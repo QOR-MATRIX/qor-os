@@ -58,10 +58,12 @@ int main(int argc, char *argv[])
     const QCommandLineOption socket(u"socket"_s, u"Wayland socket name for clients (default: first free wayland-N)."_s,
                                     u"name"_s);
     const QCommandLineOption size(u"size"_s, u"Output window size, e.g. 1600x1000."_s, u"WxH"_s);
+    const QCommandLineOption surface(u"surface"_s, u"Shell surface to show: beam, control-center, overview."_s,
+                                     u"name"_s);
     const QCommandLineOption screenshot(u"screenshot"_s, u"Save a screenshot of the output to this path and exit."_s,
                                         u"file"_s);
     const QCommandLineOption delay(u"delay"_s, u"Milliseconds to wait before the screenshot."_s, u"ms"_s, u"5000"_s);
-    parser.addOptions({ services, unlocked, socket, size, screenshot, delay });
+    parser.addOptions({ services, unlocked, socket, size, surface, screenshot, delay });
     parser.process(app);
 
     qtos::Kit::initialize();
@@ -80,6 +82,7 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
     QVariantMap options;
     options.insert(u"unlocked"_s, parser.isSet(unlocked));
+    options.insert(u"surface"_s, parser.value(surface));
     if (const QStringList parts = parser.value(size).split(u'x'); parts.size() == 2) {
         options.insert(u"width"_s, parts[0].toInt());
         options.insert(u"height"_s, parts[1].toInt());
