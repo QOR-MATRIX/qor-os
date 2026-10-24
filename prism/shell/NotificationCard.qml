@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
 import QtQuick
 import QTOS.Kit
-import QTOS.Services
 import QTOS.Apps
 
 // A single notification banner. Slides in on a spring, waits (pausing while

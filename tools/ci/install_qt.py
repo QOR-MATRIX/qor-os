@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 """Unattended install of the commercial Qt used by QTOS CI.
 
-Downloads the Qt Online Installer and installs the packages listed in
-.github/qt-packages.json for the requested platform. Credentials come from the
-environment (GitHub Actions secrets) and are never printed:
+Installs the kit and add-ons listed in .github/qt-packages.json for the
+requested platform with the Qt Online Installer (or, when the root already has
+an installation, its MaintenanceTool), then verifies that the expected CMake
+packages exist. Credentials are never printed. They come from, in order:
 
-    QT_INSTALLER_JWT_TOKEN                      preferred (Qt Account → JWT)
-    QT_INSTALLER_EMAIL + QT_INSTALLER_PASSWORD  fallback
+    QT_INSTALLER_JWT_TOKEN                      preferred in CI (Qt Account → JWT)
+    QT_INSTALLER_EMAIL + QT_INSTALLER_PASSWORD  CI fallback
+    qtaccount.ini                               a machine already signed in to the Qt installer
+                                                (Linux: ~/.local/share/Qt, Windows: %APPDATA%\\Qt,
+                                                macOS: ~/Library/Application Support/Qt)
 
 Usage:
     python tools/ci/install_qt.py --platform windows --root C:/Qt
@@ -41,18 +45,31 @@ def download(url: str, directory: Path) -> Path:
     return target
 
 
+def account_file() -> Path:
+    if sys.platform == "win32":
+        return Path(os.environ.get("APPDATA", "")) / "Qt" / "qtaccount.ini"
+    if sys.platform == "darwin":
+        return Path.home() / "Library" / "Application Support" / "Qt" / "qtaccount.ini"
+    return Path.home() / ".local" / "share" / "Qt" / "qtaccount.ini"
+
+
 def run_installer(installer: Path, root: Path, packages: list[str], required: bool) -> bool:
     command = [
         str(installer), "--root", str(root),
         "--accept-licenses", "--accept-obligations", "--default-answer", "--confirm-command",
         "--auto-answer", "telemetry-question=No",
     ]
-    if not os.environ.get("QT_INSTALLER_JWT_TOKEN"):
-        email = os.environ.get("QT_INSTALLER_EMAIL")
-        password = os.environ.get("QT_INSTALLER_PASSWORD")
-        if not email or not password:
-            sys.exit("No Qt credentials: set QT_INSTALLER_JWT_TOKEN or QT_INSTALLER_EMAIL/QT_INSTALLER_PASSWORD.")
+    email = os.environ.get("QT_INSTALLER_EMAIL")
+    password = os.environ.get("QT_INSTALLER_PASSWORD")
+    if os.environ.get("QT_INSTALLER_JWT_TOKEN"):
+        pass  # the installer reads the token from the environment
+    elif email and password:
         command += ["--email", email, "--pw", password]
+    elif not account_file().is_file():
+        sys.exit(
+            "No Qt credentials: set QT_INSTALLER_JWT_TOKEN or QT_INSTALLER_EMAIL/QT_INSTALLER_PASSWORD, "
+            f"or sign in to the Qt installer once on this machine ({account_file()})."
+        )
     command += ["install", *packages]
 
     redacted = [("***" if i > 0 and command[i - 1] in ("--email", "--pw") else part) for i, part in enumerate(command)]
@@ -73,14 +90,27 @@ def main() -> int:
     spec = manifest[args.platform]
     args.root.mkdir(parents=True, exist_ok=True)
 
+    # The online installer only installs into an empty root; later additions go
+    # through the MaintenanceTool it leaves behind.
+    maintenance_tool = args.root / ("MaintenanceTool.exe" if sys.platform == "win32" else "MaintenanceTool")
+    packages = spec["packages"] + manifest.get("addons", [])
     with tempfile.TemporaryDirectory() as tmp:
-        installer = download(INSTALLERS[args.platform], Path(tmp))
-        run_installer(installer, args.root, spec["packages"], required=True)
+        installer = maintenance_tool if maintenance_tool.is_file() else download(INSTALLERS[args.platform], Path(tmp))
+        run_installer(installer, args.root, packages, required=True)
         for package in spec.get("optional", []):
-            if not run_installer(installer, args.root, [package], required=False):
+            if not run_installer(maintenance_tool, args.root, [package], required=False):
                 print(f"Optional package not installed: {package}")
 
+    # The installer exits 0 even when it skips a package it cannot resolve, so
+    # check the result rather than trusting the exit code.
     kit = args.root / manifest["version"] / spec["kit"]
+    cmake_dir = kit / "lib" / "cmake"
+    missing = [name for name in manifest.get("cmake", []) if not (cmake_dir / name).is_dir()]
+    if missing:
+        sys.exit(f"Qt install incomplete, missing CMake packages in {cmake_dir}: {', '.join(missing)}")
+    for name in spec.get("optionalCmake", []):
+        if not (cmake_dir / name).is_dir():
+            print(f"Optional module not available: {name}")
     print(f"Qt kit: {kit}")
     github_env = os.environ.get("GITHUB_ENV")
     if github_env:

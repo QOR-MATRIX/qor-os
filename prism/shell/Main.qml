@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
 import QtQuick
-import QTOS.Kit
 import QTOS.Shell
 
 // Top-level window used when the shell runs on a desktop OS (qtos-shell).

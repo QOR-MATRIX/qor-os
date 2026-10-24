@@ -6,12 +6,45 @@ All notable changes to QTOS are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- **Increase Contrast**, a new accessibility setting.
+  - It is available through the `increaseContrast` setting, in Settings → Accessibility, as a Beam action, as `qtosctl contrast on|off`, and as `qtos-shell --contrast high`.
+  - Roles can define `highContrast` token values, which `Theme.contrast` blends in OKLab on a spring.
+  - Targets: 7:1 for primary, secondary and accent text; 4.5:1 for tertiary text and status colors; 3:1 for focus rings.
+  - Separators, strokes and control fills strengthen, and glass becomes solid (`Theme.solidMaterials`).
+  - The Widgets palette follows `QTOS_CONTRAST=high`.
+- **Luminance-capped tokens.** `maxLuminance` lowers lightness until a role's WCAG luminance fits under the cap. White text on `accent` and `accentHover` therefore stays at least 4.5:1 at *every* accent hue, which OKLCH lightness alone cannot guarantee. Implemented in `color::capLuminance`, mirrored in the token generator.
+- **Golden-image tests (`tst_golden`, label `gpu`).**
+  - Covers Lumen controls, Kit components, and wallpaper with backdrop and glass, each in light, dark, high-contrast and RTL variants.
+  - Comparison is a perceptual per-pixel OKLab diff with failure heatmaps, plus an `update_golden` target. CI uploads the diffs when a case fails.
+  - One reference set serves Windows (Direct3D 11) and Linux (OpenGL), which differ on under 0.01% of pixels. Per-OS overrides are optional.
+- Token tests that enforce the WCAG contrast guarantees.
+- `qtosctl transparency on|off`.
+- **Prism runs real Wayland clients** (verified nested in WSLg with `weston-terminal` and a Qt Widgets app).
+  - Server-side decorations for `xdg-decoration` clients; none for clients that draw their own.
+  - Client window geometry is aligned with the frame (shadows clipped, never scaled), and the frame adopts the client's chosen size.
+  - Activated and maximized states are sent; client maximize and minimize requests are honoured.
+  - Moves started from a client's own title bar use Prism's springs and edge snapping.
+  - Clients are configured for the target size, not every frame of a resize animation.
+  - New `prism` options: `--socket`, `--size`, `--screenshot` and `--delay`. Prism prints the socket clients should use.
+- Linux on WSL2 build and run guide (docs/BUILDING.md).
+
+### Fixed
+
+- Default dark-appearance accent: white text on it was 2.9:1. The accent is now a deeper indigo (OKLCH L 0.575) and meets AA. Accent hover darkens instead of lightening, so text keeps its contrast while hovered.
+- CI Qt manifest: Qt 6.8+ add-on IDs are architecture-independent. The old per-kit IDs are virtual, and the installer skipped them while still reporting success. `install_qt.py` now verifies the expected CMake packages afterwards.
+- `install_qt.py` installs additional packages through the existing installation's MaintenanceTool, since the online installer refuses a non-empty root. It also accepts an existing Qt Account sign-in (`qtaccount.ini`).
+- Removed three unused QML imports flagged by qmllint.
+- `prism` failed to load on Qt 6 (`ShellSurfaceItem.sizeFollowsSurface` no longer exists). It was never built before: this is its first run.
+
 ### Changed
 
 - CI: per-platform Qt sources (`QTOS_WINDOWS_QT_DIR`, `QTOS_LINUX_QT_DIR`), so a Windows self-hosted kit no longer affects the Linux job. Self-hosted builds are incremental. Qt's bundled CMake and Ninja are put on `PATH` automatically. The optional `QTOS_RUN_GPU_TESTS` runs GPU suites. Build also runs on `v*` tags.
 - CI: the installable Windows artifact is uploaded only for tags and manual runs (7-day retention), to stay within the Free-plan storage quota.
 - pre-commit: vendored fonts and icons and generated token files are excluded from all hooks. Multi-document YAML (Qt Application Manager manifests) is allowed. clang-format skips the SDK template, matching CI.
 - Developer setup uses a repo-local `.venv` for the pinned tooling.
+- `QT_QML_GENERATE_QMLLS_INI` is a cache option, so a second build of the same checkout (for example a WSL build of a Windows working tree) can turn it off without repointing the editor.
 
 ## [0.1.0] - 2026-10-23
 

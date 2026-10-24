@@ -47,7 +47,10 @@ qt_standard_project_setup(REQUIRES ${QTOS_QT_MIN_VERSION})
 # All QML modules land in one import directory so qmllint, qmlls and the
 # Qt Quick tooling see the same module layout the runtime does.
 set(QT_QML_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/qml")
-set(QT_QML_GENERATE_QMLLS_INI ON)
+# .qmlls.ini files are written into the source tree and point at this build.
+# Turn this off for secondary builds of the same checkout (for example a WSL
+# build of a Windows working tree) so they do not repoint the editor.
+set(QT_QML_GENERATE_QMLLS_INI ON CACHE BOOL "Write .qmlls.ini files for qmlls into the source tree")
 
 include(QtosCompilerSettings)
 

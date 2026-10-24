@@ -24,8 +24,12 @@ already has Qt is faster, free, builds incrementally and has a real GPU.
 
 **Current setup:** the QTOS workstation has a repository runner registered as
 `<COMPUTERNAME>-qtos` (labels `self-hosted, Windows, X64, qt, msvc, gpu`),
-installed in `%USERPROFILE%\ghr\qtos`. It runs as the signed-in user, so no
-admin rights are needed. It does **not** start on its own:
+installed in `%USERPROFILE%\ghr\qtos`.
+
+- `QTOS_WINDOWS_RUNNER`, `QTOS_WINDOWS_QT_DIR` and `QTOS_RUN_GPU_TESTS` are set.
+- A full Windows build with tests takes about 2½ minutes.
+- The runner runs as the signed-in user, so no admin rights are needed.
+- It does **not** start on its own:
 
 ```powershell
 # Start it for this session (keep the window open while CI runs):
@@ -72,14 +76,27 @@ Add repository **secrets**:
 - `QT_INSTALLER_JWT_TOKEN`: a Qt Account JWT for unattended installs (preferred), **or**
 - `QT_INSTALLER_EMAIL` and `QT_INSTALLER_PASSWORD`: the Qt Account login.
 
-`tools/ci/install_qt.py` downloads the official online installer, installs
-the package IDs in [`.github/qt-packages.json`](../.github/qt-packages.json)
-in unattended mode, and caches the result with `actions/cache` (keyed on OS,
-Qt version and the package list). Credentials are passed through the
+`tools/ci/install_qt.py` downloads the official online installer and installs
+the kit and add-ons in [`.github/qt-packages.json`](../.github/qt-packages.json)
+in unattended mode. It then checks that the CMake packages listed under
+`cmake` exist, because the installer exits successfully even when it skips a
+package it cannot resolve. The result is cached with `actions/cache` (keyed on
+OS, Qt version and the package list). Credentials are passed through the
 environment and are redacted from logs.
 
-To change modules, edit `qt-packages.json`. List available IDs with the
-installer's `search` command, for example
+The same script sets up a workstation or a self-hosted runner. Without
+credential variables it uses an existing Qt Account sign-in (`qtaccount.ini`,
+written by any interactive Qt installer run), and it adds packages to an
+existing installation through that installation's MaintenanceTool:
+
+```bash
+python3 tools/ci/install_qt.py --platform linux --root ~/Qt   # e.g. WSL2 Ubuntu
+```
+
+To change modules, edit `qt-packages.json`. Since Qt 6.8, add-on IDs are
+architecture-independent (`qt.qt6.6120.addons.qtgraphs`); the per-kit IDs are
+virtual and cannot be selected. List available IDs with the installer's
+`search` command, for example
 `qt-online-installer-windows-x64-online.exe --root C:\tmp search qt.qt6.6120`.
 
 Without either option, the Build workflow's preflight job succeeds and writes
