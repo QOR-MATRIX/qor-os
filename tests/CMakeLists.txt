@@ -36,6 +36,26 @@ set_target_properties(tst_kit_qml PROPERTIES WIN32_EXECUTABLE OFF)
 add_test(NAME tst_kit_qml COMMAND tst_kit_qml -input "${CMAKE_CURRENT_SOURCE_DIR}/kit/tst_kit.qml")
 set_tests_properties(tst_kit_qml PROPERTIES LABELS "gpu" ENVIRONMENT "${QTOS_TEST_ENV}")
 
+# ── Golden-image tests (GPU) ────────────────────────────────────────────────
+# Renders golden/scenes in every variant and compares them perceptually with
+# golden/references/. `cmake --build --preset <preset> --target update_golden`
+# rewrites the references; see docs/DEVELOPMENT.md.
+qt_add_executable(tst_golden golden/tst_golden.cpp)
+target_link_libraries(tst_golden PRIVATE
+    Qt6::Test Qt6::Quick Qt6::QuickControls2
+    qtos_kit qtos_kitplugin qtos_lumen_style qtos_lumen_styleplugin qtos::compiler_settings)
+target_compile_definitions(tst_golden PRIVATE
+    QTOS_GOLDEN_DIR="${CMAKE_CURRENT_SOURCE_DIR}/golden"
+    QTOS_GOLDEN_OUT="${CMAKE_CURRENT_BINARY_DIR}/golden-out")
+set_target_properties(tst_golden PROPERTIES WIN32_EXECUTABLE OFF)
+add_test(NAME tst_golden COMMAND tst_golden)
+set_tests_properties(tst_golden PROPERTIES LABELS "gpu" ENVIRONMENT "${QTOS_TEST_ENV}")
+add_custom_target(update_golden
+    COMMAND ${CMAKE_COMMAND} -E env QTOS_GOLDEN_UPDATE=1 ${QTOS_TEST_ENV} $<TARGET_FILE:tst_golden>
+    DEPENDS tst_golden
+    COMMENT "Rewriting golden references in tests/golden/references"
+    USES_TERMINAL)
+
 # ── Tooling tests (Python) ──────────────────────────────────────────────────
 find_package(Python3 3.10 COMPONENTS Interpreter)
 if(Python3_Interpreter_FOUND)

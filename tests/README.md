@@ -7,7 +7,8 @@
 | `tst_services` | `services/tst_services.cpp` | Qt Test | End-to-end Qt Remote Objects, on a private endpoint |
 | `tst_shell` | `shell/tst_search.qml` | Qt Quick Test | Beam search and calculator (pure JS) |
 | `tst_kit_qml` | `kit/tst_kit.qml` | Qt Quick Test | Kit in a real window; label `gpu` |
-| `tools_generate_tokens` | `tools/test_generate_tokens.py` | Python unittest | Generator math and output freshness |
+| `tst_golden` | `golden/tst_golden.cpp` | Qt Test | Golden images of Kit and Lumen controls (light, dark, high contrast, RTL), perceptual OKLab diff, one reference set for all platforms; label `gpu`. See [DEVELOPMENT.md](../docs/DEVELOPMENT.md#golden-image-tests) |
+| `tools_generate_tokens` | `tools/test_generate_tokens.py` | Python unittest | Generator math, output freshness and WCAG contrast guarantees |
 
 ```powershell
 ctest --preset windows-release            # everything

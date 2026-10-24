@@ -124,8 +124,17 @@ jobs:
         run: ctest --preset ci-windows -LE gpu
 
       - name: Test (GPU)
+        id: gpu-tests
         if: vars.QTOS_RUN_GPU_TESTS == 'true'
         run: ctest --preset ci-windows -L gpu
+
+      - name: Upload golden-image differences
+        if: failure() && steps.gpu-tests.outcome == 'failure'
+        uses: actions/upload-artifact@v7
+        with:
+          name: golden-diff-windows
+          path: build/ci-windows/tests/golden-out
+          retention-days: 7
 
       - name: Package
         if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')

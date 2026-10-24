@@ -80,13 +80,68 @@ produces deterministic frames you can compare before and after a change.
 1. Edit `kit/tokens/lumen.tokens.json`.
 2. `python tools/tokens/generate_tokens.py` regenerates `kit/Tokens.qml`,
    `platform/common/lumentokens.h` and `docs/design/tokens.md`.
-3. Rebuild, then capture screenshots in light and dark.
+3. `python -m unittest discover -s tests/tools` checks the contrast
+   guarantees (text on accent at every preset hue, and the high-contrast
+   targets).
+4. Rebuild, run the golden-image tests (below), and update the references if
+   the change is intended.
 
 ### Add a color role
 
 Add it to `color.roles` in the JSON, regenerate, then expose it in
 `kit/Theme.qml` (`readonly property color myRole: resolve(Tokens.color.myRole)`).
-Add it to `tests/kit/tst_kit.qml` if it is a core role.
+Add it to `tests/kit/tst_kit.qml` if it is a core role. If text sits on it or
+it is text, add `highContrast` values and a target in
+`tests/tools/test_generate_tokens.py`.
+
+### Golden-image tests
+
+`tst_golden` renders the scenes in `tests/golden/scenes/` (Lumen controls,
+Kit components, and wallpaper with backdrop and glass) in five variants:
+
+- `dark`
+- `light`
+- `dark-hc`
+- `light-hc` (Increase Contrast)
+- `dark-rtl` (right to left)
+
+It compares each render with `tests/golden/references/<scene>-<variant>.png`.
+The comparison is perceptual: a pixel differs when its OKLab distance exceeds
+0.03 (about 1.5 just-noticeable differences). A case fails when more than 0.3%
+of its pixels differ.
+
+That absorbs GPU, driver and graphics-API variation:
+
+- Intel UHD and an RTX 4060 (Direct3D 11) differ by at most 0.023, in the
+  backdrop blur.
+- Linux (OpenGL on Mesa, WSLg) differs visibly from the Windows references on
+  at most 0.005% of pixels, a few antialiased glyph edges.
+
+So one reference set serves every platform. It still catches real changes: a
+0.125 lightness shift in `textPrimary` fails every affected case.
+
+```powershell
+ctest --preset ci-windows -L gpu                                  # run (opens brief windows)
+cmake --build --preset ci-windows --target update_golden          # rewrite the shared references
+```
+
+If a platform must render a case differently on purpose, run the test with
+`QTOS_GOLDEN_UPDATE=platform`. That writes an override to
+`tests/golden/references/<os>/`, which takes precedence on that OS.
+
+When a case fails, `build/<preset>/tests/golden-out/` holds `<case>-actual.png`
+and `<case>-diff.png`, with visible differences in red. CI uploads them as the
+`golden-diff-windows` artifact. To accept an intended change:
+
+1. Inspect the diff images.
+2. Run `update_golden`.
+3. Review the new references in the pull request's image diff.
+4. Commit them with the change.
+
+To add a scene, put a QML file with a root `property bool rtl` in
+`tests/golden/scenes/`, add its name to `kScenes` in `tst_golden.cpp`, then
+run `update_golden`. A case without a reference is skipped with a message
+rather than failed.
 
 ### Add an icon
 
