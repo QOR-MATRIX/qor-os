@@ -19,3 +19,7 @@ updates:
     labels: ["type: chore", "dependencies"]
     commit-message:
       prefix: "chore"
+    ignore:
+      # Formatter upgrades reformat the codebase and must move together with
+      # the pre-commit mirror rev; upgrade deliberately (docs/DEVELOPMENT.md).
+      - dependency-name: "clang-format"
