@@ -29,7 +29,8 @@ installed in `%USERPROFILE%\ghr\qtos`.
 - `QTOS_WINDOWS_RUNNER`, `QTOS_WINDOWS_QT_DIR` and `QTOS_RUN_GPU_TESTS` are set.
 - A full Windows build with tests takes about 2½ minutes.
 - The runner runs as the signed-in user, so no admin rights are needed.
-- It does **not** start on its own:
+- It starts minimised at every sign-in through a Startup-folder entry. To set
+  it up on another machine, or to start it by hand:
 
 ```powershell
 # Start it for this session (keep the window open while CI runs):
