@@ -2,7 +2,7 @@
 # Run on demand: pre-commit run --all-files
 
 # Vendored third-party assets and generated files are never rewritten by hooks.
-exclude: '^(kit/fonts/|kit/icons/|kit/Tokens\.qml$|platform/common/lumentokens\.h$|docs/design/tokens\.md$)'
+exclude: '^(kit/fonts/|kit/icons/|prism/compositor/protocols/|kit/Tokens\.qml$|platform/common/lumentokens\.h$|docs/design/tokens\.md$)'
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks

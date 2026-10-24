@@ -33,7 +33,8 @@ if(MSVC)
     endif()
 else()
     target_compile_options(qtos_compiler_settings INTERFACE
-        -Wall -Wextra -Wpedantic -Wshadow -Wnon-virtual-dtor -Wold-style-cast
+        -Wall -Wextra -Wpedantic -Wshadow
+        $<$<COMPILE_LANGUAGE:CXX>:-Wnon-virtual-dtor -Wold-style-cast>
     )
     if(QTOS_WARNINGS_AS_ERRORS)
         target_compile_options(qtos_compiler_settings INTERFACE -Werror)

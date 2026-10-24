@@ -7,6 +7,7 @@
 import QtQuick
 import QtWayland.Compositor
 import QtWayland.Compositor.XdgShell
+import QtWayland.Compositor.PresentationTime
 import QTOS.Shell
 
 // Prism: the QTOS Wayland compositor. The shell and every client window share
@@ -25,7 +26,7 @@ WaylandCompositor {
         id: output
         sizeFollowsWindow: true
         window: Window {
-            id: window
+            id: outputWindow
             width: compositor.options.width ?? 1600
             height: compositor.options.height ?? 1000
             visible: true
@@ -53,14 +54,14 @@ WaylandCompositor {
             id: content
 
             property var window: null
-            readonly property XdgSurface xdgSurface: window ? window.shellSurface : null
-            readonly property XdgToplevel toplevel: window ? window.toplevel : null
+            readonly property XdgSurface xdgSurface: content.window ? content.window.shellSurface : null
+            readonly property XdgToplevel toplevel: content.window ? content.window.toplevel : null
             readonly property rect geometry: xdgSurface ? xdgSurface.windowGeometry : Qt.rect(0, 0, 0, 0)
             // Configure for where the frame is going, not where its spring is
             // now, so clients lay out once per resize rather than every frame.
-            readonly property size area: window ? window.contentTargetSize : Qt.size(0, 0)
-            readonly property bool activated: window ? window.focused : false
-            readonly property bool maximized: window ? window.maximized : false
+            readonly property size area: content.window ? content.window.contentTargetSize : Qt.size(0, 0)
+            readonly property bool activated: content.window ? content.window.focused : false
+            readonly property bool maximized: content.window ? content.window.maximized : false
             property size configuredSize: Qt.size(0, 0)
 
             function configure() {
@@ -80,9 +81,9 @@ WaylandCompositor {
             // The client chose another size than configured (e.g. a terminal
             // snapping to whole cells, or its preferred size on first map).
             onGeometryChanged: {
-                if (window && geometry.width > 0 && geometry.height > 0
+                if (content.window && geometry.width > 0 && geometry.height > 0
                         && (geometry.width !== configuredSize.width || geometry.height !== configuredSize.height))
-                    window.adoptContentSize(geometry.width, geometry.height);
+                    content.window.adoptContentSize(geometry.width, geometry.height);
             }
 
             ShellSurfaceItem {
@@ -135,6 +136,18 @@ WaylandCompositor {
         preferredMode: XdgToplevel.ServerSideDecoration
     }
 
+    // ── Protocol extensions (see prism/README.md for the full list) ─────────
     TextInputManager { }
+    TextInputManagerV3 { }
     QtTextInputMethodManager { }
+    IdleInhibitManagerV1 { }
+    FractionalScaleManagerV1 {
+        preferredScale: desktop.Screen.devicePixelRatio
+    }
+    CursorShapeManagerV1 { }
+    PresentationTime { id: presentation }
+    PresentationFeedback {
+        presentationTime: presentation // qmllint disable incompatible-type
+        window: outputWindow
+    }
 }

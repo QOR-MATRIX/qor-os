@@ -27,7 +27,11 @@ All notable changes to QTOS are recorded here. The format follows
   - Activated and maximized states are sent; client maximize and minimize requests are honoured.
   - Moves started from a client's own title bar use Prism's springs and edge snapping.
   - Clients are configured for the target size, not every frame of a resize animation.
-  - New `prism` options: `--socket`, `--size`, `--screenshot` and `--delay`. Prism prints the socket clients should use.
+  - New `prism` options: `--socket`, `--size`, `--surface`, `--screenshot` and `--delay`. Prism prints the socket clients should use.
+- **Wayland protocols in Prism**, verified on the wire by `tools/dev/prism-protocol-check.sh`.
+  - Prism implements `wp_fractional_scale_v1` and `wp_cursor_shape_v1` (v2) itself, with protocol XML vendored from wayland-protocols 1.47.
+  - Qt's `wp_presentation` is enabled, fed with swap timestamps, and works around a Qt 6.12 initialisation bug for the QML element.
+  - Qt's idle-inhibit and text-input-v3 are enabled.
 - Linux on WSL2 build and run guide (docs/BUILDING.md).
 
 ### Fixed

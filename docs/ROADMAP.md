@@ -30,7 +30,7 @@ display refresh; compositor backend decision gate
 - [x] Build and run `prism` nested on Linux and under WSLg; launch Qt apps into it
 - [ ] Client windows: popups, XDG activation, client-initiated resize, app icons from `appId`. Done so far: configure on resize, server- and client-side decorations, client moves, and maximize and minimize requests.
 - [ ] Shared Space and Overview behaviour for clients; minimise/restore of clients
-- [ ] Wayland extensions: fractional-scale, cursor-shape, presentation-time, idle-inhibit
+- [x] Wayland extensions: fractional-scale, cursor-shape, presentation-time, idle-inhibit (`tools/dev/prism-protocol-check.sh`)
 - [ ] Three-finger gestures for Overview and Spaces (libinput through Qt)
 - [ ] Decision-gate benchmark: multi-output frame pacing and input latency
 - [ ] Evaluate Qt Interface Framework for service codegen and simulation (ADR)

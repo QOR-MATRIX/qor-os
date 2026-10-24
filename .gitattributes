@@ -26,6 +26,7 @@ docs/design/tokens.md           linguist-generated=true
 # Vendored third-party assets
 kit/fonts/**      linguist-vendored=true
 kit/icons/*.svg   linguist-vendored=true
+prism/compositor/protocols/*.xml  linguist-vendored=true
 
 # Language detection
 *.rep             linguist-language=C++
