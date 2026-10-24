@@ -26,6 +26,10 @@ Item {
     property var shellSurface: null
     property var toplevel: null
     readonly property bool isClient: shellSurface !== null
+    // False for clients that draw their own title bar (client-side
+    // decorations): Prism then draws no title bar of its own.
+    property bool decorated: true
+    readonly property bool hasTitleBar: !isClient || decorated
 
     // ── State ───────────────────────────────────────────────────────────────
     property real normalX: 100
@@ -48,6 +52,18 @@ Item {
     readonly property real frameWidth: frameRect.width
     readonly property real frameHeight: frameRect.height
     readonly property real titleBarHeight: 40
+    // The size a client's content settles at (the frame animates towards it).
+    readonly property size contentTargetSize: Qt.size(frameWidth,
+                                                      frameHeight - (isClient && decorated ? titleBarHeight : 0))
+
+    // A client chose a different size from the one Prism configured, for
+    // example a terminal snapping to whole character cells: fit the frame.
+    function adoptContentSize(contentWidth: real, contentHeight: real) {
+        if (maximized || inOverview)
+            return;
+        normalW = contentWidth;
+        normalH = contentHeight + (isClient && decorated ? titleBarHeight : 0);
+    }
 
     function focusContent() {
         const content = appLoader.item as Item;
@@ -158,6 +174,21 @@ Item {
         }
     }
 
+    // A client with its own title bar asks the compositor to move it when that
+    // title bar is dragged. The press belongs to the client, so the frame
+    // follows the pointer through `pointerWatch` and moves exactly like a
+    // Prism title-bar drag (springs, edge snapping, maximise on top edge).
+    property bool clientMoving: false
+    property point clientMoveStart
+
+    function beginClientMove() {
+        if (!pointerWatch.active)
+            return;
+        clientMoveStart = pointerWatch.point.scenePosition;
+        clientMoving = true;
+        beginMove(clientMoveStart);
+    }
+
     function beginResize() {
         manager.activate(win);
         if (maximized) {
@@ -195,10 +226,11 @@ Item {
         layer.mipmap: win.visualScale < 0.9
         layer.effect: RoundMask { radius: Tokens.radius.window }
 
-        // Wayland clients sit below the title bar (server-side decoration);
-        // first-party apps extend under it for a unified toolbar.
+        // Server-side decorated Wayland clients sit below the title bar;
+        // first-party apps extend under it for a unified toolbar, and
+        // client-side decorated clients fill the whole frame.
         Rectangle {
-            visible: win.isClient
+            visible: win.isClient && win.decorated
             width: parent.width
             height: win.titleBarHeight
             color: Theme.surfaceSunken
@@ -207,7 +239,7 @@ Item {
         Loader {
             id: appLoader
             anchors.fill: parent
-            anchors.topMargin: win.isClient ? win.titleBarHeight : 0
+            anchors.topMargin: win.isClient && win.decorated ? win.titleBarHeight : 0
             focus: true
             sourceComponent: win.isClient ? win.manager.surfaceDelegate : AppRegistry.component(win.appId)
             onLoaded: {
@@ -220,6 +252,7 @@ Item {
         // Title bar, drawn by Prism over the app's unified toolbar area.
         Item {
             id: titleBar
+            visible: win.hasTitleBar
             width: parent.width
             height: win.titleBarHeight
 
@@ -301,6 +334,25 @@ Item {
             onPressedChanged: if (pressed && !win.focused) win.manager.activate(win)
         }
         HoverHandler { id: frameHover }
+        // Observes (passively) the pointer while a client-requested move runs.
+        PointHandler {
+            id: pointerWatch
+            property point lastScenePosition
+            onPointChanged: {
+                if (!active)
+                    return;
+                lastScenePosition = point.scenePosition;
+                if (win.clientMoving)
+                    win.moveBy(Qt.vector2d(point.scenePosition.x - win.clientMoveStart.x,
+                                           point.scenePosition.y - win.clientMoveStart.y), point.scenePosition);
+            }
+            onActiveChanged: {
+                if (!active && win.clientMoving) {
+                    win.clientMoving = false;
+                    win.endMove(lastScenePosition);
+                }
+            }
+        }
     }
 
     // Resize grips (bottom, right, corner).

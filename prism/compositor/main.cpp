@@ -5,8 +5,11 @@
 // Hosts the QTOS.Shell desktop inside a Qt Wayland Compositor scene. Run it
 // nested for development:
 //
-//   prism                       # inside an existing Wayland/X11 session or WSLg
-//   WAYLAND_DISPLAY=wayland-1 kwrite   # launch a client into Prism
+//   prism --unlocked            # inside an existing Wayland/X11 session or WSLg
+//   WAYLAND_DISPLAY=wayland-1 weston-terminal   # launch a client into Prism
+//
+// Prism prints the socket name it listens on (the first free wayland-N, or
+// --socket).
 //
 // Status: experimental, see docs/adr/0003-compositor-strategy.md.
 
@@ -15,11 +18,14 @@
 #include "simservices.h"
 
 #include <QtCore/QCommandLineParser>
+#include <QtCore/QTimer>
 #include <QtGui/QGuiApplication>
 #include <QtQml/QQmlApplicationEngine>
 #include <QtQml/QQmlExtensionPlugin>
+#include <QtQuick/QQuickWindow>
 #include <QtQuickControls2/QQuickStyle>
 
+#include <algorithm>
 #include <memory>
 
 using namespace Qt::StringLiterals;
@@ -49,7 +55,13 @@ int main(int argc, char *argv[])
     const QCommandLineOption services(u"services"_s, u"embedded (simulated, default) or external."_s, u"mode"_s,
                                       u"embedded"_s);
     const QCommandLineOption unlocked(u"unlocked"_s, u"Start on the desktop instead of the lock screen."_s);
-    parser.addOptions({ services, unlocked });
+    const QCommandLineOption socket(u"socket"_s, u"Wayland socket name for clients (default: first free wayland-N)."_s,
+                                    u"name"_s);
+    const QCommandLineOption size(u"size"_s, u"Output window size, e.g. 1600x1000."_s, u"WxH"_s);
+    const QCommandLineOption screenshot(u"screenshot"_s, u"Save a screenshot of the output to this path and exit."_s,
+                                        u"file"_s);
+    const QCommandLineOption delay(u"delay"_s, u"Milliseconds to wait before the screenshot."_s, u"ms"_s, u"5000"_s);
+    parser.addOptions({ services, unlocked, socket, size, screenshot, delay });
     parser.process(app);
 
     qtos::Kit::initialize();
@@ -68,9 +80,30 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
     QVariantMap options;
     options.insert(u"unlocked"_s, parser.isSet(unlocked));
-    engine.setInitialProperties({ { u"options"_s, options } });
+    if (const QStringList parts = parser.value(size).split(u'x'); parts.size() == 2) {
+        options.insert(u"width"_s, parts[0].toInt());
+        options.insert(u"height"_s, parts[1].toInt());
+    }
+    engine.setInitialProperties({ { u"options"_s, options }, { u"socketName"_s, parser.value(socket).toUtf8() } });
     engine.loadFromModule("QTOS.Prism", "Compositor");
     if (engine.rootObjects().isEmpty())
         return 2;
+
+    const QByteArray socketName = engine.rootObjects().constFirst()->property("socketName").toByteArray();
+    qInfo("Prism is running. Start clients with WAYLAND_DISPLAY=%s", socketName.constData());
+
+    if (parser.isSet(screenshot)) {
+        QTimer::singleShot(parser.value(delay).toInt(), &app, [path = parser.value(screenshot)] {
+            const QWindowList windows = QGuiApplication::topLevelWindows();
+            auto it = std::find_if(windows.cbegin(), windows.cend(),
+                                   [](QWindow *w) { return w->isVisible() && qobject_cast<QQuickWindow *>(w); });
+            const bool saved = it != windows.cend() && static_cast<QQuickWindow *>(*it)->grabWindow().save(path);
+            if (saved)
+                qInfo("Saved %s", qPrintable(path));
+            else
+                qWarning("Could not save a screenshot to %s", qPrintable(path));
+            QCoreApplication::exit(saved ? 0 : 3);
+        });
+    }
     return app.exec();
 }

@@ -27,8 +27,8 @@ Exit: a daily-drivable *nested* session for an hour with real Qt apps at
 display refresh; compositor backend decision gate
 ([ADR-0003](adr/0003-compositor-strategy.md)).
 
-- [ ] Build and run `prism` nested on Linux and under WSLg; launch Qt apps into it
-- [ ] Client windows: resize via configure, server-side decoration polish, popups, XDG activation
+- [x] Build and run `prism` nested on Linux and under WSLg; launch Qt apps into it
+- [ ] Client windows: popups, XDG activation, client-initiated resize, app icons from `appId`. Done so far: configure on resize, server- and client-side decorations, client moves, and maximize and minimize requests.
 - [ ] Shared Space and Overview behaviour for clients; minimise/restore of clients
 - [ ] Wayland extensions: fractional-scale, cursor-shape, presentation-time, idle-inhibit
 - [ ] Three-finger gestures for Overview and Spaces (libinput through Qt)

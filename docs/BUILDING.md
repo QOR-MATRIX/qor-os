@@ -26,6 +26,7 @@ Install these for the `MSVC 2022 64-bit` kit in the Qt Maintenance Tool
 | Qt Graphs | `qt.qt6.6120.addons.qtgraphs` | Monitor app |
 | Qt Image Formats | `qt.qt6.6120.addons.qtimageformats` | WebP screenshots |
 | Qt Quick Compiler extensions | `qt.qt6.6120.addons.qtqmlscriptcompiler` | `qmlsc` ahead-of-time QML compilation (commercial) |
+| Qt Task Tree (TP) | `qt.qt6.6120.addons.qttasktree` | Dependency of Qt's own QML asset-downloader plugin; without it CMake prints a warning at configure time |
 
 Recommended for upcoming phases (see [QT-MODULES.md](QT-MODULES.md)): Qt
 Multimedia, Qt Quick 3D, Qt Quick Timeline, Qt Lottie, Qt Virtual Keyboard,
@@ -45,6 +46,35 @@ OpenGL/EGL/xkbcommon development packages:
 sudo apt-get install ninja-build libgl1-mesa-dev libegl1-mesa-dev libxkbcommon-dev \
   libfontconfig1-dev libfreetype-dev libwayland-dev
 ```
+
+### Linux on WSL2 (Windows workstation)
+
+WSL2 with WSLg is the quickest way to work on the Linux-only parts (`prism`,
+the platform plugins) from a Windows machine. It is verified on Ubuntu 26.04
+with GCC 15 and CMake 4.2.
+
+```bash
+# 1. Build dependencies, plus Weston's demo clients for testing Prism:
+sudo apt-get install build-essential cmake ninja-build git python3 pkg-config \
+  libgl1-mesa-dev libegl1-mesa-dev libgles-dev libdrm-dev libgbm-dev libvulkan-dev \
+  libxkbcommon-dev libxkbcommon-x11-dev libfontconfig1-dev libfreetype-dev libdbus-1-3 \
+  libwayland-dev wayland-protocols libinput-dev libxcb-cursor0 weston
+
+# 2. The commercial Qt kit, unattended. This reuses the Qt Account sign-in
+#    from Windows. Copy it once and keep it private:
+install -D -m 600 "/mnt/c/Users/<you>/AppData/Roaming/Qt/qtaccount.ini" ~/.local/share/Qt/qtaccount.ini
+python3 /mnt/c/path/to/QTOS/tools/ci/install_qt.py --platform linux --root ~/Qt
+
+# 3. Build the Windows checkout from WSL into the Linux filesystem (fast I/O).
+#    Turn .qmlls.ini generation off so the Windows editor setup is untouched:
+cmake -S /mnt/c/path/to/QTOS -B ~/qtos-build/linux-release --preset linux-release \
+  -DQT_QML_GENERATE_QMLLS_INI=OFF
+cmake --build ~/qtos-build/linux-release
+ctest --test-dir ~/qtos-build/linux-release        # GPU suites run on WSLg too
+```
+
+On Linux the executables sit in their target directories, for example
+`prism/qtos-shell`, `prism/compositor/prism` and `platform/lumen-widgets-gallery`.
 
 ## 2. Configure and build
 
@@ -107,6 +137,7 @@ modules in `build/<preset>/qml/`, plugins in `build/<preset>/plugins/`.
 | `--query <text>` | Initial Beam query (with `--surface beam`) |
 | `--theme light\|dark` | Force appearance (writes to the settings service) |
 | `--accent <hue>` | Force accent hue in OKLCH degrees |
+| `--contrast standard\|high` | Force Increase Contrast off or on |
 | `--size WxH` | Window size in logical pixels (clamped to the screen) |
 | `--fullscreen` | Start full screen (<kbd>F11</kbd> toggles) |
 | `--services embedded\|external` | Host the simulator in-process (default) or connect to `qtos-simd` |
@@ -128,6 +159,47 @@ under the `notes` category.
 .\tools\dev\run.ps1 -- --services external --unlocked       # terminal 2
 .\build\windows-release\qtosctl.exe watch                    # terminal 3
 ```
+
+### Prism, the Wayland compositor (Linux)
+
+`prism` hosts the same shell as a real Wayland compositor. It runs nested
+inside any Wayland or X11 session, including WSLg:
+
+```bash
+B=~/qtos-build/linux-release
+$B/prism/compositor/prism --unlocked --socket wayland-qtos &
+WAYLAND_DISPLAY=wayland-qtos weston-terminal &                  # client-side decorations
+WAYLAND_DISPLAY=wayland-qtos QT_QPA_PLATFORM=wayland \
+  $B/platform/lumen-widgets-gallery &                           # Qt app, Prism decorations
+```
+
+![Prism nested in WSLg with weston-terminal and a Qt Widgets client](images/prism-nested.webp)
+
+| Option | Description |
+|--------|-------------|
+| `--unlocked` | Start on the desktop instead of the lock screen |
+| `--socket <name>` | Wayland socket for clients (default: the first free `wayland-N`, printed at start) |
+| `--size WxH` | Output window size |
+| `--services embedded\|external` | As for `qtos-shell` |
+| `--screenshot <file> [--delay ms]` | Save the output and exit (used for automated checks) |
+
+How clients are handled:
+
+- **Decorations.** Clients that support `xdg-decoration` (all Qt apps) get
+  Prism's title bar and controls. Clients that draw their own (Weston demos,
+  GTK) get none, so nothing is drawn twice.
+- **Window geometry.** A client's window geometry is aligned with the frame,
+  and client-drawn shadows are clipped, never scaled.
+- **Size.** If a client picks its own size (a preferred size on first map, or
+  whole character cells in a terminal), the frame adopts it.
+- **Window state.** Focus, maximise and minimise follow `xdg_toplevel`
+  requests and states.
+- **Moves.** A move started from a client's own title bar uses the same
+  springs and edge snapping as Prism's.
+
+Under WSLg, Mesa's `libEGL` warnings and "no EGL_WL_bind_wayland_display" are
+expected. Clients fall back to shared-memory buffers, which is fine for
+development; on device, GPU buffer sharing is part of Phase 2.
 
 ## 4. Tests and lint
 
