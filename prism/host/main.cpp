@@ -76,6 +76,7 @@ HostOptions parseOptions(const QGuiApplication &app)
     const QCommandLineOption query(u"query"_s, u"Initial Beam query."_s, u"text"_s);
     const QCommandLineOption theme(u"theme"_s, u"Force appearance: light or dark."_s, u"theme"_s);
     const QCommandLineOption accent(u"accent"_s, u"Force accent hue in degrees."_s, u"hue"_s);
+    const QCommandLineOption contrast(u"contrast"_s, u"Force contrast: standard or high."_s, u"contrast"_s);
     const QCommandLineOption size(u"size"_s, u"Window size, e.g. 1600x1000."_s, u"WxH"_s);
     const QCommandLineOption fullscreen(u"fullscreen"_s, u"Start full screen."_s);
     const QCommandLineOption screenshot(u"screenshot"_s, u"Save a screenshot to this path and exit."_s, u"file"_s);
@@ -86,8 +87,8 @@ HostOptions parseOptions(const QGuiApplication &app)
     const QCommandLineOption benchmarkOut(u"benchmark-out"_s, u"Write the benchmark JSON to this file."_s, u"file"_s);
     const QCommandLineOption gpu(u"gpu"_s, u"GPU preference: high-performance (default), low-power or default."_s,
                                  u"preference"_s, u"high-performance"_s);
-    parser.addOptions({ services, servicesUrl, scenario, ephemeral, unlocked, open, surface, query, theme, accent, size,
-                        fullscreen, screenshot, delay, benchmark, benchmarkOut, gpu });
+    parser.addOptions({ services, servicesUrl, scenario, ephemeral, unlocked, open, surface, query, theme, accent,
+                        contrast, size, fullscreen, screenshot, delay, benchmark, benchmarkOut, gpu });
     parser.process(app);
 
     HostOptions options;
@@ -108,6 +109,7 @@ HostOptions parseOptions(const QGuiApplication &app)
     qml.insert(u"query"_s, parser.value(query));
     qml.insert(u"theme"_s, parser.value(theme));
     qml.insert(u"accent"_s, parser.isSet(accent) ? QVariant(parser.value(accent).toDouble()) : QVariant());
+    qml.insert(u"contrast"_s, parser.value(contrast));
     qml.insert(u"fullscreen"_s, parser.isSet(fullscreen));
     qml.insert(u"screenshot"_s, parser.isSet(screenshot));
     qml.insert(u"qtVersion"_s, QString::fromLatin1(qVersion()));

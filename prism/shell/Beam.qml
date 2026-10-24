@@ -72,7 +72,11 @@ Item {
                    qsTr("Every spring becomes an instant, calm transition.")),
             action("transparency.toggle", s.reduceTransparency ? qsTr("Turn Off Reduce Transparency")
                                                                : qsTr("Turn On Reduce Transparency"),
-                   "contrast", "glass blur accessibility opaque", qsTr("Glass becomes solid for legibility.")),
+                   "layers", "glass blur accessibility opaque", qsTr("Glass becomes solid for legibility.")),
+            action("contrast.toggle", s.increaseContrast ? qsTr("Turn Off Increase Contrast")
+                                                         : qsTr("Turn On Increase Contrast"),
+                   "contrast", "accessibility legibility vision text outline",
+                   qsTr("Stronger text, outlines and separators; glass becomes solid.")),
             action("wallpaper.living", s.livingWallpaper ? qsTr("Stop Living Wallpaper") : qsTr("Start Living Wallpaper"),
                    "sparkles", "wallpaper animate aurora background", qsTr("Let the Aurora wallpaper drift slowly.")),
             action("notify.test", qsTr("Send Test Notification"), "bell-ring", "notification banner",

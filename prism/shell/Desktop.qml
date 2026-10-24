@@ -37,6 +37,7 @@ FocusScope {
     Binding { target: Theme; property: "accentHue"; value: Services.settings.accentHue }
     Binding { target: Theme; property: "reduceMotion"; value: Services.settings.reduceMotion }
     Binding { target: Theme; property: "reduceTransparency"; value: Services.settings.reduceTransparency }
+    Binding { target: Theme; property: "increaseContrast"; value: Services.settings.increaseContrast }
     Binding { target: Theme; property: "livingWallpaper"; value: Services.settings.livingWallpaper }
 
     // ── Shell API ───────────────────────────────────────────────────────────
@@ -105,6 +106,7 @@ FocusScope {
         case "dnd.toggle": Services.notifications.doNotDisturb = !Services.notifications.doNotDisturb; break;
         case "motion.toggle": settings.reduceMotion = !settings.reduceMotion; break;
         case "transparency.toggle": settings.reduceTransparency = !settings.reduceTransparency; break;
+        case "contrast.toggle": settings.increaseContrast = !settings.increaseContrast; break;
         case "wallpaper.living": settings.livingWallpaper = !settings.livingWallpaper; break;
         case "notify.test":
             Services.notifications.notify("system", qsTr("Hello from Beam"),
@@ -153,6 +155,10 @@ FocusScope {
             Services.settings.darkMode = true;
         if (options.accent !== undefined && options.accent !== null)
             Services.settings.accentHue = options.accent;
+        if (options.contrast === "high")
+            Services.settings.increaseContrast = true;
+        else if (options.contrast === "standard")
+            Services.settings.increaseContrast = false;
         if (options.unlocked)
             unlock();
         if (options.surface && options.surface.length > 0)

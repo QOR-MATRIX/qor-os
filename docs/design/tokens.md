@@ -5,38 +5,41 @@
 Source of truth: [`kit/tokens/lumen.tokens.json`](../../kit/tokens/lumen.tokens.json). QML access: `Tokens.<group>.<name>` (raw values) and `Theme.<role>` (resolved, animated colors).
 
 Hex values are sRGB, gamut-mapped from OKLCH, shown with the default accent hue **274°**.
+The high-contrast columns apply with **Increase Contrast**; a dash means the role is unchanged.
+A luminance cap lowers lightness until the role's WCAG relative luminance is at most the value,
+so white text on it keeps 4.5:1 at every accent hue.
 
 ## Color roles
 
-| Role | Light | Dark | Follows accent |
-|------|-------|------|----------------|
-| `background` | `#f0f2f7` | `#0b0e14` |  |
-| `surface` | `#fbfcfe` | `#161a20` |  |
-| `surfaceRaised` | `#ffffff` | `#21252c` |  |
-| `surfaceSunken` | `#eaedf2` | `#101319` |  |
-| `glassTint` | `#f8fafe @ 58%` | `#131720 @ 52%` |  |
-| `glassStroke` | `#ffffff @ 85%` | `#ffffff @ 17%` |  |
-| `frostTint` | `#f4f7fc @ 72%` | `#11151c @ 70%` |  |
-| `windowStroke` | `#11161f @ 14%` | `#ffffff @ 11%` |  |
-| `textPrimary` | `#13171f` | `#f5f7f9` |  |
-| `textSecondary` | `#4f545d` | `#b7bbc1` |  |
-| `textTertiary` | `#7f838b` | `#7f838b` |  |
-| `textDisabled` | `#a2a5aa` | `#585b61` |  |
-| `separator` | `#11161f @ 10%` | `#ffffff @ 9%` |  |
-| `fillControl` | `#11161f @ 6%` | `#ffffff @ 8%` |  |
-| `fillControlHover` | `#11161f @ 8%` | `#ffffff @ 12%` |  |
-| `fillControlPressed` | `#11161f @ 13%` | `#ffffff @ 16%` |  |
-| `fillSelected` | `#6070ef @ 16%` | `#8194ff @ 26%` | yes |
-| `accent` | `#5b69f0` | `#798cff` | yes |
-| `accentHover` | `#505be0` | `#8da0ff` | yes |
-| `accentText` | `#4852c7` | `#a9b9ff` | yes |
-| `onAccent` | `#fbfcff` | `#fdfdff` | yes |
-| `focusRing` | `#5f6ef5 @ 55%` | `#899cff @ 60%` | yes |
-| `shadow` | `#060d1a @ 22%` | `#000000 @ 55%` |  |
-| `scrim` | `#11161f @ 16%` | `#000000 @ 40%` |  |
-| `positive` | `#1a9d4b` | `#58cd78` |  |
-| `warning` | `#d98b09` | `#f7bc50` |  |
-| `critical` | `#d92931` | `#fb605c` |  |
+| Role | Light | Dark | Light, high contrast | Dark, high contrast | Follows accent | Luminance cap |
+|------|-------|------|----------------------|---------------------|----------------|---------------|
+| `background` | `#f0f2f7` | `#0b0e14` | — | — |  |  |
+| `surface` | `#fbfcfe` | `#161a20` | — | — |  |  |
+| `surfaceRaised` | `#ffffff` | `#21252c` | — | — |  |  |
+| `surfaceSunken` | `#eaedf2` | `#101319` | — | — |  |  |
+| `glassTint` | `#f8fafe @ 58%` | `#131720 @ 52%` | — | — |  |  |
+| `glassStroke` | `#ffffff @ 85%` | `#ffffff @ 17%` | `#11161f @ 34%` | `#ffffff @ 40%` |  |  |
+| `frostTint` | `#f4f7fc @ 72%` | `#11151c @ 70%` | — | — |  |  |
+| `windowStroke` | `#11161f @ 14%` | `#ffffff @ 11%` | `#11161f @ 42%` | `#ffffff @ 36%` |  |  |
+| `textPrimary` | `#13171f` | `#f5f7f9` | `#05070c` | `#ffffff` |  |  |
+| `textSecondary` | `#4f545d` | `#b7bbc1` | `#292e36` | `#dbdee3` |  |  |
+| `textTertiary` | `#7f838b` | `#7f838b` | `#494d55` | `#babec4` |  |  |
+| `textDisabled` | `#a2a5aa` | `#585b61` | `#71757a` | `#83868c` |  |  |
+| `separator` | `#11161f @ 10%` | `#ffffff @ 9%` | `#11161f @ 32%` | `#ffffff @ 30%` |  |  |
+| `fillControl` | `#11161f @ 6%` | `#ffffff @ 8%` | `#11161f @ 10%` | `#ffffff @ 14%` |  |  |
+| `fillControlHover` | `#11161f @ 8%` | `#ffffff @ 12%` | `#11161f @ 15%` | `#ffffff @ 20%` |  |  |
+| `fillControlPressed` | `#11161f @ 13%` | `#ffffff @ 16%` | `#11161f @ 22%` | `#ffffff @ 27%` |  |  |
+| `fillSelected` | `#6070ef @ 16%` | `#8194ff @ 26%` | `#525ee3 @ 26%` | `#899cff @ 36%` | yes |  |
+| `accent` | `#5663e9` | `#5967e5` | `#464ed2` | `#525fd5` | yes | 0.175 |
+| `accentHover` | `#4b54d9` | `#4f5bd9` | `#3a3dc1` | `#4852c7` | yes | 0.175 |
+| `accentText` | `#4852c7` | `#a9b9ff` | `#3539ac` | `#c7d2ff` | yes |  |
+| `onAccent` | `#fbfcff` | `#fdfdff` | `#ffffff` | `#ffffff` | yes |  |
+| `focusRing` | `#5f6ef5 @ 55%` | `#899cff @ 60%` | `#4147cb` | `#a9b9ff` | yes |  |
+| `shadow` | `#060d1a @ 22%` | `#000000 @ 55%` | — | — |  |  |
+| `scrim` | `#11161f @ 16%` | `#000000 @ 40%` | `#11161f @ 30%` | `#000000 @ 60%` |  |  |
+| `positive` | `#1a9d4b` | `#58cd78` | `#007131` | `#7ce695` |  |  |
+| `warning` | `#d98b09` | `#f7bc50` | `#996000` | `#ffd16b` |  |  |
+| `critical` | `#d92931` | `#fb605c` | `#bc001d` | `#ff958d` |  |  |
 
 Accent presets (hue °): 274, 248, 205, 162, 95, 58, 25, 338
 

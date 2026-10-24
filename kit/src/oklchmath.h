@@ -27,4 +27,11 @@ QColor oklabToSrgb(const Lab &lab, double alpha = 1.0);
 QColor fromOklch(double l, double c, double hueDegrees, double alpha = 1.0);
 QColor mixOklab(const QColor &from, const QColor &to, double t);
 
+// WCAG 2 relative luminance (0–1) of the color as displayed (gamut-mapped sRGB).
+double relativeLuminance(const Lab &lab);
+// Lowers lightness, keeping hue and chroma, until the relative luminance is at
+// most `maxLuminance`. Lumen uses this to guarantee text contrast on accent
+// fills for any accent hue: OKLCH lightness alone does not fix luminance.
+Lab capLuminance(const Lab &lab, double maxLuminance);
+
 } // namespace qtos::color

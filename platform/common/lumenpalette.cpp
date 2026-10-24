@@ -20,14 +20,17 @@ Appearance appearanceFromEnvironment()
     const double hue = qEnvironmentVariable("QTOS_ACCENT_HUE").toDouble(&ok);
     if (ok)
         appearance.accentHue = hue;
+    appearance.highContrast = qEnvironmentVariable("QTOS_CONTRAST") == u"high"_s;
     return appearance;
 }
 
 QColor resolve(const ColorRole &role, const Appearance &appearance)
 {
-    const Oklch &v = appearance.dark ? role.dark : role.light;
+    const Oklch &v = appearance.highContrast ? (appearance.dark ? role.highContrastDark : role.highContrastLight)
+                                             : (appearance.dark ? role.dark : role.light);
     const double hue = v.h + (role.followAccent ? appearance.accentHue : 0.0);
-    return color::fromOklch(v.l, v.c, hue, v.a);
+    const color::Lab lab = color::capLuminance(color::oklchToOklab(v.l, v.c, hue), role.maxLuminance);
+    return color::oklabToSrgb(lab, v.a);
 }
 
 namespace {

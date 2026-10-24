@@ -16,8 +16,9 @@ Item {
     property real downsample: Tokens.material.downsample
     property real blurMax: Tokens.material.blurMax
     property real saturation: Tokens.material.saturation
-    // Paused with Reduce Transparency: Glass falls back to opaque surfaces.
-    property bool live: !Theme.reduceTransparency
+    // Paused with solid materials (Reduce Transparency or Increase Contrast):
+    // Glass falls back to opaque surfaces.
+    property bool live: !Theme.solidMaterials
 
     // The texture provider Glass binds to.
     readonly property Item texture: blurred

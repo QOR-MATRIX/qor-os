@@ -9,28 +9,55 @@ using namespace Qt::StringLiterals;
 
 namespace qtos {
 
+namespace {
+
+// Interpolates a {light, dark} pair of [L, C, H, A] values in OKLab at
+// darkness `t`. Returns false when the pair is missing or malformed.
+bool blendAppearance(const QVariantMap &pair, double t, double hueOffset, color::Lab &lab, double &alpha)
+{
+    const QVariantList light = pair.value(u"light"_s).toList();
+    const QVariantList dark = pair.value(u"dark"_s).toList();
+    if (light.size() < 4 || dark.size() < 4)
+        return false;
+
+    auto toLab = [hueOffset](const QVariantList &v) {
+        return color::oklchToOklab(v[0].toDouble(), v[1].toDouble(), v[2].toDouble() + hueOffset);
+    };
+    const color::Lab a = toLab(light);
+    const color::Lab b = toLab(dark);
+    lab = { a.l + (b.l - a.l) * t, a.a + (b.a - a.a) * t, a.b + (b.b - a.b) * t };
+    alpha = light[3].toDouble() + (dark[3].toDouble() - light[3].toDouble()) * t;
+    return true;
+}
+
+} // namespace
+
 Oklch::Oklch(QObject *parent) : QObject(parent) { }
 
 QColor Oklch::color(double l, double c, double h, double alpha) const { return color::fromOklch(l, c, h, alpha); }
 
-QColor Oklch::themed(const QVariantMap &token, double darkness, double accentHue) const
+QColor Oklch::themed(const QVariantMap &token, double darkness, double accentHue, double contrast) const
 {
-    const QVariantList light = token.value(u"light"_s).toList();
-    const QVariantList dark = token.value(u"dark"_s).toList();
-    if (light.size() < 4 || dark.size() < 4)
+    const double hueOffset = token.value(u"followAccent"_s).toBool() ? accentHue : 0.0;
+    const double t = std::clamp(darkness, 0.0, 1.0);
+
+    color::Lab lab;
+    double alpha = 1.0;
+    if (!blendAppearance(token, t, hueOffset, lab, alpha))
         return {};
 
-    const double hueOffset = token.value(u"followAccent"_s).toBool() ? accentHue : 0.0;
-    auto lab = [hueOffset](const QVariantList &v) {
-        return color::oklchToOklab(v[0].toDouble(), v[1].toDouble(), v[2].toDouble() + hueOffset);
-    };
+    const double k = std::clamp(contrast, 0.0, 1.0);
+    color::Lab high;
+    double highAlpha = 1.0;
+    if (k > 0.0 && blendAppearance(token.value(u"highContrast"_s).toMap(), t, hueOffset, high, highAlpha)) {
+        lab = { lab.l + (high.l - lab.l) * k, lab.a + (high.a - lab.a) * k, lab.b + (high.b - lab.b) * k };
+        alpha += (highAlpha - alpha) * k;
+    }
 
-    const double t = std::clamp(darkness, 0.0, 1.0);
-    const color::Lab a = lab(light);
-    const color::Lab b = lab(dark);
-    const color::Lab m { a.l + (b.l - a.l) * t, a.a + (b.a - a.a) * t, a.b + (b.b - a.b) * t };
-    const double alpha = light[3].toDouble() + (dark[3].toDouble() - light[3].toDouble()) * t;
-    return color::oklabToSrgb(m, alpha);
+    const QVariant maxLuminance = token.value(u"maxLuminance"_s);
+    if (maxLuminance.isValid())
+        lab = color::capLuminance(lab, maxLuminance.toDouble());
+    return color::oklabToSrgb(lab, alpha);
 }
 
 QColor Oklch::mix(const QColor &from, const QColor &to, double t) const { return color::mixOklab(from, to, t); }

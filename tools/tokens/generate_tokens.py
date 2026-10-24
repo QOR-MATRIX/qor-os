@@ -58,8 +58,8 @@ def _in_gamut(rgb: tuple[float, float, float], eps: float = 1e-5) -> bool:
     return all(-eps <= ch <= 1.0 + eps for ch in rgb)
 
 
-def oklch_to_srgb(l: float, c: float, h: float) -> tuple[float, float, float]:
-    """Converts OKLCH to gamma-encoded sRGB, reducing chroma to stay in gamut."""
+def gamut_mapped_linear(l: float, c: float, h: float) -> tuple[float, float, float]:
+    """Linear sRGB for OKLCH, reducing chroma until the color is in gamut."""
     rgb = oklch_to_linear_srgb(l, c, h)
     if not _in_gamut(rgb):
         lo, hi = 0.0, c
@@ -70,18 +70,54 @@ def oklch_to_srgb(l: float, c: float, h: float) -> tuple[float, float, float]:
             else:
                 hi = mid
         rgb = oklch_to_linear_srgb(l, lo, h)
+    return rgb
+
+
+def oklch_to_srgb(l: float, c: float, h: float) -> tuple[float, float, float]:
+    """Converts OKLCH to gamma-encoded sRGB, reducing chroma to stay in gamut."""
 
     def encode(x: float) -> float:
         x = min(max(x, 0.0), 1.0)
         return 12.92 * x if x <= 0.0031308 else 1.055 * x ** (1 / 2.4) - 0.055
 
-    return tuple(encode(ch) for ch in rgb)  # type: ignore[return-value]
+    return tuple(encode(ch) for ch in gamut_mapped_linear(l, c, h))  # type: ignore[return-value]
+
+
+def relative_luminance(l: float, c: float, h: float) -> float:
+    """WCAG 2 relative luminance of the displayed (gamut-mapped) color."""
+    r, g, b = (min(max(ch, 0.0), 1.0) for ch in gamut_mapped_linear(l, c, h))
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b
+
+
+def cap_luminance(l: float, c: float, h: float, max_luminance: float) -> float:
+    """Returns the lightness at which the color's luminance is at most the cap
+    (mirrors color::capLuminance in kit/src/oklchmath.cpp)."""
+    if relative_luminance(l, c, h) <= max_luminance:
+        return l
+    lo, hi = 0.0, l
+    for _ in range(24):
+        mid = (lo + hi) / 2
+        if relative_luminance(mid, c, h) <= max_luminance:
+            lo = mid
+        else:
+            hi = mid
+    return lo
 
 
 def to_hex(l: float, c: float, h: float, alpha: float) -> str:
     r, g, b = oklch_to_srgb(l, c, h)
     hexrgb = "#{:02x}{:02x}{:02x}".format(*(round(ch * 255) for ch in (r, g, b)))
     return hexrgb if alpha >= 0.999 else f"{hexrgb} @ {alpha:.0%}"
+
+
+def role_hex(role: dict, appearance: str, high_contrast: bool, accent_hue: float) -> str:
+    """The sRGB value the runtime resolves for a role (see Oklch::themed)."""
+    values = (role.get("highContrast") or role)[appearance] if high_contrast else role[appearance]
+    l, c, h, a = values
+    h = (h + (accent_hue if role.get("followAccent") else 0)) % 360
+    if "maxLuminance" in role:
+        l = cap_luminance(l, c, h, role["maxLuminance"])
+    return to_hex(l, c, h, a)
 
 
 # ── QML emission ──────────────────────────────────────────────────────────────
@@ -109,9 +145,15 @@ def emit_qml(tokens: dict) -> str:
     line("component ColorRoles: QtObject {")
     for name, role in roles.items():
         follow = "true" if role.get("followAccent") else "false"
+        extra = ""
+        if "maxLuminance" in role:
+            extra += f", \"maxLuminance\": {qml_number(role['maxLuminance'])}"
+        if "highContrast" in role:
+            hc = role["highContrast"]
+            extra += f", \"highContrast\": {{ \"light\": {qml_list(hc['light'])}, \"dark\": {qml_list(hc['dark'])} }}"
         line(
             f"readonly property var {name}: ({{ \"light\": {qml_list(role['light'])}, "
-            f"\"dark\": {qml_list(role['dark'])}, \"followAccent\": {follow} }})",
+            f"\"dark\": {qml_list(role['dark'])}, \"followAccent\": {follow}{extra} }})",
             2,
         )
     line("}")
@@ -194,21 +236,38 @@ def emit_cpp(tokens: dict) -> str:
         "",
         "// Lumen tokens for C++ consumers (Qt Widgets style, QPA platform theme).",
         "// Colors are OKLCH {L, C, H, A}; hue is an offset from the accent hue when",
-        "// followAccent is true.",
+        "// followAccent is true. The high-contrast values equal the standard ones",
+        "// for roles that do not change under Increase Contrast; maxLuminance is 1",
+        "// for roles without a luminance cap.",
         "namespace qtos::lumen {",
         "",
         "struct Oklch { double l, c, h, a; };",
-        "struct ColorRole { Oklch light; Oklch dark; bool followAccent; };",
+        "struct ColorRole",
+        "{",
+        "    Oklch light;",
+        "    Oklch dark;",
+        "    bool followAccent;",
+        "    Oklch highContrastLight;",
+        "    Oklch highContrastDark;",
+        "    double maxLuminance;",
+        "};",
         "",
         f"inline constexpr double kAccentDefaultHue = {qml_number(color['accentDefaultHue'])};",
         "",
     ]
+
+    def tup(v: list[float]) -> str:
+        return "{ " + ", ".join(qml_number(x) if not float(x).is_integer() else f"{int(x)}.0" for x in v) + " }"
+
     for name, role in color["roles"].items():
-        def tup(v: list[float]) -> str:
-            return "{ " + ", ".join(qml_number(x) if not float(x).is_integer() else f"{int(x)}.0" for x in v) + " }"
         follow = "true" if role.get("followAccent") else "false"
+        hc = role.get("highContrast", role)
+        cap = role.get("maxLuminance", 1)
         const = "k" + name[0].upper() + name[1:]
-        lines.append(f"inline constexpr ColorRole {const} {{ {tup(role['light'])}, {tup(role['dark'])}, {follow} }};")
+        lines.append(
+            f"inline constexpr ColorRole {const} {{ {tup(role['light'])}, {tup(role['dark'])}, {follow},\n"
+            f"    {tup(hc['light'])}, {tup(hc['dark'])}, {qml_number(cap) if not float(cap).is_integer() else f'{int(cap)}.0'} }};"
+        )
     lines.append("")
     for name, value in tokens["radius"].items():
         const = "kRadius" + name[0].upper() + name[1:]
@@ -236,20 +295,27 @@ def emit_markdown(tokens: dict) -> str:
         "QML access: `Tokens.<group>.<name>` (raw values) and `Theme.<role>` (resolved, animated colors).",
         "",
         f"Hex values are sRGB, gamut-mapped from OKLCH, shown with the default accent hue **{accent}°**.",
+        "The high-contrast columns apply with **Increase Contrast**; a dash means the role is unchanged.",
+        "A luminance cap lowers lightness until the role's WCAG relative luminance is at most the value,",
+        "so white text on it keeps 4.5:1 at every accent hue.",
         "",
         "## Color roles",
         "",
-        "| Role | Light | Dark | Follows accent |",
-        "|------|-------|------|----------------|",
+        "| Role | Light | Dark | Light, high contrast | Dark, high contrast | Follows accent | Luminance cap |",
+        "|------|-------|------|----------------------|---------------------|----------------|---------------|",
     ]
     for name, role in color["roles"].items():
-        follow = bool(role.get("followAccent"))
-        hue_shift = accent if follow else 0
+        def fmt(appearance: str, high_contrast: bool) -> str:
+            if high_contrast and "highContrast" not in role:
+                return "—"
+            return f"`{role_hex(role, appearance, high_contrast, accent)}`"
 
-        def fmt(v: list[float]) -> str:
-            return f"`{to_hex(v[0], v[1], (v[2] + hue_shift) % 360, v[3])}`"
-
-        md.append(f"| `{name}` | {fmt(role['light'])} | {fmt(role['dark'])} | {'yes' if follow else ''} |")
+        follow = "yes" if role.get("followAccent") else ""
+        cap = qml_number(role["maxLuminance"]) if "maxLuminance" in role else ""
+        md.append(
+            f"| `{name}` | {fmt('light', False)} | {fmt('dark', False)} | {fmt('light', True)} | "
+            f"{fmt('dark', True)} | {follow} | {cap} |"
+        )
 
     md += ["", "Accent presets (hue °): " + ", ".join(str(h) for h in color["accentPresets"]), ""]
 

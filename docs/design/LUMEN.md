@@ -18,8 +18,8 @@ Exact values live in the tokens. See the generated
 3. **Color is perceptual.** Every color is defined in OKLCH, so lightness steps
    look even and themes morph without muddy midpoints.
 4. **Content first.** Materials recede. Text and media stay crisp and solid.
-5. **Accessible by construction.** Reduce Motion and Reduce Transparency are
-   global switches, not per-component work.
+5. **Accessible by construction.** Reduce Motion, Reduce Transparency and
+   Increase Contrast are global switches, not per-component work.
 
 ## Color
 
@@ -82,8 +82,9 @@ Glass recipe (`kit/shaders/glass.frag`):
    35% at the bottom: a specular edge.
 5. Draw an analytic soft shadow outside the shape.
 
-With **Reduce Transparency**, `Backdrop` pauses and `Glass` renders an
-opaque tinted `Surface` with identical geometry.
+With **Reduce Transparency** or **Increase Contrast** (`Theme.solidMaterials`),
+`Backdrop` pauses and `Glass` renders an opaque tinted `Surface` with
+identical geometry.
 
 ## Shape
 
@@ -227,7 +228,19 @@ controls, accent default buttons, focus rings and thin scroll bars.
 
 - Text roles meet contrast targets on their intended backgrounds in both
   appearances. Verify new roles with the token reference hex values.
+- Text on accent fills (`onAccent` on `accent`/`accentHover`) meets WCAG AA
+  (4.5:1) at **every** accent hue. OKLCH lightness alone cannot promise this,
+  because luminance at a given lightness varies with hue, so these roles carry
+  a `maxLuminance` cap. `Oklch.themed` (and the Widgets palette) lowers
+  lightness until the cap holds.
+- **Increase Contrast** blends every role that defines `highContrast` values
+  toward them on a spring (`Theme.contrast`, 0–1). The high-contrast set
+  targets 7:1 for primary, secondary and accent text, 4.5:1 for tertiary text
+  and status colors, and 3:1 for focus rings. Separators, strokes and control
+  fills strengthen, and glass becomes solid.
+- `tests/tools/test_generate_tokens.py` enforces these ratios, so a token
+  change that breaks them fails CI.
 - Every interactive Kit component exposes `Accessible.role`/`name`, keyboard
   activation and a visible focus ring (`focusRing`, 2 px).
 - Global switches: Reduce Motion (springs snap), Reduce Transparency (glass
-  becomes opaque, backdrops pause). Planned: Increase Contrast, larger text.
+  becomes opaque, backdrops pause), Increase Contrast. Planned: larger text.

@@ -6,8 +6,9 @@ import QTOS.Kit
 // of whatever is behind it (read from a shared Backdrop), finished with grain,
 // a specular hairline, an inner sheen and a soft shadow.
 //
-// Without a backdrop — or with Theme.reduceTransparency — it degrades to an
-// opaque tinted surface with identical geometry.
+// Without a backdrop — or with Theme.solidMaterials (Reduce Transparency or
+// Increase Contrast) — it degrades to an opaque tinted surface with identical
+// geometry.
 Item {
     id: root
 
@@ -24,7 +25,7 @@ Item {
     property real grain: Tokens.material.grain
 
     readonly property bool _hasBackdrop: backdrop !== null && backdrop.width > 0 && backdrop.height > 0
-                                         && !Theme.reduceTransparency
+                                         && !Theme.solidMaterials
     readonly property var _elevation: Theme.elevation(elevation)
     readonly property real _pad: Math.ceil(_elevation.blur + Math.abs(_elevation.offsetY) + 1)
 
@@ -50,7 +51,7 @@ Item {
             ? Qt.vector4d(placement.rect.x / root.backdrop.width, placement.rect.y / root.backdrop.height,
                           placement.rect.width / root.backdrop.width, placement.rect.height / root.backdrop.height)
             : Qt.vector4d(0, 0, 1, 1)
-        readonly property real backdropMix: Theme.reduceTransparency ? 0 : 1
+        readonly property real backdropMix: Theme.solidMaterials ? 0 : 1
         readonly property vector4d tint: Qt.vector4d(root.tint.r, root.tint.g, root.tint.b, root.tint.a)
         readonly property real grain: root.grain
         readonly property vector4d strokeColor: Qt.vector4d(root.strokeColor.r, root.strokeColor.g,

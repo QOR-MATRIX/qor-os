@@ -15,10 +15,12 @@ struct Appearance
 {
     bool dark = true;
     double accentHue = kAccentDefaultHue;
+    bool highContrast = false;
 };
 
-// Reads QTOS_APPEARANCE (light|dark) and QTOS_ACCENT_HUE. On device the
-// platform theme feeds this from qtos-settingsd instead.
+// Reads QTOS_APPEARANCE (light|dark), QTOS_ACCENT_HUE and QTOS_CONTRAST
+// (standard|high). On device the platform theme feeds this from
+// qtos-settingsd instead.
 Appearance appearanceFromEnvironment();
 
 QColor resolve(const ColorRole &role, const Appearance &appearance);

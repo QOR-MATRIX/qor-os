@@ -106,6 +106,8 @@ Commands:
   theme light|dark               Set the appearance
   accent <hue>                   Set the accent hue (0-360, OKLCH degrees)
   motion on|off                  Reduce motion
+  transparency on|off            Reduce transparency
+  contrast on|off                Increase contrast
   wifi on|off                    Toggle Wi-Fi
   connect <ssid>                 Join a Wi-Fi network
   volume <0-100>                 Set output volume
@@ -152,7 +154,9 @@ Commands:
         out() << "QTOS session at " << url.toString() << '\n'
               << "  user          " << settings->userName() << '@' << settings->hostName() << '\n'
               << "  appearance    " << (settings->darkMode() ? "dark" : "light") << ", accent " << settings->accentHue()
-              << "°" << (settings->reduceMotion() ? ", reduced motion" : "") << '\n'
+              << "°" << (settings->reduceMotion() ? ", reduced motion" : "")
+              << (settings->reduceTransparency() ? ", reduced transparency" : "")
+              << (settings->increaseContrast() ? ", increased contrast" : "") << '\n'
               << "  wi-fi         "
               << (!network->wifiEnabled() ? u"off"_s
                   : network->online()
@@ -171,7 +175,8 @@ Commands:
         return 0;
     }
 
-    if (command == u"theme"_s || command == u"accent"_s || command == u"motion"_s) {
+    if (command == u"theme"_s || command == u"accent"_s || command == u"motion"_s || command == u"transparency"_s
+        || command == u"contrast"_s) {
         auto settings = acquire<SettingsReplica>(node);
         if (!settings)
             return 1;
@@ -188,7 +193,12 @@ Commands:
             const bool on = parseOnOff(arg1, &ok);
             if (!ok)
                 return usage(parser);
-            settings->setReduceMotion(on);
+            if (command == u"motion"_s)
+                settings->setReduceMotion(on);
+            else if (command == u"transparency"_s)
+                settings->setReduceTransparency(on);
+            else
+                settings->setIncreaseContrast(on);
         }
         return flushAndExit(app);
     }

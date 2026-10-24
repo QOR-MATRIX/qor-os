@@ -8,6 +8,7 @@ class Settings
     PROP(double accentHue=274 READWRITE)
     PROP(bool reduceMotion=false READWRITE)
     PROP(bool reduceTransparency=false READWRITE)
+    PROP(bool increaseContrast=false READWRITE)
     PROP(bool livingWallpaper=false READWRITE)
     PROP(QString userName SOURCEONLYSETTER)
     PROP(QString hostName SOURCEONLYSETTER)

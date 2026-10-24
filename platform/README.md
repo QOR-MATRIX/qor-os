@@ -16,5 +16,5 @@ some-widgets-app.exe -style Lumen
 
 On a device the platform theme is loaded for every app with
 `QT_QPA_PLATFORMTHEME=qtos`. Appearance comes from `QTOS_APPEARANCE`
-(`light`/`dark`) and `QTOS_ACCENT_HUE` until it is wired to `qtos-settingsd`
-(Phase 3).
+(`light`/`dark`), `QTOS_ACCENT_HUE` and `QTOS_CONTRAST` (`standard`/`high`)
+until it is wired to `qtos-settingsd` (Phase 3).

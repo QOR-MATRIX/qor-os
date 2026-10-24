@@ -46,6 +46,26 @@ double encode(double x)
 
 double decode(double x) { return x <= 0.04045 ? x / 12.92 : std::pow((x + 0.055) / 1.055, 2.4); }
 
+// Linear sRGB for an OKLab color, reducing chroma (hue and lightness
+// preserved) until it fits the sRGB gamut.
+Rgb gamutMappedLinear(const Lab &lab)
+{
+    const Rgb linear = oklabToLinear(lab);
+    if (inGamut(linear) || (lab.a == 0 && lab.b == 0))
+        return linear;
+    // Binary-search the largest in-gamut chroma at this lightness and hue.
+    double lo = 0.0;
+    double hi = 1.0;
+    for (int i = 0; i < 20; ++i) {
+        const double mid = (lo + hi) / 2.0;
+        if (inGamut(oklabToLinear({ lab.l, lab.a * mid, lab.b * mid })))
+            lo = mid;
+        else
+            hi = mid;
+    }
+    return oklabToLinear({ lab.l, lab.a * lo, lab.b * lo });
+}
+
 } // namespace
 
 Lab oklchToOklab(double l, double c, double hueDegrees)
@@ -72,21 +92,7 @@ Lab srgbToOklab(const QColor &color)
 
 QColor oklabToSrgb(const Lab &lab, double alpha)
 {
-    Rgb linear = oklabToLinear(lab);
-    if (!inGamut(linear)) {
-        // Binary-search the largest in-gamut chroma at this lightness and hue.
-        const double chroma = std::hypot(lab.a, lab.b);
-        double lo = 0.0;
-        double hi = 1.0;
-        for (int i = 0; i < 20; ++i) {
-            const double mid = (lo + hi) / 2.0;
-            if (inGamut(oklabToLinear({ lab.l, lab.a * mid, lab.b * mid })))
-                lo = mid;
-            else
-                hi = mid;
-        }
-        linear = chroma > 0 ? oklabToLinear({ lab.l, lab.a * lo, lab.b * lo }) : linear;
-    }
+    const Rgb linear = gamutMappedLinear(lab);
     return QColor::fromRgbF(float(encode(linear.r)), float(encode(linear.g)), float(encode(linear.b)),
                             float(std::clamp(alpha, 0.0, 1.0)));
 }
@@ -103,6 +109,30 @@ QColor mixOklab(const QColor &from, const QColor &to, double t)
     const Lab b = srgbToOklab(to);
     const Lab m { a.l + (b.l - a.l) * t, a.a + (b.a - a.a) * t, a.b + (b.b - a.b) * t };
     return oklabToSrgb(m, from.alphaF() + (to.alphaF() - from.alphaF()) * t);
+}
+
+double relativeLuminance(const Lab &lab)
+{
+    const Rgb linear = gamutMappedLinear(lab);
+    auto channel = [](double x) { return std::clamp(x, 0.0, 1.0); };
+    return 0.2126 * channel(linear.r) + 0.7152 * channel(linear.g) + 0.0722 * channel(linear.b);
+}
+
+Lab capLuminance(const Lab &lab, double maxLuminance)
+{
+    if (relativeLuminance(lab) <= maxLuminance)
+        return lab;
+    // Luminance rises monotonically with lightness at a fixed hue and chroma.
+    double lo = 0.0;
+    double hi = lab.l;
+    for (int i = 0; i < 24; ++i) {
+        const double mid = (lo + hi) / 2.0;
+        if (relativeLuminance({ mid, lab.a, lab.b }) <= maxLuminance)
+            lo = mid;
+        else
+            hi = mid;
+    }
+    return { lo, lab.a, lab.b };
 }
 
 } // namespace color

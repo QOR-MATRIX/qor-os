@@ -428,10 +428,18 @@ Item {
                 SettingRow {
                     title: qsTr("Reduce transparency")
                     subtitle: qsTr("Glass and frost become solid for maximum legibility.")
-                    last: true
                     Switch {
                         checked: Services.settings.reduceTransparency
                         onToggled: Services.settings.reduceTransparency = checked
+                    }
+                }
+                SettingRow {
+                    title: qsTr("Increase contrast")
+                    subtitle: qsTr("Stronger text, outlines and separators; glass becomes solid.")
+                    last: true
+                    Switch {
+                        checked: Services.settings.increaseContrast
+                        onToggled: Services.settings.increaseContrast = checked
                     }
                 }
             }

@@ -17,17 +17,27 @@ QtObject {
     property real accentHue: Tokens.accentDefaultHue
     property bool reduceMotion: false
     property bool reduceTransparency: false
+    property bool increaseContrast: false
     property bool livingWallpaper: false
+
+    // Glass and frost render as solid surfaces. Increase Contrast implies it:
+    // a blurred, tinted backdrop cannot guarantee text contrast.
+    readonly property bool solidMaterials: reduceTransparency || increaseContrast
 
     // ── Animated drivers ──────────────────────────────────────────────────
     readonly property real darkness: _appearance.value
     readonly property real hue: _hue.value
+    readonly property real contrast: _contrast.value
 
     readonly property Spring _appearance: Spring {
         target: theme.dark ? 1 : 0
         preset: Tokens.motion.gentle
     }
     readonly property Spring _hue: Spring {
+        preset: Tokens.motion.smooth
+    }
+    readonly property Spring _contrast: Spring {
+        target: theme.increaseContrast ? 1 : 0
         preset: Tokens.motion.smooth
     }
 
@@ -43,7 +53,7 @@ QtObject {
     }
 
     function resolve(token: var): color {
-        return Oklch.themed(token, darkness, hue);
+        return Oklch.themed(token, darkness, hue, contrast);
     }
 
     function elevation(level: int): var {
@@ -55,11 +65,11 @@ QtObject {
     readonly property color surface: resolve(Tokens.color.surface)
     readonly property color surfaceRaised: resolve(Tokens.color.surfaceRaised)
     readonly property color surfaceSunken: resolve(Tokens.color.surfaceSunken)
-    readonly property color glassTint: reduceTransparency ? Oklch.alpha(resolve(Tokens.color.glassTint), 0.97)
-                                                          : resolve(Tokens.color.glassTint)
+    readonly property color glassTint: solidMaterials ? Oklch.alpha(resolve(Tokens.color.glassTint), 0.97)
+                                                      : resolve(Tokens.color.glassTint)
     readonly property color glassStroke: resolve(Tokens.color.glassStroke)
-    readonly property color frostTint: reduceTransparency ? Oklch.alpha(resolve(Tokens.color.frostTint), 0.98)
-                                                          : resolve(Tokens.color.frostTint)
+    readonly property color frostTint: solidMaterials ? Oklch.alpha(resolve(Tokens.color.frostTint), 0.98)
+                                                      : resolve(Tokens.color.frostTint)
     readonly property color windowStroke: resolve(Tokens.color.windowStroke)
     readonly property color textPrimary: resolve(Tokens.color.textPrimary)
     readonly property color textSecondary: resolve(Tokens.color.textSecondary)

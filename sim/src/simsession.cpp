@@ -135,13 +135,15 @@ void SimSettings::load(const QJsonObject &config)
         setAccentHue(store.value(u"accentHue"_s, accentHue()).toDouble());
         setReduceMotion(store.value(u"reduceMotion"_s, reduceMotion()).toBool());
         setReduceTransparency(store.value(u"reduceTransparency"_s, reduceTransparency()).toBool());
+        setIncreaseContrast(store.value(u"increaseContrast"_s, increaseContrast()).toBool());
         setLivingWallpaper(store.value(u"livingWallpaper"_s, livingWallpaper()).toBool());
         store.endGroup();
     }
 
     for (auto signal :
          { &SettingsSimpleSource::darkModeChanged, &SettingsSimpleSource::reduceMotionChanged,
-           &SettingsSimpleSource::reduceTransparencyChanged, &SettingsSimpleSource::livingWallpaperChanged })
+           &SettingsSimpleSource::reduceTransparencyChanged, &SettingsSimpleSource::increaseContrastChanged,
+           &SettingsSimpleSource::livingWallpaperChanged })
         connect(this, signal, this, &SimSettings::save);
     connect(this, &SettingsSimpleSource::accentHueChanged, this, &SimSettings::save);
 }
@@ -156,6 +158,7 @@ void SimSettings::save()
     store.setValue(u"accentHue"_s, accentHue());
     store.setValue(u"reduceMotion"_s, reduceMotion());
     store.setValue(u"reduceTransparency"_s, reduceTransparency());
+    store.setValue(u"increaseContrast"_s, increaseContrast());
     store.setValue(u"livingWallpaper"_s, livingWallpaper());
     store.endGroup();
 }

@@ -94,6 +94,48 @@ private Q_SLOTS:
         QVERIFY(near(hueB[2].toDouble(), 25, 3));
     }
 
+    void themedBlendsHighContrast()
+    {
+        qtos::Oklch oklch;
+        const QVariantMap token { { u"light"_s, QVariantList { 0.45, 0.0, 0.0, 1.0 } },
+                                  { u"dark"_s, QVariantList { 0.79, 0.0, 0.0, 1.0 } },
+                                  { u"highContrast"_s,
+                                    QVariantMap { { u"light"_s, QVariantList { 0.30, 0.0, 0.0, 1.0 } },
+                                                  { u"dark"_s, QVariantList { 0.90, 0.0, 0.0, 0.5 } } } } };
+        const auto lightness = [&](double darkness, double contrast) {
+            return oklch.toOklch(oklch.themed(token, darkness, 0, contrast))[0].toDouble();
+        };
+        QVERIFY(near(lightness(0, 0), 0.45, 0.005));
+        QVERIFY(near(lightness(0, 1), 0.30, 0.005));
+        QVERIFY(near(lightness(1, 1), 0.90, 0.005));
+        QVERIFY(near(lightness(0, 0.5), 0.375, 0.005)); // the contrast spring blends in OKLab
+        QVERIFY(near(oklch.themed(token, 1, 0, 1).alphaF(), 0.5, 0.01));
+
+        // Roles without high-contrast values are unaffected.
+        QVariantMap plain = token;
+        plain.remove(u"highContrast"_s);
+        QCOMPARE(oklch.themed(plain, 0, 0, 1), oklch.themed(plain, 0, 0, 0));
+    }
+
+    void luminanceCapHoldsAtEveryHue()
+    {
+        // A bright accent at any hue must come out dark enough for white text
+        // (relative luminance <= 0.175 gives >= 4.5:1 against white).
+        qtos::Oklch oklch;
+        for (int hue = 0; hue < 360; hue += 15) {
+            const QVariantMap token { { u"light"_s, QVariantList { 0.75, 0.17, 0.0, 1.0 } },
+                                      { u"dark"_s, QVariantList { 0.75, 0.17, 0.0, 1.0 } },
+                                      { u"followAccent"_s, true },
+                                      { u"maxLuminance"_s, 0.175 } };
+            const QColor c = oklch.themed(token, 1.0, hue);
+            const double y = qtos::color::relativeLuminance(qtos::color::srgbToOklab(c));
+            QVERIFY2(y <= 0.175 + 0.002, qPrintable(u"hue %1: Y=%2"_s.arg(hue).arg(y)));
+            QVERIFY2(y >= 0.15, qPrintable(u"hue %1 overshoots: Y=%2"_s.arg(hue).arg(y)));
+            const double drift = std::remainder(oklch.toOklch(c)[2].toDouble() - hue, 360.0);
+            QVERIFY2(std::abs(drift) <= 4.0, qPrintable(u"hue %1 drifted by %2"_s.arg(hue).arg(drift)));
+        }
+    }
+
     void mixIsPerceptual()
     {
         // OKLab midpoint of black and white has lightness ~0.5 (sRGB ~#636363),

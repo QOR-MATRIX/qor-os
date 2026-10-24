@@ -97,7 +97,7 @@ Property modes used in the contracts:
 |--------|------|------|---------|
 | `darkMode` | bool | READWRITE | Appearance |
 | `accentHue` | double | READWRITE | OKLCH degrees |
-| `reduceMotion`, `reduceTransparency`, `livingWallpaper` | bool | READWRITE | |
+| `reduceMotion`, `reduceTransparency`, `increaseContrast`, `livingWallpaper` | bool | READWRITE | |
 | `userName`, `hostName` | QString | source-only | |
 
 ### `SimControl` — `simcontrol.rep` (simulation only)
@@ -168,6 +168,8 @@ status                         Print system state
 theme light|dark               Set the appearance
 accent <hue>                   Set the accent hue (0-360)
 motion on|off                  Reduce motion
+transparency on|off            Reduce transparency
+contrast on|off                Increase contrast
 wifi on|off                    Toggle Wi-Fi
 connect <ssid>                 Join a Wi-Fi network
 volume <0-100>                 Set output volume

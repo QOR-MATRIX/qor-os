@@ -5,41 +5,78 @@
 
 // Lumen tokens for C++ consumers (Qt Widgets style, QPA platform theme).
 // Colors are OKLCH {L, C, H, A}; hue is an offset from the accent hue when
-// followAccent is true.
+// followAccent is true. The high-contrast values equal the standard ones
+// for roles that do not change under Increase Contrast; maxLuminance is 1
+// for roles without a luminance cap.
 namespace qtos::lumen {
 
 struct Oklch { double l, c, h, a; };
-struct ColorRole { Oklch light; Oklch dark; bool followAccent; };
+struct ColorRole
+{
+    Oklch light;
+    Oklch dark;
+    bool followAccent;
+    Oklch highContrastLight;
+    Oklch highContrastDark;
+    double maxLuminance;
+};
 
 inline constexpr double kAccentDefaultHue = 274;
 
-inline constexpr ColorRole kBackground { { 0.962, 0.006, 262.0, 1.0 }, { 0.165, 0.014, 262.0, 1.0 }, false };
-inline constexpr ColorRole kSurface { { 0.992, 0.003, 262.0, 1.0 }, { 0.215, 0.014, 262.0, 1.0 }, false };
-inline constexpr ColorRole kSurfaceRaised { { 1.0, 0.0, 262.0, 1.0 }, { 0.262, 0.015, 262.0, 1.0 }, false };
-inline constexpr ColorRole kSurfaceSunken { { 0.945, 0.007, 262.0, 1.0 }, { 0.185, 0.013, 262.0, 1.0 }, false };
-inline constexpr ColorRole kGlassTint { { 0.985, 0.006, 262.0, 0.58 }, { 0.205, 0.018, 262.0, 0.52 }, false };
-inline constexpr ColorRole kGlassStroke { { 1.0, 0.0, 262.0, 0.85 }, { 1.0, 0.0, 262.0, 0.17 }, false };
-inline constexpr ColorRole kFrostTint { { 0.975, 0.008, 262.0, 0.72 }, { 0.195, 0.016, 262.0, 0.7 }, false };
-inline constexpr ColorRole kWindowStroke { { 0.2, 0.02, 262.0, 0.14 }, { 1.0, 0.0, 262.0, 0.11 }, false };
-inline constexpr ColorRole kTextPrimary { { 0.205, 0.016, 262.0, 1.0 }, { 0.975, 0.004, 262.0, 1.0 }, false };
-inline constexpr ColorRole kTextSecondary { { 0.445, 0.016, 262.0, 1.0 }, { 0.79, 0.01, 262.0, 1.0 }, false };
-inline constexpr ColorRole kTextTertiary { { 0.61, 0.012, 262.0, 1.0 }, { 0.61, 0.012, 262.0, 1.0 }, false };
-inline constexpr ColorRole kTextDisabled { { 0.72, 0.008, 262.0, 1.0 }, { 0.47, 0.01, 262.0, 1.0 }, false };
-inline constexpr ColorRole kSeparator { { 0.2, 0.02, 262.0, 0.1 }, { 1.0, 0.0, 262.0, 0.09 }, false };
-inline constexpr ColorRole kFillControl { { 0.2, 0.02, 262.0, 0.055 }, { 1.0, 0.0, 262.0, 0.075 }, false };
-inline constexpr ColorRole kFillControlHover { { 0.2, 0.02, 262.0, 0.085 }, { 1.0, 0.0, 262.0, 0.115 }, false };
-inline constexpr ColorRole kFillControlPressed { { 0.2, 0.02, 262.0, 0.13 }, { 1.0, 0.0, 262.0, 0.16 }, false };
-inline constexpr ColorRole kFillSelected { { 0.6, 0.19, 0.0, 0.16 }, { 0.7, 0.16, 0.0, 0.26 }, true };
-inline constexpr ColorRole kAccent { { 0.585, 0.2, 0.0, 1.0 }, { 0.68, 0.17, 0.0, 1.0 }, true };
-inline constexpr ColorRole kAccentHover { { 0.54, 0.2, 0.0, 1.0 }, { 0.73, 0.16, 0.0, 1.0 }, true };
-inline constexpr ColorRole kAccentText { { 0.5, 0.18, 0.0, 1.0 }, { 0.8, 0.12, 0.0, 1.0 }, true };
-inline constexpr ColorRole kOnAccent { { 0.99, 0.01, 0.0, 1.0 }, { 0.995, 0.008, 0.0, 1.0 }, true };
-inline constexpr ColorRole kFocusRing { { 0.6, 0.2, 0.0, 0.55 }, { 0.72, 0.17, 0.0, 0.6 }, true };
-inline constexpr ColorRole kShadow { { 0.16, 0.03, 262.0, 0.22 }, { 0.0, 0.0, 0.0, 0.55 }, false };
-inline constexpr ColorRole kScrim { { 0.2, 0.02, 262.0, 0.16 }, { 0.0, 0.0, 0.0, 0.4 }, false };
-inline constexpr ColorRole kPositive { { 0.61, 0.16, 150.0, 1.0 }, { 0.76, 0.16, 150.0, 1.0 }, false };
-inline constexpr ColorRole kWarning { { 0.7, 0.15, 70.0, 1.0 }, { 0.83, 0.14, 80.0, 1.0 }, false };
-inline constexpr ColorRole kCritical { { 0.575, 0.21, 25.0, 1.0 }, { 0.69, 0.19, 25.0, 1.0 }, false };
+inline constexpr ColorRole kBackground { { 0.962, 0.006, 262.0, 1.0 }, { 0.165, 0.014, 262.0, 1.0 }, false,
+    { 0.962, 0.006, 262.0, 1.0 }, { 0.165, 0.014, 262.0, 1.0 }, 1.0 };
+inline constexpr ColorRole kSurface { { 0.992, 0.003, 262.0, 1.0 }, { 0.215, 0.014, 262.0, 1.0 }, false,
+    { 0.992, 0.003, 262.0, 1.0 }, { 0.215, 0.014, 262.0, 1.0 }, 1.0 };
+inline constexpr ColorRole kSurfaceRaised { { 1.0, 0.0, 262.0, 1.0 }, { 0.262, 0.015, 262.0, 1.0 }, false,
+    { 1.0, 0.0, 262.0, 1.0 }, { 0.262, 0.015, 262.0, 1.0 }, 1.0 };
+inline constexpr ColorRole kSurfaceSunken { { 0.945, 0.007, 262.0, 1.0 }, { 0.185, 0.013, 262.0, 1.0 }, false,
+    { 0.945, 0.007, 262.0, 1.0 }, { 0.185, 0.013, 262.0, 1.0 }, 1.0 };
+inline constexpr ColorRole kGlassTint { { 0.985, 0.006, 262.0, 0.58 }, { 0.205, 0.018, 262.0, 0.52 }, false,
+    { 0.985, 0.006, 262.0, 0.58 }, { 0.205, 0.018, 262.0, 0.52 }, 1.0 };
+inline constexpr ColorRole kGlassStroke { { 1.0, 0.0, 262.0, 0.85 }, { 1.0, 0.0, 262.0, 0.17 }, false,
+    { 0.2, 0.02, 262.0, 0.34 }, { 1.0, 0.0, 262.0, 0.4 }, 1.0 };
+inline constexpr ColorRole kFrostTint { { 0.975, 0.008, 262.0, 0.72 }, { 0.195, 0.016, 262.0, 0.7 }, false,
+    { 0.975, 0.008, 262.0, 0.72 }, { 0.195, 0.016, 262.0, 0.7 }, 1.0 };
+inline constexpr ColorRole kWindowStroke { { 0.2, 0.02, 262.0, 0.14 }, { 1.0, 0.0, 262.0, 0.11 }, false,
+    { 0.2, 0.02, 262.0, 0.42 }, { 1.0, 0.0, 262.0, 0.36 }, 1.0 };
+inline constexpr ColorRole kTextPrimary { { 0.205, 0.016, 262.0, 1.0 }, { 0.975, 0.004, 262.0, 1.0 }, false,
+    { 0.13, 0.012, 262.0, 1.0 }, { 1.0, 0.0, 262.0, 1.0 }, 1.0 };
+inline constexpr ColorRole kTextSecondary { { 0.445, 0.016, 262.0, 1.0 }, { 0.79, 0.01, 262.0, 1.0 }, false,
+    { 0.3, 0.016, 262.0, 1.0 }, { 0.9, 0.008, 262.0, 1.0 }, 1.0 };
+inline constexpr ColorRole kTextTertiary { { 0.61, 0.012, 262.0, 1.0 }, { 0.61, 0.012, 262.0, 1.0 }, false,
+    { 0.42, 0.014, 262.0, 1.0 }, { 0.8, 0.01, 262.0, 1.0 }, 1.0 };
+inline constexpr ColorRole kTextDisabled { { 0.72, 0.008, 262.0, 1.0 }, { 0.47, 0.01, 262.0, 1.0 }, false,
+    { 0.56, 0.01, 262.0, 1.0 }, { 0.62, 0.01, 262.0, 1.0 }, 1.0 };
+inline constexpr ColorRole kSeparator { { 0.2, 0.02, 262.0, 0.1 }, { 1.0, 0.0, 262.0, 0.09 }, false,
+    { 0.2, 0.02, 262.0, 0.32 }, { 1.0, 0.0, 262.0, 0.3 }, 1.0 };
+inline constexpr ColorRole kFillControl { { 0.2, 0.02, 262.0, 0.055 }, { 1.0, 0.0, 262.0, 0.075 }, false,
+    { 0.2, 0.02, 262.0, 0.1 }, { 1.0, 0.0, 262.0, 0.14 }, 1.0 };
+inline constexpr ColorRole kFillControlHover { { 0.2, 0.02, 262.0, 0.085 }, { 1.0, 0.0, 262.0, 0.115 }, false,
+    { 0.2, 0.02, 262.0, 0.15 }, { 1.0, 0.0, 262.0, 0.2 }, 1.0 };
+inline constexpr ColorRole kFillControlPressed { { 0.2, 0.02, 262.0, 0.13 }, { 1.0, 0.0, 262.0, 0.16 }, false,
+    { 0.2, 0.02, 262.0, 0.22 }, { 1.0, 0.0, 262.0, 0.27 }, 1.0 };
+inline constexpr ColorRole kFillSelected { { 0.6, 0.19, 0.0, 0.16 }, { 0.7, 0.16, 0.0, 0.26 }, true,
+    { 0.55, 0.2, 0.0, 0.26 }, { 0.72, 0.16, 0.0, 0.36 }, 1.0 };
+inline constexpr ColorRole kAccent { { 0.565, 0.2, 0.0, 1.0 }, { 0.575, 0.19, 0.0, 1.0 }, true,
+    { 0.5, 0.2, 0.0, 1.0 }, { 0.54, 0.18, 0.0, 1.0 }, 0.175 };
+inline constexpr ColorRole kAccentHover { { 0.52, 0.2, 0.0, 1.0 }, { 0.535, 0.19, 0.0, 1.0 }, true,
+    { 0.45, 0.2, 0.0, 1.0 }, { 0.5, 0.18, 0.0, 1.0 }, 0.175 };
+inline constexpr ColorRole kAccentText { { 0.5, 0.18, 0.0, 1.0 }, { 0.8, 0.12, 0.0, 1.0 }, true,
+    { 0.42, 0.18, 0.0, 1.0 }, { 0.87, 0.11, 0.0, 1.0 }, 1.0 };
+inline constexpr ColorRole kOnAccent { { 0.99, 0.01, 0.0, 1.0 }, { 0.995, 0.008, 0.0, 1.0 }, true,
+    { 1.0, 0.0, 0.0, 1.0 }, { 1.0, 0.0, 0.0, 1.0 }, 1.0 };
+inline constexpr ColorRole kFocusRing { { 0.6, 0.2, 0.0, 0.55 }, { 0.72, 0.17, 0.0, 0.6 }, true,
+    { 0.48, 0.2, 0.0, 1.0 }, { 0.8, 0.15, 0.0, 1.0 }, 1.0 };
+inline constexpr ColorRole kShadow { { 0.16, 0.03, 262.0, 0.22 }, { 0.0, 0.0, 0.0, 0.55 }, false,
+    { 0.16, 0.03, 262.0, 0.22 }, { 0.0, 0.0, 0.0, 0.55 }, 1.0 };
+inline constexpr ColorRole kScrim { { 0.2, 0.02, 262.0, 0.16 }, { 0.0, 0.0, 0.0, 0.4 }, false,
+    { 0.2, 0.02, 262.0, 0.3 }, { 0.0, 0.0, 0.0, 0.6 }, 1.0 };
+inline constexpr ColorRole kPositive { { 0.61, 0.16, 150.0, 1.0 }, { 0.76, 0.16, 150.0, 1.0 }, false,
+    { 0.48, 0.15, 150.0, 1.0 }, { 0.84, 0.15, 150.0, 1.0 }, 1.0 };
+inline constexpr ColorRole kWarning { { 0.7, 0.15, 70.0, 1.0 }, { 0.83, 0.14, 80.0, 1.0 }, false,
+    { 0.54, 0.13, 70.0, 1.0 }, { 0.88, 0.13, 85.0, 1.0 }, 1.0 };
+inline constexpr ColorRole kCritical { { 0.575, 0.21, 25.0, 1.0 }, { 0.69, 0.19, 25.0, 1.0 }, false,
+    { 0.5, 0.21, 25.0, 1.0 }, { 0.78, 0.16, 25.0, 1.0 }, 1.0 };
 
 inline constexpr double kRadiusXs = 4;
 inline constexpr double kRadiusS = 6;
