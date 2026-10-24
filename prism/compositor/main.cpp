@@ -15,6 +15,7 @@
 
 #include "kit.h"
 #include "services.h"
+#include "shellbenchmark.h"
 #include "simservices.h"
 
 #include <QtCore/QCommandLineParser>
@@ -63,7 +64,12 @@ int main(int argc, char *argv[])
     const QCommandLineOption screenshot(u"screenshot"_s, u"Save a screenshot of the output to this path and exit."_s,
                                         u"file"_s);
     const QCommandLineOption delay(u"delay"_s, u"Milliseconds to wait before the screenshot."_s, u"ms"_s, u"5000"_s);
-    parser.addOptions({ services, unlocked, socket, size, surface, screenshot, delay });
+    const QCommandLineOption benchmark(
+        u"benchmark"_s,
+        u"Run the shell tour for N seconds, report per-output frame pacing and input latency as JSON, exit."_s,
+        u"seconds"_s);
+    const QCommandLineOption benchmarkOut(u"benchmark-out"_s, u"Write the benchmark JSON to this file."_s, u"file"_s);
+    parser.addOptions({ services, unlocked, socket, size, surface, screenshot, delay, benchmark, benchmarkOut });
     parser.process(app);
 
     qtos::Kit::initialize();
@@ -81,7 +87,8 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
     QVariantMap options;
-    options.insert(u"unlocked"_s, parser.isSet(unlocked));
+    const int benchmarkSeconds = parser.value(benchmark).toInt();
+    options.insert(u"unlocked"_s, parser.isSet(unlocked) || benchmarkSeconds > 0);
     options.insert(u"surface"_s, parser.value(surface));
     if (const QStringList parts = parser.value(size).split(u'x'); parts.size() == 2) {
         options.insert(u"width"_s, parts[0].toInt());
@@ -94,6 +101,15 @@ int main(int argc, char *argv[])
 
     const QByteArray socketName = engine.rootObjects().constFirst()->property("socketName").toByteArray();
     qInfo("Prism is running. Start clients with WAYLAND_DISPLAY=%s", socketName.constData());
+
+    if (benchmarkSeconds > 0) {
+        // One QQuickWindow per WaylandOutput: measure them all.
+        QList<QQuickWindow *> outputs;
+        for (QWindow *window : QGuiApplication::topLevelWindows())
+            if (auto *quick = qobject_cast<QQuickWindow *>(window); quick && quick->isVisible())
+                outputs.append(quick);
+        qtos::runShellBenchmark(outputs, { u"prism"_s, benchmarkSeconds, parser.value(benchmarkOut) });
+    }
 
     if (parser.isSet(screenshot)) {
         QTimer::singleShot(parser.value(delay).toInt(), &app, [path = parser.value(screenshot)] {

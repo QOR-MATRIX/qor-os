@@ -182,6 +182,7 @@ WAYLAND_DISPLAY=wayland-qtos QT_QPA_PLATFORM=wayland \
 | `--size WxH` | Output window size |
 | `--services embedded\|external` | As for `qtos-shell` |
 | `--screenshot <file> [--delay ms]` | Save the output and exit (used for automated checks) |
+| `--benchmark <seconds> [--benchmark-out file]` | Shell tour plus input latency; per-output JSON report, then exit ([PERFORMANCE.md](PERFORMANCE.md)) |
 
 How clients are handled:
 

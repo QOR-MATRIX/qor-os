@@ -35,6 +35,7 @@ WaylandCompositor {
 
             Desktop {
                 id: desktop
+                objectName: "desktop"
                 anchors.fill: parent
                 options: compositor.options
                 focus: true

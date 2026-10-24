@@ -44,6 +44,8 @@ public:
     bool isIdle() const { return m_idle; }
     int framesRecorded() const;
 
+    // Recorded frame intervals in milliseconds, oldest first.
+    QList<double> intervals() const;
     // Percentile (0-100) of recorded frame intervals in milliseconds.
     double percentile(double p) const;
     double average() const;

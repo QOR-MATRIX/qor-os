@@ -16,6 +16,7 @@ behaviour.
 | Idle wakeups with nothing animating | ~0 | Met by design: springs stop on settle, clock wakes once a minute, no continuous animations |
 | First-party app launch → first frame | ≤ 300 ms | Apps are in-process QML in simulation; measured in Phase 3 with Qt Application Manager |
 | Beam keystroke → results | ≤ 16 ms | Search is synchronous JS over about 60 entries; not yet instrumented |
+| Pointer input → photon | ≤ 1 frame + scanout | Input to swap: 5.9 ms p50 on the RTX 4060 at 360 Hz (about 2.1 frames, measured through the Windows compositor); 9.2 ms on Intel UHD. Measured on device in Phase 2 |
 | Boot / login budgets | ≤ 5 s / ≤ 700 ms | Phase 2 (image) |
 
 ## Baseline (2026-10-23)
@@ -33,6 +34,38 @@ Window 1539×844 logical at 125% scaling (1924×1055 physical), Direct3D 11,
 The RTX 4060 holds the panel's 360 Hz refresh through the whole tour. The
 single max outlier is first-use pipeline creation when Beam opens.
 
+Re-measured on 2026-10-24 with the shared benchmark driver:
+
+- **RTX 4060:** 2.79 ms average, p95 3.06 ms, with 0.3% of frames missing a
+  360 Hz refresh.
+- **Intel UHD:** bimodal between runs. Two runs in five reproduce the
+  baseline (avg 7.2 ms, p95 9.1 ms); the others sit at p95 about 11.1 ms,
+  which looks like a GPU power state. Compare the better of several runs.
+
+### Input-to-swap latency (2026-10-24)
+
+`inputToSwap` times a pointer move over the Shelf. The clock starts when the
+event is posted and stops at the swap of the first frame synchronised after
+the event was handled. Display scan-out and input-device latency are not
+included.
+
+| GPU | p50 | p95 | Max |
+|-----|-----|-----|-----|
+| NVIDIA GeForce RTX 4060 Laptop (360 Hz) | **5.9 ms** | 6.3 ms | 6.5 ms |
+| Intel UHD Graphics (360 Hz panel) | 9.2 ms | 18 ms | 54 ms |
+
+### Prism nested under WSLg (2026-10-24, indicative)
+
+`prism --benchmark 8` on the same laptop, inside WSLg. That means Ubuntu
+26.04, OpenGL on Mesa d3d12, a 60 Hz output paced by WSLg's Weston, and a
+1600×1000 window. These numbers describe the nested development setup, not
+the device.
+
+| Scenario | Average | p95 | Missed frames | Input to swap p50 / p95 |
+|----------|---------|-----|---------------|-------------------------|
+| Shell tour | 17.1 ms (60 Hz) | 17.8 ms | 0.2% | 26.4 / 33.9 ms |
+| Shell tour + `weston-terminal` + Qt Widgets client | 18.2 ms | 21.8 ms | 1.1% | 26.8 / 34.8 ms |
+
 ### Optimisation history
 
 | Change | Intel UHD p95 | Intel UHD avg |
@@ -47,10 +80,45 @@ single max outlier is first-use pipeline creation when Beam opens.
 .\tools\dev\run.ps1 -- --gpu low-power --open files,music,notes --benchmark 8   # integrated GPU
 ```
 
-The JSON contains `frames`, `averageMs`, `averageFps`, `p50Ms`, `p95Ms`,
-`p99Ms`, `maxMs`, `graphicsApi`, `size` and `devicePixelRatio`. Intervals come
-from `QQuickWindow::frameSwapped` through `qtos::FrameStats`, which never
-requests frames itself. Gaps over 200 ms count as idle and are excluded.
+```bash
+prism --benchmark 8 --benchmark-out prism.json     # Linux: every output of the compositor
+```
+
+The tour runs for the given number of seconds; then the driver takes 40
+latency samples over about 6 seconds. The driver is `prism/shell/shellbenchmark.cpp`, shared by
+`qtos-shell` and `prism`.
+
+| Field | Meaning |
+|-------|---------|
+| `tool` | `qtos-shell` or `prism` |
+| `frames`, `averageMs`, `averageFps`, `p50Ms`, `p95Ms`, `p99Ms`, `maxMs` | Frame intervals of the first output during the tour |
+| `refreshHz`, `missedFrames`, `missedPercent` | The output's refresh rate, and intervals longer than 1.5 refresh periods |
+| `graphicsApi`, `size`, `devicePixelRatio`, `screen`, `seconds` | Context |
+| `outputs[]` | The same frame fields for every output (one window per `WaylandOutput` under Prism) |
+| `inputToSwap` | `samples`, `posted`, `averageMs`, `p50Ms`, `p95Ms`, `p99Ms`, `maxMs` (see above) |
+
+Intervals come from `QQuickWindow::frameSwapped` through `qtos::FrameStats`,
+which never requests frames itself. Gaps over 200 ms count as idle and are
+excluded.
+
+### Compositor decision gate
+
+[ADR-0003](adr/0003-compositor-strategy.md) keeps Qt Wayland Compositor
+unless the bare-metal path misses multi-output frame-pacing or latency
+targets. The gate's data is `prism --benchmark` on the reference hardware:
+
+- DRM/KMS (`QT_QPA_PLATFORM=eglfs` with the KMS integration, later Prism's
+  own backend);
+- two outputs at different refresh rates;
+- Wayland clients running.
+
+Proposed pass criteria, to be ratified with the measurement in ADR-0011:
+
+- under 1% missed frames on each output at its own refresh rate;
+- input to swap within two refresh periods at p95.
+
+The product target stays at one frame plus scan-out (VISION §12). The nested
+numbers above validate the tooling only.
 
 The **Monitor** app shows the same probe live: frame time and fps while the
 shell animates, and **Idle · Rendering on demand** when nothing changes.

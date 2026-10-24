@@ -35,6 +35,10 @@ qt_add_qml_module(qtos_shell
         QTOS.Apps
 )
 
+# The --benchmark driver shared by qtos-shell and prism.
+target_sources(qtos_shell PRIVATE shellbenchmark.h shellbenchmark.cpp)
+target_include_directories(qtos_shell PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
+
 target_link_libraries(qtos_shell
     PUBLIC
         Qt6::Quick

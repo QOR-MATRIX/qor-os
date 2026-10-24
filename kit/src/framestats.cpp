@@ -92,6 +92,12 @@ int FrameStats::framesRecorded() const
     return int(m_intervals.size());
 }
 
+QList<double> FrameStats::intervals() const
+{
+    QMutexLocker lock(&m_mutex);
+    return m_intervals;
+}
+
 double FrameStats::percentile(double p) const
 {
     QList<double> sorted;

@@ -32,3 +32,16 @@ X11 apps run in a rootful Xwayland window until a full XWM is justified.
 - The KMS backend is the hardest single component and is budgeted explicitly
   in Phase 2.
 - The decision gate benchmark is a Phase 1 deliverable.
+
+## Status of the gate (2026-10-24)
+
+- **Tooling is ready.** `prism --benchmark` reports frame pacing per output,
+  with missed frames judged at each output's own refresh rate, and
+  input-to-swap latency. See
+  [PERFORMANCE.md](../PERFORMANCE.md#compositor-decision-gate).
+- **Nested data exists.** Prism runs nested under WSLg with real Wayland
+  clients, at 60 Hz with 0.2–1.1% missed frames.
+- **The decision needs bare metal.** That means a DRM/KMS run with two
+  outputs at different refresh rates on the reference hardware. It is
+  recorded as ADR-0011 together with that measurement. Until then, Option A
+  stands.

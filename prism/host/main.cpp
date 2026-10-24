@@ -6,17 +6,14 @@
 // device; here it manages simulated app windows, and talks to the simulated
 // QTOS services over Qt Remote Objects. See docs/BUILDING.md.
 
-#include "framestats.h"
 #include "gpupreference.h"
 #include "kit.h"
 #include "services.h"
+#include "shellbenchmark.h"
 #include "simservices.h"
 
 #include <QtCore/QCommandLineParser>
 #include <QtCore/QDir>
-#include <QtCore/QFile>
-#include <QtCore/QJsonDocument>
-#include <QtCore/QJsonObject>
 #include <QtCore/QLoggingCategory>
 #include <QtCore/QTimer>
 #include <QtGui/QGuiApplication>
@@ -24,10 +21,8 @@
 #include <QtQml/QQmlApplicationEngine>
 #include <QtQml/QQmlExtensionPlugin>
 #include <QtQuick/QQuickWindow>
-#include <QtQuick/QSGRendererInterface>
 #include <QtQuickControls2/QQuickStyle>
 
-#include <cstdio>
 #include <memory>
 
 using namespace Qt::StringLiterals;
@@ -124,82 +119,6 @@ HostOptions parseOptions(const QGuiApplication &app)
     return options;
 }
 
-// Drives a deterministic tour of shell surfaces and reports frame pacing.
-void runBenchmark(QQuickWindow *window, const HostOptions &options)
-{
-    auto *stats = new qtos::FrameStats(window);
-    stats->setWindow(window);
-    QObject *desktop = window->findChild<QObject *>(u"desktop"_s);
-
-    struct Step
-    {
-        const char *method;
-        QVariant argument;
-    };
-    static const QList<Step> script = {
-        { "setSurface", u"overview"_s },
-        { "setSurface", QString() },
-        { "setSurface", u"beam"_s },
-        { "setSurface", QString() },
-        { "setSurface", u"control-center"_s },
-        { "setSurface", QString() },
-        { "switchSpace", 1 },
-        { "switchSpace", 0 },
-    };
-
-    auto *driver = new QTimer(window);
-    driver->setInterval(750);
-    QObject::connect(driver, &QTimer::timeout, window, [desktop, driver] {
-        const int index = driver->property("step").toInt();
-        const Step &step = script.at(index % script.size());
-        if (step.argument.typeId() == QMetaType::Int)
-            QMetaObject::invokeMethod(desktop, step.method, Q_ARG(int, step.argument.toInt()));
-        else
-            QMetaObject::invokeMethod(desktop, step.method, Q_ARG(QString, step.argument.toString()));
-        driver->setProperty("step", index + 1);
-    });
-
-    constexpr int warmupMs = 2500;
-    QTimer::singleShot(warmupMs, window, [stats, driver] {
-        stats->reset();
-        driver->start();
-    });
-    QTimer::singleShot(warmupMs + options.benchmarkSeconds * 1000, window, [window, stats, options] {
-        const char *api = "unknown";
-        switch (window->rendererInterface()->graphicsApi()) {
-        case QSGRendererInterface::Direct3D11: api = "Direct3D 11"; break;
-        case QSGRendererInterface::Direct3D12: api = "Direct3D 12"; break;
-        case QSGRendererInterface::Vulkan: api = "Vulkan"; break;
-        case QSGRendererInterface::Metal: api = "Metal"; break;
-        case QSGRendererInterface::OpenGL: api = "OpenGL"; break;
-        default: break;
-        }
-        const double avg = stats->average();
-        const QJsonObject result {
-            { u"frames"_s, stats->framesRecorded() },
-            { u"averageMs"_s, avg },
-            { u"averageFps"_s, avg > 0 ? 1000.0 / avg : 0.0 },
-            { u"p50Ms"_s, stats->percentile(50) },
-            { u"p95Ms"_s, stats->percentile(95) },
-            { u"p99Ms"_s, stats->percentile(99) },
-            { u"maxMs"_s, stats->maximum() },
-            { u"graphicsApi"_s, QString::fromLatin1(api) },
-            { u"size"_s, QString(QString::number(window->width()) + u'x' + QString::number(window->height())) },
-            { u"devicePixelRatio"_s, window->devicePixelRatio() },
-            { u"seconds"_s, options.benchmarkSeconds },
-        };
-        const QByteArray json = QJsonDocument(result).toJson(QJsonDocument::Indented);
-        if (!options.benchmarkOut.isEmpty()) {
-            QFile file(options.benchmarkOut);
-            if (file.open(QIODevice::WriteOnly))
-                file.write(json);
-        }
-        std::fputs(json.constData(), stdout);
-        std::fflush(stdout);
-        QCoreApplication::exit(0);
-    });
-}
-
 } // namespace
 
 int main(int argc, char *argv[])
@@ -250,7 +169,8 @@ int main(int argc, char *argv[])
         return 2;
 
     if (options.benchmarkSeconds > 0)
-        runBenchmark(qobject_cast<QQuickWindow *>(engine.rootObjects().constFirst()), options);
+        qtos::runShellBenchmark({ qobject_cast<QQuickWindow *>(engine.rootObjects().constFirst()) },
+                                { u"qtos-shell"_s, options.benchmarkSeconds, options.benchmarkOut });
 
     if (!options.screenshotPath.isEmpty()) {
         auto *window = qobject_cast<QQuickWindow *>(engine.rootObjects().constFirst());

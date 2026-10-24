@@ -33,6 +33,7 @@ All notable changes to QTOS are recorded here. The format follows
   - Qt's `wp_presentation` is enabled, fed with swap timestamps, and works around a Qt 6.12 initialisation bug for the QML element.
   - Qt's idle-inhibit and text-input-v3 are enabled.
 - Linux on WSL2 build and run guide (docs/BUILDING.md).
+- **Benchmark v2**, shared by `qtos-shell` and `prism` (`prism/shell/shellbenchmark.cpp`): `prism --benchmark` reports per-output frame pacing, missed frames at each output's refresh rate, and input-to-swap latency. Top-level JSON fields are unchanged. Baselines: input to swap 5.9 ms p50 on the RTX 4060 (360 Hz); nested Prism under WSLg holds 60 Hz. This is the tooling for the ADR-0003 decision gate, which needs a bare-metal run.
 
 ### Fixed
 

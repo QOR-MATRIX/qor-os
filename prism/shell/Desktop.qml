@@ -259,6 +259,7 @@ FocusScope {
 
         Shelf {
             id: shelf
+            objectName: "shelf"
             anchors.horizontalCenter: parent.horizontalCenter
             y: parent.height - height - 12 + 110 * lockDepth.value
             backdrop: sceneBackdrop
