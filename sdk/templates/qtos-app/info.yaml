@@ -1,0 +1,16 @@
+# Qt Application Manager manifest (device packaging, Phase 3).
+formatVersion: 1
+formatType: am-application
+---
+id: 'dev.example.hello-lumen'
+name:
+  en: 'Hello Lumen'
+icon: 'icon.png'
+code: 'hello-lumen'
+runtime: 'native'
+categories: [ 'utilities' ]
+capabilities: [ ]
+intents:
+  - id: 'dev.example.hello-lumen.greet'
+    name:
+      en: 'Say hello'

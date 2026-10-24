@@ -1,0 +1,46 @@
+# QTOS.Shell — the Prism shell UI, shared by qtos-shell (simulation) and the
+# prism Wayland compositor (device).
+
+# Imported by relative path from QML; not exported as a module member.
+set_source_files_properties(search.js PROPERTIES QT_QML_SKIP_QMLDIR_ENTRY TRUE)
+
+qt_add_library(qtos_shell STATIC)
+
+qt_add_qml_module(qtos_shell
+    URI QTOS.Shell
+    VERSION 1.0
+    RESOURCE_PREFIX /qt/qml
+    QML_FILES
+        Main.qml
+        Desktop.qml
+        WindowLayer.qml
+        AppWindow.qml
+        Rail.qml
+        LiveActivity.qml
+        MediaPopover.qml
+        Shelf.qml
+        ShelfButton.qml
+        Beam.qml
+        ControlCenter.qml
+        NotificationStack.qml
+        NotificationCard.qml
+        LockScreen.qml
+        SpaceSwitcher.qml
+        search.js
+    DEPENDENCIES
+        QtQuick
+        QtQuick.Controls
+        QTOS.Kit
+        QTOS.Services
+        QTOS.Apps
+)
+
+target_link_libraries(qtos_shell
+    PUBLIC
+        Qt6::Quick
+        qtos_kit
+        qtos_services
+        qtos_apps
+    PRIVATE
+        qtos::compiler_settings
+)

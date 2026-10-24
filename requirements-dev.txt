@@ -1,0 +1,4 @@
+# Developer tooling, pinned so local runs and CI produce identical results.
+#   python -m pip install -r requirements-dev.txt
+clang-format==20.1.8
+pre-commit==4.7.0

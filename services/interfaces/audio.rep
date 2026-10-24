@@ -1,0 +1,14 @@
+// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// qtos-audiod: output volume and routing (backed by PipeWire/WirePlumber on device).
+#include <QtCore/QStringList>
+
+class Audio
+{
+    // 0.0 .. 1.0
+    PROP(double volume=0.6 READWRITE)
+    PROP(bool muted=false READWRITE)
+    PROP(QString outputDevice SOURCEONLYSETTER)
+    PROP(QStringList outputDevices SOURCEONLYSETTER)
+
+    SLOT(void selectOutput(const QString &device))
+}

@@ -1,0 +1,56 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "QTOS: build (release)",
+      "type": "shell",
+      "command": "pwsh",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}/tools/dev/build.ps1", "-Preset", "windows-release"],
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": ["$msCompile"]
+    },
+    {
+      "label": "QTOS: build + test",
+      "type": "shell",
+      "command": "pwsh",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}/tools/dev/build.ps1", "-Preset", "windows-release", "-Test"],
+      "group": "test",
+      "problemMatcher": ["$msCompile"]
+    },
+    {
+      "label": "QTOS: qmllint",
+      "type": "shell",
+      "command": "pwsh",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}/tools/dev/build.ps1", "-Preset", "windows-release", "-Target", "all_qmllint"],
+      "problemMatcher": []
+    },
+    {
+      "label": "QTOS: run shell",
+      "type": "shell",
+      "command": "pwsh",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}/tools/dev/run.ps1", "--", "--unlocked", "--open", "files,music"],
+      "problemMatcher": []
+    },
+    {
+      "label": "QTOS: benchmark",
+      "type": "shell",
+      "command": "pwsh",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}/tools/dev/run.ps1", "--", "--open", "files,music,notes", "--benchmark", "10"],
+      "problemMatcher": []
+    },
+    {
+      "label": "QTOS: capture doc screenshots",
+      "type": "shell",
+      "command": "pwsh",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}/tools/screenshots/capture.ps1"],
+      "problemMatcher": []
+    },
+    {
+      "label": "QTOS: regenerate Lumen tokens",
+      "type": "shell",
+      "command": "python",
+      "args": ["tools/tokens/generate_tokens.py"],
+      "problemMatcher": []
+    }
+  ]
+}

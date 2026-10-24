@@ -1,0 +1,22 @@
+// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+import QtQuick
+import QtQuick.Templates as T
+import QTOS.Kit
+
+T.MenuSeparator {
+    id: control
+
+    implicitWidth: Math.max(implicitBackgroundWidth + leftInset + rightInset,
+                            implicitContentWidth + leftPadding + rightPadding)
+    implicitHeight: Math.max(implicitBackgroundHeight + topInset + bottomInset,
+                             implicitContentHeight + topPadding + bottomPadding)
+
+    padding: 4
+    verticalPadding: 4
+
+    contentItem: Rectangle {
+        implicitWidth: 188
+        implicitHeight: 1
+        color: Theme.separator
+    }
+}

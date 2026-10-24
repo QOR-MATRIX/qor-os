@@ -1,0 +1,13 @@
+// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// qtos-btd: Bluetooth adapter and paired devices (backed by BluezQt on device).
+#include <QtCore/QVariantList>
+
+class Bluetooth
+{
+    PROP(bool enabled=true READWRITE)
+    // [{ "name": string, "kind": "headphones"|"keyboard"|"mouse"|"speaker",
+    //    "connected": bool, "battery": int (-1 if unknown) }]
+    PROP(QVariantList devices SOURCEONLYSETTER)
+
+    SLOT(void toggleDevice(const QString &name))
+}

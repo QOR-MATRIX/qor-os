@@ -1,0 +1,28 @@
+# QTOS clang-tidy profile. Run with tools/dev/tidy.ps1 or your IDE (clangd
+# reads this file). Uses compile_commands.json from any configured preset.
+Checks: >
+  -*,
+  bugprone-*,
+  -bugprone-easily-swappable-parameters,
+  -bugprone-narrowing-conversions,
+  cppcoreguidelines-pro-type-cstyle-cast,
+  cppcoreguidelines-slicing,
+  misc-definitions-in-headers,
+  misc-redundant-expression,
+  misc-unused-using-decls,
+  modernize-use-nullptr,
+  modernize-use-override,
+  modernize-use-using,
+  modernize-make-unique,
+  performance-*,
+  -performance-enum-size,
+  readability-container-size-empty,
+  readability-delete-null-pointer,
+  readability-redundant-smartptr-get,
+  readability-simplify-boolean-expr
+WarningsAsErrors: ''
+HeaderFilterRegex: '(kit|services|sim|prism|platform|tools|tests)/.*'
+FormatStyle: file
+CheckOptions:
+  - key: performance-unnecessary-value-param.AllowedTypes
+    value: 'QString;QByteArray;QVariant;QVariantMap;QVariantList;QStringList;QUrl;QColor;QFont'

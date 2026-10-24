@@ -1,0 +1,66 @@
+# QTOS C++ style — Qt-flavoured, 120 columns. Enforced in CI with the pinned
+# clang-format from requirements-dev.txt (see docs/DEVELOPMENT.md).
+Language: Cpp
+BasedOnStyle: WebKit
+Standard: c++20
+ColumnLimit: 120
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+AccessModifierOffset: -4
+NamespaceIndentation: None
+FixNamespaceComments: true
+PointerAlignment: Right
+ReferenceAlignment: Pointer
+QualifierAlignment: Leave
+
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterClass: true
+  AfterControlStatement: Never
+  AfterEnum: false
+  AfterFunction: true
+  AfterNamespace: false
+  AfterStruct: true
+  AfterUnion: true
+  AfterExternBlock: false
+  BeforeCatch: false
+  BeforeElse: false
+  BeforeLambdaBody: false
+  BeforeWhile: false
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: false
+
+AllowShortFunctionsOnASingleLine: All
+AllowShortBlocksOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AllowShortLambdasOnASingleLine: All
+AllowShortCaseLabelsOnASingleLine: true
+AlwaysBreakTemplateDeclarations: Yes
+BreakBeforeBinaryOperators: NonAssignment
+BreakConstructorInitializers: BeforeColon
+PackConstructorInitializers: BinPack
+ConstructorInitializerIndentWidth: 4
+ContinuationIndentWidth: 4
+Cpp11BracedListStyle: false
+SpaceInEmptyBlock: true
+SpaceAfterTemplateKeyword: false
+SpaceBeforeCpp11BracedList: true
+AlignAfterOpenBracket: Align
+AlignOperands: Align
+AlignTrailingComments: true
+AllowAllArgumentsOnNextLine: true
+BinPackArguments: true
+BinPackParameters: true
+EmptyLineBeforeAccessModifier: LogicalBlock
+KeepEmptyLinesAtTheStartOfBlocks: false
+MaxEmptyLinesToKeep: 1
+
+IncludeBlocks: Preserve
+SortIncludes: CaseSensitive
+
+StatementAttributeLikeMacros: [Q_EMIT]
+StatementMacros: [Q_UNUSED, Q_OBJECT, Q_GADGET, QML_ELEMENT, QML_SINGLETON, QML_ANONYMOUS, QML_UNCREATABLE]
+ForEachMacros: [Q_FOREACH, foreach]

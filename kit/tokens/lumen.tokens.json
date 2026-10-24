@@ -1,0 +1,94 @@
+{
+  "meta": {
+    "name": "Lumen",
+    "version": "0.1.0",
+    "description": "Design tokens for the QTOS Lumen design language. Colors are OKLCH: [lightness 0-1, chroma, hue degrees, alpha]. Roles with followAccent=true treat the hue as an offset from the live accent hue."
+  },
+  "color": {
+    "accentDefaultHue": 274,
+    "accentPresets": [274, 248, 205, 162, 95, 58, 25, 338],
+    "roles": {
+      "background":         { "light": [0.962, 0.006, 262, 1.00], "dark": [0.165, 0.014, 262, 1.00] },
+      "surface":            { "light": [0.992, 0.003, 262, 1.00], "dark": [0.215, 0.014, 262, 1.00] },
+      "surfaceRaised":      { "light": [1.000, 0.000, 262, 1.00], "dark": [0.262, 0.015, 262, 1.00] },
+      "surfaceSunken":      { "light": [0.945, 0.007, 262, 1.00], "dark": [0.185, 0.013, 262, 1.00] },
+      "glassTint":          { "light": [0.985, 0.006, 262, 0.58], "dark": [0.205, 0.018, 262, 0.52] },
+      "glassStroke":        { "light": [1.000, 0.000, 262, 0.85], "dark": [1.000, 0.000, 262, 0.17] },
+      "frostTint":          { "light": [0.975, 0.008, 262, 0.72], "dark": [0.195, 0.016, 262, 0.70] },
+      "windowStroke":       { "light": [0.200, 0.020, 262, 0.14], "dark": [1.000, 0.000, 262, 0.11] },
+      "textPrimary":        { "light": [0.205, 0.016, 262, 1.00], "dark": [0.975, 0.004, 262, 1.00] },
+      "textSecondary":      { "light": [0.445, 0.016, 262, 1.00], "dark": [0.790, 0.010, 262, 1.00] },
+      "textTertiary":       { "light": [0.610, 0.012, 262, 1.00], "dark": [0.610, 0.012, 262, 1.00] },
+      "textDisabled":       { "light": [0.720, 0.008, 262, 1.00], "dark": [0.470, 0.010, 262, 1.00] },
+      "separator":          { "light": [0.200, 0.020, 262, 0.10], "dark": [1.000, 0.000, 262, 0.09] },
+      "fillControl":        { "light": [0.200, 0.020, 262, 0.055], "dark": [1.000, 0.000, 262, 0.075] },
+      "fillControlHover":   { "light": [0.200, 0.020, 262, 0.085], "dark": [1.000, 0.000, 262, 0.115] },
+      "fillControlPressed": { "light": [0.200, 0.020, 262, 0.130], "dark": [1.000, 0.000, 262, 0.160] },
+      "fillSelected":       { "light": [0.600, 0.190, 0, 0.16], "dark": [0.700, 0.160, 0, 0.26], "followAccent": true },
+      "accent":             { "light": [0.585, 0.200, 0, 1.00], "dark": [0.680, 0.170, 0, 1.00], "followAccent": true },
+      "accentHover":        { "light": [0.540, 0.200, 0, 1.00], "dark": [0.730, 0.160, 0, 1.00], "followAccent": true },
+      "accentText":         { "light": [0.500, 0.180, 0, 1.00], "dark": [0.800, 0.120, 0, 1.00], "followAccent": true },
+      "onAccent":           { "light": [0.990, 0.010, 0, 1.00], "dark": [0.995, 0.008, 0, 1.00], "followAccent": true },
+      "focusRing":          { "light": [0.600, 0.200, 0, 0.55], "dark": [0.720, 0.170, 0, 0.60], "followAccent": true },
+      "shadow":             { "light": [0.160, 0.030, 262, 0.22], "dark": [0.000, 0.000, 0, 0.55] },
+      "scrim":              { "light": [0.200, 0.020, 262, 0.16], "dark": [0.000, 0.000, 0, 0.40] },
+      "positive":           { "light": [0.610, 0.160, 150, 1.00], "dark": [0.760, 0.160, 150, 1.00] },
+      "warning":            { "light": [0.700, 0.150, 70, 1.00], "dark": [0.830, 0.140, 80, 1.00] },
+      "critical":           { "light": [0.575, 0.210, 25, 1.00], "dark": [0.690, 0.190, 25, 1.00] }
+    }
+  },
+  "radius": {
+    "xs": 4,
+    "s": 6,
+    "m": 9,
+    "l": 13,
+    "xl": 18,
+    "xxl": 26,
+    "window": 14,
+    "squircleExponent": 4.0
+  },
+  "spacing": {
+    "xxs": 2,
+    "xs": 4,
+    "s": 8,
+    "m": 12,
+    "l": 16,
+    "xl": 24,
+    "xxl": 32,
+    "xxxl": 48
+  },
+  "type": {
+    "caption":    { "size": 11,  "weight": 520, "tracking": 0.15, "opsz": 14 },
+    "footnote":   { "size": 12,  "weight": 460, "tracking": 0.05, "opsz": 14 },
+    "body":       { "size": 13,  "weight": 430, "tracking": 0.0,  "opsz": 14 },
+    "bodyStrong": { "size": 13,  "weight": 600, "tracking": 0.0,  "opsz": 14 },
+    "callout":    { "size": 15,  "weight": 450, "tracking": -0.05, "opsz": 16 },
+    "headline":   { "size": 15,  "weight": 630, "tracking": -0.1, "opsz": 16 },
+    "title3":     { "size": 17,  "weight": 630, "tracking": -0.15, "opsz": 18 },
+    "title2":     { "size": 22,  "weight": 660, "tracking": -0.3, "opsz": 22 },
+    "title1":     { "size": 28,  "weight": 690, "tracking": -0.5, "opsz": 28 },
+    "display":    { "size": 36,  "weight": 720, "tracking": -0.8, "opsz": 32 },
+    "hero":       { "size": 120, "weight": 230, "tracking": -3.5, "opsz": 32 }
+  },
+  "elevation": [
+    { "blur": 0,  "offsetY": 0,  "opacity": 0.0 },
+    { "blur": 8,  "offsetY": 1,  "opacity": 0.45 },
+    { "blur": 18, "offsetY": 4,  "opacity": 0.60 },
+    { "blur": 34, "offsetY": 10, "opacity": 0.75 },
+    { "blur": 56, "offsetY": 18, "opacity": 0.90 },
+    { "blur": 84, "offsetY": 28, "opacity": 1.0 }
+  ],
+  "motion": {
+    "snappy": { "response": 0.28, "damping": 0.90 },
+    "smooth": { "response": 0.42, "damping": 1.00 },
+    "bouncy": { "response": 0.50, "damping": 0.72 },
+    "gentle": { "response": 0.80, "damping": 1.00 },
+    "staggerMs": 18
+  },
+  "material": {
+    "downsample": 0.25,
+    "blurMax": 40,
+    "saturation": 0.45,
+    "grain": 0.022
+  }
+}

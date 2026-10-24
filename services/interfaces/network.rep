@@ -1,0 +1,19 @@
+// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// qtos-netd: Wi-Fi and connectivity state (backed by NetworkManagerQt on device).
+#include <QtCore/QVariantList>
+
+class Network
+{
+    PROP(bool wifiEnabled=true READWRITE)
+    PROP(bool online=false SOURCEONLYSETTER)
+    PROP(QString activeSsid SOURCEONLYSETTER)
+    // 0 (no signal) .. 3 (excellent)
+    PROP(int signalBars=0 SOURCEONLYSETTER)
+    // [{ "ssid": string, "bars": int, "secure": bool }]
+    PROP(QVariantList accessPoints SOURCEONLYSETTER)
+    PROP(bool connecting=false SOURCEONLYSETTER)
+
+    SLOT(void connectTo(const QString &ssid))
+    SLOT(void disconnectNetwork())
+    SIGNAL(connectionFailed(const QString &ssid, const QString &reason))
+}

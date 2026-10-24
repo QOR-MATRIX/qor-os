@@ -1,0 +1,16 @@
+// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// qtos-notifyd: notification routing and Focus rules. On device it also serves
+// org.freedesktop.Notifications so every Linux app can post notifications.
+
+class Notifications
+{
+    PROP(bool doNotDisturb=false READWRITE)
+    PROP(int unreadCount=0 SOURCEONLYSETTER)
+
+    SLOT(void notify(const QString &appId, const QString &title, const QString &body, const QString &icon))
+    SLOT(void dismiss(int id))
+    SLOT(void markAllRead())
+
+    SIGNAL(posted(int id, const QString &appId, const QString &title, const QString &body, const QString &icon))
+    SIGNAL(dismissed(int id))
+}

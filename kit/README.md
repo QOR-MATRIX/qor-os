@@ -1,0 +1,31 @@
+# kit — QTOS.Kit and the Lumen style
+
+The Lumen design system. Spec: [docs/design/LUMEN.md](../docs/design/LUMEN.md).
+
+| Path | Contents |
+|------|----------|
+| `tokens/lumen.tokens.json` | **Source of truth** for color (OKLCH), radius, spacing, typography, elevation, motion, material |
+| `Tokens.qml` | Generated typed singleton. Do not edit; run `tools/tokens/generate_tokens.py` |
+| `Theme.qml` | Live roles resolved in OKLab; appearance and accent springs; fonts |
+| `Motion.qml`, `Materials.qml` | Spring presets; shared backdrops published by the shell |
+| `Surface.qml`, `Glass.qml`, `Backdrop.qml`, `RoundMask.qml`, `Wallpaper.qml` | Materials and primitives |
+| `Icon.qml`, `AppIcon.qml`, `Artwork.qml`, `QtosMark.qml` | Symbols and generated imagery |
+| `IconButton.qml`, `SidebarItem.qml`, `SectionHeader.qml`, `Card.qml`, `SegmentedControl.qml`, `SearchField.qml`, `Kbd.qml`, `Divider.qml` | Building blocks |
+| `src/` | C++: `Kit` (fonts, reduced motion), `Spring`, `Oklch` + `oklchmath`, `SceneRect`, `FrameStats` |
+| `shaders/` | `surface`, `glass`, `icon`, `roundmask`, `wallpaper` fragment shaders (compiled to `.qsb`) |
+| `fonts/` | Inter 4.1 variable (roman, italic), JetBrains Mono 2.304 variable, with OFL licenses |
+| `icons/` | 106 Lucide icons (list in `icons.txt`, imported by `tools/icons/import_lucide.py`) |
+| `style/` | The **Lumen** Qt Quick Controls style module (23 controls on Qt Quick Templates) |
+
+Use from QML:
+
+```qml
+import QTOS.Kit
+Glass { backdrop: Materials.scene; radius: Tokens.radius.xl }
+Text { font: Theme.title2; color: Theme.textPrimary }
+Spring { id: s; target: open ? 1 : 0; preset: Motion.smooth }
+```
+
+Fonts were copied from the upstream releases
+(`rsms/inter` v4.1 `InterVariable*.ttf`, `JetBrains/JetBrainsMono` v2.304
+`fonts/variable/JetBrainsMono[wght].ttf` → `JetBrainsMono-Variable.ttf`).

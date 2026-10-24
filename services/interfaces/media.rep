@@ -1,0 +1,27 @@
+// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// Now-playing session aggregated from MPRIS players on device.
+#include <QtCore/QVariantList>
+
+class Media
+{
+    PROP(bool available=false SOURCEONLYSETTER)
+    PROP(QString title SOURCEONLYSETTER)
+    PROP(QString artist SOURCEONLYSETTER)
+    PROP(QString album SOURCEONLYSETTER)
+    PROP(QString player SOURCEONLYSETTER)
+    // Artwork stand-in: an OKLCH hue the UI renders as a gradient.
+    PROP(double artworkHue=280 SOURCEONLYSETTER)
+    PROP(bool playing=false READWRITE)
+    // Seconds.
+    PROP(double position=0 SOURCEONLYSETTER)
+    PROP(double duration=0 SOURCEONLYSETTER)
+    // [{ "title": string, "artist": string, "duration": double, "hue": double }]
+    PROP(QVariantList queue SOURCEONLYSETTER)
+    PROP(int queueIndex=0 SOURCEONLYSETTER)
+
+    SLOT(void togglePlayback())
+    SLOT(void next())
+    SLOT(void previous())
+    SLOT(void seek(double seconds))
+    SLOT(void playIndex(int index))
+}

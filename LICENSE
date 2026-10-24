@@ -1,0 +1,27 @@
+QTOS — Proprietary License
+SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+
+Copyright (c) 2026 QOR-MATRIX. All rights reserved.
+
+This repository and everything in it, unless stated otherwise, is proprietary
+and confidential to QOR-MATRIX. No license is granted to use, copy, modify,
+merge, publish, distribute, sublicense or sell any part of it, in source or
+binary form, or to create derivative works from it, except under a separate
+written agreement with QOR-MATRIX.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE.
+
+Third-party components
+----------------------
+Fonts, icons and other third-party material in this repository remain under
+their own licenses, listed in THIRD_PARTY_NOTICES.md.
+
+Qt
+--
+QTOS is developed with Qt, used under a commercial Qt license held by
+QOR-MATRIX. Distribution of QTOS binaries is subject to the terms of that
+license.

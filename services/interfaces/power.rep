@@ -1,0 +1,17 @@
+// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// qtos-powerd: battery, power profiles and session power actions
+// (backed by UPower, power-profiles-daemon and logind on device).
+
+class Power
+{
+    PROP(int batteryLevel=100 SOURCEONLYSETTER)
+    PROP(bool charging=false SOURCEONLYSETTER)
+    PROP(bool onBattery=true SOURCEONLYSETTER)
+    // Estimated minutes until empty (or full while charging); -1 if unknown.
+    PROP(int minutesRemaining=-1 SOURCEONLYSETTER)
+    // "power-saver" | "balanced" | "performance"
+    PROP(QString profile READWRITE)
+
+    SLOT(void suspend())
+    SIGNAL(batteryLow(int level))
+}

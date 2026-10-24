@@ -1,0 +1,204 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 27,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "installDir": "${sourceDir}/build/install/${presetName}",
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    },
+    {
+      "name": "windows-base",
+      "hidden": true,
+      "inherits": "base",
+      "generator": "Ninja",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      },
+      "architecture": {
+        "value": "x64",
+        "strategy": "external"
+      },
+      "toolset": {
+        "value": "host=x64",
+        "strategy": "external"
+      },
+      "cacheVariables": {
+        "CMAKE_CXX_COMPILER": "cl"
+      }
+    },
+    {
+      "name": "windows-debug",
+      "displayName": "Windows · MSVC 2022 · Debug",
+      "description": "Ninja + MSVC. Run from a Developer PowerShell (tools/dev/Enter-QtosShell.ps1) or an IDE kit.",
+      "inherits": "windows-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "windows-release",
+      "displayName": "Windows · MSVC 2022 · RelWithDebInfo",
+      "description": "Optimised build with symbols — the default for day-to-day shell work.",
+      "inherits": "windows-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+      }
+    },
+    {
+      "name": "windows-vs",
+      "displayName": "Windows · Visual Studio 17 2022",
+      "description": "Multi-config Visual Studio solution. Works without a developer shell.",
+      "inherits": "base",
+      "generator": "Visual Studio 17 2022",
+      "architecture": "x64",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "linux-base",
+      "hidden": true,
+      "inherits": "base",
+      "generator": "Ninja",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "linux-debug",
+      "displayName": "Linux · Debug",
+      "inherits": "linux-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "linux-release",
+      "displayName": "Linux · RelWithDebInfo",
+      "inherits": "linux-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+      }
+    },
+    {
+      "name": "ci-windows",
+      "displayName": "CI · Windows",
+      "inherits": "windows-release",
+      "cacheVariables": {
+        "QTOS_WARNINGS_AS_ERRORS": "ON"
+      }
+    },
+    {
+      "name": "ci-linux",
+      "displayName": "CI · Linux",
+      "inherits": "linux-release",
+      "cacheVariables": {
+        "QTOS_WARNINGS_AS_ERRORS": "OFF"
+      },
+      "description": "Warnings are reported but not fatal until the first green Linux run; then enable QTOS_WARNINGS_AS_ERRORS."
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "windows-debug",
+      "configurePreset": "windows-debug"
+    },
+    {
+      "name": "windows-release",
+      "configurePreset": "windows-release"
+    },
+    {
+      "name": "windows-vs-release",
+      "configurePreset": "windows-vs",
+      "configuration": "RelWithDebInfo"
+    },
+    {
+      "name": "linux-debug",
+      "configurePreset": "linux-debug"
+    },
+    {
+      "name": "linux-release",
+      "configurePreset": "linux-release"
+    },
+    {
+      "name": "ci-windows",
+      "configurePreset": "ci-windows"
+    },
+    {
+      "name": "ci-linux",
+      "configurePreset": "ci-linux"
+    },
+    {
+      "name": "qmllint-windows",
+      "configurePreset": "windows-release",
+      "targets": [
+        "all_qmllint"
+      ]
+    },
+    {
+      "name": "qmllint-linux",
+      "configurePreset": "linux-release",
+      "targets": [
+        "all_qmllint"
+      ]
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "test-base",
+      "hidden": true,
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error",
+        "stopOnFailure": false
+      }
+    },
+    {
+      "name": "windows-debug",
+      "inherits": "test-base",
+      "configurePreset": "windows-debug"
+    },
+    {
+      "name": "windows-release",
+      "inherits": "test-base",
+      "configurePreset": "windows-release"
+    },
+    {
+      "name": "linux-debug",
+      "inherits": "test-base",
+      "configurePreset": "linux-debug"
+    },
+    {
+      "name": "linux-release",
+      "inherits": "test-base",
+      "configurePreset": "linux-release"
+    },
+    {
+      "name": "ci-windows",
+      "inherits": "test-base",
+      "configurePreset": "ci-windows"
+    },
+    {
+      "name": "ci-linux",
+      "inherits": "test-base",
+      "configurePreset": "ci-linux"
+    }
+  ]
+}

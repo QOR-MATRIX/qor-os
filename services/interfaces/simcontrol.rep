@@ -1,0 +1,13 @@
+// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// Simulation-only control surface used by qtosctl and tests to drive the
+// simulated hardware. Never present on a real device.
+
+class SimControl
+{
+    PROP(QString scenario SOURCEONLYSETTER)
+
+    SLOT(void setBattery(int level, bool charging))
+    SLOT(void setSignal(int bars))
+    SLOT(void postNotification(const QString &appId, const QString &title, const QString &body))
+    SLOT(void replayScenario())
+}

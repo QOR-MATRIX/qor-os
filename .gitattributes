@@ -1,0 +1,32 @@
+# Normalise text to LF in the repository; check out with native endings only
+# where tools require it.
+*                 text=auto eol=lf
+
+*.ps1             text eol=crlf
+*.psm1            text eol=crlf
+*.bat             text eol=crlf
+*.cmd             text eol=crlf
+
+# Binary assets
+*.ttf             binary
+*.otf             binary
+*.woff2           binary
+*.png             binary
+*.jpg             binary
+*.jpeg            binary
+*.webp            binary
+*.ico             binary
+*.qsb             binary
+
+# Generated files: collapse in diffs, exclude from language stats
+kit/Tokens.qml                  linguist-generated=true
+platform/common/lumentokens.h   linguist-generated=true
+docs/design/tokens.md           linguist-generated=true
+
+# Vendored third-party assets
+kit/fonts/**      linguist-vendored=true
+kit/icons/*.svg   linguist-vendored=true
+
+# Language detection
+*.rep             linguist-language=C++
+*.qml             linguist-language=QML

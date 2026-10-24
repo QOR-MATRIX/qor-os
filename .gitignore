@@ -1,0 +1,45 @@
+# ── Build output ──
+/build/
+/out/
+/install/
+CMakeUserPresets.json
+compile_commands.json
+
+# ── Qt Creator / Qt Design Studio ──
+CMakeLists.txt.user*
+*.qmlproject.user*
+*.autosave
+.qtcreator/
+.qmlls.ini
+
+# ── IDEs ──
+.vs/
+.idea/
+*.swp
+*~
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/tasks.json
+
+# ── Python ──
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# ── Yocto / kas ──
+/image/build/
+/image/downloads/
+/image/sstate-cache/
+/image/layers/
+
+# ── OS ──
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Scratch ──
+*.log
+/screenshots/

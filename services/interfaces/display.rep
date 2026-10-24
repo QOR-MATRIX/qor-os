@@ -1,0 +1,11 @@
+// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// Display configuration owned by the compositor (Prism) and persisted by settingsd.
+
+class Display
+{
+    // 0.0 .. 1.0
+    PROP(double brightness=0.85 READWRITE)
+    PROP(bool nightLight=false READWRITE)
+    // Colour temperature in kelvin applied while Night Light is on.
+    PROP(int nightLightTemperature=3400 READWRITE)
+}

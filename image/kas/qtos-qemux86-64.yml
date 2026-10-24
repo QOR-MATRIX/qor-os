@@ -1,0 +1,53 @@
+# kas configuration for the QTOS reference image on QEMU x86-64.
+#
+#   pip install kas
+#   kas build image/kas/qtos-qemux86-64.yml
+#   kas shell image/kas/qtos-qemux86-64.yml -c 'runqemu qemux86-64 kvm sdl gl'
+#
+# Status: Phase 2 skeleton (see image/README.md). Branches below are the
+# intended baselines and must be pinned to commit SHAs once the first image
+# boots, so builds are reproducible.
+
+header:
+  version: 14
+
+machine: qemux86-64
+distro: qtos
+target: qtos-image
+
+repos:
+  qtos:
+    layers:
+      image/meta-qtos:
+
+  poky:
+    url: https://git.yoctoproject.org/poky
+    branch: scarthgap
+    layers:
+      meta:
+      meta-poky:
+
+  meta-openembedded:
+    url: https://git.openembedded.org/meta-openembedded
+    branch: scarthgap
+    layers:
+      meta-oe:
+      meta-python:
+      meta-networking:
+      meta-multimedia:
+
+  meta-qt6:
+    # Use the meta-qt6 branch matching the Qt release in CMakeLists.txt.
+    # Commercial builds can use Boot2Qt (meta-boot2qt) from the Qt
+    # Enterprise license instead; see image/README.md.
+    url: https://code.qt.io/yocto/meta-qt6.git
+    branch: dev
+    layers:
+      .:
+
+local_conf_header:
+  qtos: |
+    INIT_MANAGER = "systemd"
+    DISTRO_FEATURES:append = " wayland opengl vulkan pam"
+    PACKAGECONFIG:append:pn-qtbase = " kms gbm eglfs"
+    EXTRA_IMAGE_FEATURES ?= "debug-tweaks"
