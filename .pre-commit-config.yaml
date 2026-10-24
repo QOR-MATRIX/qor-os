@@ -1,5 +1,9 @@
 # Install once:  python -m pip install -r requirements-dev.txt && pre-commit install
 # Run on demand: pre-commit run --all-files
+
+# Vendored third-party assets and generated files are never rewritten by hooks.
+exclude: '^(kit/fonts/|kit/icons/|kit/Tokens\.qml$|platform/common/lumentokens\.h$|docs/design/tokens\.md$)'
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
@@ -8,6 +12,8 @@ repos:
         exclude: '\.md$'
       - id: end-of-file-fixer
       - id: check-yaml
+        # Qt Application Manager manifests are multi-document YAML.
+        args: ['--allow-multiple-documents']
       - id: check-json
       - id: check-merge-conflict
       - id: check-added-large-files
@@ -20,6 +26,7 @@ repos:
     hooks:
       - id: clang-format
         types_or: [c++, c]
+        exclude: '^sdk/'
 
   - repo: local
     hooks:

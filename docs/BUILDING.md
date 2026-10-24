@@ -137,7 +137,7 @@ ctest --preset windows-release -LE gpu               # skip GPU-dependent suites
 cmake --build --preset windows-release --target all_qmllint
 python tools\tokens\generate_tokens.py --check
 python tools\ci\check_headers.py
-pre-commit run --all-files
+.\.venv\Scripts\pre-commit run --all-files
 ```
 
 ## 5. Install and deploy

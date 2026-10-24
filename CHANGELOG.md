@@ -6,6 +6,13 @@ All notable changes to QTOS are recorded here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- CI: per-platform Qt sources (`QTOS_WINDOWS_QT_DIR`, `QTOS_LINUX_QT_DIR`), so a Windows self-hosted kit no longer affects the Linux job. Self-hosted builds are incremental. Qt's bundled CMake and Ninja are put on `PATH` automatically. The optional `QTOS_RUN_GPU_TESTS` runs GPU suites. Build also runs on `v*` tags.
+- CI: the installable Windows artifact is uploaded only for tags and manual runs (7-day retention), to stay within the Free-plan storage quota.
+- pre-commit: vendored fonts and icons and generated token files are excluded from all hooks. Multi-document YAML (Qt Application Manager manifests) is allowed. clang-format skips the SDK template, matching CI.
+- Developer setup uses a repo-local `.venv` for the pinned tooling.
+
 ## [0.1.0] - 2026-10-23
 
 The Phase 0 foundation: the complete Prism shell running in simulation on

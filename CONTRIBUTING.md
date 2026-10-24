@@ -20,8 +20,9 @@ technical details live in [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) and
 ```powershell
 git clone https://github.com/QOR-MATRIX/QTOS.git
 cd QTOS
-python -m pip install -r requirements-dev.txt   # clang-format 20.1.8 + pre-commit, pinned
-pre-commit install                               # format, token and header checks on every commit
+python -m venv .venv                                         # repo-local, gitignored
+.\.venv\Scripts\python -m pip install -r requirements-dev.txt   # clang-format 20.1.8 + pre-commit, pinned
+.\.venv\Scripts\pre-commit install                     # format, token and header checks on every commit
 .\tools\dev\build.ps1 -Test                      # configure, build and test (windows-release)
 ```
 
