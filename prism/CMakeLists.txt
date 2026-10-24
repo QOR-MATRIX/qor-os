@@ -34,6 +34,11 @@ target_link_libraries(qtos-shell PRIVATE
 
 set_target_properties(qtos-shell PROPERTIES
     OUTPUT_NAME qtos-shell
+    # The QML modules are static and embedded, so tell the deployment import
+    # scanner where their sources live; otherwise it only scans prism/ and
+    # misses imports such as QtCore (Notes) and QtGraphs (Monitor).
+    QT_QML_IMPORT_SCANNER_EXTRA_ROOT_PATHS
+        "${CMAKE_SOURCE_DIR}/kit;${CMAKE_SOURCE_DIR}/apps;${CMAKE_SOURCE_DIR}/services"
     MACOSX_BUNDLE_GUI_IDENTIFIER dev.qor-matrix.qtos.shell
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}

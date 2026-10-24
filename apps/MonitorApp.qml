@@ -142,12 +142,19 @@ Item {
                     color: Oklch.alpha(Theme.accent, 0.16)
                     borderColor: Theme.accent
                     borderWidth: 2
-                    upperSeries: LineSeries { id: cpuLine }
+                    upperSeries: LineSeries {
+                        id: cpuLine
+                        XYPoint { x: 0; y: 0 }
+                        XYPoint { x: 1; y: 0 }
+                    }
                 }
                 SplineSeries {
                     id: gpuLine
                     color: Oklch.color(0.72, 0.15, Theme.hue + 120)
                     width: 2
+                    // Seed points: a spline needs data before the first sample arrives.
+                    XYPoint { x: 0; y: 0 }
+                    XYPoint { x: 1; y: 0 }
                 }
             }
         }

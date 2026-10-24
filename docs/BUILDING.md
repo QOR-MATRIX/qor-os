@@ -148,7 +148,13 @@ cmake --install build\windows-release --prefix dist\qtos
 
 The install step runs Qt's deployment script (`qt_generate_deploy_qml_app_script`,
 which calls `windeployqt` on Windows) to produce a self-contained folder with
-the required Qt libraries, plugins and QML modules.
+the required Qt libraries, plugins and QML modules. The result runs on a
+machine without Qt installed (verified with an empty `PATH`).
+
+Because the QTOS QML modules are static and embedded in the executable,
+`qtos-shell` sets `QT_QML_IMPORT_SCANNER_EXTRA_ROOT_PATHS` to `kit/`, `apps/`
+and `services/` so the deployment scan finds their imports (for example
+`QtCore` and `QtGraphs`). Add new module directories there.
 
 ## 6. Troubleshooting
 
