@@ -91,14 +91,20 @@ configured the runner:
 
 - **`.path`** holds a Linux-only PATH. WSL appends the whole Windows PATH, so
   a job could otherwise run a Windows `.exe` for a tool missing on Linux.
-- **`.env`** holds WSLg's `DISPLAY`, `WAYLAND_DISPLAY` and `XDG_RUNTIME_DIR`.
+- **`.env`** holds WSLg's display variables. `WAYLAND_DISPLAY` is the absolute
+  path of WSLg's socket, `/mnt/wslg/runtime-dir/wayland-0`. With systemd
+  enabled, `/run/user/<uid>` is recreated whenever the distribution starts,
+  and WSLg's socket is not always linked into it, so a relative `wayland-0`
+  can point at nothing and GPU tests would wait for a window forever. The
+  GPU step checks for the socket and fails with this pointer instead, and
+  each GPU suite has a 300-second timeout.
 
 ```bash
 # Set up (in WSL). Download the actions-runner-linux-x64 tarball, check its SHA-256, extract it to ~/ghr/qtos-linux.
 ./config.sh --unattended --url https://github.com/QOR-MATRIX/QTOS --token <registration token> \
   --name "$(hostname)-qtos-linux" --labels qt,gcc,wsl,gpu --work _work --replace
 printf '%s\n' /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/lib/wsl/lib > .path
-printf '%s\n' LANG=C.UTF-8 DISPLAY=:0 WAYLAND_DISPLAY=wayland-0 XDG_RUNTIME_DIR=/run/user/$(id -u) > .env
+printf '%s\n' LANG=C.UTF-8 DISPLAY=:0 WAYLAND_DISPLAY=/mnt/wslg/runtime-dir/wayland-0 XDG_RUNTIME_DIR=/run/user/$(id -u) > .env
 ```
 
 WSL keeps the distribution running while the runner's `wsl.exe` process is

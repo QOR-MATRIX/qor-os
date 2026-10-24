@@ -22,9 +22,12 @@ on:
 permissions:
   contents: read
 
+# One build per branch. A newer push supersedes an older build, including one
+# still queued for a self-hosted runner that is offline, which would otherwise
+# hold every later build behind it. Tag builds always run to completion.
 concurrency:
   group: build-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
 
 env:
   QTOS_QT_VERSION: '6.12.0'
@@ -126,7 +129,7 @@ jobs:
       - name: Test (GPU)
         id: gpu-tests
         if: vars.QTOS_RUN_GPU_TESTS == 'true'
-        run: ctest --preset ci-windows -L gpu
+        run: ctest --preset ci-windows -L gpu --timeout 300
 
       - name: Upload golden-image differences
         if: failure() && steps.gpu-tests.outcome == 'failure'
@@ -213,7 +216,16 @@ jobs:
       - name: Test (GPU)
         id: gpu-tests
         if: vars.QTOS_RUN_GPU_TESTS == 'true'
-        run: ctest --preset ci-linux -L gpu
+        run: |
+          # Without a reachable display the suites would wait for a window
+          # forever; fail with the reason instead.
+          socket="${WAYLAND_DISPLAY:-}"
+          case "$socket" in "" | /*) ;; *) socket="${XDG_RUNTIME_DIR:-}/$socket" ;; esac
+          if [ -n "$socket" ] && [ ! -S "$socket" ]; then
+            echo "::error::Wayland display socket $socket does not exist. See docs/CI.md (Linux runner in WSL2)."
+            exit 1
+          fi
+          ctest --preset ci-linux -L gpu --timeout 300
 
       - name: Upload golden-image differences
         if: failure() && steps.gpu-tests.outcome == 'failure'
