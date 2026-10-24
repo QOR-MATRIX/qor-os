@@ -209,3 +209,22 @@ jobs:
 
       - name: Test
         run: ctest --preset ci-linux -LE gpu
+
+      - name: Test (GPU)
+        id: gpu-tests
+        if: vars.QTOS_RUN_GPU_TESTS == 'true'
+        run: ctest --preset ci-linux -L gpu
+
+      - name: Upload golden-image differences
+        if: failure() && steps.gpu-tests.outcome == 'failure'
+        uses: actions/upload-artifact@v7
+        with:
+          name: golden-diff-linux
+          path: build/ci-linux/tests/golden-out
+          retention-days: 7
+
+      # Real Wayland clients against the built compositor; needs a display
+      # (WSLg or a desktop session), weston and wayland-utils on the runner.
+      - name: Prism protocol check
+        if: vars.QTOS_RUN_GPU_TESTS == 'true' && vars.QTOS_LINUX_QT_DIR != ''
+        run: tools/dev/prism-protocol-check.sh build/ci-linux

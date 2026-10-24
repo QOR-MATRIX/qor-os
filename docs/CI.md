@@ -70,6 +70,48 @@ To remove the workstation runner: stop `run.cmd`, run
 in its folder, delete the Startup entry if you created one, and delete the
 `QTOS_WINDOWS_*` variables.
 
+#### Linux runner in WSL2
+
+The same workstation also runs the Linux job inside WSL2 Ubuntu, using the
+commercial kit in `~/Qt` ([BUILDING.md](BUILDING.md#linux-on-wsl2-windows-workstation)).
+The runner is `<COMPUTERNAME>-qtos-linux`, with labels
+`self-hosted, Linux, X64, qt, gcc, wsl, gpu`, installed in `~/ghr/qtos-linux`.
+
+| Variable | Value |
+|----------|-------|
+| `QTOS_LINUX_RUNNER` | `["self-hosted","linux","qt"]` |
+| `QTOS_LINUX_QT_DIR` | `/home/<user>/Qt/6.12.0/gcc_64` |
+
+With `QTOS_RUN_GPU_TESTS`, the Linux job also runs two things on WSLg's
+display: the GPU suites, and `tools/dev/prism-protocol-check.sh`, which
+connects real clients to the built compositor.
+
+Two runner files are pinned rather than captured from the shell that
+configured the runner:
+
+- **`.path`** holds a Linux-only PATH. WSL appends the whole Windows PATH, so
+  a job could otherwise run a Windows `.exe` for a tool missing on Linux.
+- **`.env`** holds WSLg's `DISPLAY`, `WAYLAND_DISPLAY` and `XDG_RUNTIME_DIR`.
+
+```bash
+# Set up (in WSL). Download the actions-runner-linux-x64 tarball, check its SHA-256, extract it to ~/ghr/qtos-linux.
+./config.sh --unattended --url https://github.com/QOR-MATRIX/QTOS --token <registration token> \
+  --name "$(hostname)-qtos-linux" --labels qt,gcc,wsl,gpu --work _work --replace
+printf '%s\n' /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/lib/wsl/lib > .path
+printf '%s\n' LANG=C.UTF-8 DISPLAY=:0 WAYLAND_DISPLAY=wayland-0 XDG_RUNTIME_DIR=/run/user/$(id -u) > .env
+```
+
+WSL keeps the distribution running while the runner's `wsl.exe` process is
+alive, so start the runner from Windows:
+
+```powershell
+# For this session:
+Start-Process wsl.exe '-d','Ubuntu','--cd','~','--exec',"/home/$env:USERNAME/ghr/qtos-linux/run.sh" -WindowStyle Minimized
+# At every sign-in (Startup folder, next to the Windows runner's entry):
+Set-Content "$([Environment]::GetFolderPath('Startup'))\qtos-github-runner-linux.cmd" `
+  "@start `"QTOS Linux runner`" /min wsl.exe -d Ubuntu --cd ~ --exec /home/$($env:USERNAME.ToLower())/ghr/qtos-linux/run.sh"
+```
+
 ### Option B: hosted runners with the Qt Online Installer
 
 Add repository **secrets**:
