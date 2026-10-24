@@ -1,0 +1,30 @@
+name: Design / Lumen
+description: Visual, motion or interaction design changes to Lumen and the shell.
+title: "[Design] "
+labels: ["type: design", "area: kit", "status: needs-triage"]
+body:
+  - type: textarea
+    id: intent
+    attributes:
+      label: Design intent
+      description: What should change and why? Reference the signature moments or principles where relevant.
+    validations:
+      required: true
+  - type: textarea
+    id: tokens
+    attributes:
+      label: Tokens affected
+      description: Colors, radii, spacing, typography, elevation or motion presets in kit/tokens/lumen.tokens.json.
+  - type: textarea
+    id: visuals
+    attributes:
+      label: Visuals
+      description: Before/after screenshots (tools/screenshots/capture.ps1), Figma links, recordings.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: Verified in light and dark appearance
+        - label: Verified with at least two accent hues
+        - label: Contrast meets APCA/WCAG targets for text roles

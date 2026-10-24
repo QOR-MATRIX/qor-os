@@ -1,0 +1,170 @@
+name: Build
+
+# Builds and tests QTOS with the commercial Qt 6.12 kit on Windows and Linux.
+#
+# Qt comes from one of (first match wins):
+#   1. Repository variable QTOS_QT_DIR       - a Qt kit already on a self-hosted runner
+#   2. Secrets QT_INSTALLER_JWT_TOKEN, or QT_INSTALLER_EMAIL + QT_INSTALLER_PASSWORD
+#                                            - unattended Qt Online Installer, cached
+# Runner selection: repository variables QTOS_WINDOWS_RUNNER / QTOS_LINUX_RUNNER
+# take a JSON runner label, e.g. '["self-hosted","windows","qt"]'.
+# See docs/CI.md.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  QTOS_QT_VERSION: '6.12.0'
+
+jobs:
+  preflight:
+    name: Qt availability
+    runs-on: ubuntu-24.04
+    outputs:
+      qt: ${{ steps.check.outputs.qt }}
+    steps:
+      - id: check
+        env:
+          HAS_KIT: ${{ vars.QTOS_QT_DIR != '' }}
+          HAS_SECRETS: ${{ secrets.QT_INSTALLER_JWT_TOKEN != '' || (secrets.QT_INSTALLER_EMAIL != '' && secrets.QT_INSTALLER_PASSWORD != '') }}
+        run: |
+          if [ "$HAS_KIT" = "true" ] || [ "$HAS_SECRETS" = "true" ]; then
+            echo "qt=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "qt=false" >> "$GITHUB_OUTPUT"
+            {
+              echo "### Qt builds skipped"
+              echo "No commercial Qt source is configured. Add the repository secret"
+              echo "\`QT_INSTALLER_JWT_TOKEN\` (or \`QT_INSTALLER_EMAIL\` + \`QT_INSTALLER_PASSWORD\`),"
+              echo "or point \`QTOS_QT_DIR\` at a Qt kit on a self-hosted runner. See docs/CI.md."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  windows:
+    name: Windows · MSVC 2022
+    needs: preflight
+    if: needs.preflight.outputs.qt == 'true'
+    runs-on: ${{ fromJSON(vars.QTOS_WINDOWS_RUNNER || '"windows-2025"') }}
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        if: vars.QTOS_QT_DIR == ''
+        with:
+          python-version: '3.12'
+
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Restore Qt
+        id: qt-cache
+        if: vars.QTOS_QT_DIR == ''
+        uses: actions/cache@v6
+        with:
+          path: ${{ runner.temp }}/Qt
+          key: qt-${{ runner.os }}-${{ env.QTOS_QT_VERSION }}-${{ hashFiles('.github/qt-packages.json') }}
+
+      - name: Install Qt (commercial)
+        if: vars.QTOS_QT_DIR == '' && steps.qt-cache.outputs.cache-hit != 'true'
+        env:
+          QT_INSTALLER_JWT_TOKEN: ${{ secrets.QT_INSTALLER_JWT_TOKEN }}
+          QT_INSTALLER_EMAIL: ${{ secrets.QT_INSTALLER_EMAIL }}
+          QT_INSTALLER_PASSWORD: ${{ secrets.QT_INSTALLER_PASSWORD }}
+        run: python tools/ci/install_qt.py --platform windows --root "${{ runner.temp }}/Qt"
+
+      - name: Select Qt kit
+        shell: pwsh
+        run: |
+          $kit = if ('${{ vars.QTOS_QT_DIR }}') { '${{ vars.QTOS_QT_DIR }}' } else { "${{ runner.temp }}/Qt/$env:QTOS_QT_VERSION/msvc2022_64" }
+          "QTOS_QT_DIR=$kit" >> $env:GITHUB_ENV
+          "$kit/bin" >> $env:GITHUB_PATH
+
+      - name: Configure
+        run: cmake --preset ci-windows
+
+      - name: Build
+        run: cmake --build --preset ci-windows
+
+      - name: qmllint
+        run: cmake --build --preset ci-windows --target all_qmllint
+
+      - name: Test
+        run: ctest --preset ci-windows -LE gpu
+
+      - name: Package
+        run: cmake --install build/ci-windows --prefix dist/qtos
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: qtos-windows-x64
+          path: dist/qtos
+          retention-days: 14
+
+  linux:
+    name: Linux · GCC
+    needs: preflight
+    if: needs.preflight.outputs.qt == 'true'
+    runs-on: ${{ fromJSON(vars.QTOS_LINUX_RUNNER || '"ubuntu-24.04"') }}
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        if: vars.QTOS_QT_DIR == ''
+        with:
+          python-version: '3.12'
+
+      - name: System packages
+        if: vars.QTOS_QT_DIR == ''
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ninja-build libgl1-mesa-dev libegl1-mesa-dev \
+            libxkbcommon-dev libxkbcommon-x11-0 libfontconfig1-dev libfreetype-dev libdbus-1-3 \
+            libxcb-cursor0 libxcb-icccm4 libxcb-keysyms1 libxcb-shape0 libwayland-dev
+
+      - name: Restore Qt
+        id: qt-cache
+        if: vars.QTOS_QT_DIR == ''
+        uses: actions/cache@v6
+        with:
+          path: ${{ runner.temp }}/Qt
+          key: qt-${{ runner.os }}-${{ env.QTOS_QT_VERSION }}-${{ hashFiles('.github/qt-packages.json') }}
+
+      - name: Install Qt (commercial)
+        if: vars.QTOS_QT_DIR == '' && steps.qt-cache.outputs.cache-hit != 'true'
+        env:
+          QT_INSTALLER_JWT_TOKEN: ${{ secrets.QT_INSTALLER_JWT_TOKEN }}
+          QT_INSTALLER_EMAIL: ${{ secrets.QT_INSTALLER_EMAIL }}
+          QT_INSTALLER_PASSWORD: ${{ secrets.QT_INSTALLER_PASSWORD }}
+        run: python tools/ci/install_qt.py --platform linux --root "${{ runner.temp }}/Qt"
+
+      - name: Select Qt kit
+        run: |
+          kit="${{ vars.QTOS_QT_DIR }}"
+          [ -n "$kit" ] || kit="${{ runner.temp }}/Qt/${QTOS_QT_VERSION}/gcc_64"
+          echo "QTOS_QT_DIR=$kit" >> "$GITHUB_ENV"
+          echo "$kit/bin" >> "$GITHUB_PATH"
+
+      - name: Configure
+        run: cmake --preset ci-linux
+
+      - name: Build
+        run: cmake --build --preset ci-linux
+
+      - name: qmllint
+        run: cmake --build --preset ci-linux --target all_qmllint
+
+      - name: Test
+        run: ctest --preset ci-linux -LE gpu

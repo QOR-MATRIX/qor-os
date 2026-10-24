@@ -1,0 +1,27 @@
+[
+  {
+    "title": "Phase 0 · Foundations",
+    "description": "Lumen tokens, SDF Surface, Glass, Spring, Kit basics; shell in simulation mode. Exit: shell runs on Windows with simulated services; tests and qmllint green.",
+    "state": "closed"
+  },
+  {
+    "title": "Phase 1 · Nested Prism",
+    "description": "Real compositor nested in WSLg/Linux: Spaces, Shelf, Rail, Beam, Overview, decorations with real Wayland clients. Exit: daily-drivable nested session for an hour at display refresh; compositor backend decision gate (ADR-0003)."
+  },
+  {
+    "title": "Phase 2 · Bootable alpha",
+    "description": "Yocto image, KMS backend, greeter, lock, Settings/Files/Terminal/Browser, platform theme on device. Exit: boots on QEMU and the reference laptop; flicker-free boot; Widgets apps themed."
+  },
+  {
+    "title": "Phase 3 · Platform",
+    "description": "Real qtos-*d daemons, portals, sandbox, Flatpak + Qt Application Manager packages, Store, A/B updates with rollback. Exit: unattended update and forced rollback both succeed; third-party Flatpaks run sandboxed."
+  },
+  {
+    "title": "Phase 4 · Premium",
+    "description": "HDR, VRR, fractional scaling, gestures, sound, Quick Look, Stacks, Projects, hero transitions, accessibility pass. Exit: all performance budgets met in CI; screen-reader walkthrough of every shell surface."
+  },
+  {
+    "title": "Phase 5 · Ecosystem",
+    "description": "SDK + simulator, intents/Flows, Continuity, optional on-device intelligence, Spatial preview. Exit: an external developer ships an app using only the public SDK."
+  }
+]

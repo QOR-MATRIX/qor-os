@@ -1,0 +1,44 @@
+name: Feature proposal
+description: Propose a capability for QTOS (shell, apps, services, platform).
+title: "[Feature] "
+labels: ["type: feature", "status: needs-triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What can't people do today, or what is harder than it should be?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: The experience you want. Mockups, sketches and references are welcome.
+    validations:
+      required: true
+  - type: textarea
+    id: qt
+    attributes:
+      label: Qt building blocks
+      description: Which Qt modules or tools would this use? (See docs/QT-MODULES.md.)
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Roadmap phase
+      options:
+        - "Phase 1 · Nested Prism"
+        - "Phase 2 · Bootable alpha"
+        - "Phase 3 · Platform"
+        - "Phase 4 · Premium"
+        - "Phase 5 · Ecosystem"
+        - Not sure
+  - type: checkboxes
+    id: principles
+    attributes:
+      label: Principles check
+      description: See VISION.md §1.
+      options:
+        - label: Works with Reduce Motion and Reduce Transparency
+        - label: Renders on demand (no constant frames when idle)
+        - label: Keyboard and screen-reader accessible

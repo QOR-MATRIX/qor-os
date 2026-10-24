@@ -1,0 +1,61 @@
+name: Bug report
+description: Something in QTOS behaves incorrectly, crashes, or regresses.
+title: "[Bug] "
+labels: ["type: bug", "status: needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for helping make QTOS better. Please include enough detail to reproduce the problem.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Kit / Lumen design system
+        - Lumen Qt Quick Controls style
+        - Shell (Rail, Shelf, Beam, Control Center, windows)
+        - Prism compositor
+        - Services / simulator / qtosctl
+        - Apps
+        - Platform theme / QStyle
+        - Image (Yocto)
+        - Build / CI / tooling
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: Describe the behaviour and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. qtos-shell --unlocked --open files
+        2. …
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: QTOS commit or version
+      placeholder: e.g. 0.1.0 or a commit SHA
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, GPU and graphics API (Settings › About shows the API), Qt version, preset.
+      placeholder: Windows 11 · RTX 4060 · Direct3D 11 · Qt 6.12.0 · windows-release
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs and screenshots
+      description: Run with QT_FORCE_STDERR_LOGGING=1 and QT_LOGGING_RULES="qtos.*=true". Attach screenshots or captures.
+      render: shell

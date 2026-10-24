@@ -1,0 +1,35 @@
+{
+  "version": "6.12.0",
+  "comment": "Qt Online Installer package IDs installed by tools/ci/install_qt.py. List IDs with: <installer> --root <dir> search qt.qt6.6120",
+  "windows": {
+    "kit": "msvc2022_64",
+    "packages": [
+      "qt.qt6.6120.win64_msvc2022_64",
+      "qt.qt6.6120.addons.qtshadertools.win64_msvc2022_64",
+      "qt.qt6.6120.addons.qtremoteobjects.win64_msvc2022_64",
+      "qt.qt6.6120.addons.qtgraphs.win64_msvc2022_64",
+      "qt.qt6.6120.addons.qtquick3d.win64_msvc2022_64",
+      "qt.qt6.6120.addons.qtquicktimeline.win64_msvc2022_64",
+      "qt.qt6.6120.addons.qtmultimedia.win64_msvc2022_64",
+      "qt.qt6.6120.addons.qtimageformats.win64_msvc2022_64",
+      "qt.qt6.6120.addons.qtqmlscriptcompiler.win64_msvc2022_64"
+    ]
+  },
+  "linux": {
+    "kit": "gcc_64",
+    "packages": [
+      "qt.qt6.6120.linux_gcc_64",
+      "qt.qt6.6120.addons.qtshadertools.linux_gcc_64",
+      "qt.qt6.6120.addons.qtremoteobjects.linux_gcc_64",
+      "qt.qt6.6120.addons.qtgraphs.linux_gcc_64",
+      "qt.qt6.6120.addons.qtquick3d.linux_gcc_64",
+      "qt.qt6.6120.addons.qtquicktimeline.linux_gcc_64",
+      "qt.qt6.6120.addons.qtmultimedia.linux_gcc_64",
+      "qt.qt6.6120.addons.qtimageformats.linux_gcc_64",
+      "qt.qt6.6120.addons.qtqmlscriptcompiler.linux_gcc_64"
+    ],
+    "optional": [
+      "qt.qt6.6120.addons.qtwaylandcompositor.linux_gcc_64"
+    ]
+  }
+}

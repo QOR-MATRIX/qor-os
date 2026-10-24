@@ -1,0 +1,12 @@
+# Default owner for everything in the repository.
+*                       @ALaustrup
+
+# Design system: tokens and shaders change the whole OS's look.
+/kit/tokens/            @ALaustrup
+/kit/shaders/           @ALaustrup
+
+# Service contracts are public API between the shell, apps and daemons.
+/services/interfaces/   @ALaustrup
+
+# CI and repository automation.
+/.github/               @ALaustrup
