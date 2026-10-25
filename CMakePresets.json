@@ -108,9 +108,9 @@
       "displayName": "CI · Linux",
       "inherits": "linux-release",
       "cacheVariables": {
-        "QTOS_WARNINGS_AS_ERRORS": "OFF"
+        "QTOS_WARNINGS_AS_ERRORS": "ON"
       },
-      "description": "Warnings are reported but not fatal until the first green Linux run; then enable QTOS_WARNINGS_AS_ERRORS."
+      "description": "Warnings are errors, as on Windows."
     }
   ],
   "buildPresets": [

@@ -97,7 +97,7 @@ Or in one step: `.\tools\dev\build.ps1 [-Preset windows-debug] [-Test] [-Target 
 | `windows-debug` | Ninja | Debug | Debugging (Qt debug DLLs) |
 | `windows-vs` | Visual Studio 17 2022 | multi-config | Works without a developer shell |
 | `linux-release`, `linux-debug` | Ninja | | Linux |
-| `ci-windows`, `ci-linux` | Ninja | RelWithDebInfo | CI. `ci-windows` treats warnings as errors |
+| `ci-windows`, `ci-linux` | Ninja | RelWithDebInfo | CI. Both treat warnings as errors |
 
 Build options (`-D<option>=ON|OFF`):
 
