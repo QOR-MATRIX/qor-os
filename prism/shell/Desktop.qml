@@ -5,6 +5,7 @@ import QtQuick
 import QTOS.Kit
 import QTOS.Services
 import QTOS.Apps
+import QTOS.Input
 
 // The Prism desktop for one output.
 //
@@ -65,6 +66,122 @@ FocusScope {
         function onChargingChanged() {
             if (Services.power.charging)
                 Sounds.play("connect");
+        }
+    }
+
+    // ── Controller interface ────────────────────────────────────────────────
+    // A game controller drives everything while this is on (see
+    // docs/CONTROLLERS.md). Keyboard and mouse always keep working.
+    readonly property bool controllerActive: Services.settings.controllerInterface && Gamepads.count > 0
+    // For the shell's script runner and tests.
+    readonly property var controllerState: ({
+        gamepads: Gamepads.count,
+        prompt: controllerPrompt.open,
+        keyboard: controllerKeyboard.open,
+        cursorVisible: controller.cursorVisible,
+        cursor: [Math.round(controller.cursor.x), Math.round(controller.cursor.y)]
+    })
+
+    function controllerConnected(gamepad: var) {
+        if (Services.settings.controllerInterface) {
+            toast.show("gamepad-2", qsTr("%1 connected").arg(gamepad.name));
+        } else if (Services.settings.controllerAutoSwitch) {
+            Services.settings.controllerInterface = true;
+            toast.show("gamepad-2", qsTr("Controller interface on"));
+        } else {
+            controllerPrompt.ask(gamepad);
+        }
+    }
+
+    function controllerAction(name: string) {
+        switch (name) {
+        case "search": toggleSurface("beam"); break;
+        case "controlCenter": toggleSurface("control-center"); break;
+        case "overview": toggleSurface("overview"); break;
+        case "home":
+            if (locked)
+                unlock();
+            else
+                setSurface("");
+            break;
+        case "previousSpace": switchSpace(currentSpace - 1); break;
+        case "nextSpace": switchSpace(currentSpace + 1); break;
+        case "volumeDown": changeVolume(-1); break;
+        case "volumeUp": changeVolume(1); break;
+        case "keyboard": controllerKeyboard.open = !controllerKeyboard.open; break;
+        case "playPause": Services.media.togglePlayback(); break;
+        }
+        if (name !== "volumeDown" && name !== "volumeUp")
+            controller.feedback(0.3, 35);
+    }
+
+    readonly property var controllerHints: {
+        if (controllerKeyboard.open)
+            return [{ button: Gamepads.South, label: qsTr("Type") }, { button: Gamepads.West, label: qsTr("Delete") },
+                    { button: Gamepads.North, label: qsTr("Space") }, { button: Gamepads.Start, label: qsTr("Enter") },
+                    { button: Gamepads.East, label: qsTr("Close") }];
+        if (locked)
+            return [{ button: Gamepads.South, label: qsTr("Unlock") }];
+        if (surface === "beam")
+            return [{ button: Gamepads.DPadUp, text: qsTr("D-pad"), label: qsTr("Choose") },
+                    { button: Gamepads.South, label: qsTr("Open") },
+                    { button: Gamepads.LeftStick, label: qsTr("Keyboard") },
+                    { button: Gamepads.East, label: qsTr("Close") }];
+        if (surface !== "")
+            return [{ button: Gamepads.South, label: qsTr("Select") }, { button: Gamepads.East, label: qsTr("Close") }];
+        return [{ button: Gamepads.South, label: qsTr("Select") }, { button: Gamepads.East, label: qsTr("Back") },
+                { button: Gamepads.North, label: qsTr("Search") },
+                { button: Gamepads.Start, label: qsTr("Control Center") },
+                { button: Gamepads.Back, label: qsTr("Overview") }];
+    }
+
+    ControllerNavigator {
+        id: controller
+        window: desktop.Window.window
+        enabled: desktop.controllerActive
+        cursorSpeed: Services.settings.controllerCursorSpeed
+        vibration: Services.settings.controllerVibration
+        keyboardOpen: controllerKeyboard.open
+        onAction: name => desktop.controllerAction(name)
+        onKeyboardMove: (dx, dy) => controllerKeyboard.move(dx, dy)
+        onKeyboardButton: button => controllerKeyboard.button(button)
+        // The keyboard follows text fields.
+        onTextInputFocusedChanged: controllerKeyboard.open = desktop.controllerActive && textInputFocused
+    }
+
+    onControllerActiveChanged: {
+        if (!controllerActive)
+            controllerKeyboard.open = false;
+        else if (controller.textInputFocused)
+            controllerKeyboard.open = true;
+    }
+
+    // PlayStation light bars glow in the accent colour.
+    readonly property color controllerLight: Services.settings.controllerLightbar
+                                             ? Oklch.color(0.68, 0.17, Services.settings.accentHue)
+                                             : Qt.rgba(0.08, 0.08, 0.1, 1)
+    onControllerLightChanged: Gamepads.setLightColor(controllerLight)
+
+    Connections {
+        target: Gamepads
+        function onConnected(gamepad: var) {
+            desktop.controllerConnected(gamepad);
+        }
+        function onDisconnected(gamepad: var) {
+            if (Gamepads.count > 0)
+                return;
+            controllerPrompt.close();
+            if (Services.settings.controllerInterface) {
+                Services.settings.controllerInterface = false;
+                toast.show("keyboard", qsTr("Controller disconnected · keyboard and mouse"));
+            }
+        }
+        function onPressed(button: int) {
+            // The prompt answers to the controller before the interface is on.
+            if (controllerPrompt.open && !desktop.controllerActive)
+                controllerPrompt.controllerButton(button);
+            else if (desktop.controllerActive && desktop.locked && button === Gamepads.South)
+                desktop.unlock();
         }
     }
 
@@ -207,6 +324,7 @@ FocusScope {
     Component.onCompleted: {
         Materials.desktop = wallpaperBackdrop;
         Materials.scene = sceneBackdrop;
+        Gamepads.setLightColor(controllerLight);
         if (options.theme === "light")
             Services.settings.darkMode = false;
         else if (options.theme === "dark")
@@ -396,6 +514,47 @@ FocusScope {
         onUnlockRequested: desktop.unlock()
     }
 
+    // ── Controller interface surfaces (above the lock screen too) ──────────
+    ControllerHints {
+        objectName: "controllerHints"
+        x: 16
+        y: parent.height - height - 18
+        backdrop: sceneBackdrop
+        active: desktop.controllerActive
+        entries: desktop.controllerHints
+    }
+
+    ControllerKeyboard {
+        id: controllerKeyboard
+        objectName: "controllerKeyboard"
+        anchors.horizontalCenter: parent.horizontalCenter
+        y: parent.height - height - 104
+        backdrop: sceneBackdrop
+        navigator: controller
+    }
+
+    ControllerPrompt {
+        id: controllerPrompt
+        objectName: "controllerPrompt"
+        anchors.horizontalCenter: parent.horizontalCenter
+        y: desktop.railHeight + 18
+        backdrop: sceneBackdrop
+        onAccepted: always => {
+            if (always)
+                Services.settings.controllerAutoSwitch = true;
+            Services.settings.controllerInterface = true;
+            toast.show("gamepad-2", qsTr("Controller interface on"));
+        }
+    }
+
+    ShellToast {
+        id: toast
+        objectName: "toast"
+        anchors.horizontalCenter: parent.horizontalCenter
+        y: desktop.railHeight + 18
+        backdrop: sceneBackdrop
+    }
+
     // Above the lock screen: the volume keys work there too.
     VolumeHud {
         id: volumeHud
@@ -403,6 +562,12 @@ FocusScope {
         anchors.horizontalCenter: parent.horizontalCenter
         y: parent.height - height - 112
         backdrop: sceneBackdrop
+    }
+
+    ControllerCursor {
+        objectName: "controllerCursor"
+        z: 1000
+        navigator: controller
     }
 
     // ── Display simulation (applied by Prism's output pipeline on device) ───

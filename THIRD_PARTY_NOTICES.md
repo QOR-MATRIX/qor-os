@@ -10,7 +10,7 @@ license texts ship next to the files they cover.
 | PulseAudio client library (`libpulse0`, Linux) | system package | runtime dependency of Qt Multimedia | LGPL 2.1 or later |
 | [Inter](https://rsms.me/inter/) (variable, roman and italic) | 4.1 | `kit/fonts/InterVariable*.ttf` | SIL Open Font License 1.1, see [`kit/fonts/LICENSE.Inter.txt`](kit/fonts/LICENSE.Inter.txt) |
 | [JetBrains Mono](https://www.jetbrains.com/lp/mono/) (variable) | 2.304 | `kit/fonts/JetBrainsMono-Variable.ttf` | SIL Open Font License 1.1, see [`kit/fonts/LICENSE.JetBrainsMono.txt`](kit/fonts/LICENSE.JetBrainsMono.txt) |
-| [Lucide](https://lucide.dev) icons (112-icon subset, recoloured) | lucide-static 1.61.0 | `kit/icons/*.svg` | ISC; icons derived from Feather are MIT. See [`kit/icons/LICENSE.lucide.txt`](kit/icons/LICENSE.lucide.txt) |
+| [Lucide](https://lucide.dev) icons (113-icon subset, recoloured) | lucide-static 1.61.0 | `kit/icons/*.svg` | ISC; icons derived from Feather are MIT. See [`kit/icons/LICENSE.lucide.txt`](kit/icons/LICENSE.lucide.txt) |
 | [wayland-protocols](https://gitlab.freedesktop.org/wayland/wayland-protocols): fractional-scale-v1, cursor-shape-v1, tablet-v2 | 1.47 | `prism/compositor/protocols/*.xml` | MIT; the notice is in each file's `<copyright>` element |
 
 ## Build-time tooling

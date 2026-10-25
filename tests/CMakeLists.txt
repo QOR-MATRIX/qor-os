@@ -4,8 +4,9 @@ find_package(Qt6 ${QTOS_QT_MIN_VERSION} REQUIRED COMPONENTS Test QuickTest)
 
 # QtTest logs through Qt's message handler; on Windows that falls back to
 # OutputDebugString when stderr is not a console (as under ctest). Tests never
-# make sound: the audio engine renders in real time to its null output.
-set(QTOS_TEST_ENV "QT_FORCE_STDERR_LOGGING=1;QTOS_AUDIO_OUTPUT=null")
+# make sound (the audio engine renders in real time to its null output), and
+# only virtual game controllers exist.
+set(QTOS_TEST_ENV "QT_FORCE_STDERR_LOGGING=1;QTOS_AUDIO_OUTPUT=null;QTOS_GAMEPADS=virtual")
 
 # ── C++ unit tests ───────────────────────────────────────────────────────────
 function(qtos_add_test name)
@@ -21,6 +22,7 @@ qtos_add_test(tst_spring SOURCES kit/tst_spring.cpp LIBRARIES qtos_kit)
 qtos_add_test(tst_oklch SOURCES kit/tst_oklch.cpp LIBRARIES qtos_kit)
 qtos_add_test(tst_services SOURCES services/tst_services.cpp LIBRARIES qtos_services qtos_sim)
 qtos_add_test(tst_audio SOURCES audio/tst_audio.cpp LIBRARIES qtos_audio)
+qtos_add_test(tst_input SOURCES input/tst_input.cpp LIBRARIES qtos_input qtos_kit qtos_kitplugin)
 
 # ── QML tests (Qt Quick Test) ───────────────────────────────────────────────
 qt_add_executable(tst_shell shell/tst_shell.cpp)

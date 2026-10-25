@@ -151,6 +151,11 @@ int main(int argc, char *argv[])
     QGuiApplication::setApplicationVersion(QStringLiteral(QTOS_VERSION_STRING));
 
     const HostOptions options = parseOptions(app);
+    // Automated runs use virtual controllers only, so a controller on the
+    // desk never prompts in a screenshot or presses buttons in a test.
+    if ((!options.screenshotPath.isEmpty() || options.benchmarkSeconds > 0 || !options.scriptPath.isEmpty())
+        && qEnvironmentVariableIsEmpty("QTOS_GAMEPADS"))
+        qputenv("QTOS_GAMEPADS", "virtual");
     qCInfo(lcHost) << "GPU:" << qtos::host::applyGpuPreference(options.gpu);
 
     qtos::Kit::initialize();

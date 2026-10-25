@@ -31,6 +31,7 @@ In simulation the *sources* are the classes in `sim/`; on a device they are the
 |--------|------|------------|--------|---------|
 | `qtos_kit` | static lib + QML plugin | `QTOS.Kit` | `kit/` | Tokens, Theme, Motion, Materials, Spring, Oklch, SceneRect, FrameStats, Surface, Glass, Backdrop, RoundMask, Wallpaper, Icon, AppIcon, Artwork, QtosMark, Spectrum, Sounds, building blocks |
 | `qtos_lumen_style` | static lib + QML plugin | `Lumen` | `kit/style/` | Qt Quick Controls 2 style (24 controls, Basic fallback) |
+| `qtos_input` | static lib + QML plugin | `QTOS.Input` | `input/` | Game controllers: XInput, HID and evdev backends, `Gamepads`, `ControllerNavigator`, `ControllerGlyph` ([CONTROLLERS.md](CONTROLLERS.md)) |
 | `qtos_audio` | static lib | — | `audio/` | The audio engine: real-time output, QTOS Sessions synth, file decoding, EQ, limiter, analysis ([AUDIO.md](AUDIO.md)) |
 | `qtos_services` | static lib + QML plugin | `QTOS.Services` | `services/` | `Services` singleton (replicas), `Intents`, `Reactive`, QML type info for replicas |
 | `qtos_sim` | static lib | — | `sim/` | Simulated sources (audio and media on `qtos_audio`) + scenario loader + QtRO host |
@@ -40,6 +41,7 @@ In simulation the *sources* are the classes in `sim/`; on a device they are the
 | `prism` | executable | `QTOS.Prism` | `prism/compositor/` | Wayland compositor (Linux, needs Qt Wayland Compositor) |
 | `qtos-simd` | executable | — | `sim/simd/` | Services in a separate process |
 | `qtosctl` | executable | — | `tools/qtosctl/` | CLI client of the services |
+| `qtos-gamepads` | executable | — | `tools/gamepads/` | Lists game controllers and streams their state |
 | `qtos_lumen_widgets_style` | plugin (`styles`) | — | `platform/style/` | Lumen `QStyle` for Qt Widgets |
 | `qtos_platformtheme` | plugin (`platformthemes`) | — | `platform/theme/` | `qtos` QPA platform theme |
 | `lumen-widgets-gallery` | executable | — | `platform/gallery/` | QStyle preview |

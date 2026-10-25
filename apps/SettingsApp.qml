@@ -6,6 +6,7 @@ import QtQuick.Controls
 import QtQuick.Shapes
 import QTOS.Kit
 import QTOS.Services
+import QTOS.Input
 
 // Settings: every control is a live binding to a QTOS service replica, so
 // changes apply system-wide instantly (and persist via qtos-settingsd).
@@ -114,6 +115,7 @@ Item {
                 case "sound": return soundPage;
                 case "network": return networkPage;
                 case "bluetooth": return bluetoothPage;
+                case "controllers": return controllersPage;
                 case "notifications": return notificationsPage;
                 case "accessibility": return accessibilityPage;
                 case "about": return aboutPage;
@@ -782,6 +784,264 @@ Item {
                             text: dev.modelData.connected ? qsTr("Disconnect") : qsTr("Connect")
                             enabled: Services.bluetooth.enabled
                             onClicked: Services.bluetooth.toggleDevice(dev.modelData.name)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    Component {
+        id: controllersPage
+        Column {
+            id: pads
+            spacing: 18
+
+            readonly property string family: Gamepads.active.family ?? "xbox"
+            function familyName(family: string): string {
+                switch (family) {
+                case "xbox": return "Xbox";
+                case "playstation": return "PlayStation";
+                case "nintendo": return "Nintendo";
+                }
+                return qsTr("Game controller");
+            }
+
+            PageTitle { text: qsTr("Controllers") }
+
+            Group {
+                SettingRow {
+                    title: qsTr("Controller interface")
+                    subtitle: Gamepads.count === 0 ? qsTr("Connect a controller to use it.")
+                              : Services.settings.controllerInterface ? qsTr("On · the controller drives QTOS")
+                              : qsTr("Off · keyboard and mouse")
+                    Switch {
+                        objectName: "controllerInterfaceSwitch"
+                        enabled: Gamepads.count > 0 || checked
+                        checked: Services.settings.controllerInterface
+                        onToggled: Services.settings.controllerInterface = checked
+                    }
+                }
+                SettingRow {
+                    title: qsTr("Switch automatically")
+                    subtitle: qsTr("Use the controller interface as soon as a controller connects, without asking.")
+                    Switch {
+                        objectName: "controllerAutoSwitchSwitch"
+                        checked: Services.settings.controllerAutoSwitch
+                        onToggled: Services.settings.controllerAutoSwitch = checked
+                    }
+                }
+                SettingRow {
+                    title: qsTr("Cursor speed")
+                    subtitle: Math.round(Services.settings.controllerCursorSpeed * 100) + "%"
+                    Slider {
+                        width: 240
+                        value: Services.settings.controllerCursorSpeed
+                        onMoved: Services.settings.controllerCursorSpeed = value
+                    }
+                }
+                SettingRow {
+                    title: qsTr("Vibration")
+                    subtitle: qsTr("A light tap on selections and actions.")
+                    Switch {
+                        checked: Services.settings.controllerVibration
+                        onToggled: Services.settings.controllerVibration = checked
+                    }
+                }
+                SettingRow {
+                    title: qsTr("Light bar")
+                    subtitle: qsTr("PlayStation controllers glow in the accent colour.")
+                    last: true
+                    Switch {
+                        checked: Services.settings.controllerLightbar
+                        onToggled: Services.settings.controllerLightbar = checked
+                    }
+                }
+            }
+
+            SectionLabel { text: qsTr("Connected") }
+            Group {
+                Repeater {
+                    model: Gamepads.gamepads
+                    delegate: SettingRow {
+                        id: pad
+                        required property var modelData
+                        required property int index
+                        icon: "gamepad-2"
+                        title: modelData.name
+                        subtitle: {
+                            let text = pads.familyName(modelData.family) + " · " + modelData.connection;
+                            if (modelData.battery >= 0)
+                                text += " · " + modelData.battery + "%" + (modelData.charging ? qsTr(", charging") : "");
+                            return text;
+                        }
+                        last: index === Gamepads.count - 1
+                        Button {
+                            text: qsTr("Identify")
+                            enabled: pad.modelData.rumble
+                            onClicked: Gamepads.rumble(0.8, 0.6, 350)
+                        }
+                    }
+                }
+                SettingRow {
+                    visible: Gamepads.count === 0
+                    height: visible ? implicitHeight : 0
+                    icon: "gamepad-2"
+                    title: qsTr("No controllers connected")
+                    subtitle: qsTr("Xbox, PlayStation (DualShock 4, DualSense), SteelSeries Stratus and other XInput or HID game pads work over USB or Bluetooth.")
+                    last: true
+                }
+            }
+
+            // Live test of every button, both sticks and both triggers.
+            SectionLabel { text: qsTr("Test") }
+            Card {
+                id: tester
+                objectName: "controllerTester"
+                width: parent.width
+                padding: 18
+                spacing: 16
+
+                Text {
+                    width: tester.width - 36
+                    text: Gamepads.count > 0 ? qsTr("Press buttons and move the sticks; everything QTOS receives lights up here.")
+                                             : qsTr("Connect a controller to test it.")
+                    font: Theme.footnote
+                    color: Theme.textTertiary
+                    wrapMode: Text.Wrap
+                }
+
+                Row {
+                    spacing: 28
+                    Repeater {
+                        model: [{ label: qsTr("Left stick"), right: false }, { label: qsTr("Right stick"), right: true }]
+                        delegate: Column {
+                            id: stickView
+                            required property var modelData
+                            readonly property point value: modelData.right ? Gamepads.rightStick : Gamepads.leftStick
+                            spacing: 6
+                            Rectangle {
+                                width: 76
+                                height: 76
+                                radius: 38
+                                color: Theme.fillControl
+                                border.color: Theme.windowStroke
+                                Rectangle {
+                                    width: 18
+                                    height: 18
+                                    radius: 9
+                                    color: Theme.accent
+                                    x: parent.width / 2 - width / 2 + stickView.value.x * (parent.width / 2 - width / 2)
+                                    y: parent.height / 2 - height / 2 + stickView.value.y * (parent.height / 2 - height / 2)
+                                }
+                            }
+                            Text {
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                text: stickView.modelData.label
+                                font: Theme.caption
+                                color: Theme.textTertiary
+                            }
+                        }
+                    }
+                    Repeater {
+                        model: [{ button: Gamepads.LeftTrigger, right: false }, { button: Gamepads.RightTrigger, right: true }]
+                        delegate: Column {
+                            id: triggerView
+                            required property var modelData
+                            readonly property real value: modelData.right ? Gamepads.rightTrigger : Gamepads.leftTrigger
+                            spacing: 6
+                            Rectangle {
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                width: 18
+                                height: 76
+                                radius: 9
+                                color: Theme.fillControl
+                                border.color: Theme.windowStroke
+                                Rectangle {
+                                    anchors.bottom: parent.bottom
+                                    width: parent.width
+                                    height: Math.max(width, parent.height * triggerView.value)
+                                    radius: 9
+                                    color: Theme.accent
+                                    opacity: triggerView.value > 0.01 ? 1 : 0
+                                }
+                            }
+                            ControllerGlyph {
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                button: triggerView.modelData.button
+                                family: pads.family
+                                size: 20
+                            }
+                        }
+                    }
+                }
+
+                Flow {
+                    width: tester.width - 36
+                    spacing: 8
+                    Repeater {
+                        model: [Gamepads.South, Gamepads.East, Gamepads.West, Gamepads.North,
+                                Gamepads.LeftShoulder, Gamepads.RightShoulder, Gamepads.Back, Gamepads.Start,
+                                Gamepads.Guide, Gamepads.LeftStick, Gamepads.RightStick, Gamepads.DPadUp,
+                                Gamepads.DPadDown, Gamepads.DPadLeft, Gamepads.DPadRight, Gamepads.Touchpad]
+                        delegate: ControllerGlyph {
+                            id: testGlyph
+                            required property int modelData
+                            readonly property bool down: (Gamepads.buttons >> modelData) & 1
+                            button: modelData
+                            family: pads.family
+                            size: 30
+                            opacity: down ? 1 : 0.38
+                            scale: down ? 1.12 : 1
+                            Behavior on scale { NumberAnimation { duration: 80 } }
+                        }
+                    }
+                }
+            }
+
+            SectionLabel { text: qsTr("In the controller interface") }
+            Group {
+                Repeater {
+                    model: [
+                        { button: Gamepads.South, action: qsTr("Click, or open what the D-pad selected") },
+                        { button: Gamepads.West, action: qsTr("Right-click") },
+                        { button: Gamepads.East, action: qsTr("Back") },
+                        { button: Gamepads.North, action: qsTr("Search (Beam)") },
+                        { button: Gamepads.Start, action: qsTr("Control Center") },
+                        { button: Gamepads.Back, action: qsTr("Overview") },
+                        { button: Gamepads.Guide, action: qsTr("Home; unlock") },
+                        { button: Gamepads.DPadUp, text: qsTr("D-pad"), action: qsTr("Move between items") },
+                        { button: Gamepads.LeftStick, action: qsTr("Left stick: the cursor · click: keyboard") },
+                        { button: Gamepads.RightStick, action: qsTr("Right stick: scroll · click: play or pause") },
+                        { button: Gamepads.LeftShoulder, action: qsTr("Previous Space (and %1 for the next)").arg(Gamepads.buttonName(Gamepads.RightShoulder, pads.family)) },
+                        { button: Gamepads.LeftTrigger, action: qsTr("Volume down (and %1 for up)").arg(Gamepads.buttonName(Gamepads.RightTrigger, pads.family)) }
+                    ]
+                    delegate: Item {
+                        id: mapping
+                        required property var modelData
+                        required property int index
+                        width: parent ? parent.width : 400
+                        height: 44
+                        ControllerGlyph {
+                            x: 16
+                            anchors.verticalCenter: parent.verticalCenter
+                            button: mapping.modelData.button
+                            text: mapping.modelData.text ?? ""
+                            family: pads.family
+                            size: 24
+                        }
+                        Text {
+                            x: 96
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: mapping.modelData.action
+                            font: Theme.body
+                            color: Theme.textPrimary
+                        }
+                        Divider {
+                            visible: mapping.index < 11
+                            anchors.bottom: parent.bottom
+                            x: 16
+                            width: parent.width - 16
                         }
                     }
                 }

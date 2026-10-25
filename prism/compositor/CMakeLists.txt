@@ -55,6 +55,7 @@ target_link_libraries(prism PRIVATE
     qtos_lumen_styleplugin
     qtos_servicesplugin
     qtos_appsplugin
+    qtos_inputplugin
     qtos_shell
     qtos_shellplugin
     qtos_sim

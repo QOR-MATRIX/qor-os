@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
 #include "shellscript.h"
 
+#include "gamepadmanager.h"
+#include "keycodes.h"
 #include "services.h"
 
 #include <QtCore/QCoreApplication>
@@ -17,6 +19,7 @@
 #include <QtGui/QKeySequence>
 #include <QtGui/private/qhighdpiscaling_p.h>
 #include <QtQml/QJSEngine>
+#include <QtQml/QJSValue>
 #include <QtQml/QQmlEngine>
 #include <QtQuick/QQuickItem>
 #include <QtQuick/QQuickWindow>
@@ -36,47 +39,6 @@ namespace qtos {
 namespace {
 
 // Linux evdev codes; Wayland clients receive keys by scan code (evdev + 8).
-quint32 evdevCode(int key)
-{
-    static const QHash<int, quint32> codes = [] {
-        QHash<int, quint32> map {
-            { Qt::Key_Escape, 1 },
-            { Qt::Key_Backspace, 14 },
-            { Qt::Key_Tab, 15 },
-            { Qt::Key_Return, 28 },
-            { Qt::Key_Enter, 28 },
-            { Qt::Key_Space, 57 },
-            { Qt::Key_Up, 103 },
-            { Qt::Key_Left, 105 },
-            { Qt::Key_Right, 106 },
-            { Qt::Key_Down, 108 },
-            { Qt::Key_Minus, 12 },
-            { Qt::Key_Period, 52 },
-            { Qt::Key_Slash, 53 },
-            // Media and volume keys.
-            { Qt::Key_VolumeMute, 113 },
-            { Qt::Key_VolumeDown, 114 },
-            { Qt::Key_VolumeUp, 115 },
-            { Qt::Key_MediaNext, 163 },
-            { Qt::Key_MediaTogglePlayPause, 164 },
-            { Qt::Key_MediaPrevious, 165 },
-            { Qt::Key_MediaStop, 166 },
-            { Qt::Key_MediaPlay, 200 },
-            { Qt::Key_MediaPause, 201 },
-        };
-        const char *rows[] = { "qwertyuiop", "asdfghjkl", "zxcvbnm" };
-        const quint32 rowStart[] = { 16, 30, 44 };
-        for (int r = 0; r < 3; ++r)
-            for (int i = 0; rows[r][i]; ++i)
-                map.insert(Qt::Key_A + (rows[r][i] - 'a'), rowStart[r] + quint32(i));
-        for (int d = 1; d <= 9; ++d)
-            map.insert(Qt::Key_0 + d, quint32(d + 1));
-        map.insert(Qt::Key_0, 11);
-        return map;
-    }();
-    return codes.value(key, 0);
-}
-
 QJsonArray rectJson(const QRectF &r) { return { qRound(r.x()), qRound(r.y()), qRound(r.width()), qRound(r.height()) }; }
 
 QJsonArray rectJson(const QVariant &value) { return rectJson(value.toRectF()); }
@@ -299,7 +261,7 @@ private:
 
     void key(int key, Qt::KeyboardModifiers modifiers, const QString &text)
     {
-        const quint32 scanCode = evdevCode(key) + 8;
+        const quint32 scanCode = input::evdevKeyCode(key) + 8;
         for (QEvent::Type type : { QEvent::KeyPress, QEvent::KeyRelease })
             QWindowSystemInterface::handleExtendedKeyEvent(m_window, ulong(m_clock.elapsed()), type, key, modifiers,
                                                            scanCode, 0, 0, text);
@@ -366,6 +328,89 @@ private:
         });
     }
 
+    // ── Virtual game controller ─────────────────────────────────────────────
+
+    // {"gamepad": {"connect": "xbox|playstation|nintendo|generic", "name": ...}}
+    // {"gamepad": {"press" | "release" | "tap": "south|east|west|north|lb|rb|lt|rt|
+    //              back|start|guide|ls|rs|up|down|left|right"}}
+    // {"gamepad": {"stick": [x, y], "ms": 400}}    the left stick, then centred
+    // {"gamepad": {"disconnect": true}}
+    int gamepad(const QJsonObject &spec)
+    {
+        using namespace qtos::input;
+        GamepadManager *manager = GamepadManager::instance();
+        if (spec.contains(u"connect"_s)) {
+            static const QHash<QString, Family> families { { u"xbox"_s, Family::Xbox },
+                                                           { u"playstation"_s, Family::PlayStation },
+                                                           { u"nintendo"_s, Family::Nintendo },
+                                                           { u"generic"_s, Family::Generic } };
+            const QString family = spec[u"connect"_s].toString(u"xbox"_s);
+            m_pad = {};
+            m_gamepad = manager->addVirtual(families.value(family, Family::Xbox),
+                                            spec[u"name"_s].toString(u"Virtual Controller"_s));
+            return 400;
+        }
+        if (m_gamepad.isEmpty()) {
+            m_error = u"no virtual controller is connected"_s;
+            return -1;
+        }
+        if (spec.contains(u"disconnect"_s)) {
+            manager->removeVirtual(m_gamepad);
+            m_gamepad.clear();
+            return 400;
+        }
+        if (spec.contains(u"stick"_s)) {
+            const QJsonArray xy = spec[u"stick"_s].toArray();
+            m_pad.axis(Axis::LeftX) = float(xy.at(0).toDouble());
+            m_pad.axis(Axis::LeftY) = float(xy.at(1).toDouble());
+            manager->setVirtualState(m_gamepad, m_pad);
+            m_queue.push_front([this] {
+                m_pad.axis(Axis::LeftX) = 0;
+                m_pad.axis(Axis::LeftY) = 0;
+                GamepadManager::instance()->setVirtualState(m_gamepad, m_pad);
+                return 200;
+            });
+            return spec[u"ms"_s].toInt(300);
+        }
+        static const QHash<QString, Button> buttons {
+            { u"south"_s, Button::South },    { u"east"_s, Button::East },       { u"west"_s, Button::West },
+            { u"north"_s, Button::North },    { u"lb"_s, Button::LeftShoulder }, { u"rb"_s, Button::RightShoulder },
+            { u"lt"_s, Button::LeftTrigger }, { u"rt"_s, Button::RightTrigger }, { u"back"_s, Button::Back },
+            { u"start"_s, Button::Start },    { u"guide"_s, Button::Guide },     { u"ls"_s, Button::LeftStick },
+            { u"rs"_s, Button::RightStick },  { u"up"_s, Button::DPadUp },       { u"down"_s, Button::DPadDown },
+            { u"left"_s, Button::DPadLeft },  { u"right"_s, Button::DPadRight },
+        };
+        const QString name = spec[u"press"_s].toString(spec[u"release"_s].toString(spec[u"tap"_s].toString()));
+        if (!buttons.contains(name)) {
+            m_error = u"unknown controller button \"%1\""_s.arg(name);
+            return -1;
+        }
+        const Button button = buttons.value(name);
+        const auto set = [this, button](bool down) {
+            // Triggers are analogue: a press is a full pull.
+            if (button == Button::LeftTrigger)
+                m_pad.axis(Axis::LeftTrigger) = down ? 1.0f : 0.0f;
+            else if (button == Button::RightTrigger)
+                m_pad.axis(Axis::RightTrigger) = down ? 1.0f : 0.0f;
+            else
+                m_pad.set(button, down);
+            GamepadManager::instance()->setVirtualState(m_gamepad, m_pad);
+        };
+        if (spec.contains(u"release"_s)) {
+            set(false);
+            return 250;
+        }
+        set(true);
+        if (spec.contains(u"tap"_s)) {
+            m_queue.push_front([set] {
+                set(false);
+                return 350;
+            });
+            return 90;
+        }
+        return 250;
+    }
+
     // ── Steps ───────────────────────────────────────────────────────────────
 
     bool expand(const QJsonObject &step)
@@ -396,6 +441,9 @@ private:
             });
         } else if (step.contains(u"drag"_s)) {
             enqueueDrag(step[u"drag"_s].toObject());
+        } else if (step.contains(u"gamepad"_s)) {
+            const QJsonObject spec = step[u"gamepad"_s].toObject();
+            m_queue.push_back([this, spec] { return gamepad(spec); });
         } else if (step.contains(u"scroll"_s)) {
             // {"scroll": {"at": target, "notches": n}}: turns a mouse wheel n
             // notches (positive scrolls down, towards the end).
@@ -661,6 +709,12 @@ private:
         return entry;
     }
 
+    // A QML `var` arrives as a QJSValue; JSON wants plain variants.
+    static QVariant plain(const QVariant &value)
+    {
+        return value.metaType() == QMetaType::fromType<QJSValue>() ? value.value<QJSValue>().toVariant() : value;
+    }
+
     QJsonObject state() const
     {
         QJsonArray list;
@@ -679,9 +733,10 @@ private:
             return values;
         };
         return {
-            { u"settings"_s, snapshot("settings", { "darkMode", "accentHue", "reduceMotion", "reduceTransparency",
-                                                    "increaseContrast", "livingWallpaper", "audioReactive",
-                                                    "reactiveIntensity", "reactiveLowHz", "reactiveHighHz" }) },
+            { u"settings"_s,
+              snapshot("settings", { "darkMode", "accentHue", "reduceMotion", "reduceTransparency", "increaseContrast",
+                                     "livingWallpaper", "audioReactive", "reactiveIntensity", "reactiveLowHz",
+                                     "reactiveHighHz", "controllerInterface", "controllerAutoSwitch" }) },
             { u"audio"_s, snapshot("audio", { "volume", "muted", "outputDevice", "equalizer", "equalizerPreset",
                                               "systemSounds", "systemVolume", "active" }) },
             { u"media"_s,
@@ -692,6 +747,7 @@ private:
             { u"overview"_s, manager ? manager->property("overview").toBool() : false },
             { u"currentSpace"_s, manager ? manager->property("currentSpace").toInt() : 0 },
             { u"surface"_s, m_desktop->property("surface").toString() },
+            { u"controller"_s, QJsonValue::fromVariant(plain(m_desktop->property("controllerState"))) },
         };
     }
 
@@ -700,6 +756,8 @@ private:
     QString m_baseDir;
     QObject *m_desktop = nullptr;
     QQmlEngine *m_engine = nullptr;
+    QString m_gamepad;
+    qtos::input::GamepadState m_pad;
     qsizetype m_next = 0;
     std::deque<Action> m_queue;
     QElapsedTimer m_clock;

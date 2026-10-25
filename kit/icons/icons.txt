@@ -46,6 +46,7 @@ file-video
 film
 folder
 folder-open
+gamepad-2
 gauge
 globe
 hard-drive

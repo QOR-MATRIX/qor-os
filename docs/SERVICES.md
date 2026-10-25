@@ -117,6 +117,10 @@ outputs; see [AUDIO.md](AUDIO.md).
 | `audioReactive` | bool | READWRITE | The interface moves with what is playing (default on) |
 | `reactiveIntensity` | double | READWRITE | 0.0 to 1.0 (default 0.6) |
 | `reactiveLowHz`, `reactiveHighHz` | double | READWRITE | The frequencies it reacts to (default 40–160 Hz) |
+| `controllerInterface` | bool | READWRITE | A game controller drives the interface now (not remembered; see [CONTROLLERS.md](CONTROLLERS.md)) |
+| `controllerAutoSwitch` | bool | READWRITE | Switch when a controller connects, without asking |
+| `controllerCursorSpeed` | double | READWRITE | 0.0 to 1.0 |
+| `controllerVibration`, `controllerLightbar` | bool | READWRITE | Feedback; PlayStation light bars in the accent colour |
 | `userName`, `hostName` | QString | source-only | |
 
 ### `SimControl` — `simcontrol.rep` (simulation only)

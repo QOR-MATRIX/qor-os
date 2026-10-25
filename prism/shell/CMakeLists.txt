@@ -27,6 +27,11 @@ qt_add_qml_module(qtos_shell
         LockScreen.qml
         SpaceSwitcher.qml
         VolumeHud.qml
+        ControllerCursor.qml
+        ControllerHints.qml
+        ControllerKeyboard.qml
+        ControllerPrompt.qml
+        ShellToast.qml
         search.js
     SOURCES
         desktopentries.h desktopentries.cpp
@@ -36,6 +41,7 @@ qt_add_qml_module(qtos_shell
         QTOS.Kit
         QTOS.Services
         QTOS.Apps
+        QTOS.Input
 )
 
 # The --benchmark and --script drivers shared by qtos-shell and prism. The
@@ -50,6 +56,7 @@ target_link_libraries(qtos_shell
         qtos_kit
         qtos_services
         qtos_apps
+        qtos_input
     PRIVATE
         qtos::compiler_settings
 )

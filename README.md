@@ -62,6 +62,7 @@ Then try:
 - <kbd>Ctrl</kbd>+<kbd>↑</kbd> for Overview, and <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>←</kbd> / <kbd>→</kbd> to switch Spaces.
 - Drag a window to a screen edge to snap it, or double-click a title bar to maximise.
 - Click the clock for Control Center, or the song in the Rail for Now Playing.
+- Plug in a game controller (Xbox, PlayStation, Stratus and others) and accept the prompt to drive everything with it.
 - Press play in Music, then open Settings › Sound to shape the equaliser and choose what the interface reacts to. Your own music (the Music folder, or `QTOS_MUSIC_DIR`) is queued after the generated sessions.
 
 Drive the running system from another terminal:
@@ -80,6 +81,7 @@ Drive the running system from another terminal:
 | Path | What it is |
 |------|------------|
 | [`kit/`](kit/) | **QTOS.Kit**: Lumen tokens, `Theme`, `Spring`, OKLCH, SDF `Surface`, `Glass`, `Backdrop`, Aurora wallpaper, `Spectrum`, interface sounds, icons, fonts. [`kit/style/`](kit/style/): the **Lumen** Qt Quick Controls style |
+| [`input/`](input/) | **QTOS.Input**: game controllers (XInput, HID, evdev) and the controller interface |
 | [`audio/`](audio/) | The QTOS audio engine: real-time output, the QTOS Sessions synthesiser, music decoding, equaliser, limiter and analysis |
 | [`services/`](services/) | System service contracts (`interfaces/*.rep`) and **QTOS.Services**, the typed replicas plus `Intents` that the shell and apps use |
 | [`sim/`](sim/) | Simulated service implementations, scenarios, and the `qtos-simd` daemon |
@@ -101,6 +103,7 @@ Drive the running system from another terminal:
 - [docs/design/LUMEN.md](docs/design/LUMEN.md) and [docs/design/SHELL.md](docs/design/SHELL.md): design specifications
 - [docs/SERVICES.md](docs/SERVICES.md): service contracts, scenarios, `qtosctl`
 - [docs/AUDIO.md](docs/AUDIO.md): the audio engine, analysis and the audio-reactive interface
+- [docs/CONTROLLERS.md](docs/CONTROLLERS.md): game controllers and the controller interface
 - [docs/QT-MODULES.md](docs/QT-MODULES.md): every Qt module and tool and its role in QTOS
 - [docs/PERFORMANCE.md](docs/PERFORMANCE.md), [docs/CI.md](docs/CI.md), [docs/ROADMAP.md](docs/ROADMAP.md)
 - [docs/adr/](docs/adr/): architecture decision records

@@ -18,6 +18,16 @@ class Settings
     // The frequencies (Hz) that drive it.
     PROP(double reactiveLowHz=40 READWRITE)
     PROP(double reactiveHighHz=160 READWRITE)
+    // Controller interface: a game controller drives the whole interface.
+    // In use now (not remembered: it ends when the last controller goes).
+    PROP(bool controllerInterface=false READWRITE)
+    // Switch to it as soon as a controller connects, without asking.
+    PROP(bool controllerAutoSwitch=false READWRITE)
+    // 0..1: how fast the left stick moves the cursor.
+    PROP(double controllerCursorSpeed=0.5 READWRITE)
+    PROP(bool controllerVibration=true READWRITE)
+    // PlayStation light bars follow the accent colour.
+    PROP(bool controllerLightbar=true READWRITE)
     PROP(QString userName SOURCEONLYSETTER)
     PROP(QString hostName SOURCEONLYSETTER)
 }

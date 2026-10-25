@@ -154,7 +154,8 @@ modules in `build/<preset>/qml/`, plugins in `build/<preset>/plugins/`.
 | `--script <file>` | Drive the shell with a JSON script and exit ([DEVELOPMENT.md](DEVELOPMENT.md)) |
 
 `--screenshot`, `--benchmark` and `--script` render audio silently (the
-engine's null output); see [AUDIO.md](AUDIO.md).
+engine's null output; see [AUDIO.md](AUDIO.md)) and see only virtual game
+controllers (`QTOS_GAMEPADS=virtual`; see [CONTROLLERS.md](CONTROLLERS.md)).
 
 Persistent preferences (appearance, accent, motion, transparency, living
 wallpaper, audio and the audio-reactive interface) are stored with `QSettings`

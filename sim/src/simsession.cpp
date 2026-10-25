@@ -275,15 +275,24 @@ void SimSettings::load(const QJsonObject &config)
         setReactiveLowHz(store.value(u"lowHz"_s, reactiveLowHz()).toDouble());
         setReactiveHighHz(store.value(u"highHz"_s, reactiveHighHz()).toDouble());
         store.endGroup();
+        store.beginGroup(u"controller"_s);
+        setControllerAutoSwitch(store.value(u"autoSwitch"_s, controllerAutoSwitch()).toBool());
+        setControllerCursorSpeed(store.value(u"cursorSpeed"_s, controllerCursorSpeed()).toDouble());
+        setControllerVibration(store.value(u"vibration"_s, controllerVibration()).toBool());
+        setControllerLightbar(store.value(u"lightbar"_s, controllerLightbar()).toBool());
+        store.endGroup();
     }
 
     for (auto signal :
          { &SettingsSimpleSource::darkModeChanged, &SettingsSimpleSource::reduceMotionChanged,
            &SettingsSimpleSource::reduceTransparencyChanged, &SettingsSimpleSource::increaseContrastChanged,
-           &SettingsSimpleSource::livingWallpaperChanged, &SettingsSimpleSource::audioReactiveChanged })
+           &SettingsSimpleSource::livingWallpaperChanged, &SettingsSimpleSource::audioReactiveChanged,
+           &SettingsSimpleSource::controllerAutoSwitchChanged, &SettingsSimpleSource::controllerVibrationChanged,
+           &SettingsSimpleSource::controllerLightbarChanged })
         connect(this, signal, this, &SimSettings::save);
     for (auto signal : { &SettingsSimpleSource::accentHueChanged, &SettingsSimpleSource::reactiveIntensityChanged,
-                         &SettingsSimpleSource::reactiveLowHzChanged, &SettingsSimpleSource::reactiveHighHzChanged })
+                         &SettingsSimpleSource::reactiveLowHzChanged, &SettingsSimpleSource::reactiveHighHzChanged,
+                         &SettingsSimpleSource::controllerCursorSpeedChanged })
         connect(this, signal, this, &SimSettings::save);
 }
 
@@ -305,6 +314,12 @@ void SimSettings::save()
     store.setValue(u"intensity"_s, reactiveIntensity());
     store.setValue(u"lowHz"_s, reactiveLowHz());
     store.setValue(u"highHz"_s, reactiveHighHz());
+    store.endGroup();
+    store.beginGroup(u"controller"_s);
+    store.setValue(u"autoSwitch"_s, controllerAutoSwitch());
+    store.setValue(u"cursorSpeed"_s, controllerCursorSpeed());
+    store.setValue(u"vibration"_s, controllerVibration());
+    store.setValue(u"lightbar"_s, controllerLightbar());
     store.endGroup();
 }
 

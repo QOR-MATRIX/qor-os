@@ -65,6 +65,7 @@ include(QtosCompilerSettings)
 
 add_subdirectory(kit)
 add_subdirectory(audio)
+add_subdirectory(input)
 add_subdirectory(services)
 add_subdirectory(sim)
 add_subdirectory(apps)
@@ -72,6 +73,7 @@ add_subdirectory(prism)
 
 if(QTOS_BUILD_TOOLS)
     add_subdirectory(tools/qtosctl)
+    add_subdirectory(tools/gamepads)
 endif()
 
 if(QTOS_BUILD_PLATFORM)

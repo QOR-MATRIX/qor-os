@@ -23,10 +23,22 @@ All notable changes to QTOS are recorded here. The format follows
 - `qtosctl media seek`, `eq`, `sounds`, `reactive` and `spectrum` (a live spectrum in the terminal); `status` shows the output, EQ, reactive settings and play position.
 - `qtos-simd --silent`. Automated runs (`--screenshot`, `--benchmark`, `--script`) and every test use the engine's null output, which renders in real time to nowhere.
 - `qtos-shell --open settings/sound` opens an app at a page.
+- **Controller interface.** QTOS can be driven entirely with a game controller ([docs/CONTROLLERS.md](docs/CONTROLLERS.md)).
+  - When a controller connects, QTOS asks whether to switch (South: switch; East: not now; "always switch automatically" remembers). When the last controller disconnects, QTOS returns to keyboard and mouse.
+  - The left stick drives a Lumen cursor; South clicks and West right-clicks; East goes back; the D-pad moves focus. North opens Beam, Start Control Center, Back Overview, Guide home or unlock. The shoulders switch Spaces, the triggers set the volume, and the right stick scrolls.
+  - An on-screen keyboard opens for text fields. A hint bar shows each button's job with the glyphs of the controller in use (A B X Y, or Cross Circle Square Triangle). PlayStation light bars follow the accent colour. Selections give a light vibration.
+  - Native backends with no third-party libraries:
+    - XInput, including the Guide button: Xbox controllers, SteelSeries Stratus Duo and other XInput pads.
+    - Raw HID: DualShock 4 and DualSense over USB and Bluetooth, with rumble, light bar and battery; generic HID pads.
+    - Linux evdev, with hotplug.
+  - The same controller seen twice (Steam Input) never acts twice.
+  - Settings › Controllers: the interface, auto-switch, cursor speed, vibration and light bar; connected controllers with battery and Identify; a live tester of every button, stick and trigger; and the button map.
+  - `qtos-gamepads` lists controllers and streams their state. `tools/dev/uinput-gamepad.py` creates a kernel game pad on Linux.
+  - Shell scripts gain a virtual controller (`gamepad` steps). `tst_input` covers reports, CRCs, the mappings, dead zones, the manager and the navigator, and `shell_e2e` the whole controller flow.
 - **Music library.** Songs, Albums and Artists views, and QTOS Sessions and Music Folder collections with real counts (the placeholder playlists are gone). Play and Shuffle buttons start a view; the playing song shows a live spectrum.
 - **Shuffle and repeat** (`Media.shuffle`, `Media.repeat`): shuffle plays every track once per pass; repeat cycles through all, one and off. Both persist, and `qtosctl media shuffle|repeat` sets them.
 - **Media and volume keys** everywhere, including the lock screen, with a glass volume indicator (`VolumeHud`).
-- Lucide icons `repeat-1`, `disc-3`, `mic-vocal`, `list-music`, `library` and `audio-lines` (112 in all).
+- Lucide icons `repeat-1`, `disc-3`, `mic-vocal`, `list-music`, `library`, `audio-lines` and `gamepad-2` (113 in all).
 - On Linux without a running PipeWire daemon (WSLg), QTOS asks Qt Multimedia for its PulseAudio backend, avoiding a crash in Qt 6.12's PipeWire backend.
 - Shell scripts: a `scroll` step; the state includes `audio`, `media` and the reactive settings; item targets are found among `Repeater` delegates and must not be clipped or scrolled out of view.
 - Tests: `tst_audio` (24 cases), playback and analysis over Qt Remote Objects in `tst_services`, and the Sound page in `shell_e2e`.

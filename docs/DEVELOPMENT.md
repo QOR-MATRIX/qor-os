@@ -183,6 +183,7 @@ scale.
 | `{"drag": {"from": target, "to": target \| "by": [dx, dy], "steps": n}}` | Press, move in steps, release |
 | `{"scroll": {"at": target, "notches": n}}` | Mouse wheel; positive `n` scrolls down |
 | `{"key": "Escape"}` | Key press and release (Wayland clients receive evdev scan codes) |
+| `{"gamepad": {"connect": family \| "tap" \| "press" \| "release": button \| "stick": [x, y], "ms": n \| "disconnect": true}}` | A virtual game controller ([CONTROLLERS.md](CONTROLLERS.md)) |
 | `{"call": "setSurface", "args": [...]}` | Call a `Desktop` method (`launch`, `setSurface`, `switchSpace`, ...) |
 | `{"restore": spec}` | What clicking the window's app on the Shelf does |
 | `{"close": spec}` | Ask a window to close (`xdg_toplevel.close` for clients) |
@@ -202,7 +203,9 @@ against title or app id, or `{"title": ..., "appId": ...}`.
 
 The **state** includes:
 
-- `settings`, including the audio-reactive preferences;
+- `settings`, including the audio-reactive and controller preferences;
+- `controller`: virtual and real controllers connected, whether the connect
+  prompt and on-screen keyboard are open, and the controller cursor;
 - `audio` (volume, mute, output, equaliser, interface sounds, `active`) and
   `media` (playing, title, position, duration, queue index);
 - `workArea`, `overview`, `currentSpace` and `surface`;

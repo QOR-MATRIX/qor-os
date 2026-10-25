@@ -90,6 +90,8 @@ int main(int argc, char *argv[])
         // private endpoint so they never meet a session someone is using.
         const bool automated = parser.isSet(screenshot) || parser.isSet(benchmark) || parser.isSet(script);
         simOptions.silent = automated;
+        if (automated && qEnvironmentVariableIsEmpty("QTOS_GAMEPADS"))
+            qputenv("QTOS_GAMEPADS", "virtual"); // controllers on the desk never join in
         if (automated) {
             simOptions.persistent = false;
             simOptions.url = QUrl(qtos::Services::defaultUrl().scheme() + u":qtos-services-"_s

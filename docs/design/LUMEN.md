@@ -175,7 +175,7 @@ uses `Text.CurveRendering`.
 
 ## Iconography
 
-- A curated Lucide set (112 symbols, `kit/icons/icons.txt`) at a 1.75 px
+- A curated Lucide set (113 symbols, `kit/icons/icons.txt`) at a 1.75 px
   stroke on a 24-unit grid, recoloured white and tinted on the GPU by `Icon`.
 - Sizes: 13–16 px in controls, 16–18 px in the Rail and sidebars, 20–24 px in
   Control Center tiles.

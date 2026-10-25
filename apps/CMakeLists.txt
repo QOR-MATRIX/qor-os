@@ -33,6 +33,7 @@ qt_add_qml_module(qtos_apps
         QtCore
         QTOS.Kit
         QTOS.Services
+        QTOS.Input
 )
 
 target_link_libraries(qtos_apps
@@ -43,6 +44,7 @@ target_link_libraries(qtos_apps
         Qt6::Graphs
         qtos_kit
         qtos_services
+        qtos_input
     PRIVATE
         qtos::compiler_settings
 )
