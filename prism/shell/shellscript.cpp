@@ -214,7 +214,21 @@ private:
         const QPointF local = at.size() == 2 ? QPointF(coordinate(at.at(0).toDouble(), item->width()),
                                                        coordinate(at.at(1).toDouble(), item->height()))
                                              : QPointF(item->width() / 2, item->height() / 2);
-        return item->mapToScene(local);
+        const QPointF point = item->mapToScene(local);
+        // A window target must be the window a person would hit there.
+        if (t.contains(u"window"_s)) {
+            QQuickItem *window = findWindow(t[u"window"_s]);
+            for (QQuickItem *other : windows()) {
+                if (other == window || !other->isVisible() || other->property("minimized").toBool()
+                    || other->property("closing").toBool() || other->z() <= window->z())
+                    continue;
+                if (other->mapRectToScene(QRectF(0, 0, other->width(), other->height())).contains(point)) {
+                    m_error = u"the target point is covered by \"%1\""_s.arg(other->property("title").toString());
+                    return std::nullopt;
+                }
+            }
+        }
+        return point;
     }
 
     // ── Input ───────────────────────────────────────────────────────────────
@@ -523,6 +537,7 @@ private:
             { u"isClient"_s, w->property("isClient").toBool() },
             { u"decorated"_s, w->property("decorated").toBool() },
             { u"focused"_s, w->property("focused").toBool() },
+            { u"demandsAttention"_s, w->property("demandsAttention").toBool() },
             { u"maximized"_s, w->property("maximized").toBool() },
             { u"minimized"_s, w->property("minimized").toBool() },
             { u"closing"_s, w->property("closing").toBool() },

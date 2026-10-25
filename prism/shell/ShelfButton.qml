@@ -16,6 +16,8 @@ Item {
     property real chroma: 0.15
     property bool neutral: false
     property bool running: false
+    // The app wants attention: the icon hops every 1.5 s and its dot turns to the accent.
+    property bool attention: false
     property bool checked: false
     property real pointerX: -1000   // pointer x in the Shelf row's coordinates
 
@@ -85,6 +87,14 @@ Item {
         }
     }
 
+    Timer {
+        running: button.attention && !Motion.reduced
+        interval: 1500
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: hop.velocity = -460
+    }
+
     // Running indicator.
     Surface {
         anchors.horizontalCenter: parent.horizontalCenter
@@ -93,8 +103,8 @@ Item {
         height: 4
         radius: 2
         exponent: 2
-        color: Theme.textPrimary
-        opacity: button.running ? 0.75 : 0
+        color: button.attention ? Theme.accent : Theme.textPrimary
+        opacity: button.attention ? 1 : button.running ? 0.75 : 0
         Behavior on opacity { NumberAnimation { duration: 200 } }
     }
 

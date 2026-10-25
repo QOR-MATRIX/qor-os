@@ -28,7 +28,7 @@ display refresh; compositor backend decision gate
 ([ADR-0003](adr/0003-compositor-strategy.md)).
 
 - [x] Build and run `prism` nested on Linux and under WSLg; launch Qt apps into it
-- [ ] Client windows: XDG activation and client-initiated resize. Done so far: configure on resize (with the resizing state), server- and client-side decorations, client moves, maximize and minimize requests, popups, size limits, and app identity from desktop entries. All are covered by `prism_e2e`.
+- [x] Client windows: configure with all states, server- and client-side decorations, client moves and resizes, resizing from every edge, maximize and minimize requests, popups, size limits, app identity, and XDG activation with focus-stealing prevention. All are covered by `prism_e2e` (31 checks).
 - [ ] Spaces for client windows. Overview, minimise and Shelf restore for clients are done and covered by `prism_e2e`.
 - [x] Wayland extensions: fractional-scale, cursor-shape, presentation-time, idle-inhibit (`tools/dev/prism-protocol-check.sh`)
 - [ ] Three-finger gestures for Overview and Spaces (libinput through Qt)

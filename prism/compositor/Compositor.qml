@@ -96,12 +96,13 @@ WaylandCompositor {
                 focus: true
                 shellSurface: content.xdgSurface // qmllint disable incompatible-type
                 autoCreatePopupItems: true
-                // Prism moves windows itself (springs, snapping), so the
-                // built-in move handler only gets this placeholder.
-                moveItem: moveSink
                 x: -content.geometry.x
                 y: -content.geometry.y
                 onSurfaceDestroyed: if (content.window) content.window.manager.close(content.window, true)
+                // Prism, not Qt's built-in integration, handles move, resize,
+                // maximise and fullscreen requests.
+                onShellSurfaceChanged: WindowManagement.takeOver(surfaceItem)
+                Component.onCompleted: WindowManagement.takeOver(surfaceItem)
             }
 
             // The client's size limits bound interactive resizing.
@@ -130,12 +131,11 @@ WaylandCompositor {
             Connections {
                 target: content.toplevel
                 function onStartMove() { content.window.beginClientMove(); }
+                function onStartResize(seat, edges) { content.window.beginClientResize(edges); }
                 function onSetMaximized() { if (!content.window.maximized) content.window.toggleMaximize(); }
                 function onUnsetMaximized() { if (content.window.maximized) content.window.toggleMaximize(); }
                 function onSetMinimized() { content.window.manager.minimize(content.window); }
             }
-
-            Item { id: moveSink }
 
             Timer {
                 id: configureTimer
@@ -164,6 +164,18 @@ WaylandCompositor {
         preferredScale: desktop.Screen.devicePixelRatio
     }
     CursorShapeManagerV1 { }
+    XdgActivationV1 {
+        // A trusted request focuses the window; any other only asks for attention.
+        onActivationRequested: (surface, trusted) => {
+            const window = desktop.windowLayer.windows.find(w => w.shellSurface && w.shellSurface.surface === surface);
+            if (!window)
+                return;
+            if (trusted)
+                desktop.windowLayer.raise(window);
+            else if (!window.focused)
+                window.demandsAttention = true;
+        }
+    }
     PresentationTime { id: presentation }
     PresentationFeedback {
         presentationTime: presentation // qmllint disable incompatible-type

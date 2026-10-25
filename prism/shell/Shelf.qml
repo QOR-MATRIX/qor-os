@@ -12,6 +12,7 @@ Item {
 
     property Backdrop backdrop
     property var runningApps: []
+    property var attentionApps: []
     // appId => {name, icon} for apps outside the registry (Wayland clients).
     property var identityProvider: appId => ({ name: appId, icon: "" })
     property bool overview: false
@@ -87,6 +88,7 @@ Item {
                 chroma: app ? app.chroma : 0.1
                 label: app ? app.name : client.name
                 running: shelf.runningApps.indexOf(modelData) >= 0
+                attention: shelf.attentionApps.indexOf(modelData) >= 0
                 pointerX: pointer.hovered ? pointer.point.position.x - row.x : -1000
                 onActivated: shelf.launchRequested(modelData)
             }

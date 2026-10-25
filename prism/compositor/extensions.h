@@ -1,15 +1,18 @@
 // SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
 #pragma once
 
+#include <QtCore/QElapsedTimer>
 #include <QtCore/QHash>
 #include <QtCore/QPointer>
 #include <QtQml/QQmlParserStatus>
 #include <QtQml/qqmlregistration.h>
+#include <QtQuick/QQuickItem>
 #include <QtQuick/QQuickWindow>
 #include <QtWaylandCompositor/QWaylandCompositorExtensionTemplate>
 
 #include "qwayland-server-cursor-shape-v1.h"
 #include "qwayland-server-fractional-scale-v1.h"
+#include "qwayland-server-xdg-activation-v1.h"
 
 #include <ctime>
 #include <optional>
@@ -96,6 +99,75 @@ protected:
     void wp_cursor_shape_manager_v1_get_pointer(Resource *resource, uint32_t id, wl_resource *pointer) override;
     void wp_cursor_shape_manager_v1_get_tablet_tool_v2(Resource *resource, uint32_t id,
                                                        wl_resource *tabletTool) override;
+};
+
+class ActivationToken;
+
+// xdg_activation_v1: a client asks for one of its surfaces to be focused,
+// presenting a token. Focus-stealing prevention decides what happens:
+//   - trusted tokens, issued while the requesting client had keyboard focus or
+//     by Prism itself (createToken(), for launches), activate the window;
+//   - any other token only asks for attention, and focus stays where it is.
+// Tokens are single-use and expire after a minute.
+class ActivationManager : public QWaylandCompositorExtensionTemplate<ActivationManager>,
+                          public QtWaylandServer::xdg_activation_v1,
+                          public QQmlParserStatus
+{
+    Q_OBJECT
+    Q_INTERFACES(QQmlParserStatus)
+    QML_NAMED_ELEMENT(XdgActivationV1)
+
+public:
+    void initialize() override;
+    void classBegin() override { }
+    void componentComplete() override;
+
+    static const wl_interface *interface() { return xdg_activation_v1::interface(); }
+
+    // A trusted token for an app Prism launches (XDG_ACTIVATION_TOKEN).
+    Q_INVOKABLE QString createToken();
+
+Q_SIGNALS:
+    // `surface` is a QWaylandSurface; `trusted` decides focus or attention.
+    void activationRequested(QObject *surface, bool trusted);
+
+protected:
+    void xdg_activation_v1_destroy(Resource *resource) override;
+    void xdg_activation_v1_get_activation_token(Resource *resource, uint32_t id) override;
+    void xdg_activation_v1_activate(Resource *resource, const QString &token, wl_resource *surface) override;
+
+private:
+    friend class ActivationToken;
+    QString issue(bool trusted);
+
+    struct Issued
+    {
+        bool trusted = false;
+        QElapsedTimer age;
+    };
+    QHash<QString, Issued> m_tokens;
+};
+
+// QML singleton `WindowManagement`: makes Prism the only window manager for
+// a client surface item.
+//
+// Qt's xdg-shell integration for a ShellSurfaceItem reacts to the client's
+// move, resize, maximise and fullscreen requests itself (it moves the item,
+// sends its own resize and maximise configures). Prism handles all of these
+// with its own springs, snapping, work area and size limits, and two
+// handlers fighting over one window give inconsistent sizes. takeOver()
+// disconnects Qt's handlers for those requests; popups and activation stay
+// with Qt.
+class WindowManagement : public QObject
+{
+    Q_OBJECT
+    QML_ELEMENT
+    QML_SINGLETON
+
+public:
+    explicit WindowManagement(QObject *parent = nullptr);
+
+    Q_INVOKABLE void takeOver(QQuickItem *shellSurfaceItem);
 };
 
 // Feeds wp_presentation (Qt's PresentationTime) with every frame of `window`,

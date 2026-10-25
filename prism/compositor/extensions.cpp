@@ -2,13 +2,17 @@
 #include "extensions.h"
 
 #include <QtCore/QLoggingCategory>
+#include <QtCore/QUuid>
 #include <QtGui/QCursor>
 #include <QtQuick/QQuickItem>
 #include <QtWaylandCompositor/QWaylandClient>
 #include <QtWaylandCompositor/QWaylandCompositor>
+#include <QtWaylandCompositor/QWaylandQuickShellIntegration>
+#include <QtWaylandCompositor/QWaylandQuickShellSurfaceItem>
 #include <QtWaylandCompositor/QWaylandSeat>
 #include <QtWaylandCompositor/QWaylandSurface>
 #include <QtWaylandCompositor/QWaylandView>
+#include <QtWaylandCompositor/QWaylandXdgShell>
 
 #include <cmath>
 
@@ -237,6 +241,142 @@ void CursorShapeManager::wp_cursor_shape_manager_v1_get_pointer(Resource *resour
 void CursorShapeManager::wp_cursor_shape_manager_v1_get_tablet_tool_v2(Resource *resource, uint32_t id, wl_resource *)
 {
     new CursorShapeDevice(this, true, resource->client(), id, resource->version());
+}
+
+// ── Activation ───────────────────────────────────────────────────────────────
+
+namespace {
+constexpr qint64 kTokenLifetimeMs = 60000;
+}
+
+// An xdg_activation_token_v1 being built by a client: surface, serial and app
+// id, then commit, which answers with the token string.
+class ActivationToken : public QtWaylandServer::xdg_activation_token_v1
+{
+public:
+    ActivationToken(ActivationManager *manager, wl_client *client, uint32_t id, int version)
+        : xdg_activation_token_v1(client, id, version), m_manager(manager)
+    { }
+
+protected:
+    // Trust is decided from keyboard focus at commit, so serial, app id and
+    // surface only need to arrive before it.
+    void xdg_activation_token_v1_set_serial(Resource *resource, uint32_t, wl_resource *) override
+    {
+        checkNotCommitted(resource);
+    }
+    void xdg_activation_token_v1_set_app_id(Resource *resource, const QString &) override
+    {
+        checkNotCommitted(resource);
+    }
+    void xdg_activation_token_v1_set_surface(Resource *resource, wl_resource *) override
+    {
+        checkNotCommitted(resource);
+    }
+    void xdg_activation_token_v1_commit(Resource *resource) override
+    {
+        if (!checkNotCommitted(resource) || !m_manager)
+            return;
+        m_committed = true;
+        // Trusted when the requesting client holds keyboard focus right now.
+        bool trusted = false;
+        auto *compositor = qobject_cast<QWaylandCompositor *>(m_manager->extensionContainer());
+        if (QWaylandSeat *seat = compositor ? compositor->defaultSeat() : nullptr) {
+            QWaylandSurface *focus = seat->keyboardFocus();
+            trusted = focus && focus->client() && focus->client()->client() == resource->client();
+        }
+        send_done(m_manager->issue(trusted));
+    }
+    void xdg_activation_token_v1_destroy(Resource *resource) override { wl_resource_destroy(resource->handle); }
+    void xdg_activation_token_v1_destroy_resource(Resource *) override { delete this; }
+
+private:
+    bool checkNotCommitted(Resource *resource)
+    {
+        if (m_committed)
+            wl_resource_post_error(resource->handle, error_already_used, "the activation token was already used");
+        return !m_committed;
+    }
+
+    QPointer<ActivationManager> m_manager;
+    bool m_committed = false;
+};
+
+void ActivationManager::initialize()
+{
+    QWaylandCompositorExtensionTemplate::initialize();
+    QWaylandCompositor *compositor = compositorOf(this);
+    if (!compositor) {
+        qCWarning(lcExtensions, "XdgActivationV1 must be declared inside a WaylandCompositor");
+        return;
+    }
+    init(compositor->display(), 1);
+}
+
+void ActivationManager::componentComplete()
+{
+    if (!isInitialized())
+        initialize();
+}
+
+QString ActivationManager::createToken() { return issue(true); }
+
+QString ActivationManager::issue(bool trusted)
+{
+    // Forget expired tokens while issuing new ones.
+    for (auto it = m_tokens.begin(); it != m_tokens.end();)
+        it = it->age.elapsed() > kTokenLifetimeMs ? m_tokens.erase(it) : std::next(it);
+    const QString token = QUuid::createUuid().toString(QUuid::WithoutBraces);
+    Issued issued;
+    issued.trusted = trusted;
+    issued.age.start();
+    m_tokens.insert(token, issued);
+    return token;
+}
+
+void ActivationManager::xdg_activation_v1_destroy(Resource *resource) { wl_resource_destroy(resource->handle); }
+
+void ActivationManager::xdg_activation_v1_get_activation_token(Resource *resource, uint32_t id)
+{
+    new ActivationToken(this, resource->client(), id, resource->version());
+}
+
+void ActivationManager::xdg_activation_v1_activate(Resource *, const QString &token, wl_resource *surfaceResource)
+{
+    const auto it = m_tokens.constFind(token);
+    if (it == m_tokens.constEnd() || it->age.elapsed() > kTokenLifetimeMs) {
+        // Unknown or expired: the request is ignored, as the protocol allows.
+        return;
+    }
+    const bool trusted = it->trusted;
+    m_tokens.erase(it);
+    if (QWaylandSurface *surface = QWaylandSurface::fromResource(surfaceResource))
+        Q_EMIT activationRequested(surface, trusted);
+}
+
+// ── Window management ────────────────────────────────────────────────────────
+
+WindowManagement::WindowManagement(QObject *parent) : QObject(parent) { }
+
+void WindowManagement::takeOver(QQuickItem *shellSurfaceItem)
+{
+    auto *item = qobject_cast<QWaylandQuickShellSurfaceItem *>(shellSurfaceItem);
+    auto *xdgSurface = item ? qobject_cast<QWaylandXdgSurface *>(item->shellSurface()) : nullptr;
+    QWaylandXdgToplevel *toplevel = xdgSurface ? xdgSurface->toplevel() : nullptr;
+    if (!toplevel)
+        return;
+    // The integration is created with the item as its parent.
+    const auto integrations = item->findChildren<QWaylandQuickShellIntegration *>(Qt::FindDirectChildrenOnly);
+    for (QWaylandQuickShellIntegration *integration : integrations) {
+        QObject::disconnect(toplevel, &QWaylandXdgToplevel::startMove, integration, nullptr);
+        QObject::disconnect(toplevel, &QWaylandXdgToplevel::startResize, integration, nullptr);
+        QObject::disconnect(toplevel, &QWaylandXdgToplevel::setMaximized, integration, nullptr);
+        QObject::disconnect(toplevel, &QWaylandXdgToplevel::unsetMaximized, integration, nullptr);
+        QObject::disconnect(toplevel, &QWaylandXdgToplevel::maximizedChanged, integration, nullptr);
+        QObject::disconnect(toplevel, &QWaylandXdgToplevel::setFullscreen, integration, nullptr);
+        QObject::disconnect(toplevel, &QWaylandXdgToplevel::unsetFullscreen, integration, nullptr);
+        QObject::disconnect(toplevel, &QWaylandXdgToplevel::fullscreenChanged, integration, nullptr);
+    }
 }
 
 // ── Presentation feedback ────────────────────────────────────────────────────

@@ -43,7 +43,8 @@ check() { # name, file, pattern
 
 echo "Globals advertised by Prism:"
 for global in xdg_wm_base zxdg_decoration_manager_v1 wp_viewporter wp_fractional_scale_manager_v1 \
-              wp_cursor_shape_manager_v1 wp_presentation zwp_idle_inhibit_manager_v1 zwp_text_input_manager_v3; do
+              wp_cursor_shape_manager_v1 wp_presentation zwp_idle_inhibit_manager_v1 zwp_text_input_manager_v3 \
+              xdg_activation_v1; do
     check "$global" "$WORK/globals.txt" "interface: '$global'"
 done
 

@@ -5,10 +5,17 @@
 //
 // The "Menu" button sits at (20, 20) in the window and opens a QMenu, an
 // xdg_popup, directly below it, so a test can click it and check where Prism
-// places the popup. Title, app id and size limits are set from the command line.
+// places the popup. Pressing "Move" (160, 20) or "Resize" (300, 20) starts a
+// client-initiated move or bottom-right resize (xdg_toplevel.move/resize), as
+// client-side decorated apps do from their own title bar and borders.
+// "Activate later" (440, 20) asks for focus 1.5 s after it is clicked
+// (xdg_activation_v1), long enough for a test to focus another window first.
+// Title, app id and size limits are set from the command line.
 
 #include <QtCore/QCommandLineParser>
+#include <QtCore/QTimer>
 #include <QtGui/QResizeEvent>
+#include <QtGui/QWindow>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QMenu>
@@ -38,6 +45,17 @@ public:
         menu->addAction(u"Third"_s);
         connect(button, &QPushButton::clicked, this,
                 [button, menu] { menu->popup(button->mapToGlobal(QPoint(0, button->height()))); });
+        auto *move = new QPushButton(u"Move"_s, this);
+        move->setGeometry(160, 20, 120, 32);
+        connect(move, &QPushButton::pressed, this, [this] { windowHandle()->startSystemMove(); });
+        auto *resize = new QPushButton(u"Resize"_s, this);
+        resize->setGeometry(300, 20, 120, 32);
+        connect(resize, &QPushButton::pressed, this,
+                [this] { windowHandle()->startSystemResize(Qt::RightEdge | Qt::BottomEdge); });
+        auto *activate = new QPushButton(u"Activate later"_s, this);
+        activate->setGeometry(440, 20, 140, 32);
+        connect(activate, &QPushButton::clicked, this,
+                [this] { QTimer::singleShot(1500, this, [this] { activateWindow(); }); });
         m_size = new QLabel(this);
         m_size->setGeometry(20, 70, 300, 24);
     }

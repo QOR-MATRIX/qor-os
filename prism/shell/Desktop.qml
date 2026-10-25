@@ -264,6 +264,7 @@ FocusScope {
             y: parent.height - height - 12 + 110 * lockDepth.value
             backdrop: sceneBackdrop
             runningApps: windows.runningApps
+            attentionApps: windows.attentionApps
             identityProvider: appId => windows.clientIdentity(appId)
             overview: desktop.overview
             onLaunchRequested: appId => desktop.launch(appId, {})

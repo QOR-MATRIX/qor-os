@@ -64,10 +64,21 @@ def script(with_terminal: bool) -> list[dict]:
         {"restore": A},
         {"wait": 900},
         {"state": "06-restored.json"},
+        # The left edge moves the left side only: the right edge stays put.
+        {"drag": {"from": {"window": A, "part": "frame", "at": [2, 300]}, "by": [200, 0], "steps": 16}},
+        {"wait": 900},
+        {"state": "06a-left-edge.json"},
         # Shrink far below the client's minimum (480 x 320) with the corner grip.
         {"drag": {"from": {"window": A, "part": "frame", "at": [-6, -6]}, "by": [-700, -700], "steps": 20}},
         {"wait": 900},
         {"state": "06b-resized.json"},
+        # Client-initiated resize and move (the test client's Resize and Move buttons).
+        {"drag": {"from": {"window": A, "part": "content", "at": [360, 36]}, "by": [120, 80], "steps": 16}},
+        {"wait": 900},
+        {"state": "06c-client-resize.json"},
+        {"drag": {"from": {"window": A, "part": "content", "at": [220, 36]}, "by": [100, 60], "steps": 16}},
+        {"wait": 900},
+        {"state": "06d-client-move.json"},
         # The test client's "Menu" button: (20, 20), 120 × 32, in its window.
         {"click": {"window": A, "part": "content", "at": [80, 36]}},
         {"waitFor": {"popups": 1, "timeout": 5000}},
@@ -77,6 +88,21 @@ def script(with_terminal: bool) -> list[dict]:
         {"key": "Escape"},
         {"waitFor": {"popups": 0, "timeout": 5000}},
         {"state": "08-popup-closed.json"},
+    ]
+    if with_terminal:
+        steps += [
+            # Focus-stealing prevention: the test client asks for focus 1.5 s
+            # after the click, by which time the terminal has focus.
+            {"click": {"window": A, "part": "content", "at": [510, 36]}},
+            {"click": {"window": TERMINAL, "part": "content", "at": [-60, -60]}},
+            {"wait": 2500},
+            {"state": "08b-activation-refused.json"},
+            # Left of the terminal, which is raised over the rest of the window.
+            {"click": {"window": A, "part": "content", "at": [60, 200]}},
+            {"wait": 500},
+            {"state": "08c-attention-cleared.json"},
+        ]
+    steps += [
         {"call": "setSurface", "args": ["overview"]},
         {"wait": 1000},
         {"screenshot": "09-overview.png"},
@@ -176,6 +202,30 @@ def verify(out: Path, with_terminal: bool) -> int:
     a = find(load("06-restored.json"), A)
     c.check("Shelf restore brings the client back focused", bool(a and not a["minimized"] and a["focused"]))
 
+    print("Resize from any edge:")
+    before = find(load("06-restored.json"), A)
+    after = find(load("06a-left-edge.json"), A)
+    if before and after:
+        b, f = before["frameRect"], after["frameRect"]
+        c.check("left-edge drag moves the left side by the drag", near([f[0], f[2]], [b[0] + 200, b[2] - 200]),
+                f"{b} -> {f}")
+        c.check("the right edge stays where it was", near([f[0] + f[2]], [b[0] + b[2]]), f"{b} -> {f}")
+    else:
+        c.check("left-edge resize state recorded", False)
+
+    print("Client-initiated resize and move:")
+    start = find(load("06b-resized.json"), A)
+    resized = find(load("06c-client-resize.json"), A)
+    moved = find(load("06d-client-move.json"), A)
+    if start and resized and moved:
+        s0, s1, s2 = start["frameRect"], resized["frameRect"], moved["frameRect"]
+        c.check("xdg_toplevel.resize grows the window with the pointer", near(s1, [s0[0], s0[1], s0[2] + 120, s0[3] + 80], 3),
+                f"{s0} -> {s1}")
+        c.check("xdg_toplevel.move from a Qt client moves the window", near(s2, [s1[0] + 100, s1[1] + 60, s1[2], s1[3]], 3),
+                f"{s1} -> {s2}")
+    else:
+        c.check("client-initiated resize state recorded", False)
+
     print("Size limits:")
     a = find(load("06b-resized.json"), A)
     c.check("resizing stops at the client's minimum size",
@@ -193,6 +243,16 @@ def verify(out: Path, with_terminal: bool) -> int:
         c.check("popup placed directly below the button", near(s["popups"][0][:2], expected, 3),
                 f"{s['popups'][0][:2]} vs {expected}")
     c.check("Escape closes the popup", len(load("08-popup-closed.json")["popups"]) == 0)
+
+    if with_terminal:
+        print("Activation (xdg-activation):")
+        s = load("08b-activation-refused.json")
+        a, t = find(s, A), find(s, TERMINAL)
+        c.check("an unfocused app cannot take focus", bool(a and t and t["focused"] and not a["focused"]),
+                f"A focused={a and a['focused']} terminal focused={t and t['focused']}")
+        c.check("it asks for attention instead", bool(a and a["demandsAttention"]))
+        a = find(load("08c-attention-cleared.json"), A)
+        c.check("focusing the window clears the attention", bool(a and a["focused"] and not a["demandsAttention"]))
 
     print("Overview:")
     s = load("09-overview.json")

@@ -43,6 +43,14 @@ Item {
         return ids;
     }
 
+    readonly property var attentionApps: {
+        const ids = [];
+        for (const w of windows)
+            if (w.demandsAttention && !w.closing && ids.indexOf(w.appId) < 0)
+                ids.push(w.appId);
+        return ids;
+    }
+
     signal overviewPicked()
 
     onOverviewChanged: relayout()
@@ -182,6 +190,21 @@ Item {
             if (!w.minimized && (!best || w.z > best.z))
                 best = w;
         return best;
+    }
+
+    // Brings a specific window to the front: restores it if minimised and
+    // switches to its Space.
+    function raise(window: AppWindow) {
+        if (!window || window.closing)
+            return;
+        if (window.minimized) {
+            window.origin = originProvider(window.appId);
+            window.minimized = false;
+        }
+        if (window.space !== currentSpace)
+            currentSpace = window.space;
+        activate(window);
+        relayout();
     }
 
     function activate(window: AppWindow) {

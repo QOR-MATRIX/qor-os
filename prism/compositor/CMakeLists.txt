@@ -19,9 +19,10 @@ qt6_generate_wayland_protocol_server_sources(prism PRIVATE_CODE FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/protocols/fractional-scale-v1.xml
     ${CMAKE_CURRENT_SOURCE_DIR}/protocols/cursor-shape-v1.xml
     ${CMAKE_CURRENT_SOURCE_DIR}/protocols/tablet-v2.xml
+    ${CMAKE_CURRENT_SOURCE_DIR}/protocols/xdg-activation-v1.xml
 )
 # Scanner output is not ours to fix; keep its warnings out of the build log.
-foreach(protocol IN ITEMS fractional-scale-v1 cursor-shape-v1 tablet-v2)
+foreach(protocol IN ITEMS fractional-scale-v1 cursor-shape-v1 tablet-v2 xdg-activation-v1)
     set_source_files_properties("${CMAKE_CURRENT_BINARY_DIR}/qwayland-server-${protocol}.cpp"
                                 "${CMAKE_CURRENT_BINARY_DIR}/wayland-${protocol}-protocol.c"
                                 PROPERTIES COMPILE_OPTIONS "-w")

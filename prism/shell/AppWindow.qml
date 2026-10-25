@@ -30,6 +30,10 @@ Item {
     // decorations): Prism then draws no title bar of its own.
     property bool decorated: true
     readonly property bool hasTitleBar: !isClient || decorated
+    // The app asked for focus but was not allowed to take it (focus-stealing
+    // prevention); the Shelf shows it until the window is focused.
+    property bool demandsAttention: false
+    onFocusedChanged: if (focused) demandsAttention = false
 
     // ── State ───────────────────────────────────────────────────────────────
     property real normalX: 100
@@ -174,19 +178,29 @@ Item {
         }
     }
 
-    // A client with its own title bar asks the compositor to move it when that
-    // title bar is dragged. The press belongs to the client, so the frame
-    // follows the pointer through `pointerWatch` and moves exactly like a
-    // Prism title-bar drag (springs, edge snapping, maximise on top edge).
+    // A client with its own decorations asks the compositor to move or resize
+    // it when its title bar or border is dragged (xdg_toplevel move/resize).
+    // The press belongs to the client, so the frame follows the pointer
+    // through `pointerWatch`, with the same springs, snapping and size limits
+    // as Prism's own title bar and grips.
     property bool clientMoving: false
-    property point clientMoveStart
+    property bool clientResizing: false
+    property point clientDragStart
 
     function beginClientMove() {
         if (!pointerWatch.active)
             return;
-        clientMoveStart = pointerWatch.point.scenePosition;
+        clientDragStart = pointerWatch.point.scenePosition;
         clientMoving = true;
-        beginMove(clientMoveStart);
+        beginMove(clientDragStart);
+    }
+
+    function beginClientResize(edges: int) {
+        if (!pointerWatch.active || maximized)
+            return;
+        clientDragStart = pointerWatch.point.scenePosition;
+        clientResizing = true;
+        beginResize(edges);
     }
 
     // Size limits for the content, from the client (xdg_toplevel min/max
@@ -195,8 +209,10 @@ Item {
     property size maximumContentSize: Qt.size(0, 0)
     // True during an interactive resize, so clients can relayout cheaply.
     property bool resizing: false
+    // The edges being dragged (Qt.LeftEdge | Qt.TopEdge | ...).
+    property int resizeEdges: Qt.RightEdge | Qt.BottomEdge
 
-    function beginResize() {
+    function beginResize(edges: int) {
         manager.activate(win);
         if (maximized) {
             normalX = frameRect.x;
@@ -206,17 +222,35 @@ Item {
             maximized = false;
         }
         dragStartRect = Qt.rect(normalX, normalY, normalW, normalH);
+        resizeEdges = edges;
         resizing = true;
     }
 
+    // Moves the dragged edges by (dx, dy). Left and top edges move the
+    // origin too, so the opposite edges stay where they are.
     function resizeBy(dx: real, dy: real) {
         const chrome = isClient && decorated ? titleBarHeight : 0;
         const minW = Math.max(isClient ? 160 : 420, minimumContentSize.width);
         const minH = Math.max(isClient ? 120 : 300, minimumContentSize.height + chrome);
         const maxW = maximumContentSize.width > 0 ? maximumContentSize.width : Infinity;
         const maxH = maximumContentSize.height > 0 ? maximumContentSize.height + chrome : Infinity;
-        normalW = Math.min(maxW, Math.max(minW, dragStartRect.width + dx));
-        normalH = Math.min(maxH, Math.max(minH, dragStartRect.height + dy));
+        const r = dragStartRect;
+        const clampW = w => Math.min(maxW, Math.max(minW, w));
+        const clampH = h => Math.min(maxH, Math.max(minH, h));
+        if (resizeEdges & Qt.RightEdge)
+            normalW = clampW(r.width + dx);
+        if (resizeEdges & Qt.LeftEdge) {
+            normalW = clampW(r.width - dx);
+            normalX = r.x + r.width - normalW;
+        }
+        if (resizeEdges & Qt.BottomEdge)
+            normalH = clampH(r.height + dy);
+        if (resizeEdges & Qt.TopEdge) {
+            normalH = clampH(r.height - dy);
+            normalY = r.y + r.height - normalH;
+        }
+        gx.snap(normalX);
+        gy.snap(normalY);
         gw.snap(normalW);
         gh.snap(normalH);
     }
@@ -365,9 +399,12 @@ Item {
                 if (!active)
                     return;
                 lastScenePosition = point.scenePosition;
+                const dx = point.scenePosition.x - win.clientDragStart.x;
+                const dy = point.scenePosition.y - win.clientDragStart.y;
                 if (win.clientMoving)
-                    win.moveBy(Qt.vector2d(point.scenePosition.x - win.clientMoveStart.x,
-                                           point.scenePosition.y - win.clientMoveStart.y), point.scenePosition);
+                    win.moveBy(Qt.vector2d(dx, dy), point.scenePosition);
+                else if (win.clientResizing)
+                    win.resizeBy(dx, dy);
             }
             onActiveChanged: {
                 if (active && !win.focused)
@@ -376,50 +413,50 @@ Item {
                     win.clientMoving = false;
                     win.endMove(lastScenePosition);
                 }
+                if (!active && win.clientResizing) {
+                    win.clientResizing = false;
+                    win.endResize();
+                }
             }
         }
     }
 
-    // Resize grips (bottom, right, corner).
-    Item {
-        z: 11
-        visible: !win.maximized && !win.inOverview
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        width: 18
-        height: 18
-        HoverHandler { cursorShape: Qt.SizeFDiagCursor }
-        DragHandler {
-            target: null
-            onActiveChanged: active ? win.beginResize() : win.endResize()
-            onActiveTranslationChanged: if (active) win.resizeBy(activeTranslation.x, activeTranslation.y)
-        }
-    }
-    Item {
-        z: 11
-        visible: !win.maximized && !win.inOverview
-        anchors.right: parent.right
-        y: win.titleBarHeight
-        width: 6
-        height: parent.height - y - 18
-        HoverHandler { cursorShape: Qt.SizeHorCursor }
-        DragHandler {
-            target: null
-            onActiveChanged: active ? win.beginResize() : win.endResize()
-            onActiveTranslationChanged: if (active) win.resizeBy(activeTranslation.x, 0)
-        }
-    }
-    Item {
-        z: 11
-        visible: !win.maximized && !win.inOverview
-        anchors.bottom: parent.bottom
-        width: parent.width - 18
-        height: 6
-        HoverHandler { cursorShape: Qt.SizeVerCursor }
-        DragHandler {
-            target: null
-            onActiveChanged: active ? win.beginResize() : win.endResize()
-            onActiveTranslationChanged: if (active) win.resizeBy(0, activeTranslation.y)
+    // Resize grips on every edge and corner. They sit above the content, so a
+    // client-side decorated app's own (clipped) border is never needed.
+    Repeater {
+        model: [
+            { edges: Qt.LeftEdge | Qt.TopEdge, cursor: Qt.SizeFDiagCursor },
+            { edges: Qt.TopEdge, cursor: Qt.SizeVerCursor },
+            { edges: Qt.RightEdge | Qt.TopEdge, cursor: Qt.SizeBDiagCursor },
+            { edges: Qt.RightEdge, cursor: Qt.SizeHorCursor },
+            { edges: Qt.RightEdge | Qt.BottomEdge, cursor: Qt.SizeFDiagCursor },
+            { edges: Qt.BottomEdge, cursor: Qt.SizeVerCursor },
+            { edges: Qt.LeftEdge | Qt.BottomEdge, cursor: Qt.SizeBDiagCursor },
+            { edges: Qt.LeftEdge, cursor: Qt.SizeHorCursor }
+        ]
+        delegate: Item {
+            id: grip
+
+            required property var modelData
+            readonly property int edges: modelData.edges
+            readonly property bool horizontal: (edges & (Qt.LeftEdge | Qt.RightEdge)) !== 0
+            readonly property bool vertical: (edges & (Qt.TopEdge | Qt.BottomEdge)) !== 0
+            readonly property real band: 6
+            readonly property real corner: 12
+
+            z: 11
+            visible: !win.maximized && !win.inOverview
+            x: edges & Qt.LeftEdge ? 0 : edges & Qt.RightEdge ? win.width - width : corner
+            y: edges & Qt.TopEdge ? 0 : edges & Qt.BottomEdge ? win.height - height : corner
+            width: horizontal && vertical ? corner : horizontal ? band : win.width - 2 * corner
+            height: horizontal && vertical ? corner : vertical ? band : win.height - 2 * corner
+
+            HoverHandler { cursorShape: grip.modelData.cursor }
+            DragHandler {
+                target: null
+                onActiveChanged: active ? win.beginResize(grip.edges) : win.endResize()
+                onActiveTranslationChanged: if (active) win.resizeBy(activeTranslation.x, activeTranslation.y)
+            }
         }
     }
 

@@ -189,6 +189,9 @@ scale.
 | `{"state": file}`, `{"screenshot": file}` | Write the state as JSON or grab the window (paths relative to the script) |
 | `{"log": text}` | Print a progress line |
 
+A click or drag aimed at a window part fails if another window covers that
+point, so a script cannot silently hit the wrong window.
+
 A **target** is `[x, y]` in window coordinates, or
 `{"window": spec, "part": "frame|titlebar|content|close|maximize|minimize", "at": [x, y]}`,
 or `{"item": "<objectName>", "at": [x, y]}`. `at` is relative to the part's
@@ -213,12 +216,14 @@ Two suites use the runner (label `gpu`):
 - **`prism_e2e`** (Linux) runs `tools/dev/prism-e2e.py`. It starts a nested
   Prism with `prism-test-client` (a Qt client with a menu at a known spot,
   an app id, a desktop entry and size limits) and `weston-terminal`, which
-  draws its own decorations. It then checks 24 behaviours:
+  draws its own decorations. It then checks 31 behaviours:
   - decorations and app identity;
-  - maximise, restore, snap and moves by a client's own title bar;
+  - maximise, restore and snap;
+  - resizing from any edge, and client-initiated moves and resizes;
   - minimise and Shelf restore;
   - size limits;
   - xdg_popup placement and dismissal;
+  - focus-stealing prevention (xdg-activation);
   - Overview and close.
 
   Run it with `--keep` to keep the states and screenshots.
