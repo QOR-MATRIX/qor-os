@@ -129,7 +129,7 @@ jobs:
       - name: Test (GPU)
         id: gpu-tests
         if: vars.QTOS_RUN_GPU_TESTS == 'true'
-        run: ctest --preset ci-windows -L gpu --timeout 300
+        run: ctest --preset ci-windows -L gpu --timeout 120 --repeat until-pass:2
 
       - name: Upload golden-image differences
         if: failure() && steps.gpu-tests.outcome == 'failure'
@@ -225,7 +225,7 @@ jobs:
             echo "::error::Wayland display socket $socket does not exist. See docs/CI.md (Linux runner in WSL2)."
             exit 1
           fi
-          ctest --preset ci-linux -L gpu --timeout 300
+          ctest --preset ci-linux -L gpu --timeout 120 --repeat until-pass:2
 
       - name: Upload golden-image differences
         if: failure() && steps.gpu-tests.outcome == 'failure'

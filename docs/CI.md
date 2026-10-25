@@ -96,8 +96,12 @@ configured the runner:
   enabled, `/run/user/<uid>` is recreated whenever the distribution starts,
   and WSLg's socket is not always linked into it, so a relative `wayland-0`
   can point at nothing and GPU tests would wait for a window forever. The
-  GPU step checks for the socket and fails with this pointer instead, and
-  each GPU suite has a 300-second timeout.
+  GPU step checks for the socket and fails with this pointer instead.
+
+GPU suites run with a 120-second timeout and one retry
+(`ctest --repeat until-pass:2`). Under WSLg a window is occasionally never
+reported as exposed. It happened once, right after a full rebuild, and could
+not be reproduced in 24 runs. A genuine failure still fails both attempts.
 
 ```bash
 # Set up (in WSL). Download the actions-runner-linux-x64 tarball, check its SHA-256, extract it to ~/ghr/qtos-linux.
