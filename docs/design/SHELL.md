@@ -115,6 +115,8 @@ top-right on `snappy`.
 - **Maximise**: double-click the title or press the button. Animates to the
   work area and back.
 - **Focus**: any press activates the window (z-order raise, focus to content).
+- **Window menu**: right-click the title bar for Minimize, Maximize or
+  Restore, Move to Space 1–3, and Close.
 - **Wayland clients** (under `prism`): the same frame. Content is a
   `ShellSurfaceItem` below the title bar. Close asks the client
   (`sendClose`), and size changes are sent as xdg configures.
@@ -128,6 +130,23 @@ wallpaper parallaxes 3% of the width per Space. Switch with
 or a two-finger horizontal swipe on the empty desktop (touchpad, 140 px
 threshold).
 
+Every window, first-party or Wayland client, belongs to one Space and rides
+the strip with it. Windows of Spaces out of view are not drawn.
+
+- **Take the active window along**:
+  <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>←</kbd>/<kbd>→</kbd>
+  or <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>1</kbd>…<kbd>3</kbd> moves it and
+  switches with it. Beam has "Move Window to Space 1–3".
+- **Send a window away**: Move to Space in the window menu leaves you where
+  you are; the topmost window left on the current Space takes focus.
+- **In Overview**, drag a window onto a Space chip. The chip under the
+  pointer lights up in the accent colour; dropping anywhere else returns the
+  window to the grid.
+- **Clients sleep off-screen.** A Wayland client on a Space out of view is
+  taken off the output (`wl_surface.leave`) and gets no frame callbacks, so
+  a well-behaved client stops drawing until its Space comes back.
+  `prism_e2e` checks this with an animating client.
+
 ### Overview
 
 <kbd>Ctrl</kbd>+<kbd>↑</kbd>, <kbd>F3</kbd> or the Shelf button.
@@ -138,7 +157,8 @@ threshold).
 - The wallpaper pulls focus (blur 90%) and zooms 3%. The Space switcher
   chips appear at the top.
 - Hover outlines a window in the accent color. Click to focus it and exit.
-  Click empty space to exit.
+  Click empty space to exit. Drag a window onto a Space chip to move it
+  there.
 
 ## Keyboard reference
 
@@ -148,6 +168,8 @@ threshold).
 | <kbd>Ctrl</kbd>+<kbd>↑</kbd> · <kbd>F3</kbd> | Overview |
 | <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>←</kbd>/<kbd>→</kbd> | Previous / next Space |
 | <kbd>Alt</kbd>+<kbd>1</kbd>…<kbd>3</kbd> | Go to Space |
+| <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>←</kbd>/<kbd>→</kbd> | Take the active window to the previous / next Space |
+| <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>1</kbd>…<kbd>3</kbd> | Take the active window to a Space |
 | <kbd>Ctrl</kbd>+<kbd>W</kbd> | Close window |
 | <kbd>Ctrl</kbd>+<kbd>M</kbd> | Minimise window |
 | <kbd>Ctrl</kbd>+<kbd>,</kbd> | Settings |

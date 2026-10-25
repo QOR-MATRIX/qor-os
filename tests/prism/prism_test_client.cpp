@@ -10,10 +10,13 @@
 // client-side decorated apps do from their own title bar and borders.
 // "Activate later" (440, 20) asks for focus 1.5 s after it is clicked
 // (xdg_activation_v1), long enough for a test to focus another window first.
-// Title, app id and size limits are set from the command line.
+// Title, app id and size limits are set from the command line. With
+// --animate a bar slides along continuously for as long as the compositor
+// sends frame callbacks: Prism's tests see it stop when the window is hidden.
 
 #include <QtCore/QCommandLineParser>
 #include <QtCore/QTimer>
+#include <QtGui/QPainter>
 #include <QtGui/QResizeEvent>
 #include <QtGui/QWindow>
 #include <QtWidgets/QApplication>
@@ -32,11 +35,44 @@ QSize parseSize(const QString &text)
     return parts.size() == 2 ? QSize(parts[0].toInt(), parts[1].toInt()) : QSize();
 }
 
+// Asks for a new frame every 16 ms. Qt's Wayland client stops drawing a
+// window that has had no frame callback for 100 ms and starts again when one
+// arrives, so what the client commits follows the compositor's frame
+// callbacks. (Pacing with QWindow::requestUpdate() instead can stall for good
+// in Qt 6.12: after such a timeout the client re-commits its old buffer
+// without asking for a frame callback, and the pending update request is
+// never delivered.)
+class Pulse : public QWidget
+{
+public:
+    explicit Pulse(QWidget *parent) : QWidget(parent)
+    {
+        auto *timer = new QTimer(this);
+        timer->setTimerType(Qt::PreciseTimer);
+        connect(timer, &QTimer::timeout, this, qOverload<>(&QWidget::update));
+        timer->start(16);
+    }
+
+protected:
+    void paintEvent(QPaintEvent *) override
+    {
+        QPainter painter(this);
+        painter.fillRect(rect(), QColor(0x20, 0x22, 0x2a));
+        const int x = int(m_frame++ * 4 % (width() + 60)) - 60;
+        painter.fillRect(QRect(x, 0, 60, height()), QColor(0x6b, 0x5b, 0xff));
+    }
+
+private:
+    quint64 m_frame = 0;
+};
+
 class Window : public QWidget
 {
 public:
-    Window()
+    explicit Window(bool animate)
     {
+        if (animate)
+            (new Pulse(this))->setGeometry(20, 110, 300, 10);
         auto *button = new QPushButton(u"Menu"_s, this);
         button->setGeometry(20, 20, 120, 32);
         auto *menu = new QMenu(this);
@@ -82,13 +118,14 @@ int main(int argc, char *argv[])
     const QCommandLineOption size(u"size"_s, u"Initial size, e.g. 640x420."_s, u"WxH"_s, u"640x420"_s);
     const QCommandLineOption minimum(u"min"_s, u"Minimum size."_s, u"WxH"_s);
     const QCommandLineOption maximum(u"max"_s, u"Maximum size."_s, u"WxH"_s);
-    parser.addOptions({ title, appId, size, minimum, maximum });
+    const QCommandLineOption animate(u"animate"_s, u"Draw continuously."_s);
+    parser.addOptions({ title, appId, size, minimum, maximum, animate });
     parser.process(app);
 
     if (parser.isSet(appId))
         QGuiApplication::setDesktopFileName(parser.value(appId));
 
-    Window window;
+    Window window(parser.isSet(animate));
     window.setWindowTitle(parser.value(title));
     window.resize(parseSize(parser.value(size)));
     if (parser.isSet(minimum))

@@ -83,8 +83,10 @@ combined before the interface acts on it, so a press never counts twice.
 
 Pointer, wheel and key events enter through `QWindowSystemInterface`, as a
 real device's do, so every surface, app and (in Prism) every Wayland client
-responds without knowing about controllers. A real mouse moving takes over
-from the controller's cursor at once.
+responds without knowing about controllers. Key strokes press their
+modifier keys around the key, as a keyboard does: Prism's compositor
+rebuilds key events from the keys it has seen go down. A real mouse moving
+takes over from the controller's cursor at once.
 
 **Hints.** A glass bar at the bottom left shows what the buttons do right
 now, with the glyphs of the controller in use. It fades after a few seconds

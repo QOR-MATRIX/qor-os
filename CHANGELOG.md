@@ -69,19 +69,28 @@ All notable changes to QTOS are recorded here. The format follows
 - Linux on WSL2 build and run guide (docs/BUILDING.md).
 - **Shell scripts and end-to-end tests.**
   - `qtos-shell --script` and `prism --script` drive the shell with synthetic input through `QWindowSystemInterface` (clicks, drags, keys, shell calls), and assert with `expect` steps.
-  - `shell_e2e` covers first-party apps on every platform. `prism_e2e` covers real Wayland clients (31 checks), with the new `prism-test-client`.
+  - `shell_e2e` covers first-party apps on every platform. `prism_e2e` covers real Wayland clients (40 checks), with the new `prism-test-client`.
   - Documented in docs/DEVELOPMENT.md.
 - **Wayland app identity.** The Shelf names and draws client apps from their desktop entry (`DesktopEntries`, with XDG icon-theme lookup), falling back to the window title.
 - **Resizing from every edge and corner** (eight grips; left and top edges keep the opposite side in place). Client-initiated moves and resizes (`xdg_toplevel.move`/`resize`) go through the same springs, snapping and size limits. `WindowManagement.takeOver()` detaches Qt's built-in xdg-shell handlers, which otherwise fought Prism over the window size.
 - **xdg-activation with focus-stealing prevention.** Tokens issued while the requesting client has keyboard focus (or by Prism, for launches) activate the window. Any other request only marks it as wanting attention: a Shelf hop and an accent dot, cleared on focus.
 - **Client size limits and the resizing state.** Interactive resizing respects a client's minimum and maximum size, and clients receive `xdg_toplevel` `resizing` while it lasts.
 - **Benchmark v2**, shared by `qtos-shell` and `prism` (`prism/shell/shellbenchmark.cpp`): `prism --benchmark` reports per-output frame pacing, missed frames at each output's refresh rate, and input-to-swap latency. Top-level JSON fields are unchanged. Baselines: input to swap 5.9 ms p50 on the RTX 4060 (360 Hz); nested Prism under WSLg holds 60 Hz. This is the tooling for the ADR-0003 decision gate, which needs a bare-metal run.
+- **Spaces for every window, Wayland clients included** ([SHELL.md](docs/design/SHELL.md#spaces)).
+  - Windows ride their Space along the strip, and windows on Spaces out of view are not drawn.
+  - Take the active window along with <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>←</kbd>/<kbd>→</kbd>, <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>1</kbd>…<kbd>3</kbd> or Beam's "Move Window to Space".
+  - Send any window away from its new title-bar menu (right-click: Minimize, Maximize, Move to Space, Close), or drag it onto a Space chip in Overview.
+  - Clients on Spaces out of view leave the output and get no frame callbacks, so they stop drawing. `prism_e2e` checks this with an animating client (`prism-test-client --animate`).
+  - Shell scripts gain `rightClick` steps. The window state includes `visible`, `commits` and the surface's `onOutput`, and the state includes the shell's `frames`. `prism-e2e.py` keeps each client's output next to Prism's log.
 
 ### Fixed
 
 - **Clicking an icon button in a window that overlapped another raised the window underneath.** `IconButton`'s `TapHandler` takes only a passive grab, so the press reached the activation watcher of every window below. Only the topmost window at the press now activates. `shell_e2e` checks it.
 - **Automated runs could talk to a QTOS session in use.** On Windows a named pipe accepts several servers, so a second simulator "hosted" the default endpoint alongside a running session, and clients could reach either. The simulator now probes the endpoint first, and `--script`, `--screenshot` and `--benchmark` runs use a private one.
 - On Linux the keyboard's play/pause key (delivered as Media Play) only ever started playback; it now toggles.
+- **A Wayland client that kept drawing during a resize could pull its window back to an earlier size.** Prism took any committed size other than the latest configured one as the client's own choice, including frames drawn for an earlier configure. It now adopts a client's size only once the client has acknowledged the latest configure (`WindowManagement.configureAcked`). Found by `prism_e2e` with an animating client.
+- **Scripted tests could be disturbed by real input.** A real pointer motion with no button held (a person's mouse, or WSLg's pointer crossing a nested Prism) cancels Qt Quick drags, the likely reason `prism_e2e`'s edge resize occasionally stopped part-way. While a script runs, only its own input and the controller interface's (`qtos::input::InjectedInput`) now reach the window.
+- **Synthetic keys lost their modifiers inside Prism.** QtWaylandCompositor rebuilds every key event from its XKB state, which only real modifier key events change. Shell scripts' <kbd>Ctrl</kbd>+<kbd>Alt</kbd> shortcuts, the controller's <kbd>Shift</kbd>+<kbd>Tab</kbd> and capitals from the on-screen keyboard therefore arrived without modifiers. Synthetic key strokes (`qtos::input::sendKeyStroke`) now press the modifier keys around the key, as a keyboard does, and carry evdev codes for US punctuation and F1–F12.
 
 - `tools/dev/run.ps1 -- <shell options>` passed the first shell option as `-Preset` (so `run.ps1 -- --unlocked` failed with "not built for preset"). `-Preset` is now named-only.
 

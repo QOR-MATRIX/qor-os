@@ -85,15 +85,42 @@ WaylandCompositor {
             onResizingChanged: configureTimer.restart()
             // The client chose another size than configured (e.g. a terminal
             // snapping to whole cells, or its preferred size on first map).
-            onGeometryChanged: {
+            // Only a commit that answers the latest configure says so: while
+            // a resize is under way, a client that keeps drawing still commits
+            // sizes configured earlier. Checked on every commit, since the
+            // answer may be the size the client already had.
+            function adoptClientSize() {
                 if (content.window && geometry.width > 0 && geometry.height > 0
-                        && (geometry.width !== configuredSize.width || geometry.height !== configuredSize.height))
+                        && (geometry.width !== configuredSize.width || geometry.height !== configuredSize.height)
+                        && WindowManagement.configureAcked(toplevel))
                     content.window.adoptContentSize(geometry.width, geometry.height);
+            }
+            onGeometryChanged: adoptClientSize()
+
+            // A window out of view (another Space, minimised, behind the lock
+            // screen) takes its client off the output: wl_surface.leave, and no
+            // frame callbacks, so the client stops drawing until it returns.
+            readonly property bool shown: content.window !== null && content.window.visible
+            function updateOutput() {
+                surfaceItem.output = shown && surfaceItem.compositor ? surfaceItem.compositor.defaultOutput : null;
+            }
+            onShownChanged: updateOutput()
+            Connections {
+                target: surfaceItem.surface
+                function onRedraw() {
+                    if (!content.window)
+                        return;
+                    content.window.commits++; // for tests
+                    content.adoptClientSize();
+                }
             }
 
             ShellSurfaceItem {
                 id: surfaceItem
                 focus: true
+                // Qt reassigns the output when the surface or window changes.
+                onSurfaceChanged: Qt.callLater(content.updateOutput)
+                onWindowChanged: Qt.callLater(content.updateOutput)
                 shellSurface: content.xdgSurface // qmllint disable incompatible-type
                 autoCreatePopupItems: true
                 x: -content.geometry.x

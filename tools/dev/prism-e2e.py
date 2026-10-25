@@ -8,7 +8,7 @@ server-side decorations and a menu at a known spot, and weston-terminal, which
 draws its own decorations. The script drives them with synthetic pointer and
 key input that takes the same path as a person's: maximise, restore, snap,
 move by a client's own title bar, minimise, restore from the Shelf, popup,
-Overview and close. This file then checks the window-manager state the script
+Spaces, Overview and close. This file then checks the window-manager state the script
 recorded at each step.
 
     tools/dev/prism-e2e.py --build-dir ~/qtos-build/linux-release [--keep]
@@ -103,6 +103,37 @@ def script(with_terminal: bool) -> list[dict]:
             {"state": "08c-attention-cleared.json"},
         ]
     steps += [
+        # Spaces. The test client draws continuously (--animate): about one
+        # commit per frame while shown. On a Space out of view Prism takes it
+        # off the output, so it gets no frame callbacks and stops drawing.
+        {"click": {"window": A, "part": "titlebar", "at": [200, 20]}},
+        {"wait": 300},
+        {"state": "08d-shown.json"},
+        {"wait": 1000},
+        {"state": "08e-shown-later.json"},
+        {"key": "Ctrl+Alt+Right"},
+        {"wait": 1500},
+        {"state": "08f-hidden.json"},
+        {"wait": 1000},
+        {"state": "08g-hidden-later.json"},
+        {"key": "Ctrl+Alt+Left"},
+        {"wait": 1200},
+        {"state": "08h-back.json"},
+        {"wait": 1000},
+        {"state": "08i-back-later.json"},
+        # Carry the client to Space 2 with the keyboard; send it back to
+        # Space 1 from its window menu, staying on Space 2.
+        {"key": "Ctrl+Alt+Shift+Right"},
+        {"wait": 1500},
+        {"state": "08j-carried.json"},
+        {"rightClick": {"window": A, "part": "titlebar", "at": [200, 20]}},
+        {"wait": 700},
+        {"click": {"item": "moveToSpace0"}},
+        {"wait": 1500},
+        {"state": "08k-sent-back.json"},
+        {"key": "Alt+1"},
+        {"wait": 1200},
+        {"state": "08l-space-1.json"},
         {"call": "setSurface", "args": ["overview"]},
         {"wait": 1000},
         {"screenshot": "09-overview.png"},
@@ -254,6 +285,43 @@ def verify(out: Path, with_terminal: bool) -> int:
         a = find(load("08c-attention-cleared.json"), A)
         c.check("focusing the window clears the attention", bool(a and a["focused"] and not a["demandsAttention"]))
 
+    print("Spaces:")
+    states = {name: load(f"{name}.json") for name in
+              ("08d-shown", "08e-shown-later", "08f-hidden", "08g-hidden-later", "08h-back", "08i-back-later")}
+    shown0, shown1, hidden0, hidden1, back0, back1 = (find(s, A) for s in states.values())
+
+    def frames(first: str, second: str) -> str:
+        # Prism draws only when asked by its host (WSLg); a client inside gets
+        # frame callbacks only when Prism draws.
+        return f"Prism drew {states[second].get('frames', 0) - states[first].get('frames', 0)} frames"
+
+    if shown0 and shown1 and hidden0 and hidden1 and back0 and back1:
+        drawn = shown1["commits"] - shown0["commits"]
+        c.check("a shown client draws continuously", drawn >= 5,
+                f"{drawn} commits in 1 s; {frames('08d-shown', '08e-shown-later')}")
+        c.check("on a Space out of view it is not drawn", not hidden1["visible"])
+        c.check("and is off the output (wl_surface.leave)", not hidden1["surfaceItem"]["onOutput"])
+        idle = hidden1["commits"] - hidden0["commits"]
+        c.check("so it stops drawing (no frame callbacks)", idle <= 2, f"{idle} commits in 1 s")
+        c.check("back in view it is on the output again", back1["visible"] and back1["surfaceItem"]["onOutput"])
+        resumed = back1["commits"] - back0["commits"]
+        c.check("and draws again", resumed >= 5,
+                f"{resumed} commits in 1 s; {frames('08h-back', '08i-back-later')}")
+    else:
+        c.check("Spaces states recorded", False)
+    s = load("08j-carried.json")
+    a = find(s, A)
+    c.check("Ctrl+Alt+Shift+Right carries the client to the next Space",
+            bool(a and a["space"] == 1 and s["currentSpace"] == 1 and a["visible"] and a["focused"]),
+            f"space={a and a['space']} current={s['currentSpace']}")
+    s = load("08k-sent-back.json")
+    a = find(s, A)
+    c.check("the window menu sends it to another Space without following",
+            bool(a and a["space"] == 0 and s["currentSpace"] == 1 and not a["visible"]),
+            f"space={a and a['space']} current={s['currentSpace']}")
+    a = find(load("08l-space-1.json"), A)
+    c.check("it is there on its Space", bool(a and a["visible"] and a["surfaceItem"]["onOutput"]))
+
     print("Overview:")
     s = load("09-overview.json")
     a = find(s, A)
@@ -305,6 +373,14 @@ def main() -> int:
                                    "--script", str(out / "script.json")], stdout=log, stderr=subprocess.STDOUT,
                                   env=dict(os.environ, XDG_DATA_DIRS=data_dirs))
     clients: list[subprocess.Popen] = []
+    client_logs = []
+
+    def start(name: str, command: list[str], env: dict[str, str]) -> None:
+        # Client output is kept next to Prism's, for when a check fails.
+        output = (out / f"{name}.log").open("w")
+        client_logs.append(output)
+        clients.append(subprocess.Popen(command, stdout=output, stderr=subprocess.STDOUT, env=env))
+
     try:
         deadline = time.monotonic() + 15
         while "Prism is running" not in (out / "prism.log").read_text():
@@ -313,12 +389,11 @@ def main() -> int:
                 return 102
             time.sleep(0.1)
         env = dict(os.environ, WAYLAND_DISPLAY=socket, QT_QPA_PLATFORM="wayland")
-        quiet = {"stdout": subprocess.DEVNULL, "stderr": subprocess.DEVNULL, "env": env}
-        clients.append(subprocess.Popen([str(client), "--title", "Prism Test A", "--app-id", "org.qtos.PrismTestA",
-                                         "--size", "640x420", "--min", "480x320"], **quiet))
+        start("client-a", [str(client), "--title", "Prism Test A", "--app-id", "org.qtos.PrismTestA",
+                           "--size", "640x420", "--min", "480x320", "--animate"], env)
         if terminal:
             time.sleep(0.8)
-            clients.append(subprocess.Popen([terminal], **quiet))
+            start("terminal", [terminal], env)
         status = compositor.wait(timeout=150)
     except subprocess.TimeoutExpired:
         compositor.kill()
@@ -327,7 +402,8 @@ def main() -> int:
     finally:
         for p in clients:
             p.kill()
-        log.close()
+        for output in [log, *client_logs]:
+            output.close()
 
     if status != 0:
         print(f"prism --script failed ({status}):")

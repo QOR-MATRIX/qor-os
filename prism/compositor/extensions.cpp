@@ -13,6 +13,7 @@
 #include <QtWaylandCompositor/QWaylandSurface>
 #include <QtWaylandCompositor/QWaylandView>
 #include <QtWaylandCompositor/QWaylandXdgShell>
+#include <QtWaylandCompositor/private/qwaylandxdgshell_p.h>
 
 #include <cmath>
 
@@ -377,6 +378,11 @@ void WindowManagement::takeOver(QQuickItem *shellSurfaceItem)
         QObject::disconnect(toplevel, &QWaylandXdgToplevel::unsetFullscreen, integration, nullptr);
         QObject::disconnect(toplevel, &QWaylandXdgToplevel::fullscreenChanged, integration, nullptr);
     }
+}
+
+bool WindowManagement::configureAcked(QWaylandXdgToplevel *toplevel) const
+{
+    return toplevel && QWaylandXdgToplevelPrivate::get(toplevel)->m_pendingConfigures.isEmpty();
 }
 
 // ── Presentation feedback ────────────────────────────────────────────────────

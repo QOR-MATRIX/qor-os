@@ -2,7 +2,7 @@
 #include "navigator.h"
 
 #include "gamepadmanager.h"
-#include "keycodes.h"
+#include "injection.h"
 
 #include <QtCore/QCoreApplication>
 #include <QtGui/QGuiApplication>
@@ -10,7 +10,6 @@
 #include <QtGui/QMouseEvent>
 #include <QtGui/private/qhighdpiscaling_p.h>
 #include <QtGui/qpa/qwindowsysteminterface.h>
-#include <QtGui/qpa/qwindowsysteminterface_p.h>
 
 #include <algorithm>
 #include <cmath>
@@ -324,11 +323,10 @@ void ControllerNavigator::tick()
             QWindow *window = m_window.data();
             const QPointF position =
                 m_cursorVisible ? m_cursor : QPointF(window->width() / 2.0, window->height() / 2.0);
-            m_injecting = true;
+            const InjectedInput injected;
             QWindowSystemInterface::handleWheelEvent(
                 window, ulong(now), QHighDpi::toNativeLocalPosition(position, window),
                 QHighDpi::toNativeGlobalPosition(window->mapToGlobal(position), window), QPoint(), angle);
-            m_injecting = false;
         }
     }
 
@@ -389,11 +387,10 @@ void ControllerNavigator::injectMouse(QEvent::Type type, Qt::MouseButton button)
     else if (type == QEvent::MouseButtonRelease)
         m_buttons &= ~button;
     QWindow *window = m_window.data();
-    m_injecting = true;
-    QWindowSystemInterface::handleMouseEvent<QWindowSystemInterface::SynchronousDelivery>(
+    const InjectedInput injected;
+    QWindowSystemInterface::handleMouseEvent(
         window, ulong(m_inputClock.elapsed()), QHighDpi::toNativeLocalPosition(m_cursor, window),
         QHighDpi::toNativeGlobalPosition(window->mapToGlobal(m_cursor), window), m_buttons, button, type);
-    m_injecting = false;
 }
 
 void ControllerNavigator::releaseAll()
@@ -411,7 +408,7 @@ bool ControllerNavigator::eventFilter(QObject *watched, QEvent *event)
 {
     // A real mouse takes over from the controller's cursor (and leaves it
     // where the mouse is).
-    if (!m_injecting && m_cursorVisible
+    if (!isInjecting() && m_cursorVisible
         && (event->type() == QEvent::MouseMove || event->type() == QEvent::MouseButtonPress)) {
         m_cursor = static_cast<QMouseEvent *>(event)->scenePosition();
         Q_EMIT cursorChanged();
@@ -426,19 +423,8 @@ bool ControllerNavigator::injectKey(int key, Qt::KeyboardModifiers modifiers, co
 {
     if (!m_window)
         return false;
-    const quint32 scanCode = evdevKeyCode(key) + 8;
-    const ulong time = ulong(m_inputClock.elapsed());
     // Delivered synchronously, so the result says whether anything took it.
-    const bool wasSynchronous = QWindowSystemInterfacePrivate::synchronousWindowSystemEvents;
-    QWindowSystemInterface::setSynchronousWindowSystemEvents(true);
-    m_injecting = true;
-    const bool accepted = QWindowSystemInterface::handleExtendedKeyEvent(m_window.data(), time, QEvent::KeyPress, key,
-                                                                         modifiers, scanCode, 0, 0, text);
-    QWindowSystemInterface::handleExtendedKeyEvent(m_window.data(), time, QEvent::KeyRelease, key, modifiers, scanCode,
-                                                   0, 0, text);
-    m_injecting = false;
-    QWindowSystemInterface::setSynchronousWindowSystemEvents(wasSynchronous);
-    return accepted;
+    return sendKeyStroke(m_window.data(), ulong(m_inputClock.elapsed()), key, modifiers, text);
 }
 
 void ControllerNavigator::sendKey(int key, int modifiers)

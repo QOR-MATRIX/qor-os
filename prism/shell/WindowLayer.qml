@@ -18,6 +18,10 @@ Item {
     property bool overview: false
     property int spaceCount: 3
     property var originProvider: appId => Qt.rect(width / 2, height, 0, 0)
+    // The Space chip under a scene point in Overview, or -1 (set by the shell).
+    property var spaceAt: scenePoint => -1
+    // The chip a window dragged in Overview would land on.
+    property int spaceDropHint: -1
 
     // Every managed window, in creation order. Reassigned (never mutated in
     // place) so bindings such as runningApps re-evaluate.
@@ -52,6 +56,12 @@ Item {
     }
 
     signal overviewPicked()
+    // The shell owns currentSpace (it is bound here): ask it to switch.
+    signal spaceRequested(int index)
+    function requestSpace(index: int) {
+        if (index !== currentSpace)
+            spaceRequested(index);
+    }
 
     onOverviewChanged: relayout()
     onCurrentSpaceChanged: {
@@ -87,6 +97,49 @@ Item {
             name: entry.found ? entry.name : (window && window.title.length > 0 ? window.title : appId),
             icon: entry.found ? entry.icon : ""
         };
+    }
+
+    // Moves a window to another Space. With `follow`, the view goes along and
+    // carries the window across; otherwise the window slides away to it.
+    function moveToSpace(window: AppWindow, space: int, follow: bool) {
+        space = Math.max(0, Math.min(spaceCount - 1, space));
+        if (!window || window.closing || window.space === space)
+            return;
+        window.space = space;
+        if (follow) {
+            requestSpace(space);
+            activate(window);
+        } else if (active === window) {
+            const others = windowsOn(currentSpace).filter(w => !w.minimized);
+            activate(others.length > 0 ? others.reduce((a, b) => a.z > b.z ? a : b) : null);
+        }
+        relayout();
+    }
+
+    // The keyboard's moves: by a step, or to a Space, carrying the window.
+    function moveActive(step: int) {
+        if (active && !active.minimized)
+            moveToSpace(active, active.space + step, true);
+    }
+    function moveActiveTo(space: int) {
+        if (active && !active.minimized)
+            moveToSpace(active, space, true);
+    }
+
+    // Overview dragging.
+    function raiseInOverview(window: AppWindow) {
+        window.z = ++stackCounter;
+    }
+    function hoverInOverview(scenePoint: point) {
+        spaceDropHint = spaceAt(scenePoint);
+    }
+    function dropInOverview(window: AppWindow, scenePoint: point) {
+        const target = spaceAt(scenePoint);
+        spaceDropHint = -1;
+        if (target >= 0 && target !== window.space)
+            moveToSpace(window, target, false);
+        else
+            relayout();
     }
 
     // The window a person sees at a scene point: the highest visible one
@@ -125,7 +178,7 @@ Item {
                 existing.minimized = false;
             }
             if (existing.space !== currentSpace)
-                currentSpace = existing.space;
+                requestSpace(existing.space);
             activate(existing);
             relayout();
             return existing;
@@ -216,7 +269,7 @@ Item {
             window.minimized = false;
         }
         if (window.space !== currentSpace)
-            currentSpace = window.space;
+            requestSpace(window.space);
         activate(window);
         relayout();
     }

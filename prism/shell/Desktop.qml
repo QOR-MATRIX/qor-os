@@ -289,6 +289,7 @@ FocusScope {
                                           "bell-ring");
             break;
         case "space.go": switchSpace(args.index); break;
+        case "window.space": windows.moveActiveTo(args.index); break;
         case "accent.set": settings.accentHue = args.hue; break;
         case "app.open": launch(args.id, args); break;
         default: console.warn("Unknown shell action", id);
@@ -401,6 +402,8 @@ FocusScope {
             visible: opacity > 0.002
             onOverviewPicked: desktop.setSurface("")
             originProvider: appId => shelf.originFor(appId)
+            spaceAt: scenePoint => spaceSwitcher.indexAt(scenePoint)
+            onSpaceRequested: index => desktop.switchSpace(index)
         }
     }
 
@@ -415,6 +418,9 @@ FocusScope {
         visible: opacity > 0.002
 
         SpaceSwitcher {
+            id: spaceSwitcher
+            objectName: "spaceSwitcher"
+            dropHint: windows.spaceDropHint
             anchors.horizontalCenter: parent.horizontalCenter
             y: desktop.workArea.y + 6
             progress: overviewDepth.value
@@ -617,6 +623,17 @@ FocusScope {
         enabled: !desktop.locked
         onActivated: desktop.switchSpace(desktop.currentSpace + 1)
     }
+    // Move the active window to another Space, and go with it.
+    Shortcut {
+        sequence: "Ctrl+Alt+Shift+Left"
+        enabled: !desktop.locked
+        onActivated: windows.moveActive(-1)
+    }
+    Shortcut {
+        sequence: "Ctrl+Alt+Shift+Right"
+        enabled: !desktop.locked
+        onActivated: windows.moveActive(1)
+    }
     Shortcut {
         sequence: "Ctrl+Alt+L"
         enabled: !desktop.locked
@@ -651,6 +668,11 @@ FocusScope {
                 sequence: "Alt+" + (spaceShortcut.index + 1)
                 enabled: !desktop.locked
                 onActivated: desktop.switchSpace(spaceShortcut.index)
+            }
+            Shortcut {
+                sequence: "Alt+Shift+" + (spaceShortcut.index + 1)
+                enabled: !desktop.locked
+                onActivated: windows.moveActiveTo(spaceShortcut.index)
             }
         }
     }

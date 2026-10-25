@@ -2,6 +2,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Controls
 import QTOS.Kit
 import QTOS.Apps
 
@@ -21,6 +22,9 @@ Item {
     property var launchArgs: ({})
     property int space: 0
     property int serial: 0
+    // Buffers a Wayland client has committed (counted by Prism; tests use it
+    // to see that a hidden client stops drawing).
+    property int commits: 0
 
     // Set only for real Wayland clients (Prism compositor).
     property var shellSurface: null
@@ -100,6 +104,13 @@ Item {
     Spring { id: gw; target: win.frameRect.width; preset: Motion.smooth }
     Spring { id: gh; target: win.frameRect.height; preset: Motion.smooth }
     Spring { id: gs; target: win.inOverview ? win.overviewScale : 1; preset: Motion.smooth }
+    // The window's Space on the strip. Moving it with the view carries the
+    // window across while the desktop slides underneath.
+    Spring { id: gspace; target: win.space; preset: Motion.smooth }
+    // Offset while dragged in Overview (towards a Space chip).
+    property point overviewDrag: Qt.point(0, 0)
+    Spring { id: odx; target: win.overviewDrag.x; preset: Motion.snappy }
+    Spring { id: ody; target: win.overviewDrag.y; preset: Motion.snappy }
     Spring {
         id: presence
         value: 0
@@ -119,14 +130,18 @@ Item {
     readonly property real centerX: flies ? originCx + (targetCx - originCx) * t : targetCx
     readonly property real centerY: flies ? originCy + (targetCy - originCy) * t : targetCy
 
-    x: space * (manager ? manager.width : 0) + centerX - width * visualScale / 2
-    y: centerY - height * visualScale / 2
+    x: gspace.value * (manager ? manager.width : 0) + centerX - width * visualScale / 2 + odx.value
+    y: centerY - height * visualScale / 2 + ody.value
     width: gw.value
     height: gh.value
     scale: visualScale
     transformOrigin: Item.TopLeft
     opacity: flies ? Math.min(1, t * 2.4) : t
-    visible: opacity > 0.003
+    // On the Space in view, or sliding past it. Windows out of view are not
+    // drawn at all, and Prism takes their clients off the output so they stop
+    // rendering too.
+    readonly property bool onScreen: !manager || Math.abs(gspace.value - manager.spaceOffset) < 0.999
+    visible: opacity > 0.003 && onScreen
 
     // ── Interaction helpers ─────────────────────────────────────────────────
     property point dragStart
@@ -325,6 +340,51 @@ Item {
                 onTapped: win.manager.activate(win)
                 onDoubleTapped: win.toggleMaximize()
             }
+            // The window menu.
+            TapHandler {
+                acceptedButtons: Qt.RightButton
+                onTapped: eventPoint => {
+                    win.manager.activate(win);
+                    windowMenu.popup(titleBar, eventPoint.position);
+                }
+            }
+
+            Menu {
+                id: windowMenu
+                objectName: "windowMenu"
+                MenuItem {
+                    text: qsTr("Minimize")
+                    onTriggered: win.manager.minimize(win)
+                }
+                MenuItem {
+                    text: win.maximized ? qsTr("Restore") : qsTr("Maximize")
+                    onTriggered: win.toggleMaximize()
+                }
+                MenuSeparator { }
+                MenuItem {
+                    objectName: "moveToSpace0"
+                    text: qsTr("Move to Space 1")
+                    enabled: win.space !== 0
+                    onTriggered: win.manager.moveToSpace(win, 0, false)
+                }
+                MenuItem {
+                    objectName: "moveToSpace1"
+                    text: qsTr("Move to Space 2")
+                    enabled: win.space !== 1
+                    onTriggered: win.manager.moveToSpace(win, 1, false)
+                }
+                MenuItem {
+                    objectName: "moveToSpace2"
+                    text: qsTr("Move to Space 3")
+                    enabled: win.space !== 2
+                    onTriggered: win.manager.moveToSpace(win, 2, false)
+                }
+                MenuSeparator { }
+                MenuItem {
+                    text: qsTr("Close")
+                    onTriggered: win.manager.close(win, false)
+                }
+            }
 
             Text {
                 anchors.centerIn: parent
@@ -463,12 +523,37 @@ Item {
         }
     }
 
-    // Overview picking.
+    // Overview: pick a window, or drag it onto a Space chip to move it there.
     Item {
         anchors.fill: parent
         z: 12
         visible: win.inOverview
         HoverHandler { id: overviewHover }
         TapHandler { onTapped: win.manager.pickInOverview(win) }
+        DragHandler {
+            // The centroid is already reset when the drag ends, so the drop
+            // point is remembered on the way.
+            property point lastScenePosition
+            target: null
+            onActiveChanged: {
+                if (active) {
+                    win.manager.raiseInOverview(win);
+                } else {
+                    win.manager.dropInOverview(win, lastScenePosition);
+                    win.overviewDrag = Qt.point(0, 0);
+                }
+            }
+            onCentroidChanged: {
+                if (!active)
+                    return;
+                lastScenePosition = centroid.scenePosition;
+                const dx = centroid.scenePosition.x - centroid.scenePressPosition.x;
+                const dy = centroid.scenePosition.y - centroid.scenePressPosition.y;
+                win.overviewDrag = Qt.point(dx, dy);
+                odx.snap(dx);
+                ody.snap(dy);
+                win.manager.hoverInOverview(centroid.scenePosition);
+            }
+        }
     }
 }

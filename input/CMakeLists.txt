@@ -23,6 +23,7 @@ qt_add_qml_module(qtos_input
         src/gamepad.h
         src/gamepadbackend.h
         src/gamepadmanager.h src/gamepadmanager.cpp
+        src/injection.h src/injection.cpp
         src/keycodes.h src/keycodes.cpp
         src/mapping.h src/mapping.cpp
         src/playstation.h src/playstation.cpp

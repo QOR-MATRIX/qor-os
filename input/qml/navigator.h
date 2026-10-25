@@ -116,7 +116,6 @@ private:
     bool m_pressed = false;
     bool m_textInputFocused = false;
     bool m_focusMode = false; // the D-pad moved focus since the stick last moved
-    bool m_injecting = false;
     bool m_hidSystemCursor = false;
     Qt::MouseButtons m_buttons;
 

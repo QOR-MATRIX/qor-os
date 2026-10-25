@@ -1,7 +1,10 @@
 # prism — the QTOS Wayland compositor (Linux only, experimental).
 
-find_package(Qt6 ${QTOS_QT_MIN_VERSION} QUIET COMPONENTS WaylandCompositor WaylandScannerTools)
-if(NOT Qt6WaylandCompositor_FOUND)
+# WaylandCompositorPrivate: which configures a client has yet to acknowledge
+# (WindowManagement.configureAcked), which Qt keeps private.
+find_package(Qt6 ${QTOS_QT_MIN_VERSION} QUIET COMPONENTS
+    WaylandCompositor WaylandCompositorPrivate WaylandScannerTools)
+if(NOT Qt6WaylandCompositor_FOUND OR NOT Qt6WaylandCompositorPrivate_FOUND)
     message(WARNING "Qt Wayland Compositor not found: skipping the prism compositor. "
                     "Install the Qt Wayland Compositor module for your kit to build it.")
     return()
@@ -49,6 +52,7 @@ target_link_libraries(prism PRIVATE
     Qt6::Quick
     Qt6::QuickControls2
     Qt6::WaylandCompositor
+    Qt6::WaylandCompositorPrivate
     qtos_kit
     qtos_services
     qtos_kitplugin

@@ -29,7 +29,7 @@ display refresh; compositor backend decision gate
 
 - [x] Build and run `prism` nested on Linux and under WSLg; launch Qt apps into it
 - [x] Client windows: configure with all states, server- and client-side decorations, client moves and resizes, resizing from every edge, maximize and minimize requests, popups, size limits, app identity, and XDG activation with focus-stealing prevention. All are covered by `prism_e2e` (31 checks).
-- [ ] Spaces for client windows. Overview, minimise and Shelf restore for clients are done and covered by `prism_e2e`.
+- [x] Spaces for client windows: every window rides its Space, moves by keyboard, window menu, Beam or Overview drag, and clients on Spaces out of view get no frame callbacks. Covered by `prism_e2e` and `shell_e2e`.
 - [x] Controller interface: Xbox, PlayStation, Stratus and other game pads drive the whole shell, with a prompt on connect, an on-screen keyboard and native XInput, HID and evdev backends ([CONTROLLERS.md](CONTROLLERS.md))
 - [x] Real audio: the QTOS audio engine (Qt Multimedia's real-time output), generated QTOS Sessions and music files, a five-band equaliser, interface sounds, and an audio-reactive interface with adjustable intensity and frequency range ([AUDIO.md](AUDIO.md))
 - [x] Wayland extensions: fractional-scale, cursor-shape, presentation-time, idle-inhibit (`tools/dev/prism-protocol-check.sh`)

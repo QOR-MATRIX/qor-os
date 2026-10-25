@@ -2,7 +2,7 @@
 #include "shellscript.h"
 
 #include "gamepadmanager.h"
-#include "keycodes.h"
+#include "injection.h"
 #include "services.h"
 
 #include <QtCore/QCoreApplication>
@@ -26,6 +26,7 @@
 #include <QtQuick/QQuickWindow>
 #include <qpa/qwindowsysteminterface.h>
 
+#include <atomic>
 #include <cmath>
 #include <cstdio>
 #include <deque>
@@ -53,11 +54,49 @@ public:
         m_clock.start();
         m_desktop = window->findChild<QObject *>(u"desktop"_s);
         m_engine = m_desktop ? qmlEngine(m_desktop) : nullptr;
+        // Emitted on the render thread.
+        connect(window, &QQuickWindow::frameSwapped, this, [this] { ++m_frames; }, Qt::DirectConnection);
+        window->installEventFilter(this);
     }
 
     void start()
     {
         QTimer::singleShot(0, this, [this] { pump(); });
+    }
+
+protected:
+    // Only the script's own input (and the controller interface's) reaches
+    // the window while a script runs. Real input, from a person at the
+    // machine or a host compositor's pointer crossing a nested Prism, would
+    // interleave with it: a real pointer motion with no button held cancels
+    // a scripted drag, and a key press could fire a shortcut. (Enter and
+    // Leave pass: without them shell_e2e's click on a title-bar button is
+    // lost on Windows.)
+    bool eventFilter(QObject *watched, QEvent *event) override
+    {
+        if (watched != m_window || input::isInjecting())
+            return QObject::eventFilter(watched, event);
+        switch (event->type()) {
+        case QEvent::ShortcutOverride:
+            event->accept(); // overridden, so the shortcut map leaves it alone
+            return true;
+        case QEvent::MouseButtonPress:
+        case QEvent::MouseButtonRelease:
+        case QEvent::MouseButtonDblClick:
+        case QEvent::MouseMove:
+        case QEvent::Wheel:
+        case QEvent::KeyPress:
+        case QEvent::KeyRelease:
+        case QEvent::TouchBegin:
+        case QEvent::TouchUpdate:
+        case QEvent::TouchEnd:
+        case QEvent::TouchCancel:
+        case QEvent::TabletPress:
+        case QEvent::TabletMove:
+        case QEvent::TabletRelease:
+        case QEvent::NativeGesture: return true;
+        default: return QObject::eventFilter(watched, event);
+        }
     }
 
 private:
@@ -255,7 +294,8 @@ private:
         else if (type == QEvent::MouseButtonRelease)
             m_buttons &= ~button;
         // QWindowSystemInterface takes native pixels; scripts use logical ones.
-        QWindowSystemInterface::handleMouseEvent<QWindowSystemInterface::SynchronousDelivery>(
+        const input::InjectedInput injected;
+        QWindowSystemInterface::handleMouseEvent(
             m_window, ulong(m_clock.elapsed()), QHighDpi::toNativeLocalPosition(pos, m_window),
             QHighDpi::toNativeGlobalPosition(m_window->mapToGlobal(pos), m_window), m_buttons, button, type);
     }
@@ -273,13 +313,10 @@ private:
     void key(int key, Qt::KeyboardModifiers modifiers, const QString &text)
     {
         ensureFocus();
-        const quint32 scanCode = input::evdevKeyCode(key) + 8;
-        for (QEvent::Type type : { QEvent::KeyPress, QEvent::KeyRelease })
-            QWindowSystemInterface::handleExtendedKeyEvent(m_window, ulong(m_clock.elapsed()), type, key, modifiers,
-                                                           scanCode, 0, 0, text);
+        input::sendKeyStroke(m_window, ulong(m_clock.elapsed()), key, modifiers, text);
     }
 
-    void enqueueClick(const QJsonValue &target, int clicks)
+    void enqueueClick(const QJsonValue &target, int clicks, Qt::MouseButton button = Qt::LeftButton)
     {
         m_queue.push_back([this, target] {
             const auto p = resolve(target);
@@ -290,12 +327,12 @@ private:
             return 30;
         });
         for (int i = 0; i < clicks; ++i) {
-            m_queue.push_back([this] {
-                mouse(QEvent::MouseButtonPress, m_pointer, Qt::LeftButton);
+            m_queue.push_back([this, button] {
+                mouse(QEvent::MouseButtonPress, m_pointer, button);
                 return 40;
             });
-            m_queue.push_back([this] {
-                mouse(QEvent::MouseButtonRelease, m_pointer, Qt::LeftButton);
+            m_queue.push_back([this, button] {
+                mouse(QEvent::MouseButtonRelease, m_pointer, button);
                 return 60;
             });
         }
@@ -443,6 +480,8 @@ private:
             enqueueClick(step[u"click"_s], 1);
         } else if (step.contains(u"doubleClick"_s)) {
             enqueueClick(step[u"doubleClick"_s], 2);
+        } else if (step.contains(u"rightClick"_s)) {
+            enqueueClick(step[u"rightClick"_s], 1, Qt::RightButton);
         } else if (step.contains(u"move"_s)) {
             const QJsonValue target = step[u"move"_s];
             m_queue.push_back([this, target] {
@@ -466,6 +505,7 @@ private:
                 if (!p)
                     return -1;
                 const QPoint angle(0, -120 * spec[u"notches"_s].toInt(1));
+                const input::InjectedInput injected;
                 QWindowSystemInterface::handleWheelEvent(
                     m_window, ulong(m_clock.elapsed()), QHighDpi::toNativeLocalPosition(*p, m_window),
                     QHighDpi::toNativeGlobalPosition(m_window->mapToGlobal(*p), m_window), QPoint(), angle);
@@ -667,6 +707,9 @@ private:
             { u"closing"_s, w->property("closing").toBool() },
             { u"inOverview"_s, w->property("inOverview").toBool() },
             { u"space"_s, w->property("space").toInt() },
+            // Drawn at all: on the Space in view (or sliding past it).
+            { u"visible"_s, w->isVisible() },
+            { u"commits"_s, w->property("commits").toInt() },
             { u"frameRect"_s, rectJson(w->property("frameRect")) },
             { u"onScreen"_s, rectJson(w->mapRectToScene(QRectF(0, 0, w->width(), w->height()))) },
         };
@@ -711,6 +754,8 @@ private:
                                      { u"visible"_s, item->isVisible() },
                                      { u"inputEventsEnabled"_s, item->property("inputEventsEnabled").toBool() },
                                      { u"acceptedButtons"_s, int(item->acceptedMouseButtons()) },
+                                     // On the output: entered, and given frame callbacks.
+                                     { u"onOutput"_s, item->property("output").value<QObject *>() != nullptr },
                                      { u"surface"_s, surfaceInfo },
                                  });
                     break;
@@ -761,6 +806,10 @@ private:
             { u"currentSpace"_s, manager ? manager->property("currentSpace").toInt() : 0 },
             { u"surface"_s, m_desktop->property("surface").toString() },
             { u"controller"_s, QJsonValue::fromVariant(plain(m_desktop->property("controllerState"))) },
+            // Frames the shell has drawn: a client inside Prism gets frame
+            // callbacks only when Prism draws, which a host compositor (WSLg)
+            // may stop asking it to do.
+            { u"frames"_s, qint64(m_frames.load()) },
         };
     }
 
@@ -777,6 +826,7 @@ private:
     Qt::MouseButtons m_buttons;
     QPointF m_pointer;
     QString m_error;
+    std::atomic<quint64> m_frames { 0 };
 };
 
 } // namespace

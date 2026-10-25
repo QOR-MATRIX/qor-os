@@ -88,6 +88,10 @@ Item {
         for (let i = 0; i < 3; ++i)
             actions.push(action("space.go", qsTr("Go to Space %1").arg(i + 1), "layers", "space desktop workspace switch",
                                 qsTr("Switch the window strip to Space %1.").arg(i + 1), { index: i }));
+        for (let i = 0; i < 3; ++i)
+            actions.push(action("window.space", qsTr("Move Window to Space %1").arg(i + 1), "layers",
+                                "move window space desktop workspace send",
+                                qsTr("Send the active window to Space %1, and go there.").arg(i + 1), { index: i }));
         const accents = [[qsTr("Indigo"), 274], [qsTr("Blue"), 248], [qsTr("Teal"), 205], [qsTr("Green"), 162],
                          [qsTr("Amber"), 95], [qsTr("Orange"), 58], [qsTr("Red"), 25], [qsTr("Pink"), 338]];
         for (const a of accents)

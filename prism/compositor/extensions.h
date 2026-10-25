@@ -9,6 +9,7 @@
 #include <QtQuick/QQuickItem>
 #include <QtQuick/QQuickWindow>
 #include <QtWaylandCompositor/QWaylandCompositorExtensionTemplate>
+#include <QtWaylandCompositor/QWaylandXdgShell>
 
 #include "qwayland-server-cursor-shape-v1.h"
 #include "qwayland-server-fractional-scale-v1.h"
@@ -168,6 +169,10 @@ public:
     explicit WindowManagement(QObject *parent = nullptr);
 
     Q_INVOKABLE void takeOver(QQuickItem *shellSurfaceItem);
+    // Whether the client has acknowledged every configure sent to it, so
+    // that what it commits answers the latest one. During a resize a client
+    // still draws at sizes configured earlier.
+    Q_INVOKABLE bool configureAcked(QWaylandXdgToplevel *toplevel) const;
 };
 
 // Feeds wp_presentation (Qt's PresentationTime) with every frame of `window`,

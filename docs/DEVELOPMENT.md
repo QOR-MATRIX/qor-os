@@ -179,10 +179,10 @@ scale.
 |------|--------|
 | `{"wait": ms}` | Pause |
 | `{"waitFor": {"windows": n \| "window": spec \| "gone": spec \| "popups": n, "timeout": ms}}` | Wait for a condition; fail on timeout |
-| `{"click": target}`, `{"doubleClick": target}`, `{"move": target}` | Pointer input |
+| `{"click": target}`, `{"doubleClick": target}`, `{"rightClick": target}`, `{"move": target}` | Pointer input |
 | `{"drag": {"from": target, "to": target \| "by": [dx, dy], "steps": n}}` | Press, move in steps, release |
 | `{"scroll": {"at": target, "notches": n}}` | Mouse wheel; positive `n` scrolls down |
-| `{"key": "Escape"}` | Key press and release (Wayland clients receive evdev scan codes) |
+| `{"key": "Escape"}`, `{"key": "Ctrl+Alt+Right"}` | Key press and release. Modifier keys go down first and up last, as on a keyboard, which Prism needs. Wayland clients receive evdev scan codes |
 | `{"gamepad": {"connect": family \| "tap" \| "press" \| "release": button \| "stick": [x, y], "ms": n \| "disconnect": true}}` | A virtual game controller ([CONTROLLERS.md](CONTROLLERS.md)) |
 | `{"call": "setSurface", "args": [...]}` | Call a `Desktop` method (`launch`, `setSurface`, `switchSpace`, ...) |
 | `{"restore": spec}` | What clicking the window's app on the Shelf does |
@@ -193,6 +193,12 @@ scale.
 
 A click or drag aimed at a window part fails if another window covers that
 point, so a script cannot silently hit the wrong window.
+
+While a script runs, only its own input and the controller interface's
+reach the window (`qtos::input::InjectedInput`). Real pointer and key input
+is dropped: a person's mouse crossing the window, or a host compositor's
+pointer over a nested Prism, would otherwise cancel scripted drags or fire
+shortcuts. Running tests on a machine in use is safe.
 
 A **target** is `[x, y]` in window coordinates, or
 `{"window": spec, "part": "frame|titlebar|content|close|maximize|minimize", "at": [x, y]}`,
@@ -209,10 +215,13 @@ The **state** includes:
 - `audio` (volume, mute, output, equaliser, interface sounds, `active`) and
   `media` (playing, title, position, duration, queue index);
 - `workArea`, `overview`, `currentSpace` and `surface`;
+- `frames`: frames the shell has drawn (a client inside Prism gets frame
+  callbacks only when Prism draws);
 - open `popups`, as screen rectangles;
 - `windows[]`, with title, app id, focus, maximised, minimised, frame and
-  on-screen rectangles. Wayland clients also report their window geometry,
-  configured size, Shelf identity and surface item.
+  on-screen rectangles, Space, `visible` and `commits` (client commits).
+  Wayland clients also report their window geometry, configured size, Shelf
+  identity and surface item (with `onOutput`).
 
 Two suites use the runner (label `gpu`):
 
