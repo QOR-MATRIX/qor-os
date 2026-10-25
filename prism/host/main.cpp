@@ -6,6 +6,7 @@
 // device; here it manages simulated app windows, and talks to the simulated
 // QTOS services over Qt Remote Objects. See docs/BUILDING.md.
 
+#include "backend.h"
 #include "gpupreference.h"
 #include "kit.h"
 #include "services.h"
@@ -139,6 +140,8 @@ int main(int argc, char *argv[])
 {
     QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
     QQuickWindow::setTextRenderType(QQuickWindow::NativeTextRendering);
+    // Before the audio engine or interface sounds touch Qt Multimedia.
+    qtos::audio::configureBackend();
 
     QGuiApplication app(argc, argv);
     QGuiApplication::setOrganizationName(u"QOR-MATRIX"_s);

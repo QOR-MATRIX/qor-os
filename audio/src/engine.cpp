@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
 #include "engine.h"
 
+#include "backend.h"
 #include "filesource.h"
 #include "renderer.h"
 #include "session.h"
@@ -457,6 +458,7 @@ private:
 Engine::Engine(Output output, QObject *parent)
     : QObject(parent), m_null(output == Output::Null || qEnvironmentVariable("QTOS_AUDIO_OUTPUT") == u"null"_s)
 {
+    configureBackend();
     qRegisterMetaType<qtos::audio::AnalysisFrame>();
     qRegisterMetaType<QList<qtos::audio::OutputDevice>>();
 

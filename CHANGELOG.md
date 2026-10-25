@@ -23,6 +23,7 @@ All notable changes to QTOS are recorded here. The format follows
 - `qtosctl media seek`, `eq`, `sounds`, `reactive` and `spectrum` (a live spectrum in the terminal); `status` shows the output, EQ, reactive settings and play position.
 - `qtos-simd --silent`. Automated runs (`--screenshot`, `--benchmark`, `--script`) and every test use the engine's null output, which renders in real time to nowhere.
 - `qtos-shell --open settings/sound` opens an app at a page.
+- On Linux without a running PipeWire daemon (WSLg), QTOS asks Qt Multimedia for its PulseAudio backend, avoiding a crash in Qt 6.12's PipeWire backend.
 - Shell scripts: a `scroll` step; the state includes `audio`, `media` and the reactive settings; item targets are found among `Repeater` delegates and must not be clipped or scrolled out of view.
 - Tests: `tst_audio` (24 cases), playback and analysis over Qt Remote Objects in `tst_services`, and the Sound page in `shell_e2e`.
 - **Increase Contrast**, a new accessibility setting.

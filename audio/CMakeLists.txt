@@ -7,6 +7,7 @@
 
 qt_add_library(qtos_audio STATIC
     src/analyzer.h src/analyzer.cpp
+    src/backend.h src/backend.cpp
     src/dsp.h src/dsp.cpp
     src/engine.h src/engine.cpp
     src/fft.h src/fft.cpp

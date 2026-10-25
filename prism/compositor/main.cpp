@@ -13,6 +13,7 @@
 //
 // Status: experimental, see docs/adr/0003-compositor-strategy.md.
 
+#include "backend.h"
 #include "kit.h"
 #include "services.h"
 #include "shellbenchmark.h"
@@ -44,6 +45,8 @@ int main(int argc, char *argv[])
     if (qEnvironmentVariableIsEmpty("QT_QPA_PLATFORM") && !qEnvironmentVariableIsEmpty("WAYLAND_DISPLAY"))
         qputenv("QT_QPA_PLATFORM", "wayland");
     qputenv("QT_WAYLAND_DISABLE_WINDOWDECORATION", "1");
+    // Before the audio engine or interface sounds touch Qt Multimedia.
+    qtos::audio::configureBackend();
 
     QGuiApplication app(argc, argv);
     QGuiApplication::setOrganizationName(u"QOR-MATRIX"_s);

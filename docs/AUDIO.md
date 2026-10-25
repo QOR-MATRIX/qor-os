@@ -199,7 +199,7 @@ qtosctl status               # includes output, EQ, reactive settings and the pl
 |---------|-------|
 | No sound | `qtosctl status`: is media playing, and is the output a real device (not "(silent)")? Is `QTOS_AUDIO_OUTPUT=null` set? The log names the device it opened: `qtos.audio: Output: "<device>", 48000 Hz, 2 ch, Float` |
 | Linux build: undefined `pa_*` symbols | Qt Multimedia links PulseAudio: `sudo apt-get install libpulse0` |
-| WSL: crash in `QPlatformAudioDevices::create` | `libpipewire` is installed without a PipeWire setup (WSLg runs PulseAudio). Remove it, or set `QT_AUDIO_BACKEND=pulseaudio` |
+| Linux: a crash in `QPlatformAudioDevices::create` | Qt 6.12's PipeWire backend crashes when libpipewire is installed but no PipeWire daemon runs (WSLg serves PulseAudio; Weston pulls in libpipewire). QTOS detects the missing PipeWire socket and asks for the PulseAudio backend (`qtos::audio::configureBackend()`); other Qt programs need `QT_AUDIO_BACKEND=pulseaudio` |
 | WSL: no device | WSLg's server is `unix:/mnt/wslg/PulseServer`; set `PULSE_SERVER` if your environment lacks it |
 | A music file does not appear | Only the extensions above, at most three folders deep, at most 500 files |
 | The interface does not react | **React to sound** on? **Reduce Motion** off? Is the chosen range where the music has energy? `qtosctl spectrum` shows the range energy |
