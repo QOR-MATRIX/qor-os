@@ -15,6 +15,7 @@
 #include <QtCore/QJsonDocument>
 #include <QtCore/QJsonObject>
 #include <QtCore/QTimer>
+#include <QtGui/QGuiApplication>
 #include <QtGui/QImage>
 #include <QtGui/QKeySequence>
 #include <QtGui/private/qhighdpiscaling_p.h>
@@ -259,8 +260,19 @@ private:
             QHighDpi::toNativeGlobalPosition(m_window->mapToGlobal(pos), m_window), m_buttons, button, type);
     }
 
+    // Key events and shortcuts need the window to be the focus window. A
+    // window started from a background process (a CI runner) may never get
+    // the OS's focus, so the script tells Qt directly.
+    void ensureFocus()
+    {
+        if (QGuiApplication::focusWindow() != m_window)
+            QWindowSystemInterface::handleFocusWindowChanged<QWindowSystemInterface::SynchronousDelivery>(
+                m_window, Qt::ActiveWindowFocusReason);
+    }
+
     void key(int key, Qt::KeyboardModifiers modifiers, const QString &text)
     {
+        ensureFocus();
         const quint32 scanCode = input::evdevKeyCode(key) + 8;
         for (QEvent::Type type : { QEvent::KeyPress, QEvent::KeyRelease })
             QWindowSystemInterface::handleExtendedKeyEvent(m_window, ulong(m_clock.elapsed()), type, key, modifiers,
@@ -359,6 +371,7 @@ private:
             m_gamepad.clear();
             return 400;
         }
+        ensureFocus(); // the controller interface's keys go through shortcuts too
         if (spec.contains(u"stick"_s)) {
             const QJsonArray xy = spec[u"stick"_s].toArray();
             m_pad.axis(Axis::LeftX) = float(xy.at(0).toDouble());

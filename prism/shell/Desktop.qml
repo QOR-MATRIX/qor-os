@@ -104,6 +104,7 @@ FocusScope {
             else
                 setSurface("");
             break;
+        case "back": setSurface(""); break;
         case "previousSpace": switchSpace(currentSpace - 1); break;
         case "nextSpace": switchSpace(currentSpace + 1); break;
         case "volumeDown": changeVolume(-1); break;

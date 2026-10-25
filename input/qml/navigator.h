@@ -25,7 +25,7 @@ namespace qtos::input {
 //   Right stick   scroll
 //   North (Y/△), Start, Back, Guide, shoulders, triggers, stick clicks:
 //                 `action()` for the shell ("search", "controlCenter",
-//                 "overview", "home", "previousSpace", "nextSpace",
+//                 "overview", "home", "back", "previousSpace", "nextSpace",
 //                 "volumeDown", "volumeUp", "keyboard", "playPause")
 //
 // While `keyboardOpen`, the D-pad, left stick and face buttons go to the

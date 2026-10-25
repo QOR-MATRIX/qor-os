@@ -131,6 +131,10 @@ void ControllerNavigator::onMerged(const GamepadState &now, const GamepadState &
     if (!m_enabled || !m_window)
         return;
     m_inputClock.restart();
+    // Using the controller brings the shell forward (the OS may decline in
+    // a desktop simulation; on a device the shell is all there is).
+    if (now.buttons != before.buttons && QGuiApplication::focusWindow() != m_window)
+        m_window->requestActivate();
     const quint32 pressedNow = now.buttons & ~before.buttons;
     const quint32 releasedNow = before.buttons & ~now.buttons;
     for (int b = 0; b < int(Button::Count); ++b) {
@@ -205,7 +209,12 @@ void ControllerNavigator::fire(Button button, bool repeated)
         injectMouse(QEvent::MouseButtonRelease, Qt::RightButton);
         feedback(0.2, 25);
         break;
-    case Button::East: sendKey(Qt::Key_Escape); break;
+    case Button::East:
+        // Escape for whatever has focus; if nothing takes it (or the window
+        // lacks the OS's focus, so shortcuts cannot fire), the shell's back.
+        if (!injectKey(Qt::Key_Escape, Qt::NoModifier, QStringLiteral("\x1b")))
+            Q_EMIT action(QStringLiteral("back"));
+        break;
     case Button::North: Q_EMIT action(QStringLiteral("search")); break;
     case Button::Start: Q_EMIT action(QStringLiteral("controlCenter")); break;
     case Button::Back: Q_EMIT action(QStringLiteral("overview")); break;
