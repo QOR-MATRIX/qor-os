@@ -63,6 +63,8 @@ All notable changes to QTOS are recorded here. The format follows
 
 ### Fixed
 
+- `tools/dev/run.ps1 -- <shell options>` passed the first shell option as `-Preset` (so `run.ps1 -- --unlocked` failed with "not built for preset"). `-Preset` is now named-only.
+
 - **Mouse presses never reached Wayland clients, nor item-based controls inside app windows** (Qt Quick Controls, text fields). AppWindow's activation overlay used a `TapHandler`. In Qt 6.12 that leaves a mouse press accepted (QTBUG-145896), so Qt Quick stopped offering it to items underneath. Activation now uses the overlay's `PointHandler`. Found by the new end-to-end tests.
 - A minimised Wayland client could not be restored: `WindowLayer.open()` consulted the first-party app registry before looking for an existing window.
 - Wayland clients' app ids were lost: they are set just after the toplevel is created, and only the title was followed.

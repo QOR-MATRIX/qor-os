@@ -7,7 +7,9 @@
     .\tools\dev\run.ps1 -- --unlocked --open files,music
     .\tools\dev\run.ps1 -Preset windows-debug -- --theme light
 #>
-[CmdletBinding()]
+# Named parameters only: everything after `--` goes to qtos-shell, so
+# `--unlocked` must not bind to -Preset by position.
+[CmdletBinding(PositionalBinding = $false)]
 param(
     [string] $Preset = 'windows-release',
     [Parameter(ValueFromRemainingArguments = $true)] [string[]] $ShellArgs
