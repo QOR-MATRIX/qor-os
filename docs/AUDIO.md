@@ -144,6 +144,19 @@ What reacts:
 Everything persists (`QSettings` groups `audio` and `reactive`) unless the
 simulator runs ephemerally.
 
+## Music, media keys and volume
+
+The Music app is a library as well as a player: **Songs** (with the live
+spectrum beside the playing track), **Albums** and **Artists**, plus the
+**QTOS Sessions** and **Music Folder** collections. Shuffle plays every track
+once per pass; repeat cycles through all, one and off. Shuffle and repeat
+persist (`QSettings` group `media`).
+
+The keyboard's media keys work everywhere, the lock screen included:
+play/pause, next, previous, and volume up, down and mute (sixteen steps, with
+the volume sound and a glass level indicator). On Linux the play/pause key
+arrives as *Media Play* (XF86AudioPlay); both toggle.
+
 ## Interface sounds
 
 [`Sounds`](../kit/Sounds.qml) (`QTOS.Kit`) plays short cues with Qt

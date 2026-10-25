@@ -23,7 +23,7 @@ class SimMedia : public MediaSimpleSource
 {
     Q_OBJECT
 public:
-    explicit SimMedia(audio::Engine *engine, QObject *parent = nullptr);
+    SimMedia(audio::Engine *engine, bool persistent, QObject *parent = nullptr);
     // `library`: also queue the music files in the user's Music folder and
     // $QTOS_MUSIC_DIR (read in the background).
     void load(const QJsonObject &config, bool library);
@@ -38,10 +38,18 @@ private:
     void applyTrack(int index);
     void updateQueuedDuration(double seconds);
     void skipUnplayable(const QString &message);
+    void trackFinished();
+    // The queue index `steps` away from the current track in play order.
+    int stepFrom(int steps) const;
+    void reshuffle();
+    void save();
 
     audio::Engine *m_engine;
+    bool m_persistent;
     QFutureWatcher<QVariantList> m_library;
     int m_failures = 0;
+    // Play order while shuffling: a permutation of the queue, current first.
+    QList<int> m_order;
 };
 
 // Simulated notification daemon.

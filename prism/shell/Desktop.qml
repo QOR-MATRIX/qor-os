@@ -129,6 +129,21 @@ FocusScope {
         return windows.adopt(shellSurface, toplevel);
     }
 
+    // Volume keys: sixteen steps, unmuting on the way up.
+    function changeVolume(steps: int) {
+        const audio = Services.audio;
+        if (steps > 0 && audio.muted)
+            audio.muted = false;
+        audio.volume = Math.max(0, Math.min(1, Math.round(audio.volume * 16 + steps) / 16));
+        Sounds.play("volume");
+        volumeHud.show();
+    }
+
+    function toggleMute() {
+        Services.audio.muted = !Services.audio.muted;
+        volumeHud.show();
+    }
+
     function switchSpace(index: int) {
         currentSpace = Math.max(0, Math.min(spaceCount - 1, index));
     }
@@ -381,6 +396,15 @@ FocusScope {
         onUnlockRequested: desktop.unlock()
     }
 
+    // Above the lock screen: the volume keys work there too.
+    VolumeHud {
+        id: volumeHud
+        objectName: "volumeHud"
+        anchors.horizontalCenter: parent.horizontalCenter
+        y: parent.height - height - 112
+        backdrop: sceneBackdrop
+    }
+
     // ── Display simulation (applied by Prism's output pipeline on device) ───
     Rectangle {
         anchors.fill: parent
@@ -397,6 +421,16 @@ FocusScope {
     }
 
     // ── Keyboard ────────────────────────────────────────────────────────────
+    // Media and volume keys work everywhere, the lock screen included.
+    // On Linux a keyboard's play/pause key arrives as Media Play
+    // (XF86AudioPlay), so both toggle, as media players there do.
+    Shortcut { sequences: ["Toggle Media Play/Pause", "Media Play"]; onActivated: Services.media.togglePlayback() }
+    Shortcut { sequences: ["Media Pause", "Media Stop"]; onActivated: Services.media.playing = false }
+    Shortcut { sequence: "Media Next"; onActivated: Services.media.next() }
+    Shortcut { sequence: "Media Previous"; onActivated: Services.media.previous() }
+    Shortcut { sequence: "Volume Up"; onActivated: desktop.changeVolume(1) }
+    Shortcut { sequence: "Volume Down"; onActivated: desktop.changeVolume(-1) }
+    Shortcut { sequence: "Volume Mute"; onActivated: desktop.toggleMute() }
     Shortcut {
         sequences: ["Ctrl+Space", "Alt+Space"]
         enabled: !desktop.locked

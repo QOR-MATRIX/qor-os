@@ -5,6 +5,7 @@
 #include <QtCore/QFile>
 #include <QtCore/QJsonDocument>
 #include <QtCore/QLoggingCategory>
+#include <QtNetwork/QLocalSocket>
 
 using namespace Qt::StringLiterals;
 
@@ -21,6 +22,18 @@ QUrl platformDefaultUrl()
 #else
     return QUrl(u"local:qtos-services"_s);
 #endif
+}
+
+// True when a server already listens on `url`. A Windows named pipe can have
+// any number of servers, so hosting a busy endpoint there does not fail: a
+// second QTOS would silently share it and clients could reach either one.
+bool endpointInUse(const QUrl &url)
+{
+    if (url.scheme() != u"local"_s)
+        return false; // Linux abstract sockets refuse a second bind by themselves
+    QLocalSocket probe;
+    probe.connectToServer(url.path());
+    return probe.waitForConnected(150);
 }
 
 } // namespace
@@ -79,7 +92,7 @@ bool SimServices::start(const SimOptions &options)
     m_power = std::make_unique<SimPower>();
     m_audio = std::make_unique<SimAudio>(m_engine.get(), options.persistent);
     m_display = std::make_unique<SimDisplay>();
-    m_media = std::make_unique<SimMedia>(m_engine.get());
+    m_media = std::make_unique<SimMedia>(m_engine.get(), options.persistent);
     m_notifications = std::make_unique<SimNotifications>();
     m_settings = std::make_unique<SimSettings>(options.persistent);
     m_control = std::make_unique<SimControlSource>(this);
@@ -104,7 +117,7 @@ bool SimServices::start(const SimOptions &options)
     const QUrl requested = options.url.isEmpty() ? platformDefaultUrl() : options.url;
     m_host = std::make_unique<QRemoteObjectHost>();
     m_url = requested;
-    if (!m_host->setHostUrl(m_url)) {
+    if (endpointInUse(m_url) || !m_host->setHostUrl(m_url)) {
         // Another QTOS instance owns the default endpoint: fall back to a private one.
         m_url = QUrl(requested.scheme() + u":qtos-services-"_s + QString::number(QCoreApplication::applicationPid()));
         qCWarning(lcSim) << requested << "is in use; hosting services at" << m_url;

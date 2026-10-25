@@ -37,6 +37,7 @@ find_package(Qt6 ${QTOS_QT_MIN_VERSION} REQUIRED COMPONENTS
     Core
     Gui
     GuiPrivate
+    Network
     Qml
     Quick
     QuickControls2

@@ -86,8 +86,15 @@ int main(int argc, char *argv[])
     if (parser.value(services) != u"external"_s) {
         simulator = std::make_unique<qtos::sim::SimServices>();
         qtos::sim::SimOptions simOptions;
-        // Automated runs never make sound.
-        simOptions.silent = parser.isSet(screenshot) || parser.isSet(benchmark) || parser.isSet(script);
+        // Automated runs never make sound, keep no preferences, and get a
+        // private endpoint so they never meet a session someone is using.
+        const bool automated = parser.isSet(screenshot) || parser.isSet(benchmark) || parser.isSet(script);
+        simOptions.silent = automated;
+        if (automated) {
+            simOptions.persistent = false;
+            simOptions.url = QUrl(qtos::Services::defaultUrl().scheme() + u":qtos-services-"_s
+                                  + QString::number(QCoreApplication::applicationPid()));
+        }
         if (!simulator->start(simOptions))
             return 1;
         servicesUrl = simulator->url();

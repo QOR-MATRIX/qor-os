@@ -7,6 +7,7 @@
 #include "simservices.h"
 
 #include <QtCore/QCoreApplication>
+#include <QtCore/QSet>
 #include <QtTest/QSignalSpy>
 #include <QtTest/QTest>
 
@@ -137,6 +138,70 @@ private Q_SLOTS:
 
         audio->applyEqualizerPreset(u"Flat"_s);
         QTRY_COMPARE(audio->equalizer(), QVariantList({ 0.0, 0.0, 0.0, 0.0, 0.0 }));
+    }
+
+    void repeatOneReplaysTheTrack()
+    {
+        auto *media = qtos::Services::instance()->media();
+        media->setRepeat(2);
+        media->setShuffle(false);
+        media->playIndex(1);
+        QTRY_COMPARE(media->queueIndex(), 1);
+        QTRY_VERIFY(media->playing());
+        QTRY_VERIFY(media->duration() > 10);
+        media->seek(media->duration() - 0.4);
+        QTRY_VERIFY(media->position() > media->duration() - 1);
+        // The end comes, and the same track starts over.
+        QTRY_VERIFY_WITH_TIMEOUT(media->position() < 1.0, 5000);
+        QCOMPARE(media->queueIndex(), 1);
+        QVERIFY(media->playing());
+    }
+
+    void repeatAllContinuesFromTheTop()
+    {
+        auto *media = qtos::Services::instance()->media();
+        media->setRepeat(1);
+        const int last = int(media->queue().size()) - 1;
+        media->playIndex(last);
+        QTRY_COMPARE(media->queueIndex(), last);
+        QTRY_VERIFY(media->duration() > 10);
+        media->seek(media->duration() - 0.4);
+        QTRY_COMPARE_WITH_TIMEOUT(media->queueIndex(), 0, 5000);
+        QVERIFY(media->playing());
+    }
+
+    void repeatOffStopsAfterTheLastTrack()
+    {
+        auto *media = qtos::Services::instance()->media();
+        media->setRepeat(0);
+        const int last = int(media->queue().size()) - 1;
+        media->playIndex(last);
+        QTRY_COMPARE(media->queueIndex(), last);
+        QTRY_VERIFY(media->duration() > 10);
+        media->seek(media->duration() - 0.4);
+        QTRY_VERIFY_WITH_TIMEOUT(!media->playing(), 5000);
+        QCOMPARE(media->queueIndex(), 0);
+        media->setRepeat(1);
+    }
+
+    void shufflePlaysEveryTrackOncePerPass()
+    {
+        auto *media = qtos::Services::instance()->media();
+        media->setShuffle(true);
+        QTRY_VERIFY(media->shuffle());
+        media->playIndex(0);
+        QTRY_COMPARE(media->queueIndex(), 0);
+        QSet<int> seen { 0 };
+        const int count = int(media->queue().size());
+        for (int i = 1; i < count; ++i) {
+            const int before = media->queueIndex();
+            media->next();
+            QTRY_VERIFY(media->queueIndex() != before);
+            seen.insert(media->queueIndex());
+        }
+        QCOMPARE(seen.size(), count);
+        media->setShuffle(false);
+        media->setPlaying(false);
     }
 
     void reactiveSettingsReachTheSource()

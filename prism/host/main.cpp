@@ -163,6 +163,11 @@ int main(int argc, char *argv[])
         simulator = std::make_unique<qtos::sim::SimServices>();
         qtos::sim::SimOptions simOptions;
         simOptions.url = options.servicesUrl;
+        // Automated runs get a private endpoint, so they never meet (or are
+        // mistaken for) a QTOS session someone is using.
+        if (simOptions.url.isEmpty() && options.ephemeral)
+            simOptions.url = QUrl(qtos::Services::defaultUrl().scheme() + u":qtos-services-"_s
+                                  + QString::number(QCoreApplication::applicationPid()));
         simOptions.scenarioPath = options.scenario;
         simOptions.persistent = !options.ephemeral;
         // Automated runs never make sound.

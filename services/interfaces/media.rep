@@ -13,6 +13,10 @@ class Media
     // Artwork stand-in: an OKLCH hue the UI renders as a gradient.
     PROP(double artworkHue=280 SOURCEONLYSETTER)
     PROP(bool playing=false READWRITE)
+    // Play the queue in a shuffled order (each track once per pass).
+    PROP(bool shuffle=false READWRITE)
+    // 0: stop after the last track, 1: repeat the queue, 2: repeat the track.
+    PROP(int repeat=1 READWRITE)
     // True while a file is still loading at the play position.
     PROP(bool buffering=false SOURCEONLYSETTER)
     // Seconds.

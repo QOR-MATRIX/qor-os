@@ -88,6 +88,8 @@ outputs; see [AUDIO.md](AUDIO.md).
 | `title`, `artist`, `album`, `player` | QString | source-only | |
 | `artworkHue` | double | source-only | OKLCH hue used for generated artwork |
 | `playing` | bool | READWRITE | |
+| `shuffle` | bool | READWRITE | Play in a shuffled order: every track once per pass, starting from the current one |
+| `repeat` | int | READWRITE | 0: stop after the last track (ready at the first), 1: repeat the queue (default), 2: repeat the track |
 | `buffering` | bool | source-only | A file is still loading at the play position |
 | `position`, `duration` | double | source-only | Seconds; `duration` is 0 until a file's length is known |
 | `queue` | QVariantList | source-only | `[{title, artist, album, duration, hue, kind, path, session}]`: `kind` is `session` (generated live from `session: {style, mode, bpm, root, seed}`) or `file` (`path`) |
@@ -192,6 +194,8 @@ connect <ssid>                 Join a Wi-Fi network
 volume <0-100>                 Set output volume
 media play|pause|next|prev     Control the media session
 media seek <seconds>           Seek in the current track
+media shuffle on|off           Shuffle the queue
+media repeat off|all|one       Repeat the queue or the track
 eq <preset>                    Equaliser preset (Flat, "Bass Boost", ...)
 sounds on|off                  Interface sounds
 reactive on|off                Audio-reactive interface

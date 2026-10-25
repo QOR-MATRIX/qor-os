@@ -132,6 +132,8 @@ Commands:
   volume <0-100>                 Set output volume
   media play|pause|next|prev     Control the media session
   media seek <seconds>           Seek in the current track
+  media shuffle on|off           Shuffle the queue
+  media repeat off|all|one       Repeat the queue or the track
   eq <preset>                    Equaliser preset (Flat, "Bass Boost", ...)
   sounds on|off                  Interface sounds
   reactive on|off                Audio-reactive interface
@@ -167,6 +169,8 @@ Commands:
     }
 
     bool ok = false;
+    // Media.repeat values, by index.
+    const QStringList repeatModes { u"off"_s, u"all"_s, u"one"_s };
 
     if (command == u"status"_s) {
         auto settings = acquire<SettingsReplica>(node);
@@ -202,7 +206,8 @@ Commands:
                       : u"off"_s)
               << '\n'
               << "  media         " << (media->playing() ? "▶ " : "⏸ ") << media->title() << " — " << media->artist()
-              << "  " << formatTime(media->position()) << " / " << formatTime(media->duration()) << '\n'
+              << "  " << formatTime(media->position()) << " / " << formatTime(media->duration())
+              << (media->shuffle() ? ", shuffle" : "") << ", repeat " << repeatModes.value(media->repeat()) << '\n'
               << "  notifications " << notifications->unreadCount() << " unread"
               << (notifications->doNotDisturb() ? ", Do Not Disturb" : "") << '\n';
         out().flush();
@@ -275,6 +280,10 @@ Commands:
             media->previous();
         else if (arg1 == u"seek"_s && args.size() > 2)
             media->seek(args.at(2).toDouble());
+        else if (const bool on = parseOnOff(args.value(2), &ok); arg1 == u"shuffle"_s && ok)
+            media->setShuffle(on);
+        else if (const qsizetype mode = repeatModes.indexOf(args.value(2)); arg1 == u"repeat"_s && mode >= 0)
+            media->setRepeat(int(mode));
         else
             return usage(parser);
         return flushAndExit(app);

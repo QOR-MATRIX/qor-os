@@ -40,10 +40,29 @@ quint32 evdevCode(int key)
 {
     static const QHash<int, quint32> codes = [] {
         QHash<int, quint32> map {
-            { Qt::Key_Escape, 1 },  { Qt::Key_Backspace, 14 }, { Qt::Key_Tab, 15 },   { Qt::Key_Return, 28 },
-            { Qt::Key_Enter, 28 },  { Qt::Key_Space, 57 },     { Qt::Key_Up, 103 },   { Qt::Key_Left, 105 },
-            { Qt::Key_Right, 106 }, { Qt::Key_Down, 108 },     { Qt::Key_Minus, 12 }, { Qt::Key_Period, 52 },
+            { Qt::Key_Escape, 1 },
+            { Qt::Key_Backspace, 14 },
+            { Qt::Key_Tab, 15 },
+            { Qt::Key_Return, 28 },
+            { Qt::Key_Enter, 28 },
+            { Qt::Key_Space, 57 },
+            { Qt::Key_Up, 103 },
+            { Qt::Key_Left, 105 },
+            { Qt::Key_Right, 106 },
+            { Qt::Key_Down, 108 },
+            { Qt::Key_Minus, 12 },
+            { Qt::Key_Period, 52 },
             { Qt::Key_Slash, 53 },
+            // Media and volume keys.
+            { Qt::Key_VolumeMute, 113 },
+            { Qt::Key_VolumeDown, 114 },
+            { Qt::Key_VolumeUp, 115 },
+            { Qt::Key_MediaNext, 163 },
+            { Qt::Key_MediaTogglePlayPause, 164 },
+            { Qt::Key_MediaPrevious, 165 },
+            { Qt::Key_MediaStop, 166 },
+            { Qt::Key_MediaPlay, 200 },
+            { Qt::Key_MediaPause, 201 },
         };
         const char *rows[] = { "qwertyuiop", "asdfghjkl", "zxcvbnm" };
         const quint32 rowStart[] = { 16, 30, 44 };
@@ -665,7 +684,8 @@ private:
                                                     "reactiveIntensity", "reactiveLowHz", "reactiveHighHz" }) },
             { u"audio"_s, snapshot("audio", { "volume", "muted", "outputDevice", "equalizer", "equalizerPreset",
                                               "systemSounds", "systemVolume", "active" }) },
-            { u"media"_s, snapshot("media", { "playing", "title", "position", "duration", "queueIndex" }) },
+            { u"media"_s,
+              snapshot("media", { "playing", "title", "position", "duration", "queueIndex", "shuffle", "repeat" }) },
             { u"windows"_s, list },
             { u"popups"_s, popupRects },
             { u"workArea"_s, rectJson(manager ? manager->property("workArea") : QVariant()) },

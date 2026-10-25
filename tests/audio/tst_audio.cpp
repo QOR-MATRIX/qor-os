@@ -392,6 +392,13 @@ private slots:
         for (int i = 0; i < 20; ++i)
             renderer.process(buffer.data(), 4800);
         QCOMPARE(renderer.finishedGeneration(), quint64(1));
+        QCOMPARE(renderer.endCount(), quint64(1));
+
+        // Seeking back plays it again, and its end is counted again.
+        renderer.seek(1.4);
+        for (int i = 0; i < 4; ++i)
+            renderer.process(buffer.data(), 4800);
+        QCOMPARE(renderer.endCount(), quint64(2));
 
         // A replaced source comes back for deletion off the audio thread.
         renderer.setSource(new SessionSource(spec, kRate), 2);

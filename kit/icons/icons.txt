@@ -7,6 +7,7 @@ app-window
 archive
 arrow-right
 arrow-up-right
+audio-lines
 battery
 battery-charging
 battery-full
@@ -33,6 +34,7 @@ contrast
 copy
 corner-down-left
 cpu
+disc-3
 download
 eye
 file
@@ -58,12 +60,15 @@ laptop
 layers
 layout-dashboard
 layout-grid
+library
 list
+list-music
 lock
 lock-open
 mail
 maximize-2
 memory-stick
+mic-vocal
 minimize-2
 minus
 monitor
@@ -79,6 +84,7 @@ plus
 power
 presentation
 repeat
+repeat-1
 search
 settings
 settings-2

@@ -353,12 +353,10 @@ private:
         while (Source *source = m_renderer.takeRetired())
             delete source;
 
-        if (m_hasTrack) {
-            const quint64 finishedGeneration = m_renderer.finishedGeneration();
-            if (finishedGeneration == m_generation && finishedGeneration != m_reportedFinished) {
-                m_reportedFinished = finishedGeneration;
+        if (const quint64 ends = m_renderer.endCount(); ends != m_seenEnds) {
+            m_seenEnds = ends;
+            if (m_hasTrack && m_renderer.finishedGeneration() == m_generation)
                 Q_EMIT finished();
-            }
         }
 
         const qint64 delay = m_sink ? 2 * m_callbackFrames.load(std::memory_order_relaxed) : 0;
@@ -441,7 +439,7 @@ private:
     QVariantMap m_track;
     bool m_hasTrack = false;
     quint64 m_generation = 0;
-    quint64 m_reportedFinished = 0;
+    quint64 m_seenEnds = 0;
     FileSource *m_file = nullptr; // the current track when it is a file; owned by the renderer
     bool m_playing = false;
     bool m_buffering = false;

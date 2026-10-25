@@ -6,9 +6,11 @@
 
 #include <QtConcurrent/QtConcurrentRun>
 #include <QtCore/QLoggingCategory>
+#include <QtCore/QRandomGenerator>
 #include <QtCore/QSettings>
 
 #include <algorithm>
+#include <utility>
 
 using namespace Qt::StringLiterals;
 
@@ -18,16 +20,26 @@ namespace qtos::sim {
 
 // ── Media ────────────────────────────────────────────────────────────────────
 
-SimMedia::SimMedia(audio::Engine *engine, QObject *parent) : MediaSimpleSource(parent), m_engine(engine)
+SimMedia::SimMedia(audio::Engine *engine, bool persistent, QObject *parent)
+    : MediaSimpleSource(parent), m_engine(engine), m_persistent(persistent)
 {
     connect(this, &MediaSimpleSource::playingChanged, this, [this] { m_engine->setPlaying(playing()); });
+    connect(this, &MediaSimpleSource::shuffleChanged, this, [this] {
+        reshuffle();
+        save();
+    });
+    connect(this, &MediaSimpleSource::repeatChanged, this, [this] {
+        if (repeat() < 0 || repeat() > 2)
+            setRepeat(1);
+        save();
+    });
     connect(m_engine, &audio::Engine::positionChanged, this, [this](double seconds) {
         setPosition(duration() > 0 ? std::min(seconds, duration()) : seconds);
         m_failures = 0;
     });
     connect(m_engine, &audio::Engine::durationChanged, this, &SimMedia::updateQueuedDuration);
     connect(m_engine, &audio::Engine::bufferingChanged, this, &SimMedia::setBuffering);
-    connect(m_engine, &audio::Engine::finished, this, &SimMedia::next);
+    connect(m_engine, &audio::Engine::finished, this, &SimMedia::trackFinished);
     connect(m_engine, &audio::Engine::loadFailed, this, &SimMedia::skipUnplayable);
     connect(&m_library, &QFutureWatcher<QVariantList>::finished, this, [this] {
         const QVariantList files = m_library.result();
@@ -36,6 +48,7 @@ SimMedia::SimMedia(audio::Engine *engine, QObject *parent) : MediaSimpleSource(p
         qCInfo(lcSimMedia) << "Queued" << files.size() << "music files";
         setQueue(queue() + files);
         setAvailable(true);
+        reshuffle();
     });
 }
 
@@ -47,6 +60,15 @@ void SimMedia::load(const QJsonObject &config, bool library)
     applyTrack(config.value(u"index"_s).toInt(0));
     if (const double position = config.value(u"position"_s).toDouble(0); position > 0)
         seek(position);
+    if (m_persistent) {
+        QSettings store;
+        store.beginGroup(u"media"_s);
+        const bool persistent = std::exchange(m_persistent, false); // no saving while restoring
+        setShuffle(store.value(u"shuffle"_s, shuffle()).toBool());
+        setRepeat(store.value(u"repeat"_s, repeat()).toInt());
+        m_persistent = persistent;
+        store.endGroup();
+    }
     setPlaying(config.value(u"playing"_s).toBool(false));
     if (library)
         m_library.setFuture(QtConcurrent::run([roots = audio::libraryRoots()] { return audio::scanLibrary(roots); }));
@@ -101,14 +123,79 @@ void SimMedia::skipUnplayable(const QString &message)
 
 void SimMedia::togglePlayback() { setPlaying(!playing()); }
 
-void SimMedia::next() { applyTrack(queueIndex() + 1); }
+int SimMedia::stepFrom(int steps) const
+{
+    const int count = int(queue().size());
+    if (count == 0)
+        return 0;
+    if (!shuffle() || m_order.size() != count)
+        return ((queueIndex() + steps) % count + count) % count;
+    const int at = std::max(0, int(m_order.indexOf(queueIndex())));
+    return m_order.at(((at + steps) % count + count) % count);
+}
+
+// A new random order that starts with the current track, so turning shuffle
+// on never interrupts what is playing.
+void SimMedia::reshuffle()
+{
+    m_order.clear();
+    if (!shuffle())
+        return;
+    for (int i = 0; i < queue().size(); ++i)
+        if (i != queueIndex())
+            m_order.append(i);
+    std::shuffle(m_order.begin(), m_order.end(), *QRandomGenerator::global());
+    m_order.prepend(queueIndex());
+}
+
+void SimMedia::next()
+{
+    const int index = stepFrom(1);
+    // A full shuffled pass is over: deal a new order for the next one.
+    if (shuffle() && !m_order.isEmpty() && index == m_order.first()) {
+        applyTrack(index);
+        reshuffle();
+        return;
+    }
+    applyTrack(index);
+}
 
 void SimMedia::previous()
 {
     if (position() > 3.0)
         seek(0);
     else
-        applyTrack(queueIndex() - 1);
+        applyTrack(stepFrom(-1));
+}
+
+void SimMedia::trackFinished()
+{
+    switch (repeat()) {
+    case 2: // the track again
+        seek(0);
+        break;
+    case 0: // stop after the last track, ready at the first
+        if (stepFrom(1) == (shuffle() && !m_order.isEmpty() ? m_order.first() : 0)) {
+            setPlaying(false);
+            applyTrack(stepFrom(1));
+            reshuffle();
+            break;
+        }
+        next();
+        break;
+    default: next(); break;
+    }
+}
+
+void SimMedia::save()
+{
+    if (!m_persistent)
+        return;
+    QSettings store;
+    store.beginGroup(u"media"_s);
+    store.setValue(u"shuffle"_s, shuffle());
+    store.setValue(u"repeat"_s, repeat());
+    store.endGroup();
 }
 
 void SimMedia::seek(double seconds)
@@ -121,6 +208,8 @@ void SimMedia::seek(double seconds)
 void SimMedia::playIndex(int index)
 {
     applyTrack(index);
+    // A chosen track starts the shuffled order afresh from itself.
+    reshuffle();
     setPlaying(true);
 }
 

@@ -23,6 +23,10 @@ All notable changes to QTOS are recorded here. The format follows
 - `qtosctl media seek`, `eq`, `sounds`, `reactive` and `spectrum` (a live spectrum in the terminal); `status` shows the output, EQ, reactive settings and play position.
 - `qtos-simd --silent`. Automated runs (`--screenshot`, `--benchmark`, `--script`) and every test use the engine's null output, which renders in real time to nowhere.
 - `qtos-shell --open settings/sound` opens an app at a page.
+- **Music library.** Songs, Albums and Artists views, and QTOS Sessions and Music Folder collections with real counts (the placeholder playlists are gone). Play and Shuffle buttons start a view; the playing song shows a live spectrum.
+- **Shuffle and repeat** (`Media.shuffle`, `Media.repeat`): shuffle plays every track once per pass; repeat cycles through all, one and off. Both persist, and `qtosctl media shuffle|repeat` sets them.
+- **Media and volume keys** everywhere, including the lock screen, with a glass volume indicator (`VolumeHud`).
+- Lucide icons `repeat-1`, `disc-3`, `mic-vocal`, `list-music`, `library` and `audio-lines` (112 in all).
 - On Linux without a running PipeWire daemon (WSLg), QTOS asks Qt Multimedia for its PulseAudio backend, avoiding a crash in Qt 6.12's PipeWire backend.
 - Shell scripts: a `scroll` step; the state includes `audio`, `media` and the reactive settings; item targets are found among `Repeater` delegates and must not be clipped or scrolled out of view.
 - Tests: `tst_audio` (24 cases), playback and analysis over Qt Remote Objects in `tst_services`, and the Sound page in `shell_e2e`.
@@ -62,6 +66,10 @@ All notable changes to QTOS are recorded here. The format follows
 - **Benchmark v2**, shared by `qtos-shell` and `prism` (`prism/shell/shellbenchmark.cpp`): `prism --benchmark` reports per-output frame pacing, missed frames at each output's refresh rate, and input-to-swap latency. Top-level JSON fields are unchanged. Baselines: input to swap 5.9 ms p50 on the RTX 4060 (360 Hz); nested Prism under WSLg holds 60 Hz. This is the tooling for the ADR-0003 decision gate, which needs a bare-metal run.
 
 ### Fixed
+
+- **Clicking an icon button in a window that overlapped another raised the window underneath.** `IconButton`'s `TapHandler` takes only a passive grab, so the press reached the activation watcher of every window below. Only the topmost window at the press now activates. `shell_e2e` checks it.
+- **Automated runs could talk to a QTOS session in use.** On Windows a named pipe accepts several servers, so a second simulator "hosted" the default endpoint alongside a running session, and clients could reach either. The simulator now probes the endpoint first, and `--script`, `--screenshot` and `--benchmark` runs use a private one.
+- On Linux the keyboard's play/pause key (delivered as Media Play) only ever started playback; it now toggles.
 
 - `tools/dev/run.ps1 -- <shell options>` passed the first shell option as `-Preset` (so `run.ps1 -- --unlocked` failed with "not built for preset"). `-Preset` is now named-only.
 

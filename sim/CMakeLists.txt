@@ -25,6 +25,7 @@ target_include_directories(qtos_sim PUBLIC
 target_link_libraries(qtos_sim
     PUBLIC
         Qt6::Core
+        Qt6::Network
         Qt6::RemoteObjects
         qtos_audio
     PRIVATE

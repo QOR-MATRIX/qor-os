@@ -407,7 +407,10 @@ Item {
                     win.resizeBy(dx, dy);
             }
             onActiveChanged: {
-                if (active && !win.focused)
+                // Delivery reaches this handler in windows *under* the press
+                // too when the item pressed only takes a passive grab (a
+                // TapHandler's default): activate only the window on top.
+                if (active && !win.focused && win.manager.windowAt(point.scenePressPosition) === win)
                     win.manager.activate(win);
                 if (!active && win.clientMoving) {
                     win.clientMoving = false;

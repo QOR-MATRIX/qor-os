@@ -16,7 +16,7 @@ The Lumen design system. Spec: [docs/design/LUMEN.md](../docs/design/LUMEN.md).
 | `src/` | C++: `Kit` (fonts, reduced motion), `Spring`, `Oklch` + `oklchmath`, `SceneRect`, `FrameStats` |
 | `shaders/` | `surface`, `glass`, `icon`, `roundmask`, `wallpaper`, `glow` (audio-reactive light) fragment shaders (compiled to `.qsb`) |
 | `fonts/` | Inter 4.1 variable (roman, italic), JetBrains Mono 2.304 variable, with OFL licenses |
-| `icons/` | 106 Lucide icons (list in `icons.txt`, imported by `tools/icons/import_lucide.py`) |
+| `icons/` | 112 Lucide icons (list in `icons.txt`, imported by `tools/icons/import_lucide.py`) |
 | `style/` | The **Lumen** Qt Quick Controls style module (24 controls on Qt Quick Templates) |
 
 Use from QML:

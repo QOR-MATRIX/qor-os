@@ -89,6 +89,20 @@ Item {
         };
     }
 
+    // The window a person sees at a scene point: the highest visible one
+    // whose frame contains it.
+    function windowAt(scenePoint: point): AppWindow {
+        let best = null;
+        for (const w of windows) {
+            if (w.closing || w.minimized || !w.visible || (best && w.z <= best.z))
+                continue;
+            const p = w.mapFromItem(null, scenePoint.x, scenePoint.y);
+            if (p.x >= 0 && p.y >= 0 && p.x < w.width && p.y < w.height)
+                best = w;
+        }
+        return best;
+    }
+
     // The most recently raised open window of an app.
     function find(appId: string): AppWindow {
         let best = null;

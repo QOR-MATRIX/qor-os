@@ -26,6 +26,7 @@ qt_add_qml_module(qtos_shell
         NotificationCard.qml
         LockScreen.qml
         SpaceSwitcher.qml
+        VolumeHud.qml
         search.js
     SOURCES
         desktopentries.h desktopentries.cpp

@@ -134,7 +134,8 @@ void Renderer::processBlock(float *out, int frames)
             std::fill(out + rendered * 2, out + qint64(frames) * 2, 0.0f);
             if (!m_source->buffering()) {
                 m_ended = true;
-                m_finished.store(m_generation, std::memory_order_release);
+                m_finished.store(m_generation, std::memory_order_relaxed);
+                m_ends.fetch_add(1, std::memory_order_release);
             }
         }
         m_position.store(m_source->position(), std::memory_order_relaxed);

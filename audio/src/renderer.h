@@ -45,6 +45,9 @@ public:
     // What the audio thread last did.
     double position() const { return m_position.load(std::memory_order_relaxed); }
     quint64 finishedGeneration() const { return m_finished.load(std::memory_order_acquire); }
+    // Increases each time a source reaches its end, including a source that
+    // ends again after a seek back (repeat one).
+    quint64 endCount() const { return m_ends.load(std::memory_order_acquire); }
     bool buffering() const { return m_buffering.load(std::memory_order_relaxed); }
     qint64 framesRendered() const { return m_monitorWritten.load(std::memory_order_acquire); }
 
@@ -87,6 +90,7 @@ private:
 
     std::atomic<double> m_position { 0 };
     std::atomic<quint64> m_finished { 0 };
+    std::atomic<quint64> m_ends { 0 };
     std::atomic<bool> m_buffering { false };
 
     std::unique_ptr<std::atomic<float>[]> m_monitor;
