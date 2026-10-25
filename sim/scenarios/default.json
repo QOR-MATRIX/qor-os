@@ -34,15 +34,19 @@
   },
   "media": {
     "player": "Music",
-    "playing": true,
+    "playing": false,
     "index": 0,
-    "position": 47,
     "queue": [
-      { "title": "Glass Horizon", "artist": "Nova Arc", "album": "Refraction", "duration": 214, "hue": 285 },
-      { "title": "Soft Machines", "artist": "Kite Theory", "album": "Lowlight", "duration": 187, "hue": 205 },
-      { "title": "Afterglow Drive", "artist": "Mira Vale", "album": "Neon Weather", "duration": 241, "hue": 32 },
-      { "title": "Paper Satellites", "artist": "The Quiet Orbit", "album": "Telemetry", "duration": 198, "hue": 152 },
-      { "title": "Velvet Static", "artist": "Nova Arc", "album": "Refraction", "duration": 226, "hue": 338 }
+      { "title": "Glass Horizon", "artist": "Nova Arc", "album": "Refraction", "duration": 214, "hue": 285,
+        "kind": "session", "session": { "style": "drive", "mode": "minor", "bpm": 118, "root": 57, "seed": 1 } },
+      { "title": "Soft Machines", "artist": "Kite Theory", "album": "Lowlight", "duration": 187, "hue": 205,
+        "kind": "session", "session": { "style": "chill", "mode": "dorian", "bpm": 92, "root": 50, "seed": 2 } },
+      { "title": "Afterglow Drive", "artist": "Mira Vale", "album": "Neon Weather", "duration": 241, "hue": 32,
+        "kind": "session", "session": { "style": "pulse", "mode": "minor", "bpm": 124, "root": 54, "seed": 3 } },
+      { "title": "Paper Satellites", "artist": "The Quiet Orbit", "album": "Telemetry", "duration": 198, "hue": 152,
+        "kind": "session", "session": { "style": "ambient", "mode": "lydian", "bpm": 78, "root": 48, "seed": 4 } },
+      { "title": "Velvet Static", "artist": "Nova Arc", "album": "Refraction", "duration": 226, "hue": 338,
+        "kind": "session", "session": { "style": "drive", "mode": "minor", "bpm": 104, "root": 52, "seed": 5 } }
     ]
   },
   "notifications": [

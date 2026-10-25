@@ -8,6 +8,23 @@ All notable changes to QTOS are recorded here. The format follows
 
 ### Added
 
+- **Sound, everywhere.** QTOS plays real audio through the machine's outputs ([docs/AUDIO.md](docs/AUDIO.md)).
+  - The new audio engine (`audio/`, `qtos_audio`) uses Qt Multimedia's real-time output callback, with lock-free hand-off to the audio thread, click-free fades, a perceptual volume taper and a soft limiter.
+  - **QTOS Sessions**: original music generated live and deterministically by a small synthesiser (band-limited oscillators, state-variable filters, synthesised drums, ping-pong delay, reverb) in four styles. The five scenario tracks are sessions.
+  - **Your music**: files in the Music folder and `QTOS_MUSIC_DIR` (MP3, FLAC, Ogg, Opus, WAV, AAC, WMA, AIFF) are decoded with `QAudioDecoder` and queued after the sessions.
+  - **Five-band equaliser** with seven presets, and a response curve drawn over the live spectrum in Settings.
+  - **Output devices** follow the system: real devices are listed, hot-plugging is tracked, and the chosen output is remembered.
+  - **Interface sounds** (`Sounds` in `QTOS.Kit`): notification, lock, unlock, volume and connect cues, synthesised by `tools/sounds/generate_sounds.py`, with their own switch and volume.
+- **Audio-reactive interface.** The wallpaper's light swells with the music and flares on beats, the Live Activity shows the real spectrum, the Music artwork breathes on the beat, and Music and Control Center gain visualisers.
+  - Settings › Sound adds **React to sound**, an **Intensity** slider, and the frequencies it **Reacts to**: presets (Bass, Vocals, Highs, Full range) or any range on a logarithmic range slider over the live spectrum. A response meter shows the energy and beats.
+  - The analysis (48-band spectrum, loudness, range energy, beat detection) runs in the engine and reaches the interface as the `Audio` service's `analysis` signal; `Reactive` (`QTOS.Services`) smooths it at the display's frame rate. Reduce Motion stills it.
+- Service contracts: `Audio` gains `outputAvailable`, the equaliser, interface-sound settings, `active` and `analysis`; `Media` gains `buffering` and queue entries with `kind`, `session` and `path`; `Settings` gains `audioReactive`, `reactiveIntensity`, `reactiveLowHz` and `reactiveHighHz`.
+- Kit `Spectrum` and Lumen `RangeSlider`.
+- `qtosctl media seek`, `eq`, `sounds`, `reactive` and `spectrum` (a live spectrum in the terminal); `status` shows the output, EQ, reactive settings and play position.
+- `qtos-simd --silent`. Automated runs (`--screenshot`, `--benchmark`, `--script`) and every test use the engine's null output, which renders in real time to nowhere.
+- `qtos-shell --open settings/sound` opens an app at a page.
+- Shell scripts: a `scroll` step; the state includes `audio`, `media` and the reactive settings; item targets are found among `Repeater` delegates and must not be clipped or scrolled out of view.
+- Tests: `tst_audio` (24 cases), playback and analysis over Qt Remote Objects in `tst_services`, and the Sound page in `shell_e2e`.
 - **Increase Contrast**, a new accessibility setting.
   - It is available through the `increaseContrast` setting, in Settings → Accessibility, as a Beam action, as `qtosctl contrast on|off`, and as `qtos-shell --contrast high`.
   - Roles can define `highContrast` token values, which `Theme.contrast` blends in OKLab on a spring.
@@ -56,6 +73,8 @@ All notable changes to QTOS are recorded here. The format follows
 - `prism` failed to load on Qt 6 (`ShellSurfaceItem.sizeFollowsSurface` no longer exists). It was never built before: this is its first run.
 
 ### Changed
+
+- The scenario no longer starts playing on its own: press play.
 
 - CI: the Linux job runs on a self-hosted WSL2 runner with the commercial kit. With warnings as errors (as on Windows), it runs the GPU suites on WSLg and the Prism protocol check with real Wayland clients; about 40 s incremental.
 - CI: a newer push cancels an older Build run on the same branch, so a run queued for an offline runner no longer blocks later builds. GPU suites check for a display, time out after 120 s and retry once.

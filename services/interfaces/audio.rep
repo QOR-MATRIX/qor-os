@@ -1,14 +1,43 @@
 // SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
-// qtos-audiod: output volume and routing (backed by PipeWire/WirePlumber on device).
+// qtos-audiod: output, volume, equaliser, interface sounds and live analysis
+// of what is playing (PipeWire/WirePlumber on device; the QTOS audio engine,
+// audio/, in simulation).
 #include <QtCore/QStringList>
+#include <QtCore/QVariantList>
 
 class Audio
 {
-    // 0.0 .. 1.0
+    // 0.0 .. 1.0, perceptual: the engine applies a cubic taper.
     PROP(double volume=0.6 READWRITE)
     PROP(bool muted=false READWRITE)
+    // The output in use and every output there is, by name.
     PROP(QString outputDevice SOURCEONLYSETTER)
     PROP(QStringList outputDevices SOURCEONLYSETTER)
+    // False when there is no device to play to: audio is rendered silently.
+    PROP(bool outputAvailable=false SOURCEONLYSETTER)
+
+    // Five-band equaliser: gains in dB (-12 .. 12) at 60 Hz, 250 Hz, 1 kHz,
+    // 4 kHz and 12 kHz.
+    PROP(QVariantList equalizer SOURCEONLYSETTER)
+    // The preset the gains came from, or "Custom".
+    PROP(QString equalizerPreset SOURCEONLYSETTER)
+    PROP(QStringList equalizerPresets SOURCEONLYSETTER)
+
+    // Interface sounds: notifications, lock and unlock, volume feedback.
+    PROP(bool systemSounds=true READWRITE)
+    PROP(double systemVolume=0.5 READWRITE)
+
+    // True while something audible is playing.
+    PROP(bool active=false SOURCEONLYSETTER)
+    // Live analysis of what is being heard, about 60 times a second while
+    // active (then once more, at rest): 48 log-spaced bands from 30 Hz to
+    // 16 kHz (0..1), loudness (0..1), energy in the reactive frequency range
+    // chosen in Settings (0..1, adaptively normalised), a counter that
+    // increases on every beat in that range, and the last beat's strength
+    // (0..1).
+    SIGNAL(analysis(QVariantList bands, double level, double reactive, int beat, double beatStrength))
 
     SLOT(void selectOutput(const QString &device))
+    SLOT(void setEqualizerBand(int band, double gainDb))
+    SLOT(void applyEqualizerPreset(const QString &name))
 }

@@ -23,8 +23,13 @@ Item {
     property real seed: 42
     // Extra field rendered around the visible area to absorb parallax.
     property real overscan: 0.14
+    // Audio-reactive light (Reactive.energy and Reactive.pulse in the shell):
+    // blooms over the cached field, so reacting never re-renders the noise.
+    property real energy: 0
+    property real pulse: 0
 
     property real _time: seed
+    property real _glowTime: 0
 
     ShaderEffect {
         id: field
@@ -47,8 +52,24 @@ Item {
         fragmentShader: Qt.resolvedUrl("shaders/wallpaper.frag.qsb")
     }
 
+    ShaderEffect {
+        anchors.fill: parent
+        visible: root.energy + root.pulse > 0.002
+        readonly property vector2d resolution: Qt.vector2d(width, height)
+        readonly property real time: root._glowTime
+        readonly property real hue: root.hue
+        readonly property real darkness: root.darkness
+        readonly property real energy: root.energy
+        readonly property real pulse: root.pulse
+        fragmentShader: Qt.resolvedUrl("shaders/glow.frag.qsb")
+    }
+
     FrameAnimation {
         running: root.living && root.visible
         onTriggered: root._time += frameTime
+    }
+    FrameAnimation {
+        running: root.energy + root.pulse > 0.002 && root.visible
+        onTriggered: root._glowTime += frameTime
     }
 }

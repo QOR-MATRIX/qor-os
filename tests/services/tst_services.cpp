@@ -98,6 +98,58 @@ private Q_SLOTS:
         media->playIndex(0);
         QTRY_COMPARE(media->title(), first);
     }
+
+    // The audio engine renders silently under test (QTOS_AUDIO_OUTPUT=null)
+    // but in real time, so playback, positions and analysis are all real.
+    void playbackRunsThroughTheAudioEngine()
+    {
+        auto *media = qtos::Services::instance()->media();
+        auto *audio = qtos::Services::instance()->audio();
+        QSignalSpy analysis(audio, &AudioReplica::analysis);
+        media->playIndex(0);
+        QTRY_VERIFY(media->playing());
+        QTRY_VERIFY_WITH_TIMEOUT(media->position() > 0.5, 5000);
+        QTRY_VERIFY_WITH_TIMEOUT(audio->active(), 5000);
+        QTRY_VERIFY_WITH_TIMEOUT(analysis.count() > 10, 5000);
+        QCOMPARE(analysis.last().at(0).toList().size(), 48);
+
+        media->setPlaying(false);
+        QTRY_VERIFY_WITH_TIMEOUT(!audio->active(), 5000);
+        const double paused = media->position();
+        QTest::qWait(400);
+        QCOMPARE(media->position(), paused);
+
+        media->seek(30);
+        QTRY_COMPARE(media->position(), 30.0);
+    }
+
+    void equalizerPresetsAndBands()
+    {
+        auto *audio = qtos::Services::instance()->audio();
+        QVERIFY(audio->equalizerPresets().contains(u"Bass Boost"_s));
+        audio->applyEqualizerPreset(u"Bass Boost"_s);
+        QTRY_COMPARE(audio->equalizerPreset(), u"Bass Boost"_s);
+        QCOMPARE(audio->equalizer().value(0).toDouble(), 6.0);
+
+        audio->setEqualizerBand(2, 1.3);
+        QTRY_COMPARE(audio->equalizerPreset(), u"Custom"_s);
+        QCOMPARE(audio->equalizer().value(2).toDouble(), 1.5);
+
+        audio->applyEqualizerPreset(u"Flat"_s);
+        QTRY_COMPARE(audio->equalizer(), QVariantList({ 0.0, 0.0, 0.0, 0.0, 0.0 }));
+    }
+
+    void reactiveSettingsReachTheSource()
+    {
+        auto *settings = qtos::Services::instance()->settings();
+        QVERIFY(settings->audioReactive());
+        settings->setReactiveLowHz(300);
+        settings->setReactiveHighHz(3000);
+        settings->setReactiveIntensity(0.9);
+        QTRY_COMPARE(m_sim.settings()->reactiveLowHz(), 300.0);
+        QTRY_COMPARE(m_sim.settings()->reactiveHighHz(), 3000.0);
+        QTRY_COMPARE(m_sim.settings()->reactiveIntensity(), 0.9);
+    }
 };
 
 QTEST_MAIN(tst_Services)

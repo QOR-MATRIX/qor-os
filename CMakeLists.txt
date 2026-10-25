@@ -33,6 +33,7 @@ set(QTOS_QT_MIN_VERSION 6.12)
 # Qt API is used knowingly and pinned to the Qt version above.
 set(QT_NO_PRIVATE_MODULE_WARNING ON)
 find_package(Qt6 ${QTOS_QT_MIN_VERSION} REQUIRED COMPONENTS
+    Concurrent
     Core
     Gui
     GuiPrivate
@@ -46,6 +47,7 @@ find_package(Qt6 ${QTOS_QT_MIN_VERSION} REQUIRED COMPONENTS
     ShaderTools
     Svg
     Graphs
+    Multimedia
 )
 
 qt_standard_project_setup(REQUIRES ${QTOS_QT_MIN_VERSION})
@@ -61,6 +63,7 @@ set(QT_QML_GENERATE_QMLLS_INI ON CACHE BOOL "Write .qmlls.ini files for qmlls in
 include(QtosCompilerSettings)
 
 add_subdirectory(kit)
+add_subdirectory(audio)
 add_subdirectory(services)
 add_subdirectory(sim)
 add_subdirectory(apps)

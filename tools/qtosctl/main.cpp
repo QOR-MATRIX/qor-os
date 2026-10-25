@@ -13,6 +13,7 @@
 //   qtosctl wifi off
 //   qtosctl battery 12            # simulation only
 //   qtosctl watch                 # stream notifications and state changes
+//   qtosctl spectrum              # live view of what the audio engine hears
 
 #include "rep_audio_replica.h"
 #include "rep_media_replica.h"
@@ -83,6 +84,24 @@ int flushAndExit(QCoreApplication &app, int code = 0)
     return app.exec();
 }
 
+QString formatTime(double seconds)
+{
+    if (!(seconds > 0))
+        return u"--:--"_s;
+    const int s = int(seconds);
+    return QString::number(s / 60) + u':' + QString::number(s % 60).rightJustified(2, u'0');
+}
+
+// One line of block characters for the 48 analysis bands, low to high.
+QString spectrumLine(const QVariantList &bands)
+{
+    static const QString blocks = u" ▁▂▃▄▅▆▇█"_s;
+    QString line;
+    for (const QVariant &band : bands)
+        line += blocks.at(std::clamp(qRound(band.toDouble() * 8), 0, 8));
+    return line;
+}
+
 int usage(const QCommandLineParser &parser)
 {
     err() << parser.helpText();
@@ -112,6 +131,13 @@ Commands:
   connect <ssid>                 Join a Wi-Fi network
   volume <0-100>                 Set output volume
   media play|pause|next|prev     Control the media session
+  media seek <seconds>           Seek in the current track
+  eq <preset>                    Equaliser preset (Flat, "Bass Boost", ...)
+  sounds on|off                  Interface sounds
+  reactive on|off                Audio-reactive interface
+  reactive intensity <0-100>     How strongly it reacts
+  reactive range <low> <high>    The frequencies it reacts to, in Hz
+  spectrum [seconds]             Live spectrum, level and beats of what plays
   dnd on|off                     Do Not Disturb
   notify <title> [body]          Post a notification
   watch                          Stream notifications and state changes
@@ -166,9 +192,17 @@ Commands:
               << "  battery       " << power->batteryLevel() << '%' << (power->charging() ? " charging" : "")
               << ", profile " << power->profile() << '\n'
               << "  audio         " << qRound(audio->volume() * 100) << '%' << (audio->muted() ? " muted" : "") << " → "
-              << audio->outputDevice() << '\n'
-              << "  media         " << (media->playing() ? "▶ " : "⏸ ") << media->title() << " — " << media->artist()
+              << audio->outputDevice() << (audio->outputAvailable() ? "" : " (silent)") << ", EQ "
+              << audio->equalizerPreset() << ", interface sounds " << (audio->systemSounds() ? "on" : "off") << '\n'
+              << "  reactive      "
+              << (settings->audioReactive()
+                      ? u"on, intensity %1%, %2-%3 Hz"_s.arg(qRound(settings->reactiveIntensity() * 100))
+                            .arg(qRound(settings->reactiveLowHz()))
+                            .arg(qRound(settings->reactiveHighHz()))
+                      : u"off"_s)
               << '\n'
+              << "  media         " << (media->playing() ? "▶ " : "⏸ ") << media->title() << " — " << media->artist()
+              << "  " << formatTime(media->position()) << " / " << formatTime(media->duration()) << '\n'
               << "  notifications " << notifications->unreadCount() << " unread"
               << (notifications->doNotDisturb() ? ", Do Not Disturb" : "") << '\n';
         out().flush();
@@ -239,9 +273,84 @@ Commands:
             media->next();
         else if (arg1 == u"prev"_s)
             media->previous();
+        else if (arg1 == u"seek"_s && args.size() > 2)
+            media->seek(args.at(2).toDouble());
         else
             return usage(parser);
         return flushAndExit(app);
+    }
+
+    if (command == u"eq"_s || command == u"sounds"_s) {
+        auto audio = acquire<AudioReplica>(node);
+        if (!audio)
+            return 1;
+        if (command == u"eq"_s) {
+            if (!audio->equalizerPresets().contains(arg1)) {
+                err() << "qtosctl: presets are " << audio->equalizerPresets().join(u", "_s) << '\n';
+                return 2;
+            }
+            audio->applyEqualizerPreset(arg1);
+        } else {
+            const bool on = parseOnOff(arg1, &ok);
+            if (!ok)
+                return usage(parser);
+            audio->setSystemSounds(on);
+        }
+        return flushAndExit(app);
+    }
+
+    if (command == u"reactive"_s) {
+        auto settings = acquire<SettingsReplica>(node);
+        if (!settings)
+            return 1;
+        if (arg1 == u"intensity"_s) {
+            const int level = args.value(2).toInt(&ok);
+            if (!ok)
+                return usage(parser);
+            settings->setReactiveIntensity(std::clamp(level, 0, 100) / 100.0);
+        } else if (arg1 == u"range"_s) {
+            bool highOk = false;
+            const double low = args.value(2).toDouble(&ok);
+            const double high = args.value(3).toDouble(&highOk);
+            if (!ok || !highOk || low <= 0 || high <= low)
+                return usage(parser);
+            settings->setReactiveLowHz(low);
+            settings->setReactiveHighHz(high);
+        } else {
+            const bool on = parseOnOff(arg1, &ok);
+            if (!ok)
+                return usage(parser);
+            settings->setAudioReactive(on);
+        }
+        return flushAndExit(app);
+    }
+
+    if (command == u"spectrum"_s) {
+        auto audio = acquire<AudioReplica>(node);
+        if (!audio)
+            return 1;
+        out() << "30 Hz" << QString(48 - 11, u' ') << "16 kHz   level  range  beats\n";
+        out().flush();
+        int frames = 0;
+        QObject::connect(audio.get(), &AudioReplica::analysis, &app,
+                         [&frames](const QVariantList &bands, double level, double reactive, int beat, double) {
+                             // About 20 lines a second is plenty for a terminal.
+                             if (frames++ % 3 != 0)
+                                 return;
+                             out() << '\r' << spectrumLine(bands) << "  "
+                                   << QString::number(qRound(level * 100)).rightJustified(4) << "%  "
+                                   << QString::number(qRound(reactive * 100)).rightJustified(4) << "%  " << beat
+                                   << "   ";
+                             out().flush();
+                         });
+        if (const int seconds = arg1.toInt(&ok); ok && seconds > 0) {
+            QTimer::singleShot(seconds * 1000, &app, [&frames] {
+                out() << '\n' << frames << " analysis frames\n";
+                out().flush();
+                QCoreApplication::exit(frames > 0 ? 0 : 3);
+            });
+        }
+        return app.exec();
     }
 
     if (command == u"dnd"_s || command == u"notify"_s) {

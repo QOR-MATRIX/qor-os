@@ -72,12 +72,14 @@ bool SimServices::start(const SimOptions &options)
     if (!loadScenario(options.scenarioPath) && !loadScenario({}))
         return false;
 
+    m_engine =
+        std::make_unique<audio::Engine>(options.silent ? audio::Engine::Output::Null : audio::Engine::Output::Auto);
     m_network = std::make_unique<SimNetwork>();
     m_bluetooth = std::make_unique<SimBluetooth>();
     m_power = std::make_unique<SimPower>();
-    m_audio = std::make_unique<SimAudio>();
+    m_audio = std::make_unique<SimAudio>(m_engine.get(), options.persistent);
     m_display = std::make_unique<SimDisplay>();
-    m_media = std::make_unique<SimMedia>();
+    m_media = std::make_unique<SimMedia>(m_engine.get());
     m_notifications = std::make_unique<SimNotifications>();
     m_settings = std::make_unique<SimSettings>(options.persistent);
     m_control = std::make_unique<SimControlSource>(this);
@@ -86,8 +88,17 @@ bool SimServices::start(const SimOptions &options)
     m_bluetooth->load(m_scenario.value(u"bluetooth"_s).toObject());
     m_power->load(m_scenario.value(u"power"_s).toObject());
     m_audio->load(m_scenario.value(u"audio"_s).toObject());
-    m_media->load(m_scenario.value(u"media"_s).toObject());
+    m_media->load(m_scenario.value(u"media"_s).toObject(),
+                  options.persistent || qEnvironmentVariableIsSet("QTOS_MUSIC_DIR"));
     m_settings->load(m_scenario.value(u"user"_s).toObject());
+
+    // The interface reacts to the frequencies chosen in Settings.
+    const auto applyRange = [this] {
+        m_engine->setReactiveRange(m_settings->reactiveLowHz(), m_settings->reactiveHighHz());
+    };
+    connect(m_settings.get(), &SettingsSimpleSource::reactiveLowHzChanged, this, applyRange);
+    connect(m_settings.get(), &SettingsSimpleSource::reactiveHighHzChanged, this, applyRange);
+    applyRange();
     m_control->setScenario(scenarioName());
 
     const QUrl requested = options.url.isEmpty() ? platformDefaultUrl() : options.url;

@@ -29,6 +29,10 @@ set_source_files_properties(qml/Intents.qml PROPERTIES
     QT_QML_SINGLETON_TYPE TRUE
     QT_RESOURCE_ALIAS Intents.qml
 )
+set_source_files_properties(qml/Reactive.qml PROPERTIES
+    QT_QML_SINGLETON_TYPE TRUE
+    QT_RESOURCE_ALIAS Reactive.qml
+)
 
 qt_add_qml_module(qtos_services
     URI QTOS.Services
@@ -36,8 +40,11 @@ qt_add_qml_module(qtos_services
     RESOURCE_PREFIX /qt/qml
     QML_FILES
         qml/Intents.qml
+        qml/Reactive.qml
     SOURCES
         qml/services.h qml/services.cpp
+    DEPENDENCIES
+        QtQuick
 )
 
 target_include_directories(qtos_services PUBLIC
@@ -47,6 +54,7 @@ target_include_directories(qtos_services PUBLIC
 target_link_libraries(qtos_services
     PUBLIC
         Qt6::Qml
+        Qt6::Quick
         Qt6::RemoteObjects
     PRIVATE
         qtos::compiler_settings

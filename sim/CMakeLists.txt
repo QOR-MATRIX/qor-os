@@ -26,7 +26,9 @@ target_link_libraries(qtos_sim
     PUBLIC
         Qt6::Core
         Qt6::RemoteObjects
+        qtos_audio
     PRIVATE
+        Qt6::Concurrent
         qtos::compiler_settings
 )
 

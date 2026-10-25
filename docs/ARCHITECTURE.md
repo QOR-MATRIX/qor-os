@@ -29,10 +29,11 @@ In simulation the *sources* are the classes in `sim/`; on a device they are the
 
 | Target | Kind | Module URI | Source | Purpose |
 |--------|------|------------|--------|---------|
-| `qtos_kit` | static lib + QML plugin | `QTOS.Kit` | `kit/` | Tokens, Theme, Motion, Materials, Spring, Oklch, SceneRect, FrameStats, Surface, Glass, Backdrop, RoundMask, Wallpaper, Icon, AppIcon, Artwork, QtosMark, building blocks |
-| `qtos_lumen_style` | static lib + QML plugin | `Lumen` | `kit/style/` | Qt Quick Controls 2 style (23 controls, Basic fallback) |
-| `qtos_services` | static lib + QML plugin | `QTOS.Services` | `services/` | `Services` singleton (replicas), `Intents`, QML type info for replicas |
-| `qtos_sim` | static lib | — | `sim/` | Simulated sources + scenario loader + QtRO host |
+| `qtos_kit` | static lib + QML plugin | `QTOS.Kit` | `kit/` | Tokens, Theme, Motion, Materials, Spring, Oklch, SceneRect, FrameStats, Surface, Glass, Backdrop, RoundMask, Wallpaper, Icon, AppIcon, Artwork, QtosMark, Spectrum, Sounds, building blocks |
+| `qtos_lumen_style` | static lib + QML plugin | `Lumen` | `kit/style/` | Qt Quick Controls 2 style (24 controls, Basic fallback) |
+| `qtos_audio` | static lib | — | `audio/` | The audio engine: real-time output, QTOS Sessions synth, file decoding, EQ, limiter, analysis ([AUDIO.md](AUDIO.md)) |
+| `qtos_services` | static lib + QML plugin | `QTOS.Services` | `services/` | `Services` singleton (replicas), `Intents`, `Reactive`, QML type info for replicas |
+| `qtos_sim` | static lib | — | `sim/` | Simulated sources (audio and media on `qtos_audio`) + scenario loader + QtRO host |
 | `qtos_apps` | static lib + QML plugin | `QTOS.Apps` | `apps/` | `AppRegistry` and the six apps |
 | `qtos_shell` | static lib + QML plugin | `QTOS.Shell` | `prism/shell/` | `Main`, `Desktop` and every shell surface |
 | `qtos-shell` | executable | — | `prism/host/` | Simulation host: window, sim services, CLI, screenshot, benchmark, GPU preference |

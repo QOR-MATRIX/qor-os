@@ -36,6 +36,7 @@ $catalog = [ordered]@{
     'overview'       = @('--unlocked', '--open', 'files,music,notes,terminal,monitor', '--surface', 'overview', '--delay', '4600')
     'light'          = @('--unlocked', '--open', 'notes,settings', '--theme', 'light', '--accent', '205', '--delay', '4200')
     'apps'           = @('--unlocked', '--open', 'terminal,monitor', '--delay', '4600')
+    'sound'          = @('--unlocked', '--play', '--seek', '64', '--open', 'music,settings/sound/reactive', '--delay', '5600')
 }
 
 $selected = if ($Scenes) { $Scenes } else { $catalog.Keys }

@@ -79,6 +79,9 @@ Item {
                    qsTr("Stronger text, outlines and separators; glass becomes solid.")),
             action("wallpaper.living", s.livingWallpaper ? qsTr("Stop Living Wallpaper") : qsTr("Start Living Wallpaper"),
                    "sparkles", "wallpaper animate aurora background", qsTr("Let the Aurora wallpaper drift slowly.")),
+            action("reactive.toggle", s.audioReactive ? qsTr("Stop Reacting to Sound") : qsTr("React to Sound"),
+                   "activity", "audio reactive visualizer music beat wallpaper spectrum",
+                   qsTr("The wallpaper, Now Playing and the Rail move with what's playing.")),
             action("notify.test", qsTr("Send Test Notification"), "bell-ring", "notification banner",
                    qsTr("Posts through qtos-notifyd over Qt Remote Objects."))
         ];
@@ -98,6 +101,13 @@ Item {
             keywords: p.keywords, icon: p.icon, hue: 262, chroma: 0.03, description: p.description,
             action: "app.open", args: JSON.stringify({ id: "settings", page: p.id })
         }));
+        settings.push({
+            kind: "setting", id: "settings-sound-reactive", title: qsTr("Settings › Sound › Audio-reactive interface"),
+            subtitle: qsTr("Setting"), keywords: "audio reactive intensity frequency bass visualizer beat",
+            icon: "activity", hue: 262, chroma: 0.03,
+            description: qsTr("Intensity and the frequencies the interface reacts to."),
+            action: "app.open", args: JSON.stringify({ id: "settings", page: "sound", section: "reactive" })
+        });
 
         const files = AppRegistry.files().map(f => ({
             kind: "file", id: f.path, title: f.name, subtitle: f.folder, keywords: f.kind + " " + f.folder,

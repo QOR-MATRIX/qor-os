@@ -18,14 +18,14 @@ in QTOS and when it is adopted. Status:
 | Qt Qml | QML engine, `QML_ELEMENT`/`QML_SINGLETON`/`QML_FOREIGN` registration | **In use** |
 | Qt Qml Core (`QtCore` QML) | `Settings` for Notes persistence | **In use** |
 | Qt Quick | The entire shell and apps; scene graph; `ShaderEffect`, `FrameAnimation`, pointer handlers | **In use** |
-| Qt Quick Controls + Templates | The **Lumen** style (23 controls on `QtQuick.Templates`) | **In use** |
+| Qt Quick Controls + Templates | The **Lumen** style (24 controls on `QtQuick.Templates`) | **In use** |
 | Qt Quick Effects | `MultiEffect` blur for the shared `Backdrop` | **In use** |
-| Qt Quick Shapes | Linked; will host vector icons from Qt VectorImage | Phase 4 |
+| Qt Quick Shapes | The equaliser's response curve in Settings; will host vector icons from Qt VectorImage | **In use** |
 | Qt Quick Layouts | Linked; available for app layouts | **In use** (available) |
 | Qt Widgets | Lumen `QStyle` and the widgets gallery | **In use** |
 | Qt Test / Qt Quick Test | C++ and QML test suites | **In use** |
 | Qt Network | Underlies Qt Remote Objects local sockets; online accounts later | **In use** |
-| Qt Concurrent | Background work in the indexer (`qtos-indexd`) | Phase 3 |
+| Qt Concurrent | Scanning the music library in the background; the indexer (`qtos-indexd`) later | **In use** |
 | Qt Sql | SQLite FTS5 index for Beam file search | Phase 3 |
 | Qt Svg | Rasterises Lucide icons for GPU tinting | **In use** |
 | Qt OpenGL / OpenGL Widgets | Only through QRhi's OpenGL backend; no direct use | Not used directly |
@@ -43,7 +43,7 @@ in QTOS and when it is adopted. Status:
 | **Qt Image Formats** | WebP screenshots and documentation images | **In use** |
 | **Qt Wayland Compositor** | `prism`: Wayland compositor hosting the shell (Linux) | **In use** (experimental) |
 | Qt Wayland (client) | Running QTOS apps inside Prism | Phase 1 |
-| Qt Multimedia | Real playback in Music, Camera, screen recording in Prism, video Quick Look | Phase 3 |
+| **Qt Multimedia** | The [audio engine](AUDIO.md): real-time output (`QAudioSink` callback interface), music decoding (`QAudioDecoder`, FFmpeg), device tracking (`QMediaDevices`), interface sounds (`SoundEffect`). Later: Camera, screen recording in Prism, video Quick Look | **In use** |
 | Qt Quick 3D | Spatial Overview, 3D Quick Look (with Asset Utils), Settings hero | Phase 4 |
 | Qt Quick 3D Xr | Spatial mode on OpenXR headsets | Phase 5 |
 | Qt Quick 3D Physics | Not planned for the shell | Not used |

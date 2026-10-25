@@ -44,8 +44,11 @@ OpenGL/EGL/xkbcommon development packages:
 
 ```bash
 sudo apt-get install ninja-build libgl1-mesa-dev libegl1-mesa-dev libxkbcommon-dev \
-  libfontconfig1-dev libfreetype-dev libwayland-dev
+  libfontconfig1-dev libfreetype-dev libwayland-dev libpulse0
 ```
+
+`libpulse0` is needed by Qt Multimedia (the audio engine); desktops running
+PipeWire are used through it automatically.
 
 ### Linux on WSL2 (Windows workstation)
 
@@ -58,7 +61,7 @@ with GCC 15 and CMake 4.2.
 sudo apt-get install build-essential cmake ninja-build git python3 pkg-config \
   libgl1-mesa-dev libegl1-mesa-dev libgles-dev libdrm-dev libgbm-dev libvulkan-dev \
   libxkbcommon-dev libxkbcommon-x11-dev libfontconfig1-dev libfreetype-dev libdbus-1-3 \
-  libwayland-dev wayland-protocols libinput-dev libxcb-cursor0 weston
+  libwayland-dev wayland-protocols libinput-dev libxcb-cursor0 libpulse0 weston
 
 # 2. The commercial Qt kit, unattended. This reuses the Qt Account sign-in
 #    from Windows. Copy it once and keep it private:
@@ -132,7 +135,8 @@ modules in `build/<preset>/qml/`, plugins in `build/<preset>/plugins/`.
 | Option | Description |
 |--------|-------------|
 | `--unlocked` | Start on the desktop instead of the lock screen |
-| `--open <apps>` | Comma-separated apps to open after unlock: `files`, `music`, `notes`, `terminal`, `monitor`, `settings` |
+| `--open <apps>` | Comma-separated apps to open after unlock: `files`, `music`, `notes`, `terminal`, `monitor`, `settings`. `app/page` opens a page and `app/page/section` scrolls to a section, for example `settings/sound/reactive` |
+| `--play`, `--seek <seconds>` | Start the music, at a position |
 | `--surface <name>` | Show `beam`, `control-center`, `overview` or `media` after start |
 | `--query <text>` | Initial Beam query (with `--surface beam`) |
 | `--theme light\|dark` | Force appearance (writes to the settings service) |
@@ -147,10 +151,14 @@ modules in `build/<preset>/qml/`, plugins in `build/<preset>/plugins/`.
 | `--gpu high-performance\|low-power\|default` | GPU preference (default `high-performance`) |
 | `--screenshot <file> [--delay ms]` | Save a frame (`.webp`, `.png`, `.jpg`) and exit |
 | `--benchmark <seconds> [--benchmark-out file]` | Scripted animation tour, prints frame-pacing JSON, exits |
+| `--script <file>` | Drive the shell with a JSON script and exit ([DEVELOPMENT.md](DEVELOPMENT.md)) |
+
+`--screenshot`, `--benchmark` and `--script` render audio silently (the
+engine's null output); see [AUDIO.md](AUDIO.md).
 
 Persistent preferences (appearance, accent, motion, transparency, living
-wallpaper) are stored with `QSettings` under `QOR-MATRIX/QTOS Shell` and Notes
-under the `notes` category.
+wallpaper, audio and the audio-reactive interface) are stored with `QSettings`
+under `QOR-MATRIX/QTOS Shell` and Notes under the `notes` category.
 
 ### Separate service process
 

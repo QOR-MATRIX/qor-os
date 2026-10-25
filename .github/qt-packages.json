@@ -12,7 +12,7 @@
     "qt.qt6.6120.addons.qtqmlscriptcompiler",
     "qt.qt6.6120.addons.qttasktree"
   ],
-  "cmake": ["Qt6Quick", "Qt6QuickControls2", "Qt6ShaderTools", "Qt6RemoteObjects", "Qt6Graphs", "Qt6Svg"],
+  "cmake": ["Qt6Quick", "Qt6QuickControls2", "Qt6ShaderTools", "Qt6RemoteObjects", "Qt6Graphs", "Qt6Svg", "Qt6Multimedia"],
   "windows": {
     "kit": "msvc2022_64",
     "packages": ["qt.qt6.6120.win64_msvc2022_64"]

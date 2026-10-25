@@ -30,6 +30,7 @@ the image skeleton.
 | ![Light appearance](docs/images/light.webp) | **Lumen**: OKLCH tokens, so light/dark and the accent hue morph continuously through OKLab. Pictured: light appearance with a teal accent. |
 | ![Lock screen](docs/images/lock.webp) | **Lock screen**: drawn by Prism above every client, with a variable-weight Inter clock and a focus-pull unlock. |
 | ![Apps](docs/images/apps.webp) | **Apps**: Files, Music, Notes, Terminal, Monitor (Qt Graphs, passive frame-time probe) and Settings, built on QTOS.Kit and the Lumen Qt Quick Controls style. |
+| ![Sound](docs/images/sound.webp) | **Sound and an audio-reactive interface**: a real-time audio engine plays generated QTOS Sessions and your own music with a five-band equaliser. The wallpaper, Now Playing and the Rail move with the music, at the intensity and in the frequency range you choose. |
 
 **Performance** (8 s scripted tour of Overview, Beam, Control Center and Space
 switches, 1539×844 logical at 125%, Direct3D 11):
@@ -61,6 +62,7 @@ Then try:
 - <kbd>Ctrl</kbd>+<kbd>↑</kbd> for Overview, and <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>←</kbd> / <kbd>→</kbd> to switch Spaces.
 - Drag a window to a screen edge to snap it, or double-click a title bar to maximise.
 - Click the clock for Control Center, or the song in the Rail for Now Playing.
+- Press play in Music, then open Settings › Sound to shape the equaliser and choose what the interface reacts to. Your own music (the Music folder, or `QTOS_MUSIC_DIR`) is queued after the generated sessions.
 
 Drive the running system from another terminal:
 
@@ -69,13 +71,16 @@ Drive the running system from another terminal:
 .\build\windows-release\qtosctl.exe theme light
 .\build\windows-release\qtosctl.exe accent 152
 .\build\windows-release\qtosctl.exe notify "Build finished" "All tests passed"
+.\build\windows-release\qtosctl.exe media play
+.\build\windows-release\qtosctl.exe spectrum 10
 ```
 
 ## Repository map
 
 | Path | What it is |
 |------|------------|
-| [`kit/`](kit/) | **QTOS.Kit**: Lumen tokens, `Theme`, `Spring`, OKLCH, SDF `Surface`, `Glass`, `Backdrop`, Aurora wallpaper, icons, fonts. [`kit/style/`](kit/style/): the **Lumen** Qt Quick Controls style |
+| [`kit/`](kit/) | **QTOS.Kit**: Lumen tokens, `Theme`, `Spring`, OKLCH, SDF `Surface`, `Glass`, `Backdrop`, Aurora wallpaper, `Spectrum`, interface sounds, icons, fonts. [`kit/style/`](kit/style/): the **Lumen** Qt Quick Controls style |
+| [`audio/`](audio/) | The QTOS audio engine: real-time output, the QTOS Sessions synthesiser, music decoding, equaliser, limiter and analysis |
 | [`services/`](services/) | System service contracts (`interfaces/*.rep`) and **QTOS.Services**, the typed replicas plus `Intents` that the shell and apps use |
 | [`sim/`](sim/) | Simulated service implementations, scenarios, and the `qtos-simd` daemon |
 | [`prism/`](prism/) | **QTOS.Shell** (`shell/`), the `qtos-shell` simulation host (`host/`), and the `prism` Wayland compositor (`compositor/`) |
@@ -95,6 +100,7 @@ Drive the running system from another terminal:
 - [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md): conventions, recipes, debugging
 - [docs/design/LUMEN.md](docs/design/LUMEN.md) and [docs/design/SHELL.md](docs/design/SHELL.md): design specifications
 - [docs/SERVICES.md](docs/SERVICES.md): service contracts, scenarios, `qtosctl`
+- [docs/AUDIO.md](docs/AUDIO.md): the audio engine, analysis and the audio-reactive interface
 - [docs/QT-MODULES.md](docs/QT-MODULES.md): every Qt module and tool and its role in QTOS
 - [docs/PERFORMANCE.md](docs/PERFORMANCE.md), [docs/CI.md](docs/CI.md), [docs/ROADMAP.md](docs/ROADMAP.md)
 - [docs/adr/](docs/adr/): architecture decision records

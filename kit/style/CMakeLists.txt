@@ -23,6 +23,7 @@ qt_add_qml_module(qtos_lumen_style
         Popup.qml
         ProgressBar.qml
         RadioButton.qml
+        RangeSlider.qml
         ScrollBar.qml
         ScrollIndicator.qml
         ScrollView.qml

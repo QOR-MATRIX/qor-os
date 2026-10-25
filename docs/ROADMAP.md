@@ -30,6 +30,7 @@ display refresh; compositor backend decision gate
 - [x] Build and run `prism` nested on Linux and under WSLg; launch Qt apps into it
 - [x] Client windows: configure with all states, server- and client-side decorations, client moves and resizes, resizing from every edge, maximize and minimize requests, popups, size limits, app identity, and XDG activation with focus-stealing prevention. All are covered by `prism_e2e` (31 checks).
 - [ ] Spaces for client windows. Overview, minimise and Shelf restore for clients are done and covered by `prism_e2e`.
+- [x] Real audio: the QTOS audio engine (Qt Multimedia's real-time output), generated QTOS Sessions and music files, a five-band equaliser, interface sounds, and an audio-reactive interface with adjustable intensity and frequency range ([AUDIO.md](AUDIO.md))
 - [x] Wayland extensions: fractional-scale, cursor-shape, presentation-time, idle-inhibit (`tools/dev/prism-protocol-check.sh`)
 - [ ] Three-finger gestures for Overview and Spaces (libinput through Qt)
 - [ ] Decision-gate benchmark: multi-output frame pacing and input latency
@@ -66,7 +67,7 @@ Exit: all performance budgets met in CI; screen-reader walkthrough of every
 shell surface.
 
 - [ ] HDR, VRR, fractional scaling
-- [ ] Spatial Audio UI sounds, Lottie symbols, VectorImage icons
+- [ ] Spatial Audio UI sounds (interface sounds exist; positional rendering is the Phase 4 step), Lottie symbols, VectorImage icons
 - [ ] Quick Look (Qt PDF, Qt Multimedia, Qt Quick 3D)
 - [ ] Window Stacks, Projects, Stash, hero transitions (`qtos_hero`)
 - [ ] Qt-native screen reader (TextToSpeech), Increase Contrast, larger text

@@ -1,6 +1,6 @@
 # QTOS.Kit — Lumen design tokens, theme, motion and material primitives.
 
-set_source_files_properties(Tokens.qml Theme.qml Motion.qml Materials.qml
+set_source_files_properties(Tokens.qml Theme.qml Motion.qml Materials.qml Sounds.qml
     PROPERTIES QT_QML_SINGLETON_TYPE TRUE
 )
 
@@ -39,6 +39,8 @@ qt_add_qml_module(qtos_kit
         SearchField.qml
         Kbd.qml
         Divider.qml
+        Spectrum.qml
+        Sounds.qml
     SOURCES
         src/kit.h src/kit.cpp
         src/spring.h src/spring.cpp
@@ -51,9 +53,15 @@ qt_add_qml_module(qtos_kit
         fonts/InterVariable-Italic.ttf
         fonts/JetBrainsMono-Variable.ttf
         ${QTOS_KIT_ICONS}
+        sounds/notification.wav
+        sounds/lock.wav
+        sounds/unlock.wav
+        sounds/volume.wav
+        sounds/connect.wav
     DEPENDENCIES
         QtQuick
         QtQuick.Effects
+        QtMultimedia
 )
 
 qt_add_shaders(qtos_kit "qtos_kit_shaders"
@@ -64,6 +72,7 @@ qt_add_shaders(qtos_kit "qtos_kit_shaders"
         shaders/icon.frag
         shaders/roundmask.frag
         shaders/wallpaper.frag
+        shaders/glow.frag
 )
 
 target_include_directories(qtos_kit PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")

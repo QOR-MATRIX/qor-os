@@ -194,6 +194,12 @@ different palettes of the same field.
 - Rendered once into a cached layer with 14% overscan. Zoom (lock,
   Overview) and parallax (Spaces) are transforms of that texture.
 - **Living wallpaper** (off by default) animates the field slowly.
+- **Audio-reactive light.** `energy` and `pulse` (from `Reactive` in the
+  shell) drive a separate glow shader over the cached field: light rising
+  from the bottom corners in the accent's neighbourhood, and a bloom that
+  flares on beats. Additive in dark mode, a soft tint in light mode. It is
+  drawn only while there is something to react to. See
+  [AUDIO.md](../AUDIO.md).
 
 ## Components
 
@@ -206,13 +212,15 @@ different palettes of the same field.
 | `Wallpaper` | Aurora |
 | `Icon`, `AppIcon`, `Artwork`, `QtosMark` | Symbols, app tiles, generated media art, brand mark |
 | `IconButton`, `SidebarItem`, `SectionHeader`, `Card`, `SegmentedControl`, `SearchField`, `Kbd`, `Divider` | App building blocks |
-| `Theme`, `Tokens`, `Motion`, `Materials`, `Oklch`, `Kit` | Singletons |
+| `Spectrum` | Audio visualiser: any number of 0..1 bands drawn as rounded bars, optionally mirrored, with a highlighted sub-range |
+| `Sounds` | Interface sounds (`Sounds.play("notification")`); the shell binds `enabled`, `volume` and `device` |
+| `Theme`, `Tokens`, `Motion`, `Materials`, `Oklch`, `Kit`, `Sounds` | Singletons |
 | `Spring`, `SceneRect`, `FrameStats` | C++ behaviour types |
 
 ### Lumen Qt Quick Controls style
 
 Selected with `QQuickStyle::setStyle("Lumen")`. It implements Button,
-ToolButton, Switch, CheckBox, RadioButton, Slider, TextField, TextArea,
+ToolButton, Switch, CheckBox, RadioButton, Slider, RangeSlider, TextField, TextArea,
 ItemDelegate, ScrollBar, ScrollIndicator, ScrollView, ProgressBar, ToolTip,
 Label, Pane, Frame, TabBar, TabButton, Popup, Menu, MenuItem and
 MenuSeparator. Other controls fall back to Basic. `icon.name` takes Lumen

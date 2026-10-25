@@ -25,13 +25,15 @@ int main(int argc, char *argv[])
     const QCommandLineOption urlOption(u"url"_s, u"Endpoint to host the services on."_s, u"url"_s);
     const QCommandLineOption scenarioOption(u"scenario"_s, u"Scenario JSON file to load."_s, u"file"_s);
     const QCommandLineOption ephemeralOption(u"ephemeral"_s, u"Do not persist user preferences."_s);
-    parser.addOptions({ urlOption, scenarioOption, ephemeralOption });
+    const QCommandLineOption silentOption(u"silent"_s, u"Render audio without an output device."_s);
+    parser.addOptions({ urlOption, scenarioOption, ephemeralOption, silentOption });
     parser.process(app);
 
     qtos::sim::SimOptions options;
     options.url = parser.isSet(urlOption) ? QUrl(parser.value(urlOption)) : QUrl();
     options.scenarioPath = parser.value(scenarioOption);
     options.persistent = !parser.isSet(ephemeralOption);
+    options.silent = parser.isSet(silentOption);
 
     qtos::sim::SimServices services;
     if (!services.start(options))

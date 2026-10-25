@@ -137,6 +137,22 @@ private:
 
     // A window spec is a string (matches the title or the app id) or an
     // object {"title": ..., "appId": ...}; each matches by substring.
+    // By objectName, in the QObject tree and then the visual tree: delegates a
+    // Repeater creates are only reachable through the latter.
+    QQuickItem *findItem(const QString &name) const
+    {
+        if (auto *item = m_window->findChild<QQuickItem *>(name))
+            return item;
+        QList<QQuickItem *> pending { m_window->contentItem() };
+        while (!pending.isEmpty()) {
+            QQuickItem *item = pending.takeFirst();
+            if (item->objectName() == name)
+                return item;
+            pending.append(item->childItems());
+        }
+        return nullptr;
+    }
+
     QQuickItem *findWindow(const QJsonValue &spec) const
     {
         const QString title = spec.isObject() ? spec[u"title"_s].toString() : spec.toString();
@@ -199,7 +215,7 @@ private:
                 return std::nullopt;
             }
         } else if (t.contains(u"item"_s)) {
-            item = m_window->findChild<QQuickItem *>(t[u"item"_s].toString());
+            item = findItem(t[u"item"_s].toString());
             if (!item) {
                 m_error = u"no item named \"%1\""_s.arg(t[u"item"_s].toString());
                 return std::nullopt;
@@ -215,6 +231,20 @@ private:
                                                        coordinate(at.at(1).toDouble(), item->height()))
                                              : QPointF(item->width() / 2, item->height() / 2);
         const QPointF point = item->mapToScene(local);
+        // An item target must be on screen: not hidden, scrolled away or clipped.
+        if (t.contains(u"item"_s)) {
+            if (!item->isVisible()) {
+                m_error = u"\"%1\" is not visible"_s.arg(t[u"item"_s].toString());
+                return std::nullopt;
+            }
+            for (QQuickItem *ancestor = item->parentItem(); ancestor; ancestor = ancestor->parentItem()) {
+                if (ancestor->clip()
+                    && !ancestor->mapRectToScene(QRectF(0, 0, ancestor->width(), ancestor->height())).contains(point)) {
+                    m_error = u"\"%1\" is scrolled or clipped out of view"_s.arg(t[u"item"_s].toString());
+                    return std::nullopt;
+                }
+            }
+        }
         // A window target must be the window a person would hit there.
         if (t.contains(u"window"_s)) {
             QQuickItem *window = findWindow(t[u"window"_s]);
@@ -347,6 +377,20 @@ private:
             });
         } else if (step.contains(u"drag"_s)) {
             enqueueDrag(step[u"drag"_s].toObject());
+        } else if (step.contains(u"scroll"_s)) {
+            // {"scroll": {"at": target, "notches": n}}: turns a mouse wheel n
+            // notches (positive scrolls down, towards the end).
+            const QJsonObject spec = step[u"scroll"_s].toObject();
+            m_queue.push_back([this, spec] {
+                const auto p = resolve(spec[u"at"_s]);
+                if (!p)
+                    return -1;
+                const QPoint angle(0, -120 * spec[u"notches"_s].toInt(1));
+                QWindowSystemInterface::handleWheelEvent(
+                    m_window, ulong(m_clock.elapsed()), QHighDpi::toNativeLocalPosition(*p, m_window),
+                    QHighDpi::toNativeGlobalPosition(m_window->mapToGlobal(*p), m_window), QPoint(), angle);
+                return 450;
+            });
         } else if (step.contains(u"key"_s)) {
             const QKeySequence sequence = QKeySequence::fromString(step[u"key"_s].toString());
             if (sequence.isEmpty()) {
@@ -607,14 +651,21 @@ private:
         for (QQuickItem *p : popups())
             popupRects.append(rectJson(p->mapRectToScene(QRectF(0, 0, p->width(), p->height()))));
         QObject *manager = layer();
-        QJsonObject settings;
-        if (auto *replica = Services::instance()->property("settings").value<QObject *>()) {
-            for (const char *name : { "darkMode", "accentHue", "reduceMotion", "reduceTransparency", "increaseContrast",
-                                      "livingWallpaper" })
-                settings.insert(QString::fromLatin1(name), QJsonValue::fromVariant(replica->property(name)));
-        }
+        const auto snapshot = [](const char *service, std::initializer_list<const char *> names) {
+            QJsonObject values;
+            if (auto *replica = Services::instance()->property(service).value<QObject *>()) {
+                for (const char *name : names)
+                    values.insert(QString::fromLatin1(name), QJsonValue::fromVariant(replica->property(name)));
+            }
+            return values;
+        };
         return {
-            { u"settings"_s, settings },
+            { u"settings"_s, snapshot("settings", { "darkMode", "accentHue", "reduceMotion", "reduceTransparency",
+                                                    "increaseContrast", "livingWallpaper", "audioReactive",
+                                                    "reactiveIntensity", "reactiveLowHz", "reactiveHighHz" }) },
+            { u"audio"_s, snapshot("audio", { "volume", "muted", "outputDevice", "equalizer", "equalizerPreset",
+                                              "systemSounds", "systemVolume", "active" }) },
+            { u"media"_s, snapshot("media", { "playing", "title", "position", "duration", "queueIndex" }) },
             { u"windows"_s, list },
             { u"popups"_s, popupRects },
             { u"workArea"_s, rectJson(manager ? manager->property("workArea") : QVariant()) },

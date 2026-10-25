@@ -7,7 +7,8 @@ import QTOS.Kit
 import QTOS.Services
 
 // Music: a now-playing hero bound to the media service, with transport,
-// seeking, volume and the live queue.
+// seeking, volume, a live visualiser and the queue. QTOS Sessions (music the
+// audio engine generates live) come first; files from the Music folder follow.
 Item {
     id: app
 
@@ -16,8 +17,12 @@ Item {
     property string section: "now"
 
     readonly property var media: Services.media
+    readonly property var track: media.queue[media.queueIndex] ?? ({})
+    readonly property color tint: Oklch.color(Theme.darkness > 0.5 ? 0.76 : 0.6, 0.15, media.artworkHue)
 
     function formatTime(seconds: real): string {
+        if (!(seconds > 0) && seconds !== 0)
+            return "--:--";
         const s = Math.max(0, Math.floor(seconds));
         return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
     }
@@ -69,13 +74,22 @@ Item {
             id: art
             anchors.horizontalCenter: parent.horizontalCenter
             y: 26
-            width: Math.min(280, hero.width - 80, hero.height - 230)
+            width: Math.max(120, Math.min(280, hero.width - 80, hero.height - 300))
             height: width
             hue: app.media.artworkHue
             elevation: 5
-            shadowColor: Oklch.color(0.45, 0.16, app.media.artworkHue, 0.85)
+            // The glow beneath brightens with the music.
+            shadowColor: Oklch.color(0.45 + 0.22 * Reactive.energy, 0.16 + 0.05 * Reactive.energy,
+                                     app.media.artworkHue, 0.85)
             scale: app.media.playing ? 1 : 0.92
             Behavior on scale { SpringAnimation { spring: 3; damping: 0.28 } }
+            // Breathes on the beat (on top of the play/pause spring above).
+            transform: Scale {
+                origin.x: art.width / 2
+                origin.y: art.height / 2
+                xScale: 1 + 0.035 * Reactive.pulse + 0.015 * Reactive.energy
+                yScale: xScale
+            }
         }
 
         Column {
@@ -96,10 +110,22 @@ Item {
             Text {
                 width: parent.width
                 horizontalAlignment: Text.AlignHCenter
-                text: app.media.artist + " · " + app.media.album
+                text: app.media.album.length > 0 ? app.media.artist + " · " + app.media.album : app.media.artist
                 font: Theme.callout
                 color: Theme.textSecondary
                 elide: Text.ElideRight
+            }
+            Row {
+                anchors.horizontalCenter: parent.horizontalCenter
+                spacing: 5
+                visible: app.track.kind === "session"
+                Icon { anchors.verticalCenter: parent.verticalCenter; name: "sparkles"; size: 12; color: Theme.textTertiary }
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: qsTr("QTOS Session · generated live, %1 BPM").arg(app.track.session?.bpm ?? "")
+                    font: Theme.caption
+                    color: Theme.textTertiary
+                }
             }
 
             Item { width: 1; height: 8 }
@@ -114,10 +140,14 @@ Item {
             Item {
                 width: parent.width
                 height: 16
-                Text { text: app.formatTime(app.media.position); font: Theme.caption; color: Theme.textTertiary }
+                Text {
+                    text: app.media.buffering ? qsTr("Loading…") : app.formatTime(app.media.position)
+                    font: Theme.caption
+                    color: Theme.textTertiary
+                }
                 Text {
                     anchors.right: parent.right
-                    text: "-" + app.formatTime(app.media.duration - app.media.position)
+                    text: app.media.duration > 0 ? "-" + app.formatTime(app.media.duration - app.media.position) : "--:--"
                     font: Theme.caption
                     color: Theme.textTertiary
                 }
@@ -161,9 +191,29 @@ Item {
                     width: 200
                     value: Services.audio.volume
                     onMoved: Services.audio.volume = value
+                    onPressedChanged: if (!pressed) Sounds.play("volume")
                 }
                 Icon { anchors.verticalCenter: parent.verticalCenter; name: "volume-2"; size: 14; color: Theme.textTertiary }
             }
+        }
+
+        // Live visualiser of what is playing.
+        Spectrum {
+            objectName: "musicVisualizer"
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 18
+            width: Math.min(460, hero.width - 60)
+            height: 44
+            bars: 40
+            spacing: 3
+            mirrored: true
+            minimum: 0.08
+            values: Reactive.spectrum
+            color: app.tint
+            dimColor: app.tint
+            opacity: Reactive.playing ? 0.9 : 0.35
+            Behavior on opacity { NumberAnimation { duration: 300 } }
         }
     }
 
@@ -241,7 +291,7 @@ Item {
                     anchors.right: parent.right
                     anchors.rightMargin: 10
                     anchors.verticalCenter: parent.verticalCenter
-                    text: app.formatTime(track.modelData.duration)
+                    text: track.modelData.duration > 0 ? app.formatTime(track.modelData.duration) : ""
                     font: Theme.caption
                     color: Theme.textTertiary
                 }

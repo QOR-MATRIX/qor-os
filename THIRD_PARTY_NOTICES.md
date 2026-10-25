@@ -6,6 +6,8 @@ license texts ship next to the files they cover.
 | Component | Version | Where | License |
 |-----------|---------|-------|---------|
 | [Qt](https://www.qt.io) | 6.12.0 | build and runtime dependency | Commercial Qt license held by QOR-MATRIX |
+| [FFmpeg](https://ffmpeg.org) (through Qt Multimedia's FFmpeg backend) | 9.0.1, shipped with Qt | runtime dependency for decoding music files | LGPL 2.1 or later; distributed as Qt's shared libraries. See Qt's third-party notices |
+| PulseAudio client library (`libpulse0`, Linux) | system package | runtime dependency of Qt Multimedia | LGPL 2.1 or later |
 | [Inter](https://rsms.me/inter/) (variable, roman and italic) | 4.1 | `kit/fonts/InterVariable*.ttf` | SIL Open Font License 1.1, see [`kit/fonts/LICENSE.Inter.txt`](kit/fonts/LICENSE.Inter.txt) |
 | [JetBrains Mono](https://www.jetbrains.com/lp/mono/) (variable) | 2.304 | `kit/fonts/JetBrainsMono-Variable.ttf` | SIL Open Font License 1.1, see [`kit/fonts/LICENSE.JetBrainsMono.txt`](kit/fonts/LICENSE.JetBrainsMono.txt) |
 | [Lucide](https://lucide.dev) icons (106-icon subset, recoloured) | lucide-static 1.61.0 | `kit/icons/*.svg` | ISC; icons derived from Feather are MIT. See [`kit/icons/LICENSE.lucide.txt`](kit/icons/LICENSE.lucide.txt) |

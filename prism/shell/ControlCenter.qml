@@ -222,6 +222,7 @@ Item {
                         to: 1
                         value: Services.audio.volume
                         onMoved: Services.audio.volume = value
+                        onPressedChanged: if (!pressed) Sounds.play("volume")
                     }
                 }
             }
@@ -259,6 +260,17 @@ Item {
                     font: Theme.footnote
                     color: Theme.textSecondary
                     elide: Text.ElideRight
+                }
+                Spectrum {
+                    objectName: "controlCenterSpectrum"
+                    width: Math.min(parent.width, 96)
+                    height: 10
+                    visible: Reactive.playing
+                    bars: 16
+                    spacing: 2
+                    minimum: 0.15
+                    values: Reactive.spectrum
+                    color: Oklch.color(Theme.darkness > 0.5 ? 0.78 : 0.6, 0.15, Services.media.artworkHue)
                 }
             }
             Row {

@@ -10,6 +10,14 @@ class Settings
     PROP(bool reduceTransparency=false READWRITE)
     PROP(bool increaseContrast=false READWRITE)
     PROP(bool livingWallpaper=false READWRITE)
+    // Audio-reactive interface: the wallpaper, Now Playing and visualisers
+    // move with what is playing.
+    PROP(bool audioReactive=true READWRITE)
+    // 0..1: how strongly.
+    PROP(double reactiveIntensity=0.6 READWRITE)
+    // The frequencies (Hz) that drive it.
+    PROP(double reactiveLowHz=40 READWRITE)
+    PROP(double reactiveHighHz=160 READWRITE)
     PROP(QString userName SOURCEONLYSETTER)
     PROP(QString hostName SOURCEONLYSETTER)
 }

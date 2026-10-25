@@ -82,7 +82,10 @@ int main(int argc, char *argv[])
     QUrl servicesUrl = qtos::Services::defaultUrl();
     if (parser.value(services) != u"external"_s) {
         simulator = std::make_unique<qtos::sim::SimServices>();
-        if (!simulator->start({}))
+        qtos::sim::SimOptions simOptions;
+        // Automated runs never make sound.
+        simOptions.silent = parser.isSet(screenshot) || parser.isSet(benchmark) || parser.isSet(script);
+        if (!simulator->start(simOptions))
             return 1;
         servicesUrl = simulator->url();
     }

@@ -40,6 +40,34 @@ FocusScope {
     Binding { target: Theme; property: "increaseContrast"; value: Services.settings.increaseContrast }
     Binding { target: Theme; property: "livingWallpaper"; value: Services.settings.livingWallpaper }
 
+    // ── Interface sounds follow qtos-audiod ─────────────────────────────────
+    Binding {
+        target: Sounds
+        property: "enabled"
+        value: Services.connected && Services.audio.systemSounds && Services.audio.outputAvailable
+    }
+    Binding {
+        target: Sounds
+        property: "volume"
+        // Relative to the output volume, which has a perceptual (cubic) taper.
+        value: Services.audio.muted ? 0 : Math.pow(Services.audio.volume, 3) * Services.audio.systemVolume
+    }
+    Binding { target: Sounds; property: "device"; value: Services.audio.outputDevice }
+    Connections {
+        target: Services.notifications
+        function onPosted() {
+            if (!Services.notifications.doNotDisturb)
+                Sounds.play("notification");
+        }
+    }
+    Connections {
+        target: Services.power
+        function onChargingChanged() {
+            if (Services.power.charging)
+                Sounds.play("connect");
+        }
+    }
+
     // ── Shell API ───────────────────────────────────────────────────────────
     function setSurface(name: string) {
         if (locked && name !== "")
@@ -67,17 +95,30 @@ FocusScope {
 
     function lock() {
         surface = "";
+        if (!locked)
+            Sounds.play("lock");
         locked = true;
     }
 
     function unlock() {
+        if (locked)
+            Sounds.play("unlock");
         locked = false;
         desktop.forceActiveFocus();
         if (!startupAppsOpened) {
             startupAppsOpened = true;
+            // "settings/sound" opens an app at a page, "settings/sound/reactive"
+            // at a section of it.
             const apps = options.apps ?? [];
-            for (let i = 0; i < apps.length; ++i)
-                startupTimer.createObject(desktop, { appId: apps[i], interval: 260 + i * 140 });
+            for (let i = 0; i < apps.length; ++i) {
+                const parts = apps[i].split("/");
+                const args = {};
+                if (parts.length > 1)
+                    args.page = parts[1];
+                if (parts.length > 2)
+                    args.section = parts[2];
+                startupTimer.createObject(desktop, { appId: parts[0], args: args, interval: 260 + i * 140 });
+            }
         }
     }
 
@@ -108,6 +149,7 @@ FocusScope {
         case "transparency.toggle": settings.reduceTransparency = !settings.reduceTransparency; break;
         case "contrast.toggle": settings.increaseContrast = !settings.increaseContrast; break;
         case "wallpaper.living": settings.livingWallpaper = !settings.livingWallpaper; break;
+        case "reactive.toggle": settings.audioReactive = !settings.audioReactive; break;
         case "notify.test":
             Services.notifications.notify("system", qsTr("Hello from Beam"),
                                           qsTr("Notifications travel over Qt Remote Objects from qtos-notifyd."),
@@ -138,9 +180,10 @@ FocusScope {
         id: startupTimer
         Timer {
             property string appId
+            property var args: ({})
             running: true
             onTriggered: {
-                desktop.launch(appId, {});
+                desktop.launch(appId, args);
                 destroy();
             }
         }
@@ -190,7 +233,11 @@ FocusScope {
             id: wallpaper
             anchors.fill: parent
             parallax: Qt.vector2d(spaceTravel.value * 0.03, 0)
-            zoom: 1 + 0.06 * lockDepth.value + 0.03 * overviewDepth.value
+            // The audio-reactive interface: light that swells with the music
+            // and a gentle push on every beat.
+            energy: Reactive.energy
+            pulse: Reactive.pulse
+            zoom: 1 + 0.06 * lockDepth.value + 0.03 * overviewDepth.value + 0.012 * Reactive.pulse
         }
 
         // Focus pull: crossfade to the pre-blurred wallpaper.

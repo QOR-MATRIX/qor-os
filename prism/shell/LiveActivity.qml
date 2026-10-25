@@ -34,7 +34,11 @@ Item {
         radius: height / 2
         exponent: 2
         color: capsule.expanded ? Theme.fillControlPressed : hover.hovered ? Theme.fillControlHover : Theme.fillControl
-        strokeColor: Oklch.alpha(Theme.glassStroke, Theme.glassStroke.a * 0.6)
+        // The rim catches the music's energy.
+        strokeColor: Reactive.energy + Reactive.pulse > 0.01
+                     ? Oklch.color(0.78, 0.15, Services.media.artworkHue, 0.25 + 0.5 * Math.min(1, Reactive.energy + Reactive.pulse))
+                     : Oklch.alpha(Theme.glassStroke, Theme.glassStroke.a * 0.6)
+        strokeWidth: 1 + Reactive.pulse
         Behavior on color { ColorAnimation { duration: 120 } }
     }
 
@@ -69,42 +73,21 @@ Item {
                 font: Theme.footnote
                 color: Theme.textTertiary
             }
-            Equalizer {
+            // Four bars of the live spectrum.
+            Spectrum {
+                objectName: "liveActivitySpectrum"
                 anchors.verticalCenter: parent.verticalCenter
-                playing: Services.media.playing
-                barColor: Oklch.color(0.78, 0.15, Services.media.artworkHue)
+                width: 17
+                height: 12
+                bars: 4
+                spacing: 2
+                minimum: 0.25
+                values: Services.media.playing ? Reactive.spectrum.slice(2, 34) : []
+                color: Oklch.color(0.78, 0.15, Services.media.artworkHue)
             }
         }
     }
 
     HoverHandler { id: hover }
     TapHandler { onTapped: capsule.toggled() }
-
-    component Equalizer: Row {
-        id: eq
-        property bool playing: false
-        property color barColor: Theme.accent
-        spacing: 2
-        height: 12
-        Repeater {
-            model: 4
-            delegate: Rectangle {
-                id: bar
-                required property int index
-                anchors.bottom: parent.bottom
-                width: 2.5
-                radius: 1.25
-                color: eq.barColor
-                height: eq.playing ? level : 3
-                property real level: 6
-                Behavior on height { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
-                Timer {
-                    running: eq.playing && eq.visible
-                    repeat: true
-                    interval: 170 + bar.index * 37
-                    onTriggered: bar.level = 3 + Math.random() * 9
-                }
-            }
-        }
-    }
 }

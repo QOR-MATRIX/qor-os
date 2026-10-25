@@ -181,6 +181,7 @@ scale.
 | `{"waitFor": {"windows": n \| "window": spec \| "gone": spec \| "popups": n, "timeout": ms}}` | Wait for a condition; fail on timeout |
 | `{"click": target}`, `{"doubleClick": target}`, `{"move": target}` | Pointer input |
 | `{"drag": {"from": target, "to": target \| "by": [dx, dy], "steps": n}}` | Press, move in steps, release |
+| `{"scroll": {"at": target, "notches": n}}` | Mouse wheel; positive `n` scrolls down |
 | `{"key": "Escape"}` | Key press and release (Wayland clients receive evdev scan codes) |
 | `{"call": "setSurface", "args": [...]}` | Call a `Desktop` method (`launch`, `setSurface`, `switchSpace`, ...) |
 | `{"restore": spec}` | What clicking the window's app on the Shelf does |
@@ -201,7 +202,9 @@ against title or app id, or `{"title": ..., "appId": ...}`.
 
 The **state** includes:
 
-- `settings`;
+- `settings`, including the audio-reactive preferences;
+- `audio` (volume, mute, output, equaliser, interface sounds, `active`) and
+  `media` (playing, title, position, duration, queue index);
 - `workArea`, `overview`, `currentSpace` and `surface`;
 - open `popups`, as screen rectangles;
 - `windows[]`, with title, app id, focus, maximised, minimised, frame and

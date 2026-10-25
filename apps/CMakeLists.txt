@@ -28,6 +28,7 @@ qt_add_qml_module(qtos_apps
     DEPENDENCIES
         QtQuick
         QtQuick.Controls
+        QtQuick.Shapes
         QtGraphs
         QtCore
         QTOS.Kit
@@ -38,6 +39,7 @@ target_link_libraries(qtos_apps
     PUBLIC
         Qt6::Quick
         Qt6::QuickControls2
+        Qt6::QuickShapes
         Qt6::Graphs
         qtos_kit
         qtos_services

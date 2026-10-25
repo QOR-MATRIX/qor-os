@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
 #pragma once
 
+#include "engine.h"
 #include "rep_audio_source.h"
 #include "rep_bluetooth_source.h"
 #include "rep_display_source.h"
@@ -68,13 +69,32 @@ private:
     bool m_warned10 = false;
 };
 
+// Audio backed by the QTOS audio engine: the machine's real outputs (or the
+// scenario's, when the engine renders silently), perceptual volume, the
+// equaliser, interface-sound preferences and live analysis for the
+// audio-reactive interface.
 class SimAudio : public AudioSimpleSource
 {
     Q_OBJECT
 public:
-    explicit SimAudio(QObject *parent = nullptr);
+    SimAudio(audio::Engine *engine, bool persistent, QObject *parent = nullptr);
     void load(const QJsonObject &config);
+
     void selectOutput(const QString &device) override;
+    void setEqualizerBand(int band, double gainDb) override;
+    void applyEqualizerPreset(const QString &name) override;
+
+private:
+    void applyOutputs(const QList<audio::OutputDevice> &outputs, const QString &currentId);
+    void applyEqualizer(const QVariantList &gains, const QString &preset);
+    void forward(const audio::AnalysisFrame &frame);
+    void save();
+
+    audio::Engine *m_engine;
+    bool m_persistent;
+    QList<audio::OutputDevice> m_outputs;
+    QString m_preferredOutput; // chosen by name; empty: the system default
+    bool m_restoredOutput = false;
 };
 
 class SimDisplay : public DisplaySimpleSource

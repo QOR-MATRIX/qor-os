@@ -35,7 +35,8 @@ struct SimOptions
 {
     QUrl url;               // empty: platform default
     QString scenarioPath;   // empty: built-in default scenario
-    bool persistent = true; // persist user preferences between runs
+    bool persistent = true; // persist user preferences, read the user's music
+    bool silent = false;    // render audio to the null output (automation)
 };
 
 // Hosts every simulated QTOS service on a Qt Remote Objects node, so the
@@ -62,6 +63,7 @@ public:
     SimMedia *media() const { return m_media.get(); }
     SimNotifications *notifications() const { return m_notifications.get(); }
     SimSettings *settings() const { return m_settings.get(); }
+    audio::Engine *audioEngine() const { return m_engine.get(); }
 
     void replayScenario();
 
@@ -71,6 +73,7 @@ private:
     QJsonObject m_scenario;
     QUrl m_url;
     std::unique_ptr<QRemoteObjectHost> m_host;
+    std::unique_ptr<audio::Engine> m_engine; // outlives the services that use it
     std::unique_ptr<SimNetwork> m_network;
     std::unique_ptr<SimBluetooth> m_bluetooth;
     std::unique_ptr<SimPower> m_power;

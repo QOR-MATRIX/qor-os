@@ -51,13 +51,26 @@ Property modes used in the contracts:
 
 ### `Audio` — `audio.rep` (device: qtos-audiod over PipeWire)
 
+In simulation this is backed by the QTOS audio engine and the machine's real
+outputs; see [AUDIO.md](AUDIO.md).
+
 | Member | Type | Mode / kind | Meaning |
 |--------|------|-------------|---------|
-| `volume` | double | READWRITE | 0.0 to 1.0 |
+| `volume` | double | READWRITE | 0.0 to 1.0, perceptual (cubic taper) |
 | `muted` | bool | READWRITE | |
-| `outputDevice` | QString | source-only | |
+| `outputDevice` | QString | source-only | Name of the output in use |
 | `outputDevices` | QStringList | source-only | |
-| `selectOutput(device)` | slot | | |
+| `outputAvailable` | bool | source-only | False when audio is rendered silently (no device, or the null output) |
+| `equalizer` | QVariantList | source-only | Five gains in dB (−12..12) at 60 Hz, 250 Hz, 1 kHz, 4 kHz, 12 kHz |
+| `equalizerPreset` | QString | source-only | Preset name, or "Custom" |
+| `equalizerPresets` | QStringList | source-only | Flat, Bass Boost, Warm, Vocal, Bright, Loudness, Late Night |
+| `systemSounds` | bool | READWRITE | Interface sounds |
+| `systemVolume` | double | READWRITE | 0.0 to 1.0, relative to `volume` |
+| `active` | bool | source-only | Something audible is playing |
+| `selectOutput(device)` | slot | | By name |
+| `setEqualizerBand(band, gainDb)` | slot | | Half-decibel steps |
+| `applyEqualizerPreset(name)` | slot | | |
+| `analysis(bands, level, reactive, beat, beatStrength)` | signal | | ~60 Hz while active: 48 bands 30 Hz–16 kHz (0..1), loudness, energy in the reactive range, beat counter, beat strength |
 
 ### `Display` — `display.rep` (owned by Prism, persisted by settingsd)
 
@@ -75,8 +88,9 @@ Property modes used in the contracts:
 | `title`, `artist`, `album`, `player` | QString | source-only | |
 | `artworkHue` | double | source-only | OKLCH hue used for generated artwork |
 | `playing` | bool | READWRITE | |
-| `position`, `duration` | double | source-only | Seconds |
-| `queue` | QVariantList | source-only | `[{title, artist, album, duration, hue}]` |
+| `buffering` | bool | source-only | A file is still loading at the play position |
+| `position`, `duration` | double | source-only | Seconds; `duration` is 0 until a file's length is known |
+| `queue` | QVariantList | source-only | `[{title, artist, album, duration, hue, kind, path, session}]`: `kind` is `session` (generated live from `session: {style, mode, bpm, root, seed}`) or `file` (`path`) |
 | `queueIndex` | int | source-only | |
 | `togglePlayback()`, `next()`, `previous()`, `seek(s)`, `playIndex(i)` | slots | | `previous()` restarts the track if more than 3 s in |
 
@@ -98,6 +112,9 @@ Property modes used in the contracts:
 | `darkMode` | bool | READWRITE | Appearance |
 | `accentHue` | double | READWRITE | OKLCH degrees |
 | `reduceMotion`, `reduceTransparency`, `increaseContrast`, `livingWallpaper` | bool | READWRITE | |
+| `audioReactive` | bool | READWRITE | The interface moves with what is playing (default on) |
+| `reactiveIntensity` | double | READWRITE | 0.0 to 1.0 (default 0.6) |
+| `reactiveLowHz`, `reactiveHighHz` | double | READWRITE | The frequencies it reacts to (default 40–160 Hz) |
 | `userName`, `hostName` | QString | source-only | |
 
 ### `SimControl` — `simcontrol.rep` (simulation only)
@@ -156,7 +173,7 @@ The simulator loads [`sim/scenarios/default.json`](../sim/scenarios/default.json
 | `bluetooth` | `{devices: [{name, kind, connected, battery}]}` |
 | `power` | `{batteryLevel, charging, secondsPerPercent}` |
 | `audio` | `{volume, devices: [..], output}` |
-| `media` | `{player, playing, index, position, queue: [{title, artist, album, duration, hue}]}` |
+| `media` | `{player, playing, index, position, queue: [{title, artist, album, duration, hue, kind, session \| path}]}` |
 | `notifications` | `[{atMs, app, title, body, icon}]`, posted relative to start |
 
 ## qtosctl
@@ -174,6 +191,13 @@ wifi on|off                    Toggle Wi-Fi
 connect <ssid>                 Join a Wi-Fi network
 volume <0-100>                 Set output volume
 media play|pause|next|prev     Control the media session
+media seek <seconds>           Seek in the current track
+eq <preset>                    Equaliser preset (Flat, "Bass Boost", ...)
+sounds on|off                  Interface sounds
+reactive on|off                Audio-reactive interface
+reactive intensity <0-100>     How strongly it reacts
+reactive range <low> <high>    The frequencies it reacts to, in Hz
+spectrum [seconds]             Live spectrum, level and beats of what plays
 dnd on|off                     Do Not Disturb
 notify <title> [body] [--app id]   Post a notification
 watch                          Stream notifications, appearance and media changes

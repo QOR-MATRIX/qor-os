@@ -5,20 +5,28 @@
 #include "rep_notifications_source.h"
 #include "rep_settings_source.h"
 
+#include <QtCore/QFutureWatcher>
 #include <QtCore/QJsonArray>
 #include <QtCore/QJsonObject>
 #include <QtCore/QList>
 #include <QtCore/QTimer>
 
+namespace qtos::audio {
+class Engine;
+}
+
 namespace qtos::sim {
 
-// Simulated now-playing session with a queue that advances in real time.
+// Now playing, played for real by the audio engine: the scenario's QTOS
+// Sessions (music generated live) followed by the user's music files.
 class SimMedia : public MediaSimpleSource
 {
     Q_OBJECT
 public:
-    explicit SimMedia(QObject *parent = nullptr);
-    void load(const QJsonObject &config);
+    explicit SimMedia(audio::Engine *engine, QObject *parent = nullptr);
+    // `library`: also queue the music files in the user's Music folder and
+    // $QTOS_MUSIC_DIR (read in the background).
+    void load(const QJsonObject &config, bool library);
 
     void togglePlayback() override;
     void next() override;
@@ -28,9 +36,12 @@ public:
 
 private:
     void applyTrack(int index);
-    void tick();
+    void updateQueuedDuration(double seconds);
+    void skipUnplayable(const QString &message);
 
-    QTimer m_clock;
+    audio::Engine *m_engine;
+    QFutureWatcher<QVariantList> m_library;
+    int m_failures = 0;
 };
 
 // Simulated notification daemon.

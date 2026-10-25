@@ -51,6 +51,8 @@ struct HostOptions
     QString benchmarkOut;
     QString scriptPath;
     bool ephemeral = false;
+    bool play = false;
+    double seek = 0;
 };
 
 HostOptions parseOptions(const QGuiApplication &app)
@@ -67,7 +69,9 @@ HostOptions parseOptions(const QGuiApplication &app)
     const QCommandLineOption scenario(u"scenario"_s, u"Simulation scenario JSON file."_s, u"file"_s);
     const QCommandLineOption ephemeral(u"ephemeral"_s, u"Do not persist preferences (implied by --screenshot)."_s);
     const QCommandLineOption unlocked(u"unlocked"_s, u"Start on the desktop instead of the lock screen."_s);
-    const QCommandLineOption open(u"open"_s, u"Comma-separated apps to open at start (e.g. files,music)."_s, u"apps"_s);
+    const QCommandLineOption open(
+        u"open"_s, u"Comma-separated apps to open at start, optionally at a page (e.g. music,settings/sound)."_s,
+        u"apps"_s);
     const QCommandLineOption surface(u"surface"_s, u"Shell surface to show: beam, control-center, overview."_s,
                                      u"name"_s);
     const QCommandLineOption query(u"query"_s, u"Initial Beam query."_s, u"text"_s);
@@ -85,8 +89,11 @@ HostOptions parseOptions(const QGuiApplication &app)
     const QCommandLineOption gpu(u"gpu"_s, u"GPU preference: high-performance (default), low-power or default."_s,
                                  u"preference"_s, u"high-performance"_s);
     const QCommandLineOption script(u"script"_s, u"Run a JSON UI script against the shell, then exit."_s, u"file"_s);
-    parser.addOptions({ services, servicesUrl, scenario, ephemeral, unlocked, open, surface, query, theme, accent,
-                        contrast, size, fullscreen, screenshot, delay, benchmark, benchmarkOut, gpu, script });
+    const QCommandLineOption play(u"play"_s, u"Start playing the scenario's music."_s);
+    const QCommandLineOption seek(u"seek"_s, u"Start the music at this many seconds."_s, u"seconds"_s);
+    parser.addOptions({ services, servicesUrl, scenario,     ephemeral, unlocked, open,       surface,
+                        query,    theme,       accent,       contrast,  size,     fullscreen, screenshot,
+                        delay,    benchmark,   benchmarkOut, gpu,       script,   play,       seek });
     parser.process(app);
 
     HostOptions options;
@@ -99,6 +106,8 @@ HostOptions parseOptions(const QGuiApplication &app)
     options.benchmarkOut = parser.value(benchmarkOut);
     options.scriptPath = parser.value(script);
     options.gpu = parser.value(gpu);
+    options.play = parser.isSet(play);
+    options.seek = parser.value(seek).toDouble();
     options.ephemeral =
         parser.isSet(ephemeral) || parser.isSet(screenshot) || options.benchmarkSeconds > 0 || parser.isSet(script);
 
@@ -153,6 +162,9 @@ int main(int argc, char *argv[])
         simOptions.url = options.servicesUrl;
         simOptions.scenarioPath = options.scenario;
         simOptions.persistent = !options.ephemeral;
+        // Automated runs never make sound.
+        simOptions.silent =
+            !options.screenshotPath.isEmpty() || options.benchmarkSeconds > 0 || !options.scriptPath.isEmpty();
         if (!simulator->start(simOptions)) {
             qCCritical(lcHost) << "Could not start the simulated services.";
             return 1;
@@ -161,6 +173,12 @@ int main(int argc, char *argv[])
     }
     if (!qtos::Services::instance()->connectTo(servicesUrl))
         qCWarning(lcHost) << "Continuing with partially available services.";
+    if (MediaReplica *media = qtos::Services::instance()->media()) {
+        if (options.seek > 0)
+            media->seek(options.seek);
+        if (options.play)
+            media->setPlaying(true);
+    }
 
     // ── Shell ───────────────────────────────────────────────────────────────
     QQmlApplicationEngine engine;
