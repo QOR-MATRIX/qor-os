@@ -16,6 +16,7 @@
 #include "kit.h"
 #include "services.h"
 #include "shellbenchmark.h"
+#include "shellscript.h"
 #include "simservices.h"
 
 #include <QtCore/QCommandLineParser>
@@ -69,7 +70,9 @@ int main(int argc, char *argv[])
         u"Run the shell tour for N seconds, report per-output frame pacing and input latency as JSON, exit."_s,
         u"seconds"_s);
     const QCommandLineOption benchmarkOut(u"benchmark-out"_s, u"Write the benchmark JSON to this file."_s, u"file"_s);
-    parser.addOptions({ services, unlocked, socket, size, surface, screenshot, delay, benchmark, benchmarkOut });
+    const QCommandLineOption script(u"script"_s, u"Run a JSON UI script against the shell, then exit."_s, u"file"_s);
+    parser.addOptions(
+        { services, unlocked, socket, size, surface, screenshot, delay, benchmark, benchmarkOut, script });
     parser.process(app);
 
     qtos::Kit::initialize();
@@ -109,6 +112,14 @@ int main(int argc, char *argv[])
             if (auto *quick = qobject_cast<QQuickWindow *>(window); quick && quick->isVisible())
                 outputs.append(quick);
         qtos::runShellBenchmark(outputs, { u"prism"_s, benchmarkSeconds, parser.value(benchmarkOut) });
+    }
+
+    if (parser.isSet(script)) {
+        QQuickWindow *output = nullptr;
+        for (QWindow *window : QGuiApplication::topLevelWindows())
+            if (auto *quick = qobject_cast<QQuickWindow *>(window); quick && quick->isVisible() && !output)
+                output = quick;
+        qtos::runShellScript(output, parser.value(script));
     }
 
     if (parser.isSet(screenshot)) {

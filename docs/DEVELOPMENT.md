@@ -58,6 +58,16 @@ produces deterministic frames you can compare before and after a change.
 - Accessibility: interactive items set `Accessible.role` / `Accessible.name`,
   support keyboard activation (Space/Return) and show `Theme.focusRing` on
   `activeFocus` / `visualFocus`.
+- **Never put a `TapHandler` on an overlay above interactive content.** In Qt
+  6.12 a `TapHandler`, even with `gesturePolicy: TapHandler.DragThreshold`,
+  leaves a *mouse* press accepted (QTBUG-145896). Qt Quick then stops
+  offering the press to items underneath. Handlers still get it; items do
+  not: Qt Quick Controls, `TextInput`, and Wayland client surfaces in
+  Prism. To observe presses from above, use a `PointHandler`, which always
+  leaves them unaccepted (see the activation overlay in `AppWindow.qml`).
+  `TapHandler` on the item it belongs to, or on a parent, is fine: parents are
+  offered events after their children. `shell_e2e` and `prism_e2e` catch
+  regressions.
 - `all_qmllint` must stay at zero warnings.
 
 ## 4. Performance rules
@@ -142,6 +152,76 @@ To add a scene, put a QML file with a root `property bool rtl` in
 `tests/golden/scenes/`, add its name to `kScenes` in `tst_golden.cpp`, then
 run `update_golden`. A case without a reference is skipped with a message
 rather than failed.
+
+### Shell scripts and end-to-end tests
+
+`qtos-shell --script file.json` and `prism --script file.json` drive the
+shell with synthetic input, then exit with 0 (every step passed) or 4 (a
+step failed, with the reason on stderr). Input enters through
+`QWindowSystemInterface`, the way a device's (and `QTest`'s) does. It
+therefore takes the same path as a person's: shell handlers, controls, and
+under Prism on to Wayland clients. The runner is
+`prism/shell/shellscript.cpp`; scripts use logical coordinates at any display
+scale.
+
+```json
+{ "steps": [
+  { "call": "launch", "args": ["settings", { "page": "accessibility" }] },
+  { "waitFor": { "windows": 1, "timeout": 10000 } },
+  { "click": { "item": "reduceMotionSwitch" } },
+  { "expect": { "path": "settings.reduceMotion", "equals": true } },
+  { "drag": { "from": { "window": "Settings", "part": "titlebar", "at": [140, 20] }, "to": [3, 400] } },
+  { "expect": { "window": "Settings", "path": "frameRect", "near": "workArea", "scale": [1, 1, 0.5, 1] } }
+] }
+```
+
+| Step | Effect |
+|------|--------|
+| `{"wait": ms}` | Pause |
+| `{"waitFor": {"windows": n \| "window": spec \| "gone": spec \| "popups": n, "timeout": ms}}` | Wait for a condition; fail on timeout |
+| `{"click": target}`, `{"doubleClick": target}`, `{"move": target}` | Pointer input |
+| `{"drag": {"from": target, "to": target \| "by": [dx, dy], "steps": n}}` | Press, move in steps, release |
+| `{"key": "Escape"}` | Key press and release (Wayland clients receive evdev scan codes) |
+| `{"call": "setSurface", "args": [...]}` | Call a `Desktop` method (`launch`, `setSurface`, `switchSpace`, ...) |
+| `{"restore": spec}` | What clicking the window's app on the Shelf does |
+| `{"close": spec}` | Ask a window to close (`xdg_toplevel.close` for clients) |
+| `{"expect": {"path": ..., "equals": value}}` | Assert on the state below; `"window": spec` scopes the path to a window; `"near": [..] \| "statePath"` with `"scale"` and `"tolerance"` compares rectangles |
+| `{"state": file}`, `{"screenshot": file}` | Write the state as JSON or grab the window (paths relative to the script) |
+| `{"log": text}` | Print a progress line |
+
+A **target** is `[x, y]` in window coordinates, or
+`{"window": spec, "part": "frame|titlebar|content|close|maximize|minimize", "at": [x, y]}`,
+or `{"item": "<objectName>", "at": [x, y]}`. `at` is relative to the part's
+top-left corner; negative values count from the right and bottom edges, and
+without `at` the target is the centre. A window **spec** is a string matched
+against title or app id, or `{"title": ..., "appId": ...}`.
+
+The **state** includes:
+
+- `settings`;
+- `workArea`, `overview`, `currentSpace` and `surface`;
+- open `popups`, as screen rectangles;
+- `windows[]`, with title, app id, focus, maximised, minimised, frame and
+  on-screen rectangles. Wayland clients also report their window geometry,
+  configured size, Shelf identity and surface item.
+
+Two suites use the runner (label `gpu`):
+
+- **`shell_e2e`** runs `tests/shell/apps.e2e.json` in `qtos-shell` on every
+  platform. A Lumen `Switch` receives a click, and maximise, snap, minimise,
+  Shelf restore, Overview and close work for a first-party app.
+- **`prism_e2e`** (Linux) runs `tools/dev/prism-e2e.py`. It starts a nested
+  Prism with `prism-test-client` (a Qt client with a menu at a known spot,
+  an app id, a desktop entry and size limits) and `weston-terminal`, which
+  draws its own decorations. It then checks 24 behaviours:
+  - decorations and app identity;
+  - maximise, restore, snap and moves by a client's own title bar;
+  - minimise and Shelf restore;
+  - size limits;
+  - xdg_popup placement and dismissal;
+  - Overview and close.
+
+  Run it with `--keep` to keep the states and screenshots.
 
 ### Add an icon
 

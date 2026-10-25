@@ -20,6 +20,14 @@ WAYLAND_DISPLAY=wayland-qtos QT_QPA_PLATFORM=wayland some-qt-app
 Without `--socket`, Prism takes the first free socket in `$XDG_RUNTIME_DIR`
 (`wayland-1` inside most sessions) and prints it at start.
 
+## End-to-end tests
+
+`tools/dev/prism-e2e.py --build-dir <build>` runs a nested Prism with real
+clients and drives it through `prism --script`. The ctest name is
+`prism_e2e`, and it needs a display. It checks 24 window-management
+behaviours, from decorations to popups and Shelf identity. See
+[DEVELOPMENT.md](../docs/DEVELOPMENT.md#shell-scripts-and-end-to-end-tests).
+
 ## Wayland protocols
 
 | Protocol | Provided by | Notes |

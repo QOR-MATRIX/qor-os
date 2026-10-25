@@ -63,6 +63,7 @@ WaylandCompositor {
             readonly property size area: content.window ? content.window.contentTargetSize : Qt.size(0, 0)
             readonly property bool activated: content.window ? content.window.focused : false
             readonly property bool maximized: content.window ? content.window.maximized : false
+            readonly property bool resizing: content.window ? content.window.resizing : false
             property size configuredSize: Qt.size(0, 0)
 
             function configure() {
@@ -73,12 +74,15 @@ WaylandCompositor {
                     states.push(XdgToplevel.ActivatedState);
                 if (maximized)
                     states.push(XdgToplevel.MaximizedState);
+                if (resizing)
+                    states.push(XdgToplevel.ResizingState);
                 configuredSize = Qt.size(Math.round(area.width), Math.round(area.height));
                 toplevel.sendConfigure(configuredSize, states);
             }
             onAreaChanged: configureTimer.restart()
             onActivatedChanged: configureTimer.restart()
             onMaximizedChanged: configureTimer.restart()
+            onResizingChanged: configureTimer.restart()
             // The client chose another size than configured (e.g. a terminal
             // snapping to whole cells, or its preferred size on first map).
             onGeometryChanged: {
@@ -98,6 +102,20 @@ WaylandCompositor {
                 x: -content.geometry.x
                 y: -content.geometry.y
                 onSurfaceDestroyed: if (content.window) content.window.manager.close(content.window, true)
+            }
+
+            // The client's size limits bound interactive resizing.
+            Binding {
+                when: content.window !== null && content.toplevel !== null
+                target: content.window
+                property: "minimumContentSize"
+                value: content.toplevel?.minSize ?? Qt.size(0, 0)
+            }
+            Binding {
+                when: content.window !== null && content.toplevel !== null
+                target: content.window
+                property: "maximumContentSize"
+                value: content.toplevel?.maxSize ?? Qt.size(0, 0)
             }
 
             // Clients that keep their own title bar get no Prism title bar.

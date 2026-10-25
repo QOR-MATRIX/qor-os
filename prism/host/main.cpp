@@ -10,6 +10,7 @@
 #include "kit.h"
 #include "services.h"
 #include "shellbenchmark.h"
+#include "shellscript.h"
 #include "simservices.h"
 
 #include <QtCore/QCommandLineParser>
@@ -48,6 +49,7 @@ struct HostOptions
     int benchmarkSeconds = 0;
     QString gpu = u"high-performance"_s;
     QString benchmarkOut;
+    QString scriptPath;
     bool ephemeral = false;
 };
 
@@ -82,8 +84,9 @@ HostOptions parseOptions(const QGuiApplication &app)
     const QCommandLineOption benchmarkOut(u"benchmark-out"_s, u"Write the benchmark JSON to this file."_s, u"file"_s);
     const QCommandLineOption gpu(u"gpu"_s, u"GPU preference: high-performance (default), low-power or default."_s,
                                  u"preference"_s, u"high-performance"_s);
+    const QCommandLineOption script(u"script"_s, u"Run a JSON UI script against the shell, then exit."_s, u"file"_s);
     parser.addOptions({ services, servicesUrl, scenario, ephemeral, unlocked, open, surface, query, theme, accent,
-                        contrast, size, fullscreen, screenshot, delay, benchmark, benchmarkOut, gpu });
+                        contrast, size, fullscreen, screenshot, delay, benchmark, benchmarkOut, gpu, script });
     parser.process(app);
 
     HostOptions options;
@@ -94,8 +97,10 @@ HostOptions parseOptions(const QGuiApplication &app)
     options.screenshotDelayMs = parser.value(delay).toInt();
     options.benchmarkSeconds = parser.value(benchmark).toInt();
     options.benchmarkOut = parser.value(benchmarkOut);
+    options.scriptPath = parser.value(script);
     options.gpu = parser.value(gpu);
-    options.ephemeral = parser.isSet(ephemeral) || parser.isSet(screenshot) || options.benchmarkSeconds > 0;
+    options.ephemeral =
+        parser.isSet(ephemeral) || parser.isSet(screenshot) || options.benchmarkSeconds > 0 || parser.isSet(script);
 
     QVariantMap &qml = options.qml;
     qml.insert(u"unlocked"_s, parser.isSet(unlocked) || options.benchmarkSeconds > 0);
@@ -171,6 +176,8 @@ int main(int argc, char *argv[])
     if (options.benchmarkSeconds > 0)
         qtos::runShellBenchmark({ qobject_cast<QQuickWindow *>(engine.rootObjects().constFirst()) },
                                 { u"qtos-shell"_s, options.benchmarkSeconds, options.benchmarkOut });
+    if (!options.scriptPath.isEmpty())
+        qtos::runShellScript(qobject_cast<QQuickWindow *>(engine.rootObjects().constFirst()), options.scriptPath);
 
     if (!options.screenshotPath.isEmpty()) {
         auto *window = qobject_cast<QQuickWindow *>(engine.rootObjects().constFirst());

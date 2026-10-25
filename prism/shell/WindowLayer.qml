@@ -59,28 +59,59 @@ Item {
         return windows.filter(w => w.space === space && !w.closing);
     }
 
-    function find(appId: string): AppWindow {
-        for (const w of windows)
-            if (w.appId === appId && !w.closing)
-                return w;
-        return null;
+    // New windows cascade around the centre of the work area, never past its
+    // edges (the top edge would put a title bar under the Rail).
+    function cascadeX(w: real, cascade: int): real {
+        const x = workArea.x + (workArea.width - w) / 2 + cascade * 30;
+        return Math.max(workArea.x, Math.min(x, workArea.x + workArea.width - w));
+    }
+    function cascadeY(h: real, cascade: int): real {
+        const y = workArea.y + (workArea.height - h) / 2 + cascade * 24;
+        return Math.max(workArea.y, Math.min(y, workArea.y + workArea.height - h));
     }
 
-    function open(appId: string, origin: rect, args: var): AppWindow {
-        const app = AppRegistry.app(appId);
-        if (!app)
-            return null;
+    // Name and icon for an app that is not a first-party one (a Wayland
+    // client): from its desktop entry, else its window title.
+    function clientIdentity(appId: string): var {
+        const entry = DesktopEntries.lookup(appId);
+        const window = find(appId);
+        return {
+            name: entry.found ? entry.name : (window && window.title.length > 0 ? window.title : appId),
+            icon: entry.found ? entry.icon : ""
+        };
+    }
 
+    // The most recently raised open window of an app.
+    function find(appId: string): AppWindow {
+        let best = null;
+        for (const w of windows)
+            if (w.appId === appId && !w.closing && (!best || w.z > best.z))
+                best = w;
+        return best;
+    }
+
+    // Brings an app's window back (restoring it if minimised), or opens a
+    // first-party app. Wayland clients are never in the registry, so a
+    // running window is looked up first: that is how the Shelf restores them.
+    function open(appId: string, origin: rect, args: var): AppWindow {
         const existing = find(appId);
         if (existing) {
-            existing.launchArgs = args;
+            if (!existing.isClient)
+                existing.launchArgs = args;
             if (existing.minimized) {
                 existing.origin = origin;
                 existing.minimized = false;
             }
+            if (existing.space !== currentSpace)
+                currentSpace = existing.space;
             activate(existing);
+            relayout();
             return existing;
         }
+
+        const app = AppRegistry.app(appId);
+        if (!app)
+            return null;
 
         const index = windowsOn(currentSpace).length;
         const w = Math.min(app.width, workArea.width - 60);
@@ -91,8 +122,8 @@ Item {
             appId: appId,
             title: app.name,
             space: currentSpace,
-            normalX: workArea.x + (workArea.width - w) / 2 + cascade * 30,
-            normalY: workArea.y + (workArea.height - h) / 2 + cascade * 24,
+            normalX: cascadeX(w, cascade),
+            normalY: cascadeY(h, cascade),
             normalW: w,
             normalH: h,
             origin: origin,
@@ -117,8 +148,8 @@ Item {
             appId: toplevel.appId,
             title: toplevel.title,
             space: currentSpace,
-            normalX: workArea.x + (workArea.width - w) / 2 + cascade * 30,
-            normalY: workArea.y + (workArea.height - h) / 2 + cascade * 24,
+            normalX: cascadeX(w, cascade),
+            normalY: cascadeY(h, cascade),
             normalW: w,
             normalH: h,
             origin: Qt.rect(workArea.x + workArea.width / 2 - 40, workArea.y + workArea.height / 2 - 30, 80, 60),
@@ -126,7 +157,10 @@ Item {
             toplevel: toplevel,
             serial: ++serialCounter
         });
+        // Clients usually set their title and app id just after creating the
+        // toplevel, so both are followed rather than read once.
         toplevel.titleChanged.connect(() => window.title = toplevel.title);
+        toplevel.appIdChanged.connect(() => window.appId = toplevel.appId);
         window.closed.connect(() => layer.remove(window));
         windows = windows.concat([window]);
         activate(window);

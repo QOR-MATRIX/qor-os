@@ -9,6 +9,8 @@ Item {
 
     property string appId
     property string glyph
+    // An app's own icon (Wayland clients); when set it replaces the glyph tile.
+    property url iconSource
     property string label
     property real hue: 274
     property real chroma: 0.15
@@ -45,9 +47,21 @@ Item {
         scale: magnify.value * (tap.pressed ? 0.92 : 1)
         transformOrigin: Item.Bottom
 
+        Image {
+            anchors.fill: parent
+            anchors.margins: 2
+            visible: !button.neutral && button.iconSource.toString().length > 0
+            source: button.iconSource
+            sourceSize: Qt.size(width * Screen.devicePixelRatio * 1.3, height * Screen.devicePixelRatio * 1.3)
+            fillMode: Image.PreserveAspectFit
+            smooth: true
+            mipmap: true
+            asynchronous: true
+        }
+
         AppIcon {
             anchors.fill: parent
-            visible: !button.neutral
+            visible: !button.neutral && button.iconSource.toString().length === 0
             size: button.width
             glyph: button.glyph
             hue: button.hue

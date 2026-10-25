@@ -421,6 +421,7 @@ Item {
                     title: qsTr("Reduce motion")
                     subtitle: qsTr("Springs settle instantly; parallax and zoom are removed.")
                     Switch {
+                        objectName: "reduceMotionSwitch"
                         checked: Services.settings.reduceMotion
                         onToggled: Services.settings.reduceMotion = checked
                     }

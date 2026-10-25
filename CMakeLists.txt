@@ -27,9 +27,15 @@ endif()
 
 set(QTOS_QT_MIN_VERSION 6.12)
 
+# GuiPrivate (QWindowSystemInterface for the shell's --script runner, the QPA
+# platform theme) is found here, not in a subdirectory: its dependencies (XKB on
+# Linux) must be visible to every executable that links it indirectly. Private
+# Qt API is used knowingly and pinned to the Qt version above.
+set(QT_NO_PRIVATE_MODULE_WARNING ON)
 find_package(Qt6 ${QTOS_QT_MIN_VERSION} REQUIRED COMPONENTS
     Core
     Gui
+    GuiPrivate
     Qml
     Quick
     QuickControls2

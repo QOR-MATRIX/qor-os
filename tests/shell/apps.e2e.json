@@ -1,0 +1,49 @@
+{
+  "description": "First-party apps under real (synthetic) input: item-based controls receive clicks, and window management works. Run by ctest as shell_e2e: qtos-shell --script tests/shell/apps.e2e.json.",
+  "steps": [
+    { "log": "Settings: an item-based Lumen control receives a click" },
+    { "call": "launch", "args": ["settings", { "page": "accessibility" }] },
+    { "waitFor": { "windows": 1, "timeout": 10000 } },
+    { "wait": 1200 },
+    { "expect": { "path": "settings.reduceMotion", "equals": false } },
+    { "click": { "item": "reduceMotionSwitch" } },
+    { "wait": 500 },
+    { "expect": { "path": "settings.reduceMotion", "equals": true } },
+    { "click": { "item": "reduceMotionSwitch" } },
+    { "wait": 500 },
+    { "expect": { "path": "settings.reduceMotion", "equals": false } },
+
+    { "log": "Maximise and restore" },
+    { "click": { "window": "Settings", "part": "maximize" } },
+    { "wait": 900 },
+    { "expect": { "window": "Settings", "path": "maximized", "equals": true } },
+    { "expect": { "window": "Settings", "path": "frameRect", "near": "workArea" } },
+    { "click": { "window": "Settings", "part": "maximize" } },
+    { "wait": 900 },
+    { "expect": { "window": "Settings", "path": "maximized", "equals": false } },
+
+    { "log": "Snap by dragging the title bar to the left edge" },
+    { "drag": { "from": { "window": "Settings", "part": "titlebar", "at": [140, 20] }, "to": [3, 400], "steps": 20 } },
+    { "expect": { "window": "Settings", "path": "frameRect", "near": "workArea", "scale": [1, 1, 0.5, 1] } },
+
+    { "log": "Minimise, then restore from the Shelf" },
+    { "click": { "window": "Settings", "part": "minimize" } },
+    { "wait": 800 },
+    { "expect": { "window": "Settings", "path": "minimized", "equals": true } },
+    { "restore": "Settings" },
+    { "expect": { "window": "Settings", "path": "minimized", "equals": false } },
+    { "expect": { "window": "Settings", "path": "focused", "equals": true } },
+
+    { "log": "Overview" },
+    { "call": "setSurface", "args": ["overview"] },
+    { "wait": 900 },
+    { "expect": { "path": "overview", "equals": true } },
+    { "expect": { "window": "Settings", "path": "inOverview", "equals": true } },
+    { "call": "setSurface", "args": [""] },
+    { "wait": 800 },
+
+    { "log": "Close" },
+    { "click": { "window": "Settings", "part": "close" } },
+    { "waitFor": { "windows": 0, "timeout": 4000 } }
+  ]
+}

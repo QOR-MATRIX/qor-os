@@ -12,6 +12,8 @@ Item {
 
     property Backdrop backdrop
     property var runningApps: []
+    // appId => {name, icon} for apps outside the registry (Wayland clients).
+    property var identityProvider: appId => ({ name: appId, icon: "" })
     property bool overview: false
 
     signal launchRequested(string appId)
@@ -77,11 +79,13 @@ Item {
             delegate: ShelfButton {
                 required property string modelData
                 readonly property var app: AppRegistry.app(modelData)
+                readonly property var client: app ? null : shelf.identityProvider(modelData)
                 appId: modelData
                 glyph: app ? app.glyph : "app-window"
+                iconSource: client ? client.icon : ""
                 hue: app ? app.hue : 274
                 chroma: app ? app.chroma : 0.1
-                label: app ? app.name : modelData
+                label: app ? app.name : client.name
                 running: shelf.runningApps.indexOf(modelData) >= 0
                 pointerX: pointer.hovered ? pointer.point.position.x - row.x : -1000
                 onActivated: shelf.launchRequested(modelData)

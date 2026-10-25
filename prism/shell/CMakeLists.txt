@@ -27,6 +27,8 @@ qt_add_qml_module(qtos_shell
         LockScreen.qml
         SpaceSwitcher.qml
         search.js
+    SOURCES
+        desktopentries.h desktopentries.cpp
     DEPENDENCIES
         QtQuick
         QtQuick.Controls
@@ -35,8 +37,10 @@ qt_add_qml_module(qtos_shell
         QTOS.Apps
 )
 
-# The --benchmark driver shared by qtos-shell and prism.
-target_sources(qtos_shell PRIVATE shellbenchmark.h shellbenchmark.cpp)
+# The --benchmark and --script drivers shared by qtos-shell and prism. The
+# script runner injects input through QWindowSystemInterface (Qt GUI private).
+target_sources(qtos_shell PRIVATE shellbenchmark.h shellbenchmark.cpp shellscript.h shellscript.cpp)
+target_link_libraries(qtos_shell PRIVATE Qt6::GuiPrivate)
 target_include_directories(qtos_shell PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 
 target_link_libraries(qtos_shell

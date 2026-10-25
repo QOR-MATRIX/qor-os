@@ -189,6 +189,13 @@ Item {
         beginMove(clientMoveStart);
     }
 
+    // Size limits for the content, from the client (xdg_toplevel min/max
+    // size); 0 means unconstrained. Resizing keeps the frame within them.
+    property size minimumContentSize: Qt.size(0, 0)
+    property size maximumContentSize: Qt.size(0, 0)
+    // True during an interactive resize, so clients can relayout cheaply.
+    property bool resizing: false
+
     function beginResize() {
         manager.activate(win);
         if (maximized) {
@@ -199,13 +206,23 @@ Item {
             maximized = false;
         }
         dragStartRect = Qt.rect(normalX, normalY, normalW, normalH);
+        resizing = true;
     }
 
     function resizeBy(dx: real, dy: real) {
-        normalW = Math.max(420, dragStartRect.width + dx);
-        normalH = Math.max(300, dragStartRect.height + dy);
+        const chrome = isClient && decorated ? titleBarHeight : 0;
+        const minW = Math.max(isClient ? 160 : 420, minimumContentSize.width);
+        const minH = Math.max(isClient ? 120 : 300, minimumContentSize.height + chrome);
+        const maxW = maximumContentSize.width > 0 ? maximumContentSize.width : Infinity;
+        const maxH = maximumContentSize.height > 0 ? maximumContentSize.height + chrome : Infinity;
+        normalW = Math.min(maxW, Math.max(minW, dragStartRect.width + dx));
+        normalH = Math.min(maxH, Math.max(minH, dragStartRect.height + dy));
         gw.snap(normalW);
         gh.snap(normalH);
+    }
+
+    function endResize() {
+        resizing = false;
     }
 
     // ── Frame ───────────────────────────────────────────────────────────────
@@ -238,6 +255,7 @@ Item {
 
         Loader {
             id: appLoader
+            objectName: "content"
             anchors.fill: parent
             anchors.topMargin: win.isClient && win.decorated ? win.titleBarHeight : 0
             focus: true
@@ -252,6 +270,7 @@ Item {
         // Title bar, drawn by Prism over the app's unified toolbar area.
         Item {
             id: titleBar
+            objectName: "titleBar"
             visible: win.hasTitleBar
             width: parent.width
             height: win.titleBarHeight
@@ -291,6 +310,7 @@ Item {
                 opacity: win.focused || frameHover.hovered ? 1 : 0.55
 
                 IconButton {
+                    objectName: "minimize"
                     width: 26
                     height: 26
                     icon: "minus"
@@ -298,6 +318,7 @@ Item {
                     onClicked: win.manager.minimize(win)
                 }
                 IconButton {
+                    objectName: "maximize"
                     width: 26
                     height: 26
                     icon: win.maximized ? "minimize-2" : "maximize-2"
@@ -305,6 +326,7 @@ Item {
                     onClicked: win.toggleMaximize()
                 }
                 IconButton {
+                    objectName: "close"
                     width: 26
                     height: 26
                     icon: "x"
@@ -325,18 +347,19 @@ Item {
         radius: Tokens.radius.window
     }
 
-    // Activate on any press without stealing it from the content.
+    // Watches the pointer over the whole window without taking it from the
+    // content: activates the window on any press, and follows the pointer
+    // during a client-requested move. Only handlers that leave a mouse press
+    // unaccepted may live here. A TapHandler marks it accepted (Qt 6.12,
+    // QTBUG-145896), which stops every item underneath (Wayland client
+    // surfaces, Qt Quick Controls in apps) from receiving the press.
     Item {
         anchors.fill: parent
         z: 10
-        TapHandler {
-            gesturePolicy: TapHandler.DragThreshold
-            onPressedChanged: if (pressed && !win.focused) win.manager.activate(win)
-        }
         HoverHandler { id: frameHover }
-        // Observes (passively) the pointer while a client-requested move runs.
         PointHandler {
             id: pointerWatch
+            acceptedButtons: Qt.AllButtons
             property point lastScenePosition
             onPointChanged: {
                 if (!active)
@@ -347,6 +370,8 @@ Item {
                                            point.scenePosition.y - win.clientMoveStart.y), point.scenePosition);
             }
             onActiveChanged: {
+                if (active && !win.focused)
+                    win.manager.activate(win);
                 if (!active && win.clientMoving) {
                     win.clientMoving = false;
                     win.endMove(lastScenePosition);
@@ -366,7 +391,7 @@ Item {
         HoverHandler { cursorShape: Qt.SizeFDiagCursor }
         DragHandler {
             target: null
-            onActiveChanged: if (active) win.beginResize()
+            onActiveChanged: active ? win.beginResize() : win.endResize()
             onActiveTranslationChanged: if (active) win.resizeBy(activeTranslation.x, activeTranslation.y)
         }
     }
@@ -380,7 +405,7 @@ Item {
         HoverHandler { cursorShape: Qt.SizeHorCursor }
         DragHandler {
             target: null
-            onActiveChanged: if (active) win.beginResize()
+            onActiveChanged: active ? win.beginResize() : win.endResize()
             onActiveTranslationChanged: if (active) win.resizeBy(activeTranslation.x, 0)
         }
     }
@@ -393,7 +418,7 @@ Item {
         HoverHandler { cursorShape: Qt.SizeVerCursor }
         DragHandler {
             target: null
-            onActiveChanged: if (active) win.beginResize()
+            onActiveChanged: active ? win.beginResize() : win.endResize()
             onActiveTranslationChanged: if (active) win.resizeBy(0, activeTranslation.y)
         }
     }
