@@ -45,6 +45,8 @@ All notable changes to QTOS are recorded here. The format follows
 
 ### Changed
 
+- CI: the Linux job runs on a self-hosted WSL2 runner with the commercial kit. With warnings as errors (as on Windows), it runs the GPU suites on WSLg and the Prism protocol check with real Wayland clients; about 40 s incremental.
+- CI: a newer push cancels an older Build run on the same branch, so a run queued for an offline runner no longer blocks later builds. GPU suites check for a display, time out after 120 s and retry once.
 - CI: per-platform Qt sources (`QTOS_WINDOWS_QT_DIR`, `QTOS_LINUX_QT_DIR`), so a Windows self-hosted kit no longer affects the Linux job. Self-hosted builds are incremental. Qt's bundled CMake and Ninja are put on `PATH` automatically. The optional `QTOS_RUN_GPU_TESTS` runs GPU suites. Build also runs on `v*` tags.
 - CI: the installable Windows artifact is uploaded only for tags and manual runs (7-day retention), to stay within the Free-plan storage quota.
 - pre-commit: vendored fonts and icons and generated token files are excluded from all hooks. Multi-document YAML (Qt Application Manager manifests) is allowed. clang-format skips the SDK template, matching CI.
