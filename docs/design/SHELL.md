@@ -180,6 +180,29 @@ Themes and widgets come from the Store ([STORE.md](../STORE.md)).
 - **The desktop menu** also offers Change Theme… and Get Themes and
   Widgets….
 
+### Displays
+
+Prism drives every display: nested, `prism --outputs N` opens N windows of
+the host; on bare metal (eglfs/KMS) each connected screen is an output, side
+by side from left to right.
+
+- The **main display** has the whole shell: Rail, Shelf, notifications,
+  Beam, Control Center and widgets. The others (`DisplayDesktop.qml`) show the
+  wallpaper and their own windows.
+- **Spaces, Overview and the lock screen span all displays.** Switching Space
+  slides every display together. Overview arranges each display's windows on
+  that display, labelled "Display 2" and so on.
+- **Moving windows**: the window menu's Move to Display N;
+  <kbd>Meta</kbd>+<kbd>Shift</kbd>+<kbd>←</kbd>/<kbd>→</kbd>; or drag the
+  title bar off a display's edge and let go, and the window lands on the next
+  display under the pointer.
+- **One active window** across all displays; keyboard shortcuts act on it,
+  from whichever display has the keyboard. New clients open on the main
+  display (`--spread-clients` spreads them for benchmarks).
+- In-window frost samples the wallpaper of the display the window is on
+  (`Materials.desktopFor(Window.window)`), and Wayland clients are on the
+  output of the display that shows them, so they get its frame callbacks.
+
 ### Gestures
 
 Swipes with three or more fingers, on a touchpad or a touchscreen, belong to
@@ -223,6 +246,7 @@ Where swipes come from:
 | <kbd>Alt</kbd>+<kbd>1</kbd>…<kbd>3</kbd> | Go to Space |
 | <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>←</kbd>/<kbd>→</kbd> | Take the active window to the previous / next Space |
 | <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>1</kbd>…<kbd>3</kbd> | Take the active window to a Space |
+| <kbd>Meta</kbd>+<kbd>Shift</kbd>+<kbd>←</kbd>/<kbd>→</kbd> | Move the active window to the display on the left / right (Prism) |
 | <kbd>Ctrl</kbd>+<kbd>W</kbd> | Close window |
 | <kbd>Ctrl</kbd>+<kbd>M</kbd> | Minimise window |
 | <kbd>Ctrl</kbd>+<kbd>,</kbd> | Settings |

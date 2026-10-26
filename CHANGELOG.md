@@ -69,13 +69,20 @@ All notable changes to QTOS are recorded here. The format follows
 - Linux on WSL2 build and run guide (docs/BUILDING.md).
 - **Shell scripts and end-to-end tests.**
   - `qtos-shell --script` and `prism --script` drive the shell with synthetic input through `QWindowSystemInterface` (clicks, drags, keys, shell calls), and assert with `expect` steps.
-  - `shell_e2e` covers first-party apps on every platform. `prism_e2e` covers real Wayland clients (42 checks), with the new `prism-test-client`.
+  - `shell_e2e` covers first-party apps on every platform. `prism_e2e` covers real Wayland clients (52 checks), with the new `prism-test-client`.
   - Documented in docs/DEVELOPMENT.md.
 - **Wayland app identity.** The Shelf names and draws client apps from their desktop entry (`DesktopEntries`, with XDG icon-theme lookup), falling back to the window title.
 - **Resizing from every edge and corner** (eight grips; left and top edges keep the opposite side in place). Client-initiated moves and resizes (`xdg_toplevel.move`/`resize`) go through the same springs, snapping and size limits. `WindowManagement.takeOver()` detaches Qt's built-in xdg-shell handlers, which otherwise fought Prism over the window size.
 - **xdg-activation with focus-stealing prevention.** Tokens issued while the requesting client has keyboard focus (or by Prism, for launches) activate the window. Any other request only marks it as wanting attention: a Shelf hop and an accent dot, cleared on focus.
 - **Client size limits and the resizing state.** Interactive resizing respects a client's minimum and maximum size, and clients receive `xdg_toplevel` `resizing` while it lasts.
 - **Benchmark v2**, shared by `qtos-shell` and `prism` (`prism/shell/shellbenchmark.cpp`): `prism --benchmark` reports per-output frame pacing, missed frames at each output's refresh rate, and input-to-swap latency. Top-level JSON fields are unchanged. Baselines: input to swap 5.9 ms p50 on the RTX 4060 (360 Hz); nested Prism under WSLg holds 60 Hz. This is the tooling for the ADR-0003 decision gate, which needs a bare-metal run.
+- **Several displays in Prism** ([SHELL.md](docs/design/SHELL.md#displays)).
+  - One Wayland output per display: `prism --outputs N` nested; on bare metal (eglfs/KMS) every connected screen. The main display keeps the whole shell; the others show the wallpaper and their windows (`DisplayDesktop`).
+  - Move windows between displays with the window menu, <kbd>Meta</kbd>+<kbd>Shift</kbd>+<kbd>←</kbd>/<kbd>→</kbd>, or by dragging the title bar past a display's edge. Spaces, Overview and the lock screen span all displays, and one window is active across them all.
+  - Clients are on the output of the display that shows them, so frame callbacks follow them. In-window frost samples each display's own wallpaper (`Materials.desktopFor`).
+  - `--spread-clients` opens new clients on the emptiest display. Keyboard shortcuts work from every display.
+  - **The decision-gate kit**: `tools/dev/prism-gate.sh` runs Prism on eglfs/KMS with an animating client per output, benchmarks it and judges the result against the gate's criteria. The benchmark keeps every output drawing while it measures (single-output numbers unchanged).
+  - `prism_e2e` adds a two-display run (menu, shortcut, edge drag, Spaces across displays) and a two-output benchmark: 52 checks. Shell scripts reach windows on any display and report each window's `display` and the number of `displays`; screenshots take a `display`.
 - **The QTOS Store, stage 1** ([docs/STORE.md](docs/STORE.md)).
   - A new **Store** app: Discover, Themes and Widgets, search, item pages with live previews, and a Library with updates. Apps lists what comes with QTOS. Games, Tools and Music arrive with the developer program, and the app says so.
   - Eight **themes** (Ember, Tidepool, Moss, Dusk, Paper, Graphite, Saffron, Glacier). A theme sets the accent, a preferred appearance, a tint for every neutral surface and the Aurora wallpaper's character. Choose one in the Store, Settings › Appearance or Beam.

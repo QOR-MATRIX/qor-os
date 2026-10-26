@@ -64,6 +64,12 @@ toolchain and Qt kit. Specifics:
 - WSLg's Mesa (d3d12) lacks `EGL_WL_bind_wayland_display`, so Prism logs a
   hardware-integration warning and clients use shared-memory buffers. Mesa's
   `libEGL`/`ZINK` warnings at start are expected.
+- Mesa 26 falls back to llvmpipe (software) under WSLg. `GALLIUM_DRIVER=d3d12`
+  selects the GPU; `MESA_D3D12_DEFAULT_ADAPTER_NAME=NVIDIA` picks a discrete
+  GPU. WSLg also paces its output, so nested frame rates say little about
+  Prism; the decision gate needs bare metal.
+- `--outputs 2` opens a second output as another window, for working on
+  several displays without a second monitor.
 - Qt 6 tries Wayland before X11, so pointing `WAYLAND_DISPLAY` at Prism is
   enough to open a Qt app in it. `QT_QPA_PLATFORM=wayland` just makes the
   choice explicit. WSLg also exports `DISPLAY`, so non-Qt toolkits may still

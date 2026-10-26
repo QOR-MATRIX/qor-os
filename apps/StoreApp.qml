@@ -626,7 +626,7 @@ Item {
                         width: widgetArt.live.size === "small" ? 152 : 320
                         height: widgetArt.live.size === "large" ? 320 : 152
                         scale: Math.min(1, widgetArt.height / height)
-                        backdrop: Materials.desktop
+                        backdrop: Materials.desktopFor(Window.window)
                         radius: Tokens.radius.xl
                         Loader {
                             anchors.fill: parent

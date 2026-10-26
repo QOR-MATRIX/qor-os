@@ -45,3 +45,9 @@ X11 apps run in a rootful Xwayland window until a full XWM is justified.
   outputs at different refresh rates on the reference hardware. It is
   recorded as ADR-0011 together with that measurement. Until then, Option A
   stands.
+
+Update (2026-10-26): Prism now drives several outputs: one WaylandOutput and
+window per display, every screen under eglfs. `tools/dev/prism-gate.sh` runs
+the gate on hardware in one command and writes the summary for ADR-0011
+(see [PERFORMANCE.md](../PERFORMANCE.md#running-the-decision-gate)). The run
+itself remains.

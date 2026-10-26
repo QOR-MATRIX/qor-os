@@ -98,8 +98,13 @@ latency samples over about 6 seconds. The driver is `prism/shell/shellbenchmark.
 | `inputToSwap` | `samples`, `posted`, `averageMs`, `p50Ms`, `p95Ms`, `p99Ms`, `maxMs` (see above) |
 
 Intervals come from `QQuickWindow::frameSwapped` through `qtos::FrameStats`,
-which never requests frames itself. Gaps over 200 ms count as idle and are
-excluded.
+which never requests frames itself. While the tour is measured, the benchmark
+keeps every output drawing (each swap asks for the next), so an output with
+nothing animating is measured at its refresh rate rather than by its idle
+gaps; the latency phase runs on a still scene. Gaps over 200 ms count as idle
+and are excluded. Keeping outputs busy left the single-output numbers above
+unchanged (2.78 ms average, 3.05 ms p95 and 5.9 ms input to swap on the
+RTX 4060).
 
 ### Compositor decision gate
 
@@ -119,6 +124,32 @@ Proposed pass criteria, to be ratified with the measurement in ADR-0011:
 
 The product target stays at one frame plus scan-out (VISION §12). The nested
 numbers above validate the tooling only.
+
+#### Running the decision gate
+
+Prism drives several outputs (`--outputs` nested, every screen on eglfs), and
+`tools/dev/prism-gate.sh` runs the whole gate in one command:
+
+1. Boot Linux on the reference machine (a USB install of Ubuntu 26.04 works)
+   with two displays at different refresh rates connected, for example the
+   laptop panel and an external monitor.
+2. Install the toolchain and the Qt kit, and build the `linux-release`
+   preset, as in [BUILDING.md](BUILDING.md#linux-on-wsl2-windows-workstation)
+   (the steps are the same outside WSL).
+3. Switch to a text console (<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>F3</kbd>),
+   log in, and run:
+
+   ```bash
+   tools/dev/prism-gate.sh --build-dir ~/qtos-build/linux-release --seconds 20
+   ```
+
+It starts Prism on Qt's eglfs KMS integration (atomic modesetting, one
+output per connected display, side by side), opens an animating Wayland
+client on each output (`--spread-clients`), runs the benchmark, and checks
+the criteria above. It writes `report.json` and `summary.md` (machine, GPU,
+outputs and their refresh rates, per-output results, input to swap, and the
+verdict) into a `gate-<time>` folder, and exits 0 when every criterion
+passes. `summary.md` is the data ADR-0011 records.
 
 The **Monitor** app shows the same probe live: frame time and fps while the
 shell animates, and **Idle · Rendering on demand** when nothing changes.

@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+pragma ComponentBehavior: Bound
 // Qt Wayland Compositor declares XdgShell, XdgDecorationManagerV1 and the
 // text-input managers through C++ templates (QWaylandShellTemplate<T>) that
 // its qmltypes cannot describe, so qmllint can neither resolve those types
@@ -15,30 +16,85 @@ import QTOS.Shell
 // same AppWindow frames the simulator uses, so Lumen materials, springs and
 // Overview apply to real apps unchanged.
 //
+// Outputs: one per display, left to right (`options.outputs`). Nested, each
+// is a window of the host; on bare metal (eglfs), each is a screen. The
+// first hosts the shell's Desktop; the others a DisplayDesktop.
+//
 // Status: experimental. Runs nested (inside another Wayland/X11 session or
-// WSLg) today; the bare-metal KMS backend is a Phase 2 deliverable.
+// WSLg) and on Qt's eglfs (KMS) platform; Prism's own KMS backend is a Phase 2
+// deliverable.
 WaylandCompositor {
-    id: compositor
+    id: prism
 
     property var options: ({})
+    // [{ width, height, screen?, fullScreen? }]
+    readonly property var outputs: options.outputs ?? [{ width: options.width ?? 1600, height: options.height ?? 1000 }]
+
+    function outputX(index: int): real {
+        let x = 0;
+        for (let i = 0; i < index; ++i)
+            x += outputs[i].width;
+        return x;
+    }
+
+    // A fullscreen output on its screen, or a window of the host.
+    function show(window: Window, spec: var) {
+        if (spec.fullScreen && spec.screen !== undefined)
+            window.screen = Application.screens[spec.screen];
+        window.visibility = spec.fullScreen ? Window.FullScreen : Window.Windowed;
+    }
 
     WaylandOutput {
         id: output
         sizeFollowsWindow: true
+        position: Qt.point(0, 0)
         window: Window {
             id: outputWindow
-            width: compositor.options.width ?? 1600
-            height: compositor.options.height ?? 1000
-            visible: true
+            width: prism.outputs[0].width
+            height: prism.outputs[0].height
             color: "black"
             title: qsTr("QTOS · Prism")
+            Component.onCompleted: prism.show(outputWindow, prism.outputs[0])
 
             Desktop {
                 id: desktop
                 objectName: "desktop"
                 anchors.fill: parent
-                options: compositor.options
+                options: prism.options
                 focus: true
+            }
+        }
+    }
+
+    Instantiator {
+        model: prism.outputs.length - 1
+        delegate: WaylandOutput {
+            id: extra
+            required property int index
+            readonly property var spec: prism.outputs[index + 1]
+            // Instantiator parents its objects too late for the output to
+            // find its compositor by itself.
+            compositor: prism
+            sizeFollowsWindow: true
+            position: Qt.point(prism.outputX(index + 1), 0)
+            window: Window {
+                id: displayWindow
+                width: extra.spec.width
+                height: extra.spec.height
+                color: "black"
+                title: qsTr("QTOS · Prism · Display %1").arg(extra.index + 2)
+                Component.onCompleted: prism.show(displayWindow, extra.spec)
+
+                DisplayDesktop {
+                    objectName: "display" + (extra.index + 1)
+                    anchors.fill: parent
+                    primary: desktop
+                    focus: true
+                }
+                PresentationFeedback {
+                    presentationTime: presentation // qmllint disable incompatible-type
+                    window: displayWindow
+                }
             }
         }
     }
@@ -102,7 +158,10 @@ WaylandCompositor {
             // frame callbacks, so the client stops drawing until it returns.
             readonly property bool shown: content.window !== null && content.window.visible
             function updateOutput() {
-                surfaceItem.output = shown && surfaceItem.compositor ? surfaceItem.compositor.defaultOutput : null;
+                // The output of the display the window is on.
+                const window = surfaceItem.Window.window;
+                surfaceItem.output = shown && surfaceItem.compositor && window
+                    ? surfaceItem.compositor.outputFor(window) : null;
             }
             onShownChanged: updateOutput()
             Connections {
@@ -194,11 +253,11 @@ WaylandCompositor {
     XdgActivationV1 {
         // A trusted request focuses the window; any other only asks for attention.
         onActivationRequested: (surface, trusted) => {
-            const window = desktop.windowLayer.windows.find(w => w.shellSurface && w.shellSurface.surface === surface);
+            const window = desktop.allWindows().find(w => w.shellSurface && w.shellSurface.surface === surface);
             if (!window)
                 return;
             if (trusted)
-                desktop.windowLayer.raise(window);
+                window.manager.raise(window);
             else if (!window.focused)
                 window.demandsAttention = true;
         }

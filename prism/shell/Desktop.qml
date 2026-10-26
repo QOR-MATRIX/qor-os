@@ -199,7 +199,7 @@ FocusScope {
             return;
         surface = name;
         if (name === "")
-            windows.focusActive();
+            focusedLayer.focusActive();
     }
 
     function toggleSurface(name: string) {
@@ -211,7 +211,9 @@ FocusScope {
             return;
         if (surface !== "overview")
             surface = "";
-        const window = windows.open(appId, shelf.originFor(appId), args === undefined ? ({}) : args);
+        // An app already open on another display comes back there.
+        const owner = displays.find(layer => layer.find(appId) !== null) ?? windows;
+        const window = owner.open(appId, shelf.originFor(appId), args === undefined ? ({}) : args);
         if (window && window.space !== currentSpace)
             currentSpace = window.space;
         if (surface === "overview")
@@ -250,8 +252,63 @@ FocusScope {
     // ── Compositor integration (Prism on device) ───────────────────────────
     readonly property alias windowLayer: windows
 
+    // ── Displays ────────────────────────────────────────────────────────────
+    // Every display's window layer, left to right: this one first, then those
+    // of further outputs under Prism (DisplayDesktop). Windows move between
+    // them; Spaces and Overview span them all.
+    property var displays: [windows]
+    // The display whose window is active: keyboard shortcuts act there.
+    property WindowLayer focusedLayer: windows
+    readonly property real spaceOffset: spaceTravel.value
+    readonly property real lockProgress: lockDepth.value
+    readonly property var runningApps: displays.reduce((ids, layer) => ids.concat(layer.runningApps.filter(id => ids.indexOf(id) < 0)), [])
+    readonly property var attentionApps: displays.reduce((ids, layer) => ids.concat(layer.attentionApps.filter(id => ids.indexOf(id) < 0)), [])
+
+    function registerDisplay(layer: WindowLayer) {
+        displays = displays.concat([layer]);
+        layer.windowActivated.connect(() => desktop.focusDisplay(layer));
+    }
+
+    function unregisterDisplay(layer: WindowLayer) {
+        for (const window of layer.windows.slice())
+            layer.moveToDisplay(window, 0, null, null);
+        displays = displays.filter(l => l !== layer);
+        if (focusedLayer === layer)
+            focusedLayer = windows;
+    }
+
+    // One active window across all displays.
+    function focusDisplay(layer: WindowLayer) {
+        for (const other of displays)
+            if (other !== layer && other.active)
+                other.active.focused = false;
+        focusedLayer = layer;
+    }
+
+    function moveActiveToDisplay(step: int) {
+        const layer = focusedLayer;
+        if (layer.active && !layer.active.minimized)
+            layer.moveToDisplay(layer.active, layer.displayIndex + step, null, null);
+    }
+
+    function clientIdentity(appId: string): var {
+        const owner = displays.find(layer => layer.find(appId) !== null) ?? windows;
+        return owner.clientIdentity(appId);
+    }
+
+    function allWindows(): var {
+        return displays.reduce((list, layer) => list.concat(layer.windows), []);
+    }
+
     function adoptSurface(shellSurface: var, toplevel: var): AppWindow {
-        return windows.adopt(shellSurface, toplevel);
+        // prism --spread-clients: each new client on the display with the
+        // fewest windows (benchmarks put load on every output).
+        let layer = windows;
+        if (options.spreadClients)
+            for (const other of displays)
+                if (other.windows.length < layer.windows.length)
+                    layer = other;
+        return layer.adopt(shellSurface, toplevel);
     }
 
     // Volume keys: sixteen steps, unmuting on the way up.
@@ -409,7 +466,8 @@ FocusScope {
                                           "bell-ring");
             break;
         case "space.go": switchSpace(args.index); break;
-        case "window.space": windows.moveActiveTo(args.index); break;
+        case "window.space": focusedLayer.moveActiveTo(args.index); break;
+        case "window.display": focusedLayer.moveToDisplay(focusedLayer.active, args.index, null, null); break;
         case "accent.set": settings.accentHue = args.hue; break;
         case "app.open": launch(args.id, args); break;
         case "widgets.edit": editWidgets(true); break;
@@ -548,7 +606,10 @@ FocusScope {
 
         WindowLayer {
             id: windows
+            objectName: "windowLayer"
             anchors.fill: parent
+            displays: desktop.displays
+            onWindowActivated: desktop.focusDisplay(desktop.windowLayer)
             workArea: desktop.workArea
             currentSpace: desktop.currentSpace
             spaceOffset: spaceTravel.value
@@ -594,7 +655,7 @@ FocusScope {
             width: parent.width - 16
             height: desktop.railHeight
             backdrop: sceneBackdrop
-            activeTitle: windows.activeTitle
+            activeTitle: desktop.focusedLayer.activeTitle
             currentSpace: desktop.currentSpace
             spaceCount: desktop.spaceCount
             surface: desktop.surface
@@ -625,9 +686,9 @@ FocusScope {
             anchors.horizontalCenter: parent.horizontalCenter
             y: parent.height - height - 12 + 110 * Math.max(lockDepth.value, editDepth.value)
             backdrop: sceneBackdrop
-            runningApps: windows.runningApps
-            attentionApps: windows.attentionApps
-            identityProvider: appId => windows.clientIdentity(appId)
+            runningApps: desktop.runningApps
+            attentionApps: desktop.attentionApps
+            identityProvider: appId => desktop.clientIdentity(appId)
             overview: desktop.overview
             onLaunchRequested: appId => desktop.launch(appId, {})
             onBeamRequested: desktop.toggleSurface("beam")
@@ -771,68 +832,93 @@ FocusScope {
     // Media and volume keys work everywhere, the lock screen included.
     // On Linux a keyboard's play/pause key arrives as Media Play
     // (XF86AudioPlay), so both toggle, as media players there do.
-    Shortcut { sequences: ["Toggle Media Play/Pause", "Media Play"]; onActivated: Services.media.togglePlayback() }
-    Shortcut { sequences: ["Media Pause", "Media Stop"]; onActivated: Services.media.playing = false }
-    Shortcut { sequence: "Media Next"; onActivated: Services.media.next() }
-    Shortcut { sequence: "Media Previous"; onActivated: Services.media.previous() }
-    Shortcut { sequence: "Volume Up"; onActivated: desktop.changeVolume(1) }
-    Shortcut { sequence: "Volume Down"; onActivated: desktop.changeVolume(-1) }
-    Shortcut { sequence: "Volume Mute"; onActivated: desktop.toggleMute() }
+    Shortcut { context: Qt.ApplicationShortcut; sequences: ["Toggle Media Play/Pause", "Media Play"]; onActivated: Services.media.togglePlayback() }
+    Shortcut { context: Qt.ApplicationShortcut; sequences: ["Media Pause", "Media Stop"]; onActivated: Services.media.playing = false }
+    Shortcut { context: Qt.ApplicationShortcut; sequence: "Media Next"; onActivated: Services.media.next() }
+    Shortcut { context: Qt.ApplicationShortcut; sequence: "Media Previous"; onActivated: Services.media.previous() }
+    Shortcut { context: Qt.ApplicationShortcut; sequence: "Volume Up"; onActivated: desktop.changeVolume(1) }
+    Shortcut { context: Qt.ApplicationShortcut; sequence: "Volume Down"; onActivated: desktop.changeVolume(-1) }
+    Shortcut { context: Qt.ApplicationShortcut; sequence: "Volume Mute"; onActivated: desktop.toggleMute() }
     Shortcut {
+        context: Qt.ApplicationShortcut
         sequences: ["Ctrl+Space", "Alt+Space"]
         enabled: !desktop.locked
         onActivated: desktop.toggleSurface("beam")
     }
     Shortcut {
+        context: Qt.ApplicationShortcut
         sequences: ["Ctrl+Up", "F3"]
         enabled: !desktop.locked
         onActivated: desktop.toggleSurface("overview")
     }
     Shortcut {
+        context: Qt.ApplicationShortcut
         sequence: "Ctrl+Alt+Left"
         enabled: !desktop.locked
         onActivated: desktop.switchSpace(desktop.currentSpace - 1)
     }
     Shortcut {
+        context: Qt.ApplicationShortcut
         sequence: "Ctrl+Alt+Right"
         enabled: !desktop.locked
         onActivated: desktop.switchSpace(desktop.currentSpace + 1)
     }
     // Move the active window to another Space, and go with it.
     Shortcut {
+        context: Qt.ApplicationShortcut
         sequence: "Ctrl+Alt+Shift+Left"
         enabled: !desktop.locked
-        onActivated: windows.moveActive(-1)
+        onActivated: desktop.focusedLayer.moveActive(-1)
     }
     Shortcut {
+        context: Qt.ApplicationShortcut
         sequence: "Ctrl+Alt+Shift+Right"
         enabled: !desktop.locked
-        onActivated: windows.moveActive(1)
+        onActivated: desktop.focusedLayer.moveActive(1)
     }
     Shortcut {
+        context: Qt.ApplicationShortcut
         sequence: "Ctrl+Alt+L"
         enabled: !desktop.locked
         onActivated: desktop.lock()
     }
     Shortcut {
+        context: Qt.ApplicationShortcut
         sequence: "Ctrl+,"
         enabled: !desktop.locked
         onActivated: desktop.launch("settings", {})
     }
     Shortcut {
+        context: Qt.ApplicationShortcut
         sequence: "Ctrl+W"
         enabled: !desktop.locked && desktop.surface === ""
-        onActivated: windows.closeActive()
+        onActivated: desktop.focusedLayer.closeActive()
     }
     Shortcut {
+        context: Qt.ApplicationShortcut
         sequence: "Ctrl+M"
         enabled: !desktop.locked && desktop.surface === ""
-        onActivated: windows.minimizeActive()
+        onActivated: desktop.focusedLayer.minimizeActive()
     }
     Shortcut {
+        context: Qt.ApplicationShortcut
         sequence: "Escape"
         enabled: desktop.surface !== "" || desktop.editingWidgets
         onActivated: desktop.editingWidgets ? desktop.editWidgets(false) : desktop.setSurface("")
+    }
+
+    // Take the active window to the display on the left or right.
+    Shortcut {
+        context: Qt.ApplicationShortcut
+        sequence: "Meta+Shift+Left"
+        enabled: !desktop.locked && desktop.displays.length > 1
+        onActivated: desktop.moveActiveToDisplay(-1)
+    }
+    Shortcut {
+        context: Qt.ApplicationShortcut
+        sequence: "Meta+Shift+Right"
+        enabled: !desktop.locked && desktop.displays.length > 1
+        onActivated: desktop.moveActiveToDisplay(1)
     }
 
     // The desktop's own menu (right click, or press and hold, on the desktop).
@@ -862,14 +948,16 @@ FocusScope {
             id: spaceShortcut
             required property int index
             Shortcut {
+                context: Qt.ApplicationShortcut
                 sequence: "Alt+" + (spaceShortcut.index + 1)
                 enabled: !desktop.locked
                 onActivated: desktop.switchSpace(spaceShortcut.index)
             }
             Shortcut {
+                context: Qt.ApplicationShortcut
                 sequence: "Alt+Shift+" + (spaceShortcut.index + 1)
                 enabled: !desktop.locked
-                onActivated: windows.moveActiveTo(spaceShortcut.index)
+                onActivated: desktop.focusedLayer.moveActiveTo(spaceShortcut.index)
             }
         }
     }

@@ -16,6 +16,7 @@
 #include <QtCore/QJsonArray>
 #include <QtCore/QJsonDocument>
 #include <QtCore/QJsonObject>
+#include <QtCore/QPointer>
 #include <QtCore/QTimer>
 #include <QtGui/QGuiApplication>
 #include <QtGui/QImage>
@@ -147,16 +148,44 @@ private:
 
     QObject *layer() const { return m_desktop ? m_desktop->property("windowLayer").value<QObject *>() : nullptr; }
 
+    // Every display's window layer (Prism with several outputs), the main one
+    // first; just the main one otherwise.
+    QList<QObject *> layers() const
+    {
+        QList<QObject *> list;
+        if (!m_desktop)
+            return list;
+        const QJSValue displays = js(m_desktop).property(u"displays"_s);
+        const int count = displays.property(u"length"_s).toInt();
+        for (int i = 0; i < count; ++i)
+            if (QObject *layer = displays.property(quint32(i)).toQObject())
+                list.append(layer);
+        if (list.isEmpty() && layer())
+            list.append(layer());
+        return list;
+    }
+
     QList<QQuickItem *> windows() const
     {
         QList<QQuickItem *> list;
-        if (!layer())
-            return list;
-        const QJSValue array = js(layer()).property(u"windows"_s);
-        const int count = array.property(u"length"_s).toInt();
-        for (int i = 0; i < count; ++i)
-            if (auto *item = qobject_cast<QQuickItem *>(array.property(quint32(i)).toQObject()))
-                list.append(item);
+        for (QObject *layer : layers()) {
+            const QJSValue array = js(layer).property(u"windows"_s);
+            const int count = array.property(u"length"_s).toInt();
+            for (int i = 0; i < count; ++i)
+                if (auto *item = qobject_cast<QQuickItem *>(array.property(quint32(i)).toQObject()))
+                    list.append(item);
+        }
+        return list;
+    }
+
+    // The display windows: the main one first.
+    QList<QQuickWindow *> displayWindows() const
+    {
+        QList<QQuickWindow *> list { m_window };
+        for (QObject *layer : layers())
+            if (auto *item = qobject_cast<QQuickItem *>(layer);
+                item && item->window() && !list.contains(item->window()))
+                list.append(item->window());
         return list;
     }
 
@@ -166,14 +195,17 @@ private:
     // Repeater creates are only reachable through the latter.
     QQuickItem *findItem(const QString &name) const
     {
-        if (auto *item = m_window->findChild<QQuickItem *>(name))
-            return item;
-        QList<QQuickItem *> pending { m_window->contentItem() };
-        while (!pending.isEmpty()) {
-            QQuickItem *item = pending.takeFirst();
-            if (item->objectName() == name)
+        for (QQuickWindow *window : displayWindows())
+            if (auto *item = window->findChild<QQuickItem *>(name))
                 return item;
-            pending.append(item->childItems());
+        for (QQuickWindow *window : displayWindows()) {
+            QList<QQuickItem *> pending { window->contentItem() };
+            while (!pending.isEmpty()) {
+                QQuickItem *item = pending.takeFirst();
+                if (item->objectName() == name)
+                    return item;
+                pending.append(item->childItems());
+            }
         }
         return nullptr;
     }
@@ -216,11 +248,18 @@ private:
     // right and bottom edges); without it, the centre.
     std::optional<QPointF> resolve(const QJsonValue &target)
     {
+        m_target = m_window;
         if (target.isArray()) {
             const QJsonArray a = target.toArray();
             return QPointF(a.at(0).toDouble(), a.at(1).toDouble());
         }
         const QJsonObject t = target.toObject();
+        // {"display": n, "at": [x, y]}: a point on another display.
+        if (t.contains(u"display"_s) && !t.contains(u"window"_s) && !t.contains(u"item"_s)) {
+            m_target = displayWindows().value(t[u"display"_s].toInt(), m_window);
+            const QJsonArray a = t[u"at"_s].toArray();
+            return QPointF(a.at(0).toDouble(), a.at(1).toDouble());
+        }
         QQuickItem *item = nullptr;
         if (t.contains(u"window"_s)) {
             QQuickItem *window = findWindow(t[u"window"_s]);
@@ -256,6 +295,8 @@ private:
                                                        coordinate(at.at(1).toDouble(), item->height()))
                                              : QPointF(item->width() / 2, item->height() / 2);
         const QPointF point = item->mapToScene(local);
+        if (item->window())
+            m_target = item->window();
         // An item target must be on screen: not hidden, scrolled away or clipped.
         if (t.contains(u"item"_s)) {
             if (!item->isVisible()) {
@@ -274,8 +315,9 @@ private:
         if (t.contains(u"window"_s)) {
             QQuickItem *window = findWindow(t[u"window"_s]);
             for (QQuickItem *other : windows()) {
-                if (other == window || !other->isVisible() || other->property("minimized").toBool()
-                    || other->property("closing").toBool() || other->z() <= window->z())
+                if (other == window || other->window() != window->window() || !other->isVisible()
+                    || other->property("minimized").toBool() || other->property("closing").toBool()
+                    || other->z() <= window->z())
                     continue;
                 if (other->mapRectToScene(QRectF(0, 0, other->width(), other->height())).contains(point)) {
                     m_error = u"the target point is covered by \"%1\""_s.arg(other->property("title").toString());
@@ -299,9 +341,10 @@ private:
             m_buttons &= ~button;
         // QWindowSystemInterface takes native pixels; scripts use logical ones.
         const input::InjectedInput injected;
+        QQuickWindow *window = m_target ? m_target.data() : m_window;
         QWindowSystemInterface::handleMouseEvent(
-            m_window, ulong(m_clock.elapsed()), QHighDpi::toNativeLocalPosition(pos, m_window),
-            QHighDpi::toNativeGlobalPosition(m_window->mapToGlobal(pos), m_window), m_buttons, button, type);
+            window, ulong(m_clock.elapsed()), QHighDpi::toNativeLocalPosition(pos, window),
+            QHighDpi::toNativeGlobalPosition(window->mapToGlobal(pos), window), m_buttons, button, type);
     }
 
     // Key events and shortcuts need the window to be the focus window. A
@@ -356,7 +399,10 @@ private:
                 const QJsonArray by = spec[u"by"_s].toArray();
                 *to = *start + QPointF(by.at(0).toDouble(), by.at(1).toDouble());
             } else {
+                // The drag stays with the display it starts on.
+                const QPointer<QQuickWindow> startDisplay = m_target;
                 const auto end = resolve(spec[u"to"_s]);
+                m_target = startDisplay;
                 if (!end)
                     return -1;
                 *to = *end;
@@ -782,9 +828,12 @@ private:
                 return 700;
             });
         } else if (step.contains(u"screenshot"_s)) {
+            // {"screenshot": file, "display": n}: another display's window.
             const QString file = path(step[u"screenshot"_s].toString());
-            m_queue.push_back([this, file] {
-                if (!m_window->grabWindow().save(file)) {
+            const int display = step[u"display"_s].toInt(0);
+            m_queue.push_back([this, file, display] {
+                QQuickWindow *window = displayWindows().value(display);
+                if (!window || !window->grabWindow().save(file)) {
                     m_error = u"cannot write %1"_s.arg(file);
                     return -1;
                 }
@@ -915,6 +964,7 @@ private:
             { u"inOverview"_s, w->property("inOverview").toBool() },
             { u"overviewMix"_s, w->property("overviewMix").toDouble() },
             { u"space"_s, w->property("space").toInt() },
+            { u"display"_s, displayWindows().indexOf(w->window()) },
             // Drawn at all: on the Space in view (or sliding past it).
             { u"visible"_s, w->isVisible() },
             { u"commits"_s, w->property("commits").toInt() },
@@ -1013,6 +1063,7 @@ private:
             { u"workArea"_s, rectJson(manager ? manager->property("workArea") : QVariant()) },
             { u"overview"_s, manager ? manager->property("overview").toBool() : false },
             { u"currentSpace"_s, manager ? manager->property("currentSpace").toInt() : 0 },
+            { u"displays"_s, int(layers().size()) },
             { u"spaceOffset"_s, manager ? manager->property("spaceOffset").toDouble() : 0 },
             { u"overviewProgress"_s, m_desktop->property("overviewProgress").toDouble() },
             { u"gesture"_s, gestureState() },
@@ -1030,6 +1081,8 @@ private:
     }
 
     QQuickWindow *m_window;
+    // The window pointer input goes to: the display of the last target.
+    QPointer<QQuickWindow> m_target;
     QJsonArray m_steps;
     QString m_baseDir;
     QObject *m_desktop = nullptr;

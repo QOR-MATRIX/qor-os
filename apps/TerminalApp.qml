@@ -145,7 +145,7 @@ FocusScope {
     }
     Glass {
         anchors.fill: parent
-        backdrop: Materials.desktop
+        backdrop: Materials.desktopFor(Window.window)
         tint: Oklch.color(0.16, 0.02, Theme.hue, 0.86)
         radius: 0
         elevation: 0

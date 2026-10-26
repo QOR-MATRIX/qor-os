@@ -13,7 +13,7 @@ Item {
 
     Glass {
         anchors.fill: parent
-        backdrop: Materials.desktop
+        backdrop: Materials.desktopFor(Window.window)
         tint: Theme.frostTint
         radius: 0
         elevation: 0

@@ -194,6 +194,8 @@ WAYLAND_DISPLAY=wayland-qtos QT_QPA_PLATFORM=wayland \
 | `--unlocked` | Start on the desktop instead of the lock screen |
 | `--socket <name>` | Wayland socket for clients (default: the first free `wayland-N`, printed at start) |
 | `--size WxH` | Output window size |
+| `--outputs N` | Drive N outputs (up to 4), side by side, each a window of `--size`. On bare metal (`QT_QPA_PLATFORM=eglfs`) every connected screen is an output instead |
+| `--spread-clients` | Open each new client on the output with the fewest windows |
 | `--services embedded\|external` | As for `qtos-shell` |
 | `--screenshot <file> [--delay ms]` | Save the output and exit (used for automated checks) |
 | `--benchmark <seconds> [--benchmark-out file]` | Shell tour plus input latency; per-output JSON report, then exit ([PERFORMANCE.md](PERFORMANCE.md)) |

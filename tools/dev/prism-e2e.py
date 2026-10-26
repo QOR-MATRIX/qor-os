@@ -8,7 +8,10 @@ server-side decorations and a menu at a known spot, and weston-terminal, which
 draws its own decorations. The script drives them with synthetic pointer and
 key input that takes the same path as a person's: maximise, restore, snap,
 move by a client's own title bar, minimise, restore from the Shelf, popup,
-Spaces (and three-finger swipes), Overview and close. This file then checks the window-manager state the script
+Spaces (and three-finger swipes), Overview and close. A second run drives two
+displays (prism --outputs 2): moving a client between them by its window
+menu, a shortcut and its title bar, and Spaces across both; a third runs the
+benchmark on two outputs. This file then checks the window-manager state the script
 recorded at each step.
 
     tools/dev/prism-e2e.py --build-dir ~/qtos-build/linux-release [--keep]
@@ -160,6 +163,36 @@ def script(with_terminal: bool) -> list[dict]:
             {"state": "11-all-closed.json"},
         ]
     return steps
+
+
+def display_script() -> list[dict]:
+    """Two displays (prism --outputs 2): moving a client between them."""
+    return [
+        {"waitFor": {"window": A, "timeout": 15000}},
+        {"wait": 1500},
+        {"state": "d0-mapped.json"},
+        {"rightClick": {"window": A, "part": "titlebar", "at": [200, 20]}},
+        {"wait": 700},
+        {"click": {"item": "moveToDisplay1"}},
+        {"wait": 1500},
+        {"state": "d1-moved.json"},
+        {"wait": 1000},
+        {"state": "d2-moved-later.json"},
+        {"key": "Meta+Shift+Left"},
+        {"wait": 1500},
+        {"state": "d3-back.json"},
+        # Dragged past the right edge, it lands on the second display.
+        {"drag": {"from": {"window": A, "part": "titlebar", "at": [200, 20]}, "by": [1000, 0], "steps": 16}},
+        {"wait": 1500},
+        {"state": "d4-dragged.json"},
+        # Spaces span the displays.
+        {"key": "Ctrl+Alt+Right"},
+        {"wait": 1500},
+        {"state": "d5-other-space.json"},
+        {"key": "Ctrl+Alt+Left"},
+        {"wait": 1500},
+        {"state": "d6-back.json"},
+    ]
 
 
 class Checks:
@@ -351,6 +384,92 @@ def verify(out: Path, with_terminal: bool) -> int:
     return c.failures
 
 
+def verify_displays(out: Path, benchmark: Path) -> int:
+    c = Checks()
+
+    def load(name: str) -> dict:
+        return json.loads((out / name).read_text())
+
+    print("Two displays:")
+    s = load("d0-mapped.json")
+    a = find(s, A)
+    c.check("prism --outputs 2 drives two displays", s.get("displays") == 2, f"displays={s.get('displays')}")
+    c.check("a client opens on the first", bool(a and a["display"] == 0 and a["surfaceItem"]["onOutput"]))
+    moved, later = find(load("d1-moved.json"), A), find(load("d2-moved-later.json"), A)
+    c.check("the window menu moves it to the second display",
+            bool(moved and moved["display"] == 1 and moved["visible"] and moved["focused"]),
+            f"display={moved and moved['display']}")
+    c.check("where it is on that output and keeps drawing",
+            bool(moved and later and later["surfaceItem"]["onOutput"] and later["commits"] - moved["commits"] >= 5),
+            f"{later and moved and later['commits'] - moved['commits']} commits in 1 s")
+    a = find(load("d3-back.json"), A)
+    c.check("Meta+Shift+Left brings it back", bool(a and a["display"] == 0), f"display={a and a['display']}")
+    a = find(load("d4-dragged.json"), A)
+    c.check("dragging its title bar past the edge carries it over", bool(a and a["display"] == 1),
+            f"display={a and a['display']}")
+    s = load("d5-other-space.json")
+    a = find(s, A)
+    c.check("Spaces span the displays: another Space hides it",
+            bool(s["currentSpace"] == 1 and a and not a["visible"] and not a["surfaceItem"]["onOutput"]),
+            f"current={s['currentSpace']}")
+    a = find(load("d6-back.json"), A)
+    c.check("and it is back with its Space", bool(a and a["visible"] and a["surfaceItem"]["onOutput"]))
+
+    print("Benchmark, two outputs:")
+    report = json.loads(benchmark.read_text()) if benchmark.exists() else {}
+    outputs = report.get("outputs", [])
+    c.check("prism --benchmark measures every output", len(outputs) == 2, f"{len(outputs)} outputs")
+    c.check("each output drew frames", len(outputs) == 2 and all(o.get("frames", 0) > 30 for o in outputs),
+            ", ".join(str(o.get("frames")) for o in outputs))
+    return c.failures
+
+
+def run_prism(prism: Path, client: Path, out: Path, arguments: list[str], data_dirs: str,
+              terminal: str | None, timeout: int) -> int:
+    """Runs prism with the test client (and weston-terminal), keeping logs in `out`."""
+    socket = f"wayland-prism-e2e-{os.getpid()}-{out.name}"
+    log = (out / "prism.log").open("w")
+    compositor = subprocess.Popen([str(prism), "--unlocked", "--socket", socket, *arguments],
+                                  stdout=log, stderr=subprocess.STDOUT, env=dict(os.environ, XDG_DATA_DIRS=data_dirs))
+    clients: list[subprocess.Popen] = []
+    client_logs = []
+
+    def start(name: str, command: list[str], env: dict[str, str]) -> None:
+        # Client output is kept next to Prism's, for when a check fails.
+        output = (out / f"{name}.log").open("w")
+        client_logs.append(output)
+        clients.append(subprocess.Popen(command, stdout=output, stderr=subprocess.STDOUT, env=env))
+
+    try:
+        deadline = time.monotonic() + 15
+        while "Prism is running" not in (out / "prism.log").read_text():
+            if compositor.poll() is not None or time.monotonic() > deadline:
+                print("prism did not start:\n" + (out / "prism.log").read_text())
+                return 102
+            time.sleep(0.1)
+        env = dict(os.environ, WAYLAND_DISPLAY=socket, QT_QPA_PLATFORM="wayland")
+        start("client-a", [str(client), "--title", "Prism Test A", "--app-id", "org.qtos.PrismTestA",
+                           "--size", "640x420", "--min", "480x320", "--animate"], env)
+        if terminal:
+            time.sleep(0.8)
+            start("terminal", [terminal], env)
+        status = compositor.wait(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        compositor.kill()
+        print("prism timed out")
+        return 103
+    finally:
+        for p in clients:
+            p.kill()
+        for output in [log, *client_logs]:
+            output.close()
+    if status != 0:
+        print(f"prism failed ({status}):")
+        print("\n".join(line for line in (out / "prism.log").read_text().splitlines() if "script:" in line))
+        return 104
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--build-dir", type=Path, required=True)
@@ -383,51 +502,28 @@ def main() -> int:
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">'
         '<rect width="64" height="64" rx="14" fill="#5a68e6"/></svg>')
     data_dirs = f"{data}:{os.environ.get('XDG_DATA_DIRS', '/usr/local/share:/usr/share')}"
-    socket = f"wayland-prism-e2e-{os.getpid()}"
-    log = (out / "prism.log").open("w")
-    compositor = subprocess.Popen([str(prism), "--unlocked", "--socket", socket, "--size", "1600x1000",
-                                   "--script", str(out / "script.json")], stdout=log, stderr=subprocess.STDOUT,
-                                  env=dict(os.environ, XDG_DATA_DIRS=data_dirs))
-    clients: list[subprocess.Popen] = []
-    client_logs = []
-
-    def start(name: str, command: list[str], env: dict[str, str]) -> None:
-        # Client output is kept next to Prism's, for when a check fails.
-        output = (out / f"{name}.log").open("w")
-        client_logs.append(output)
-        clients.append(subprocess.Popen(command, stdout=output, stderr=subprocess.STDOUT, env=env))
-
-    try:
-        deadline = time.monotonic() + 15
-        while "Prism is running" not in (out / "prism.log").read_text():
-            if compositor.poll() is not None or time.monotonic() > deadline:
-                print("prism did not start:\n" + (out / "prism.log").read_text())
-                return 102
-            time.sleep(0.1)
-        env = dict(os.environ, WAYLAND_DISPLAY=socket, QT_QPA_PLATFORM="wayland")
-        start("client-a", [str(client), "--title", "Prism Test A", "--app-id", "org.qtos.PrismTestA",
-                           "--size", "640x420", "--min", "480x320", "--animate"], env)
-        if terminal:
-            time.sleep(0.8)
-            start("terminal", [terminal], env)
-        status = compositor.wait(timeout=150)
-    except subprocess.TimeoutExpired:
-        compositor.kill()
-        print("prism script timed out")
-        return 103
-    finally:
-        for p in clients:
-            p.kill()
-        for output in [log, *client_logs]:
-            output.close()
-
-    if status != 0:
-        print(f"prism --script failed ({status}):")
-        print("\n".join(line for line in (out / "prism.log").read_text().splitlines() if "script:" in line))
+    status = run_prism(prism, client, out, ["--size", "1600x1000", "--script", str(out / "script.json")],
+                       data_dirs, terminal, 150)
+    if status:
         print(f"output kept in {out}")
-        return 104
-
+        return status
     failures = verify(out, terminal is not None)
+
+    # Two displays, then a two-output benchmark (the decision gate's tooling).
+    displays = out / "displays"
+    displays.mkdir()
+    (displays / "script.json").write_text(json.dumps({"steps": display_script()}, indent=1))
+    status = run_prism(prism, client, displays, ["--outputs", "2", "--size", "1280x800", "--script",
+                                                 str(displays / "script.json")], data_dirs, None, 120)
+    benchmark = out / "benchmark"
+    benchmark.mkdir()
+    status = status or run_prism(prism, client, benchmark, ["--outputs", "2", "--size", "1280x800", "--benchmark",
+                                                            "4", "--benchmark-out", str(benchmark / "report.json")],
+                                 data_dirs, None, 60)
+    if status:
+        print(f"output kept in {out}")
+        return status
+    failures += verify_displays(displays, benchmark / "report.json")
     print(f"{failures} failure(s)")
     if args.keep or failures:
         print(f"output kept in {out}")

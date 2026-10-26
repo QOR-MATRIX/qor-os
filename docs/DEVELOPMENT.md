@@ -190,7 +190,7 @@ scale.
 | `{"restore": spec}` | What clicking the window's app on the Shelf does |
 | `{"close": spec}` | Ask a window to close (`xdg_toplevel.close` for clients) |
 | `{"expect": {"path": ..., "equals": value}}` | Assert on the state below; `"window": spec` scopes the path to a window; `"near": [..] \| number \| "statePath"` with `"scale"` and `"tolerance"` compares rectangles and numbers |
-| `{"state": file}`, `{"screenshot": file}` | Write the state as JSON or grab the window (paths relative to the script) |
+| `{"state": file}`, `{"screenshot": file}` | Write the state as JSON or grab the window (paths relative to the script); `"display": n` grabs another display under Prism |
 | `{"log": text}` | Print a progress line |
 
 A click or drag aimed at a window part fails if another window covers that
@@ -208,7 +208,9 @@ shortcuts. Running tests on a machine in use is safe.
 
 A **target** is `[x, y]` in window coordinates, or
 `{"window": spec, "part": "frame|titlebar|content|close|maximize|minimize", "at": [x, y]}`,
-or `{"item": "<objectName>", "at": [x, y]}`. `at` is relative to the part's
+or `{"item": "<objectName>", "at": [x, y]}`, or `{"display": n, "at": [x, y]}`
+for a point on another display (Prism with `--outputs`; windows and items are
+found on whichever display shows them). `at` is relative to the part's
 top-left corner; negative values count from the right and bottom edges, and
 without `at` the target is the centre. A window **spec** is a string matched
 against title or app id, or `{"title": ..., "appId": ...}`.
@@ -221,7 +223,8 @@ The **state** includes:
 - `audio` (volume, mute, output, equaliser, interface sounds, `active`) and
   `media` (playing, title, position, duration, queue index);
 - `workArea`, `overview`, `currentSpace` and `surface`; `spaceOffset` (where
-  the strip is, in Spaces) and `overviewProgress`;
+  the strip is, in Spaces) and `overviewProgress`; `displays` (under Prism,
+  the number of outputs);
 - `gesture`: the system gesture under way (`active`, `axis`, `source`,
   `fingers`, `translation`);
 - `store`: whether the catalogue is `ready`, its number of `items`, and what
@@ -231,8 +234,8 @@ The **state** includes:
   callbacks only when Prism draws);
 - open `popups`, as screen rectangles;
 - `windows[]`, with title, app id, focus, maximised, minimised, frame and
-  on-screen rectangles, Space, `visible`, `commits` (client commits) and
-  `overviewMix` (how far into its Overview place).
+  on-screen rectangles, Space, `display`, `visible`, `commits` (client
+  commits) and `overviewMix` (how far into its Overview place).
   Wayland clients also report their window geometry, configured size, Shelf
   identity and surface item (with `onOutput`).
 

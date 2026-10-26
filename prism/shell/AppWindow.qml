@@ -199,7 +199,25 @@ Item {
             manager.snapRect = target;
     }
 
+    // Lands on a new display (WindowLayer.receive): no flight from where it was.
+    function arrive() {
+        gx.snap(gx.target);
+        gy.snap(gy.target);
+        gw.snap(gw.target);
+        gh.snap(gh.target);
+    }
+
     function endMove(scenePoint: point) {
+        // Carried past the edge onto the next display.
+        const beyond = manager.displayBeyond(scenePoint);
+        if (beyond >= 0) {
+            manager.snapVisible = false;
+            const grab = Qt.point(scenePoint.x - normalX, scenePoint.y - normalY);
+            const from = manager;
+            // After the drag's own event delivery has finished.
+            Qt.callLater(() => from.moveToDisplay(win, beyond, scenePoint, grab));
+            return;
+        }
         const target = manager.snapTargetFor(scenePoint);
         manager.snapVisible = false;
         if (target.width <= 0)
@@ -400,6 +418,19 @@ Item {
                     text: qsTr("Move to Space 3")
                     enabled: win.space !== 2
                     onTriggered: win.manager.moveToSpace(win, 2, false)
+                }
+                // With several displays: move to another.
+                Instantiator {
+                    model: win.manager && win.manager.displays.length > 1 ? win.manager.displays.length : 0
+                    delegate: MenuItem {
+                        required property int index
+                        objectName: "moveToDisplay" + index
+                        text: qsTr("Move to Display %1").arg(index + 1)
+                        enabled: index !== win.manager.displayIndex
+                        onTriggered: win.manager.moveToDisplay(win, index, null, null)
+                    }
+                    onObjectAdded: (index, object) => windowMenu.insertItem(6 + index, object)
+                    onObjectRemoved: (index, object) => windowMenu.removeItem(object)
                 }
                 MenuSeparator { }
                 MenuItem {

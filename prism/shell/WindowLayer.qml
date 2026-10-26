@@ -24,6 +24,10 @@ Item {
     property real overviewGesture: -1
     property bool overviewTracking: false
     property int spaceCount: 3
+    // Every display's layer, left to right (Prism with several outputs); a
+    // window moves between them. Just this one in the simulator.
+    property var displays: [layer]
+    readonly property int displayIndex: Math.max(0, displays.indexOf(layer))
     property var originProvider: appId => Qt.rect(width / 2, height, 0, 0)
     // The Space chip under a scene point in Overview, or -1 (set by the shell).
     property var spaceAt: scenePoint => -1
@@ -63,6 +67,9 @@ Item {
     }
 
     signal overviewPicked()
+    // A window here became the active one (the shell unfocuses the other
+    // displays' windows).
+    signal windowActivated(AppWindow window)
     // The shell owns currentSpace (it is bound here): ask it to switch.
     signal spaceRequested(int index)
     function requestSpace(index: int) {
@@ -212,7 +219,8 @@ Item {
             launchArgs: args,
             serial: ++serialCounter
         });
-        window.closed.connect(() => layer.remove(window));
+        // Its manager at the time: the window may have moved to another display.
+        window.closed.connect(() => window.manager.remove(window));
         windows = windows.concat([window]);
         activate(window);
         relayout();
@@ -243,7 +251,8 @@ Item {
         // toplevel, so both are followed rather than read once.
         toplevel.titleChanged.connect(() => window.title = toplevel.title);
         toplevel.appIdChanged.connect(() => window.appId = toplevel.appId);
-        window.closed.connect(() => layer.remove(window));
+        // Its manager at the time: the window may have moved to another display.
+        window.closed.connect(() => window.manager.remove(window));
         windows = windows.concat([window]);
         activate(window);
         relayout();
@@ -290,6 +299,66 @@ Item {
         window.z = ++stackCounter;
         window.focused = true;
         window.focusContent();
+        windowActivated(window);
+    }
+
+    // ── Displays ────────────────────────────────────────────────────────────
+    // The neighbouring display a scene point lies on, past this one's left or
+    // right edge, or -1.
+    function displayBeyond(scenePoint: point): int {
+        if (scenePoint.x > width && displayIndex + 1 < displays.length)
+            return displayIndex + 1;
+        if (scenePoint.x < 0 && displayIndex > 0)
+            return displayIndex - 1;
+        return -1;
+    }
+
+    // Moves a window to another display. With `scenePoint` (where the pointer
+    // left this display) and `grab` (the pointer's offset in the window), it
+    // lands under the pointer; otherwise centred.
+    function moveToDisplay(window: AppWindow, index: int, scenePoint: var, grab: var): bool {
+        const target = displays[index];
+        if (!window || !target || target === layer || window.closing)
+            return false;
+        let landing = null;
+        if (scenePoint)
+            landing = Qt.point(scenePoint.x > width ? scenePoint.x - width : scenePoint.x + target.width, scenePoint.y);
+        release(window);
+        target.receive(window, landing, grab);
+        return true;
+    }
+
+    // Hands a window over to another display's layer.
+    function release(window: AppWindow) {
+        windows = windows.filter(w => w !== window);
+        if (active === window) {
+            window.focused = false;
+            active = null;
+            activate(topmost());
+        }
+        relayout();
+    }
+
+    function receive(window: AppWindow, landing: var, grab: var) {
+        window.parent = strip;
+        window.manager = layer;
+        window.normalW = Math.min(window.normalW, workArea.width);
+        window.normalH = Math.min(window.normalH, workArea.height);
+        if (landing && grab) {
+            window.normalX = landing.x - grab.x;
+            window.normalY = landing.y - grab.y;
+        } else {
+            window.normalX = workArea.x + (workArea.width - window.normalW) / 2;
+            window.normalY = workArea.y + (workArea.height - window.normalH) / 3;
+        }
+        // Keep the title bar on this display.
+        window.normalX = Math.max(workArea.x - window.normalW + 120,
+                                  Math.min(workArea.x + workArea.width - 120, window.normalX));
+        window.normalY = Math.max(workArea.y - 8, Math.min(workArea.y + workArea.height - 60, window.normalY));
+        window.arrive();
+        windows = windows.concat([window]);
+        activate(window);
+        relayout();
     }
 
     function focusActive() {

@@ -98,6 +98,37 @@ QJsonObject outputReport(QQuickWindow *window, const FrameStats *stats)
 // handles it, mark the first frame whose synchronisation starts after that,
 // and record t0 → that frame's swap. Samples whose move changed nothing (no
 // frame followed) are dropped.
+// Keeps a window drawing every frame while the tour is measured. An output
+// with nothing animating would otherwise show its idle time as missed
+// frames; the question is whether every output keeps up with its refresh
+// rate while there is work.
+class FramePump : public QObject
+{
+public:
+    explicit FramePump(QQuickWindow *window) : QObject(window), m_window(window)
+    {
+        // frameSwapped comes from the render thread.
+        connect(
+            window, &QQuickWindow::frameSwapped, this,
+            [this] {
+                if (m_running)
+                    m_window->update();
+            },
+            Qt::QueuedConnection);
+    }
+
+    void setRunning(bool running)
+    {
+        m_running = running;
+        if (running)
+            m_window->update();
+    }
+
+private:
+    QQuickWindow *m_window;
+    bool m_running = false;
+};
+
 class InputLatencyProbe : public QObject
 {
 public:
@@ -203,10 +234,12 @@ void runShellBenchmark(const QList<QQuickWindow *> &windows, const ShellBenchmar
     auto *shelf = primary->findChild<QQuickItem *>(u"shelf"_s);
 
     QList<FrameStats *> stats;
+    QList<FramePump *> pumps;
     for (QQuickWindow *window : windows) {
         auto *probe = new FrameStats(window);
         probe->setWindow(window);
         stats.append(probe);
+        pumps.append(new FramePump(window));
     }
 
     struct Step
@@ -262,13 +295,18 @@ void runShellBenchmark(const QList<QQuickWindow *> &windows, const ShellBenchmar
         QCoreApplication::exit(0);
     };
 
-    QTimer::singleShot(kWarmupMs, primary, [stats, tour] {
+    QTimer::singleShot(kWarmupMs, primary, [stats, pumps, tour] {
+        for (FramePump *pump : pumps)
+            pump->setRunning(true);
         for (FrameStats *probe : stats)
             probe->reset();
         tour->start();
     });
-    QTimer::singleShot(kWarmupMs + options.seconds * 1000, primary, [windows, primary, shelf, tour, stats, finish] {
+    const auto endTour = [windows, primary, shelf, tour, stats, pumps, finish] {
         tour->stop();
+        // The latency phase needs a still scene.
+        for (FramePump *pump : pumps)
+            pump->setRunning(false);
         // Snapshot the tour's frame statistics; the latency phase is separate.
         QJsonArray outputs;
         for (qsizetype i = 0; i < windows.size(); ++i)
@@ -280,7 +318,8 @@ void runShellBenchmark(const QList<QQuickWindow *> &windows, const ShellBenchmar
         auto *probe = new InputLatencyProbe(primary, shelf);
         probe->run(kLatencySamples, kLatencyIntervalMs,
                    [probe, outputs, finish] { finish(outputs, probe->samples(), probe->posted()); });
-    });
+    };
+    QTimer::singleShot(kWarmupMs + options.seconds * 1000, primary, endTour);
 }
 
 } // namespace qtos

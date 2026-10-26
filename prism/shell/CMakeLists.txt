@@ -34,6 +34,7 @@ qt_add_qml_module(qtos_shell
         ShellToast.qml
         WidgetLayer.qml
         WidgetGallery.qml
+        DisplayDesktop.qml
         search.js
     SOURCES
         desktopentries.h desktopentries.cpp

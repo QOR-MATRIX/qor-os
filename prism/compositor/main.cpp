@@ -24,6 +24,7 @@
 #include <QtCore/QTemporaryDir>
 #include <QtCore/QTimer>
 #include <QtGui/QGuiApplication>
+#include <QtGui/QScreen>
 #include <QtQml/QQmlApplicationEngine>
 #include <QtQml/QQmlExtensionPlugin>
 #include <QtQuick/QQuickWindow>
@@ -64,6 +65,10 @@ int main(int argc, char *argv[])
     const QCommandLineOption socket(u"socket"_s, u"Wayland socket name for clients (default: first free wayland-N)."_s,
                                     u"name"_s);
     const QCommandLineOption size(u"size"_s, u"Output window size, e.g. 1600x1000."_s, u"WxH"_s);
+    const QCommandLineOption spreadClients(u"spread-clients"_s,
+                                           u"Open each new client on the output with the fewest windows."_s);
+    const QCommandLineOption outputs(
+        u"outputs"_s, u"Nested: drive this many outputs, side by side, each a window of --size."_s, u"n"_s, u"1"_s);
     const QCommandLineOption surface(u"surface"_s, u"Shell surface to show: beam, control-center, overview."_s,
                                      u"name"_s);
     const QCommandLineOption screenshot(u"screenshot"_s, u"Save a screenshot of the output to this path and exit."_s,
@@ -75,8 +80,8 @@ int main(int argc, char *argv[])
         u"seconds"_s);
     const QCommandLineOption benchmarkOut(u"benchmark-out"_s, u"Write the benchmark JSON to this file."_s, u"file"_s);
     const QCommandLineOption script(u"script"_s, u"Run a JSON UI script against the shell, then exit."_s, u"file"_s);
-    parser.addOptions(
-        { services, unlocked, socket, size, surface, screenshot, delay, benchmark, benchmarkOut, script });
+    parser.addOptions({ services, unlocked, socket, size, outputs, spreadClients, surface, screenshot, delay, benchmark,
+                        benchmarkOut, script });
     parser.process(app);
 
     qtos::Kit::initialize();
@@ -120,10 +125,37 @@ int main(int argc, char *argv[])
     const int benchmarkSeconds = parser.value(benchmark).toInt();
     options.insert(u"unlocked"_s, parser.isSet(unlocked) || benchmarkSeconds > 0);
     options.insert(u"surface"_s, parser.value(surface));
+    int width = 1600;
+    int height = 1000;
     if (const QStringList parts = parser.value(size).split(u'x'); parts.size() == 2) {
-        options.insert(u"width"_s, parts[0].toInt());
-        options.insert(u"height"_s, parts[1].toInt());
+        width = parts[0].toInt();
+        height = parts[1].toInt();
     }
+    options.insert(u"width"_s, width);
+    options.insert(u"height"_s, height);
+    // On bare metal (Qt's eglfs, linuxfb or vkkhrdisplay) every screen is an
+    // output, fullscreen. Nested, --outputs windows of the host.
+    const QString platform = QGuiApplication::platformName();
+    const bool bareMetal = platform.startsWith(u"eglfs"_s) || platform == u"linuxfb"_s || platform == u"vkkhrdisplay"_s;
+    QVariantList outputList;
+    if (bareMetal) {
+        const QList<QScreen *> screens = QGuiApplication::screens();
+        for (qsizetype i = 0; i < screens.size(); ++i) {
+            const QSize screenSize = screens.at(i)->size();
+            outputList.append(QVariantMap { { u"width"_s, screenSize.width() },
+                                            { u"height"_s, screenSize.height() },
+                                            { u"screen"_s, int(i) },
+                                            { u"fullScreen"_s, true } });
+            qInfo("Output %lld: %s, %dx%d at %.1f Hz", qlonglong(i), qPrintable(screens.at(i)->name()),
+                  screenSize.width(), screenSize.height(), screens.at(i)->refreshRate());
+        }
+    } else {
+        const int count = std::clamp(parser.value(outputs).toInt(), 1, 4);
+        for (int i = 0; i < count; ++i)
+            outputList.append(QVariantMap { { u"width"_s, width }, { u"height"_s, height } });
+    }
+    options.insert(u"outputs"_s, outputList);
+    options.insert(u"spreadClients"_s, parser.isSet(spreadClients));
     engine.setInitialProperties({ { u"options"_s, options }, { u"socketName"_s, parser.value(socket).toUtf8() } });
     engine.loadFromModule("QTOS.Prism", "Compositor");
     if (engine.rootObjects().isEmpty())
@@ -132,29 +164,26 @@ int main(int argc, char *argv[])
     const QByteArray socketName = engine.rootObjects().constFirst()->property("socketName").toByteArray();
     qInfo("Prism is running. Start clients with WAYLAND_DISPLAY=%s", socketName.constData());
 
-    if (benchmarkSeconds > 0) {
-        // One QQuickWindow per WaylandOutput: measure them all.
-        QList<QQuickWindow *> outputs;
-        for (QWindow *window : QGuiApplication::topLevelWindows())
-            if (auto *quick = qobject_cast<QQuickWindow *>(window); quick && quick->isVisible())
-                outputs.append(quick);
-        qtos::runShellBenchmark(outputs, { u"prism"_s, benchmarkSeconds, parser.value(benchmarkOut) });
-    }
+    // One QQuickWindow per WaylandOutput, the main display's (the Desktop's)
+    // first.
+    QList<QQuickWindow *> outputWindows;
+    for (QWindow *window : QGuiApplication::topLevelWindows())
+        if (auto *quick = qobject_cast<QQuickWindow *>(window); quick && quick->isVisible())
+            outputWindows.append(quick);
+    std::stable_sort(outputWindows.begin(), outputWindows.end(), [](QQuickWindow *a, QQuickWindow *b) {
+        const auto main = [](QQuickWindow *w) { return w->findChild<QObject *>(u"desktop"_s) != nullptr; };
+        return main(a) && !main(b);
+    });
 
-    if (parser.isSet(script)) {
-        QQuickWindow *output = nullptr;
-        for (QWindow *window : QGuiApplication::topLevelWindows())
-            if (auto *quick = qobject_cast<QQuickWindow *>(window); quick && quick->isVisible() && !output)
-                output = quick;
-        qtos::runShellScript(output, parser.value(script));
-    }
+    if (benchmarkSeconds > 0)
+        qtos::runShellBenchmark(outputWindows, { u"prism"_s, benchmarkSeconds, parser.value(benchmarkOut) });
+
+    if (parser.isSet(script))
+        qtos::runShellScript(outputWindows.value(0), parser.value(script));
 
     if (parser.isSet(screenshot)) {
-        QTimer::singleShot(parser.value(delay).toInt(), &app, [path = parser.value(screenshot)] {
-            const QWindowList windows = QGuiApplication::topLevelWindows();
-            auto it = std::find_if(windows.cbegin(), windows.cend(),
-                                   [](QWindow *w) { return w->isVisible() && qobject_cast<QQuickWindow *>(w); });
-            const bool saved = it != windows.cend() && static_cast<QQuickWindow *>(*it)->grabWindow().save(path);
+        QTimer::singleShot(parser.value(delay).toInt(), &app, [path = parser.value(screenshot), outputWindows] {
+            const bool saved = !outputWindows.isEmpty() && outputWindows.first()->grabWindow().save(path);
             if (saved)
                 qInfo("Saved %s", qPrintable(path));
             else
