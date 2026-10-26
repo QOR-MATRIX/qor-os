@@ -69,13 +69,18 @@ All notable changes to QTOS are recorded here. The format follows
 - Linux on WSL2 build and run guide (docs/BUILDING.md).
 - **Shell scripts and end-to-end tests.**
   - `qtos-shell --script` and `prism --script` drive the shell with synthetic input through `QWindowSystemInterface` (clicks, drags, keys, shell calls), and assert with `expect` steps.
-  - `shell_e2e` covers first-party apps on every platform. `prism_e2e` covers real Wayland clients (40 checks), with the new `prism-test-client`.
+  - `shell_e2e` covers first-party apps on every platform. `prism_e2e` covers real Wayland clients (42 checks), with the new `prism-test-client`.
   - Documented in docs/DEVELOPMENT.md.
 - **Wayland app identity.** The Shelf names and draws client apps from their desktop entry (`DesktopEntries`, with XDG icon-theme lookup), falling back to the window title.
 - **Resizing from every edge and corner** (eight grips; left and top edges keep the opposite side in place). Client-initiated moves and resizes (`xdg_toplevel.move`/`resize`) go through the same springs, snapping and size limits. `WindowManagement.takeOver()` detaches Qt's built-in xdg-shell handlers, which otherwise fought Prism over the window size.
 - **xdg-activation with focus-stealing prevention.** Tokens issued while the requesting client has keyboard focus (or by Prism, for launches) activate the window. Any other request only marks it as wanting attention: a Shelf hop and an accent dot, cleared on focus.
 - **Client size limits and the resizing state.** Interactive resizing respects a client's minimum and maximum size, and clients receive `xdg_toplevel` `resizing` while it lasts.
 - **Benchmark v2**, shared by `qtos-shell` and `prism` (`prism/shell/shellbenchmark.cpp`): `prism --benchmark` reports per-output frame pacing, missed frames at each output's refresh rate, and input-to-swap latency. Top-level JSON fields are unchanged. Baselines: input to swap 5.9 ms p50 on the RTX 4060 (360 Hz); nested Prism under WSLg holds 60 Hz. This is the tooling for the ADR-0003 decision gate, which needs a bare-metal run.
+- **Three-finger gestures** ([SHELL.md](docs/design/SHELL.md#gestures)). Swipe sideways between Spaces, and up and down for Overview, on a touchpad or a touchscreen. The desktop follows the fingers, and the springs carry on with their velocity.
+  - Overview opens progressively: windows sit between their places and the Overview grid as far as the fingers go.
+  - `SystemGestures` (`QTOS.Input`) takes swipes of three or more fingers for the whole window, before apps and Wayland clients. Touchpad swipes arrive as Qt's native gestures (the host's pointer gestures under nested Prism). Touchscreen swipes come from touch points, and the apps under the fingers get a touch cancel.
+  - Windows reports no touchpad gestures to apps, so QTOS reads precision touchpads through Raw Input (`QTOS_TOUCHPAD=off` turns this off; automated runs do).
+  - Shell scripts gain `gesture` and `touch` steps on a virtual clock. The state includes `spaceOffset`, `overviewProgress` and `gesture`, windows their `overviewMix`, and `expect` compares single numbers with `near`. `tst_input` covers frame assembly, swipe tracking and recognition; `shell_e2e` and `prism_e2e` cover the shell.
 - **Spaces for every window, Wayland clients included** ([SHELL.md](docs/design/SHELL.md#spaces)).
   - Windows ride their Space along the strip, and windows on Spaces out of view are not drawn.
   - Take the active window along with <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>←</kbd>/<kbd>→</kbd>, <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>1</kbd>…<kbd>3</kbd> or Beam's "Move Window to Space".

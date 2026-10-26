@@ -16,6 +16,13 @@ Item {
     property int currentSpace: 0
     property real spaceOffset: 0
     property bool overview: false
+    // An Overview gesture under way: how far Overview is open (0 to 1), or -1.
+    // Windows of the current Space then sit that far between their places
+    // and their Overview grid. While `overviewTracking`, they follow it
+    // exactly; afterwards their springs carry on from where it left them.
+    // The shell calls relayout() once tracking starts and once it has ended.
+    property real overviewGesture: -1
+    property bool overviewTracking: false
     property int spaceCount: 3
     property var originProvider: appId => Qt.rect(width / 2, height, 0, 0)
     // The Space chip under a scene point in Overview, or -1 (set by the shell).
@@ -323,12 +330,17 @@ Item {
         overviewPicked();
     }
 
-    // Arranges the current Space's windows in a centred grid for Overview.
+    // Arranges the current Space's windows in a centred grid for Overview
+    // (or for an Overview gesture that may open it).
     function relayout() {
-        for (const w of windows)
-            if (w.space !== currentSpace || !overview || w.minimized || w.closing)
+        const grid = overview || overviewTracking;
+        for (const w of windows) {
+            if (w.space !== currentSpace || !grid || w.minimized || w.closing) {
                 w.inOverview = false;
-        if (!overview)
+                w.inOverviewGrid = false;
+            }
+        }
+        if (!grid)
             return;
 
         const list = windowsOn(currentSpace).filter(w => !w.minimized);
@@ -354,7 +366,8 @@ Item {
             w.overviewRect = Qt.rect(area.x + rowOffset + col * cellW + (cellW - w.frameWidth * s) / 2,
                                      area.y + row * cellH + (cellH - w.frameHeight * s) / 2,
                                      w.frameWidth * s, w.frameHeight * s);
-            w.inOverview = true;
+            w.inOverviewGrid = true;
+            w.inOverview = overview;
         }
     }
 

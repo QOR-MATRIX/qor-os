@@ -33,7 +33,7 @@ display refresh; compositor backend decision gate
 - [x] Controller interface: Xbox, PlayStation, Stratus and other game pads drive the whole shell, with a prompt on connect, an on-screen keyboard and native XInput, HID and evdev backends ([CONTROLLERS.md](CONTROLLERS.md))
 - [x] Real audio: the QTOS audio engine (Qt Multimedia's real-time output), generated QTOS Sessions and music files, a five-band equaliser, interface sounds, and an audio-reactive interface with adjustable intensity and frequency range ([AUDIO.md](AUDIO.md))
 - [x] Wayland extensions: fractional-scale, cursor-shape, presentation-time, idle-inhibit (`tools/dev/prism-protocol-check.sh`)
-- [ ] Three-finger gestures for Overview and Spaces (libinput through Qt)
+- [x] Three-finger gestures for Overview and Spaces that follow the fingers: touchpads (the host's pointer gestures in nested Prism; precision touchpads through Raw Input on Windows) and touchscreens ([SHELL.md](design/SHELL.md#gestures))
 - [ ] Decision-gate benchmark: multi-output frame pacing and input latency
 - [ ] Evaluate Qt Interface Framework for service codegen and simulation (ADR)
 - [ ] Qt Design Studio project for Lumen components
@@ -45,6 +45,7 @@ themed.
 
 - [ ] `meta-qtos` image builds (pin layer SHAs); Boot2Qt evaluation
 - [ ] KMS backend (atomic, per-output scheduling, overlay planes) or Waylib fallback
+- [ ] Touchpad gestures from libinput for the KMS backend (Qt's libinput backend reports none)
 - [ ] greetd + Prism greeter; flicker-free handoff
 - [ ] `qtos` platform theme and Lumen QStyle installed system-wide
 - [ ] Browser app (Qt WebEngine)

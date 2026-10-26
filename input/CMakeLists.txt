@@ -4,7 +4,9 @@
 # HID (DualShock 4, DualSense, generic HID game pads) on Windows, evdev on
 # Linux, and virtual controllers for tests. ControllerNavigator turns a
 # controller into pointer, scroll and key input for the shell. See
-# docs/CONTROLLERS.md.
+# docs/CONTROLLERS.md. SystemGestures recognises three-finger swipes on
+# touchpads (precision touchpads read through Raw Input on Windows) and
+# touchscreens.
 
 set_source_files_properties(qml/ControllerGlyph.qml PROPERTIES QT_RESOURCE_ALIAS ControllerGlyph.qml)
 
@@ -19,6 +21,7 @@ qt_add_qml_module(qtos_input
     SOURCES
         qml/gamepads.h qml/gamepads.cpp
         qml/navigator.h qml/navigator.cpp
+        qml/systemgestures.h qml/systemgestures.cpp
         src/backends.h
         src/gamepad.h
         src/gamepadbackend.h
@@ -27,6 +30,7 @@ qt_add_qml_module(qtos_input
         src/keycodes.h src/keycodes.cpp
         src/mapping.h src/mapping.cpp
         src/playstation.h src/playstation.cpp
+        src/touchpad.h src/touchpad.cpp
     DEPENDENCIES
         QtQuick
         QtQuick.Shapes
@@ -34,12 +38,12 @@ qt_add_qml_module(qtos_input
 )
 
 if(WIN32)
-    target_sources(qtos_input PRIVATE src/backends_windows.cpp)
+    target_sources(qtos_input PRIVATE src/backends_windows.cpp src/touchpad_windows.cpp)
     target_link_libraries(qtos_input PRIVATE hid setupapi cfgmgr32)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    target_sources(qtos_input PRIVATE src/backends_linux.cpp)
+    target_sources(qtos_input PRIVATE src/backends_linux.cpp src/touchpad_other.cpp)
 else()
-    target_sources(qtos_input PRIVATE src/backends_other.cpp)
+    target_sources(qtos_input PRIVATE src/backends_other.cpp src/touchpad_other.cpp)
 endif()
 
 target_include_directories(qtos_input PUBLIC

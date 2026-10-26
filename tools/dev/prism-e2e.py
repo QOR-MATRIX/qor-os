@@ -8,7 +8,7 @@ server-side decorations and a menu at a known spot, and weston-terminal, which
 draws its own decorations. The script drives them with synthetic pointer and
 key input that takes the same path as a person's: maximise, restore, snap,
 move by a client's own title bar, minimise, restore from the Shelf, popup,
-Spaces, Overview and close. This file then checks the window-manager state the script
+Spaces (and three-finger swipes), Overview and close. This file then checks the window-manager state the script
 recorded at each step.
 
     tools/dev/prism-e2e.py --build-dir ~/qtos-build/linux-release [--keep]
@@ -134,6 +134,15 @@ def script(with_terminal: bool) -> list[dict]:
         {"key": "Alt+1"},
         {"wait": 1200},
         {"state": "08l-space-1.json"},
+        # Three-finger swipes over a client switch Spaces: Prism takes them
+        # before the client sees them. A touchpad swipe, then a touchscreen one.
+        {"gesture": {"fingers": 3, "by": [-900, 0], "steps": 10,
+                     "at": {"window": A, "part": "content", "at": [300, 200]}}},
+        {"wait": 1200},
+        {"state": "08m-swiped.json"},
+        {"touch": {"fingers": 3, "from": [800, 500], "by": [900, 0], "steps": 10}},
+        {"wait": 1200},
+        {"state": "08n-touched.json"},
         {"call": "setSurface", "args": ["overview"]},
         {"wait": 1000},
         {"screenshot": "09-overview.png"},
@@ -321,6 +330,13 @@ def verify(out: Path, with_terminal: bool) -> int:
             f"space={a and a['space']} current={s['currentSpace']}")
     a = find(load("08l-space-1.json"), A)
     c.check("it is there on its Space", bool(a and a["visible"] and a["surfaceItem"]["onOutput"]))
+    s = load("08m-swiped.json")
+    c.check("a three-finger touchpad swipe over a client switches Spaces", s["currentSpace"] == 1,
+            f"currentSpace={s['currentSpace']}")
+    s = load("08n-touched.json")
+    a = find(s, A)
+    c.check("and so does a three-finger touchscreen swipe", bool(s["currentSpace"] == 0 and a and a["visible"]),
+            f"currentSpace={s['currentSpace']}")
 
     print("Overview:")
     s = load("09-overview.json")

@@ -1,10 +1,15 @@
 // SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
 #include "gamepadmanager.h"
+#include "injection.h"
 #include "mapping.h"
 #include "navigator.h"
 #include "playstation.h"
+#include "systemgestures.h"
+#include "touchpad.h"
 
 #include <QtCore/QByteArray>
+#include <QtGui/QPointingDevice>
+#include <QtGui/qpa/qwindowsysteminterface.h>
 #include <QtQml/QQmlComponent>
 #include <QtQml/QQmlEngine>
 #include <QtQuick/QQuickItem>
@@ -19,6 +24,20 @@ using namespace qtos::input;
 using namespace Qt::StringLiterals;
 
 namespace {
+
+// Counts the events a window's other filters let through.
+class EventCounter : public QObject
+{
+public:
+    QHash<QEvent::Type, int> counts;
+
+protected:
+    bool eventFilter(QObject *watched, QEvent *event) override
+    {
+        ++counts[event->type()];
+        return QObject::eventFilter(watched, event);
+    }
+};
 
 // A USB DualShock 4 report (0x01, 64 bytes) with the given controls.
 QByteArray ds4Usb(quint8 lx, quint8 ly, quint8 buttons0, quint8 buttons1, quint8 buttons2, quint8 l2, quint8 r2,
@@ -405,6 +424,190 @@ private slots:
         QTRY_VERIFY(!navigator.cursorVisible());
 
         manager->removeVirtual(pad);
+    }
+
+    void assemblesTouchpadFrames()
+    {
+        TouchpadFrames frames;
+        const TouchpadContact a { 1, { 10, 10 } };
+        const TouchpadContact b { 2, { 20, 10 } };
+        const TouchpadContact c { 3, { 30, 10 } };
+        const TouchpadContact padding { 0, {} };
+        // Hybrid mode: three contacts in two reports of two finger collections.
+        QVERIFY(!frames.add(3, { a, b }));
+        const auto frame = frames.add(0, { c, padding });
+        QVERIFY(frame);
+        QCOMPARE(frame->size(), 3);
+        QCOMPARE(frame->at(2).id, 3);
+        // One report holds a whole frame; collections past the count are padding.
+        const auto single = frames.add(1, { a, b });
+        QVERIFY(single);
+        QCOMPARE(single->size(), 1);
+        // A report with no frame under way is ignored.
+        QVERIFY(!frames.add(0, { a }));
+    }
+
+    void findsTouchpadSwipes()
+    {
+        TouchpadSwipe swipe;
+        using Phase = TouchpadSwipe::Phase;
+        // Two fingers scroll; they are not a swipe.
+        QVERIFY(swipe.add({ { 1, { 10, 10 } }, { 2, { 20, 10 } } }).isEmpty());
+        auto events = swipe.add({ { 1, { 10, 10 } }, { 2, { 20, 10 } }, { 3, { 30, 10 } } });
+        QCOMPARE(events.size(), 1);
+        QCOMPARE(events.at(0).phase, Phase::Begin);
+        QCOMPARE(events.at(0).fingers, 3);
+        // 2 mm to the right: 16 logical pixels.
+        events = swipe.add({ { 1, { 12, 10 } }, { 2, { 22, 10 } }, { 3, { 32, 10 } } });
+        QCOMPARE(events.size(), 1);
+        QCOMPARE(events.at(0).phase, Phase::Update);
+        QCOMPARE(events.at(0).delta, QPointF(16, 0));
+        // A fourth finger landing elsewhere does not make the swipe jump.
+        events = swipe.add({ { 1, { 13, 10 } }, { 2, { 23, 10 } }, { 3, { 33, 10 } }, { 4, { 80, 40 } } });
+        QCOMPARE(events.size(), 1);
+        QCOMPARE(events.at(0).delta, QPointF(8, 0));
+        QCOMPARE(events.at(0).fingers, 4);
+        // Fewer than three touching (a lifted contact does not count) ends it.
+        events = swipe.add({ { 1, { 13, 10 } }, { 2, { 23, 10 } }, { 3, { 33, 10 }, false } });
+        QCOMPARE(events.size(), 1);
+        QCOMPARE(events.at(0).phase, Phase::End);
+        QVERIFY(!swipe.reset());
+    }
+
+    void recognisesTouchpadSwipes()
+    {
+        QQuickWindow window;
+        window.resize(800, 600);
+        window.show();
+        QVERIFY(QTest::qWaitForWindowExposed(&window));
+        // Installed first, so it sees only what SystemGestures lets through.
+        EventCounter seen;
+        window.installEventFilter(&seen);
+        SystemGestures gestures;
+        gestures.setWindow(&window);
+        QSignalSpy started(&gestures, &SystemGestures::started);
+        QSignalSpy finished(&gestures, &SystemGestures::finished);
+
+        QPointingDevice touchpad(u"test touchpad"_s, 0x7e5701, QInputDevice::DeviceType::TouchPad,
+                                 QPointingDevice::PointerType::Finger, QInputDevice::Capability::Position, 5, 0);
+        QWindowSystemInterface::registerInputDevice(&touchpad);
+        ulong time = 1000;
+        const auto send = [&](Qt::NativeGestureType type, QPointF delta, int fingers) {
+            const InjectedInput injected; // delivered synchronously
+            QWindowSystemInterface::handleGestureEventWithValueAndDelta(&window, time, &touchpad, type, 0, delta,
+                                                                        QPointF(400, 300), QPointF(400, 300), fingers);
+        };
+
+        // Three fingers: the swipe picks its axis past the slop, and a flick
+        // releases with its velocity (104 px in 100 ms).
+        send(Qt::BeginNativeGesture, {}, 3);
+        send(Qt::PanNativeGesture, QPointF(-4, 1), 3);
+        QVERIFY(!gestures.isActive());
+        for (int i = 0; i < 10; ++i) {
+            time += 10;
+            send(Qt::PanNativeGesture, QPointF(-10, 0), 3);
+        }
+        QVERIFY(gestures.isActive());
+        QCOMPARE(gestures.axis(), Qt::Horizontal);
+        QCOMPARE(gestures.source(), u"touchpad"_s);
+        QCOMPARE(started.count(), 1);
+        QCOMPARE(gestures.translation(), QPointF(-104, 1));
+        send(Qt::EndNativeGesture, {}, 3);
+        QCOMPARE(finished.count(), 1);
+        QVERIFY(!gestures.isActive());
+        QVERIFY2(std::abs(gestures.velocity().x() + 1040) < 1, qPrintable(QString::number(gestures.velocity().x())));
+        QCOMPARE(seen.counts.value(QEvent::NativeGesture), 0);
+
+        // The axis stays put; fingers that stop before lifting release at rest.
+        time += 1000;
+        send(Qt::BeginNativeGesture, {}, 4);
+        time += 10;
+        send(Qt::PanNativeGesture, QPointF(2, -30), 4);
+        QCOMPARE(gestures.axis(), Qt::Vertical);
+        time += 10;
+        send(Qt::PanNativeGesture, QPointF(200, 0), 4);
+        QCOMPARE(gestures.axis(), Qt::Vertical);
+        time += 300;
+        send(Qt::EndNativeGesture, {}, 4);
+        QCOMPARE(finished.count(), 2);
+        QCOMPARE(gestures.velocity(), QPointF());
+
+        // Two fingers are not a system gesture: they reach the window.
+        time += 1000;
+        send(Qt::BeginNativeGesture, {}, 2);
+        send(Qt::PanNativeGesture, QPointF(-50, 0), 2);
+        send(Qt::EndNativeGesture, {}, 2);
+        QCOMPARE(started.count(), 2);
+        QCOMPARE(seen.counts.value(QEvent::NativeGesture), 3);
+
+        // Disabled, it lets everything through.
+        gestures.setEnabled(false);
+        send(Qt::BeginNativeGesture, {}, 3);
+        send(Qt::PanNativeGesture, QPointF(-50, 0), 3);
+        send(Qt::EndNativeGesture, {}, 3);
+        QCOMPARE(started.count(), 2);
+        QCOMPARE(seen.counts.value(QEvent::NativeGesture), 6);
+    }
+
+    void recognisesTouchscreenSwipes()
+    {
+        QQuickWindow window;
+        window.resize(800, 600);
+        window.show();
+        QVERIFY(QTest::qWaitForWindowExposed(&window));
+        EventCounter seen;
+        window.installEventFilter(&seen);
+        SystemGestures gestures;
+        gestures.setWindow(&window);
+        QSignalSpy started(&gestures, &SystemGestures::started);
+        QSignalSpy finished(&gestures, &SystemGestures::finished);
+        QPointingDevice *screen = QTest::createTouchDevice();
+
+        // Fingers land one after another; until they move together past the
+        // slop, the window gets every touch.
+        QTest::touchEvent(&window, screen).press(0, QPoint(300, 300), &window);
+        QTest::touchEvent(&window, screen).move(0, QPoint(300, 300), &window).press(1, QPoint(360, 300), &window);
+        QTest::touchEvent(&window, screen)
+            .move(0, QPoint(300, 300), &window)
+            .move(1, QPoint(360, 300), &window)
+            .press(2, QPoint(420, 300), &window);
+        QTest::touchEvent(&window, screen)
+            .move(0, QPoint(305, 300), &window)
+            .move(1, QPoint(365, 300), &window)
+            .move(2, QPoint(425, 300), &window);
+        QCOMPARE(started.count(), 0);
+        const int touches = seen.counts.value(QEvent::TouchBegin) + seen.counts.value(QEvent::TouchUpdate);
+        QCOMPARE(touches, 4);
+
+        // Then the swipe takes over: the window's items get a cancel and no
+        // more touches.
+        QTest::touchEvent(&window, screen)
+            .move(0, QPoint(260, 300), &window)
+            .move(1, QPoint(320, 300), &window)
+            .move(2, QPoint(380, 300), &window);
+        QCOMPARE(started.count(), 1);
+        QCOMPARE(gestures.axis(), Qt::Horizontal);
+        QCOMPARE(gestures.source(), u"touchscreen"_s);
+        QCOMPARE(seen.counts.value(QEvent::TouchCancel), 1);
+        QTest::touchEvent(&window, screen)
+            .move(0, QPoint(200, 300), &window)
+            .move(1, QPoint(260, 300), &window)
+            .move(2, QPoint(320, 300), &window);
+        QCOMPARE(gestures.translation().x(), -100.0);
+        QTest::touchEvent(&window, screen)
+            .release(0, QPoint(200, 300), &window)
+            .release(1, QPoint(260, 300), &window)
+            .release(2, QPoint(320, 300), &window);
+        QCOMPARE(finished.count(), 1);
+        QCOMPARE(seen.counts.value(QEvent::TouchBegin) + seen.counts.value(QEvent::TouchUpdate), touches);
+        QCOMPARE(seen.counts.value(QEvent::TouchEnd), 0);
+
+        // Two fingers stay with the window.
+        QTest::touchEvent(&window, screen).press(0, QPoint(300, 300), &window).press(1, QPoint(360, 300), &window);
+        QTest::touchEvent(&window, screen).move(0, QPoint(200, 300), &window).move(1, QPoint(260, 300), &window);
+        QTest::touchEvent(&window, screen).release(0, QPoint(200, 300), &window).release(1, QPoint(260, 300), &window);
+        QCOMPARE(started.count(), 1);
+        QCOMPARE(seen.counts.value(QEvent::TouchEnd), 1);
     }
 };
 

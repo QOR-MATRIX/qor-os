@@ -92,6 +92,8 @@ int main(int argc, char *argv[])
         simOptions.silent = automated;
         if (automated && qEnvironmentVariableIsEmpty("QTOS_GAMEPADS"))
             qputenv("QTOS_GAMEPADS", "virtual"); // controllers on the desk never join in
+        if (automated && qEnvironmentVariableIsEmpty("QTOS_TOUCHPAD"))
+            qputenv("QTOS_TOUCHPAD", "off");
         if (automated) {
             simOptions.persistent = false;
             simOptions.url = QUrl(qtos::Services::defaultUrl().scheme() + u":qtos-services-"_s

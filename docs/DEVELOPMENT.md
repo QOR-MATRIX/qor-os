@@ -182,17 +182,23 @@ scale.
 | `{"click": target}`, `{"doubleClick": target}`, `{"rightClick": target}`, `{"move": target}` | Pointer input |
 | `{"drag": {"from": target, "to": target \| "by": [dx, dy], "steps": n}}` | Press, move in steps, release |
 | `{"scroll": {"at": target, "notches": n}}` | Mouse wheel; positive `n` scrolls down |
+| `{"gesture": {"fingers": 3, "by": [dx, dy], "steps": n, "ms": 16, "at": target}}` | A touchpad swipe, as Qt's native gestures. In parts: `{"begin": {"fingers": 3, "at": target}}`, `{"move": [dx, dy], "steps": n, "ms": 16}`, `{"end": true, "after": ms}` (`after` holds the fingers still before they lift) |
+| `{"touch": {"fingers": n, "from": target, "by": [dx, dy], "steps": n, "ms": 16, "spread": 60}}` | A touchscreen drag: the fingers land one by one in a row, move together and lift together |
 | `{"key": "Escape"}`, `{"key": "Ctrl+Alt+Right"}` | Key press and release. Modifier keys go down first and up last, as on a keyboard, which Prism needs. Wayland clients receive evdev scan codes |
 | `{"gamepad": {"connect": family \| "tap" \| "press" \| "release": button \| "stick": [x, y], "ms": n \| "disconnect": true}}` | A virtual game controller ([CONTROLLERS.md](CONTROLLERS.md)) |
 | `{"call": "setSurface", "args": [...]}` | Call a `Desktop` method (`launch`, `setSurface`, `switchSpace`, ...) |
 | `{"restore": spec}` | What clicking the window's app on the Shelf does |
 | `{"close": spec}` | Ask a window to close (`xdg_toplevel.close` for clients) |
-| `{"expect": {"path": ..., "equals": value}}` | Assert on the state below; `"window": spec` scopes the path to a window; `"near": [..] \| "statePath"` with `"scale"` and `"tolerance"` compares rectangles |
+| `{"expect": {"path": ..., "equals": value}}` | Assert on the state below; `"window": spec` scopes the path to a window; `"near": [..] \| number \| "statePath"` with `"scale"` and `"tolerance"` compares rectangles and numbers |
 | `{"state": file}`, `{"screenshot": file}` | Write the state as JSON or grab the window (paths relative to the script) |
 | `{"log": text}` | Print a progress line |
 
 A click or drag aimed at a window part fails if another window covers that
 point, so a script cannot silently hit the wrong window.
+
+Gesture and touch steps run on a virtual clock that advances by `ms` per
+step, so the velocity a swipe ends with is the scripted one, however busy the
+machine is.
 
 While a script runs, only its own input and the controller interface's
 reach the window (`qtos::input::InjectedInput`). Real pointer and key input
@@ -214,12 +220,16 @@ The **state** includes:
   prompt and on-screen keyboard are open, and the controller cursor;
 - `audio` (volume, mute, output, equaliser, interface sounds, `active`) and
   `media` (playing, title, position, duration, queue index);
-- `workArea`, `overview`, `currentSpace` and `surface`;
+- `workArea`, `overview`, `currentSpace` and `surface`; `spaceOffset` (where
+  the strip is, in Spaces) and `overviewProgress`;
+- `gesture`: the system gesture under way (`active`, `axis`, `source`,
+  `fingers`, `translation`);
 - `frames`: frames the shell has drawn (a client inside Prism gets frame
   callbacks only when Prism draws);
 - open `popups`, as screen rectangles;
 - `windows[]`, with title, app id, focus, maximised, minimised, frame and
-  on-screen rectangles, Space, `visible` and `commits` (client commits).
+  on-screen rectangles, Space, `visible`, `commits` (client commits) and
+  `overviewMix` (how far into its Overview place).
   Wayland clients also report their window geometry, configured size, Shelf
   identity and surface item (with `onOutput`).
 

@@ -266,6 +266,100 @@ FocusScope {
         currentSpace = Math.max(0, Math.min(spaceCount - 1, index));
     }
 
+    // ── Gestures ────────────────────────────────────────────────────────────
+    // Three fingers, on a touchpad or a touchscreen: sideways moves between
+    // Spaces, up opens Overview and down closes it. The view follows the
+    // fingers exactly; on release the springs carry on with their velocity.
+    readonly property real overviewGestureDistance: 300
+    readonly property real overviewProgress: overviewDepth.value
+    // Spaces the strip is dragged by, and how far Overview is pulled open.
+    property real spaceDrag: 0
+    property bool spaceDragging: false
+    property real overviewDrag: 0
+    property real overviewDragStart: 0
+    property bool overviewDragging: false
+    // The springs stand still while fingers drive them. Cleared before the
+    // targets move on, so they animate from where the fingers left them.
+    property bool gestureTracking: false
+
+    SystemGestures {
+        id: gestures
+        objectName: "systemGestures"
+        window: desktop.Window.window
+        enabled: !desktop.locked
+        onStarted: gestures.axis === Qt.Horizontal ? desktop.beginSpaceGesture() : desktop.beginOverviewGesture()
+        onTranslationChanged: {
+            if (desktop.spaceDragging)
+                desktop.trackSpaceGesture(gestures.translation.x);
+            else if (desktop.overviewDragging)
+                desktop.trackOverviewGesture(gestures.translation.y);
+        }
+        onFinished: desktop.endGesture(gestures.velocity, true)
+        onCanceled: desktop.endGesture(Qt.point(0, 0), false)
+    }
+
+    function beginSpaceGesture() {
+        spaceDrag = 0;
+        gestureTracking = true;
+        spaceDragging = true;
+    }
+
+    function trackSpaceGesture(dx: real) {
+        // The desktop follows the fingers: moving left brings the next Space
+        // in. Past the first and last Space it resists.
+        const last = spaceCount - 1;
+        let position = currentSpace - dx / Math.max(1, width);
+        if (position < 0)
+            position *= 0.3;
+        else if (position > last)
+            position = last + (position - last) * 0.3;
+        spaceDrag = position - currentSpace;
+    }
+
+    function beginOverviewGesture() {
+        overviewDragStart = overview ? 1 : 0;
+        overviewDrag = overviewDragStart;
+        gestureTracking = true;
+        overviewDragging = true;
+        windows.overviewGesture = overviewDrag;
+        windows.overviewTracking = true;
+        windows.relayout();
+    }
+
+    function trackOverviewGesture(dy: real) {
+        overviewDrag = Math.max(0, Math.min(1, overviewDragStart - dy / overviewGestureDistance));
+        windows.overviewGesture = overviewDrag;
+    }
+
+    // `released` is false for a cancelled gesture, which goes back.
+    function endGesture(velocity: point, released: bool) {
+        if (spaceDragging) {
+            // Spaces per second; a flick carries on to the next Space.
+            const speed = released ? -velocity.x / Math.max(1, width) : 0;
+            const position = currentSpace + spaceDrag;
+            const target = released
+                ? Math.round(Math.max(currentSpace - 1, Math.min(currentSpace + 1, position + speed * 0.2)))
+                : currentSpace;
+            gestureTracking = false;
+            spaceTravel.velocity = speed;
+            spaceDragging = false;
+            spaceDrag = 0;
+            switchSpace(target);
+        } else if (overviewDragging) {
+            const speed = released ? -velocity.y / overviewGestureDistance : 0;
+            const open = released ? overviewDrag + speed * 0.2 > 0.5 : overviewDragStart > 0.5;
+            // While tracking, nothing moves yet.
+            if (open !== overview)
+                setSurface(open ? "overview" : "");
+            gestureTracking = false;
+            windows.overviewTracking = false;
+            overviewDepth.velocity = speed;
+            overviewDragging = false;
+            windows.overviewGesture = -1;
+            windows.relayout();
+        }
+    }
+
     function runAction(id: string, args: var) {
         const settings = Services.settings;
         switch (id) {
@@ -356,8 +450,18 @@ FocusScope {
 
     // ── Motion drivers ──────────────────────────────────────────────────────
     Spring { id: lockDepth; target: desktop.locked ? 1 : 0; preset: Motion.gentle }
-    Spring { id: overviewDepth; target: desktop.overview ? 1 : 0; preset: Motion.smooth }
-    Spring { id: spaceTravel; target: desktop.currentSpace; preset: Motion.smooth }
+    Spring {
+        id: overviewDepth
+        target: desktop.overviewDragging ? desktop.overviewDrag : desktop.overview ? 1 : 0
+        enabled: !desktop.gestureTracking
+        preset: Motion.smooth
+    }
+    Spring {
+        id: spaceTravel
+        target: desktop.currentSpace + desktop.spaceDrag
+        enabled: !desktop.gestureTracking
+        preset: Motion.smooth
+    }
 
     // ── Content (captured by sceneBackdrop) ─────────────────────────────────
     Item {

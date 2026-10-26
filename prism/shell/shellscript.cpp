@@ -18,6 +18,7 @@
 #include <QtGui/QGuiApplication>
 #include <QtGui/QImage>
 #include <QtGui/QKeySequence>
+#include <QtGui/QPointingDevice>
 #include <QtGui/private/qhighdpiscaling_p.h>
 #include <QtQml/QJSEngine>
 #include <QtQml/QJSValue>
@@ -26,6 +27,7 @@
 #include <QtQuick/QQuickWindow>
 #include <qpa/qwindowsysteminterface.h>
 
+#include <algorithm>
 #include <atomic>
 #include <cmath>
 #include <cstdio>
@@ -377,6 +379,168 @@ private:
         });
     }
 
+    // ── Touchpad and touchscreen gestures ───────────────────────────────────
+
+    // {"gesture": {"fingers": 3, "by": [dx, dy], "steps": n, "ms": 16, "at": target}}
+    //     a touchpad swipe: begin, n moves, end (as Qt's native gestures)
+    // {"gesture": {"begin": {"fingers": 3, "at": target}}}, {"gesture": {"move":
+    //     [dx, dy], "steps": n, "ms": 16}}, {"gesture": {"end": true, "after": ms}}
+    //     the same in parts, so a script can look in the middle
+    // Gesture and touch events carry a virtual clock that advances by "ms" per
+    // step: the release velocity is the scripted one however busy the
+    // machine is ("after" holds the fingers still before they lift).
+    void enqueueGesture(const QJsonObject &spec)
+    {
+        const bool whole = spec.contains(u"by"_s);
+        if (whole || spec.contains(u"begin"_s)) {
+            const QJsonObject begin = whole ? spec : spec[u"begin"_s].toObject();
+            m_queue.push_back([this, begin] {
+                const auto at = begin.contains(u"at"_s) ? resolve(begin[u"at"_s]) : std::optional<QPointF>(centre());
+                if (!at)
+                    return -1;
+                m_gestureFingers = begin[u"fingers"_s].toInt(3);
+                m_gesturePoint = *at;
+                m_gestureTime = std::max(m_gestureTime, m_clock.elapsed());
+                gestureEvent(Qt::BeginNativeGesture, {});
+                return 16;
+            });
+        }
+        if (whole || spec.contains(u"move"_s)) {
+            const QJsonArray by = (whole ? spec[u"by"_s] : spec[u"move"_s]).toArray();
+            const QPointF delta(by.at(0).toDouble(), by.at(1).toDouble());
+            const int steps = std::max(1, spec[u"steps"_s].toInt(12));
+            const int ms = std::max(1, spec[u"ms"_s].toInt(16));
+            for (int i = 0; i < steps; ++i) {
+                m_queue.push_back([this, delta, steps, ms] {
+                    m_gestureTime += ms;
+                    gestureEvent(Qt::PanNativeGesture, delta / steps);
+                    return ms;
+                });
+            }
+        }
+        if (whole || spec.contains(u"end"_s)) {
+            const int after = spec[u"after"_s].toInt(0);
+            m_queue.push_back([this, after] {
+                m_gestureTime += after;
+                gestureEvent(Qt::EndNativeGesture, {});
+                m_gestureFingers = 0;
+                return 500;
+            });
+        }
+    }
+
+    void gestureEvent(Qt::NativeGestureType type, QPointF delta)
+    {
+        if (!m_touchpad) {
+            m_touchpad = new QPointingDevice(u"qtos-script touchpad"_s, 0x51530001, QInputDevice::DeviceType::TouchPad,
+                                             QPointingDevice::PointerType::Finger, QInputDevice::Capability::Position,
+                                             5, 0, QString(), QPointingDeviceUniqueId(), this);
+            QWindowSystemInterface::registerInputDevice(m_touchpad);
+        }
+        const input::InjectedInput injected;
+        QWindowSystemInterface::handleGestureEventWithValueAndDelta(
+            m_window, ulong(m_gestureTime), m_touchpad, type, 0, delta,
+            QHighDpi::toNativeLocalPosition(m_gesturePoint, m_window),
+            QHighDpi::toNativeGlobalPosition(m_window->mapToGlobal(m_gesturePoint), m_window), m_gestureFingers);
+    }
+
+    // {"touch": {"fingers": 3, "from": target, "by": [dx, dy], "steps": n, "ms": 16,
+    //            "spread": 60}}
+    //     a touchscreen drag: the fingers land one after another in a row
+    //     `spread` apart, move together and lift together
+    void enqueueTouch(const QJsonObject &spec)
+    {
+        const int fingers = std::clamp(spec[u"fingers"_s].toInt(3), 1, 5);
+        const int steps = std::max(1, spec[u"steps"_s].toInt(12));
+        const int ms = std::max(1, spec[u"ms"_s].toInt(16));
+        const qreal spread = spec[u"spread"_s].toDouble(60);
+        const QJsonArray by = spec[u"by"_s].toArray();
+        const QPointF delta(by.at(0).toDouble(), by.at(1).toDouble());
+        auto start = std::make_shared<QList<QPointF>>();
+        m_queue.push_back([this, spec, start, fingers, spread] {
+            const auto from = resolve(spec[u"from"_s]);
+            if (!from)
+                return -1;
+            start->clear();
+            for (int i = 0; i < fingers; ++i)
+                start->append(*from + QPointF((i - (fingers - 1) / 2.0) * spread, 0));
+            m_gestureTime = std::max(m_gestureTime, m_clock.elapsed());
+            return 0;
+        });
+        for (int landed = 1; landed <= fingers; ++landed) {
+            m_queue.push_back([this, start, landed, ms] {
+                QList<QEventPoint::State> states;
+                for (int i = 0; i < landed; ++i)
+                    states.append(i == landed - 1 ? QEventPoint::Pressed : QEventPoint::Stationary);
+                m_gestureTime += ms;
+                touchPoints(start->mid(0, landed), states);
+                return ms;
+            });
+        }
+        for (int i = 1; i <= steps; ++i) {
+            m_queue.push_back([this, start, delta, i, steps, ms] {
+                QList<QPointF> positions;
+                for (const QPointF &p : std::as_const(*start))
+                    positions.append(p + delta * (qreal(i) / steps));
+                m_gestureTime += ms;
+                touchPoints(positions, QList<QEventPoint::State>(positions.size(), QEventPoint::Updated));
+                return ms;
+            });
+        }
+        m_queue.push_back([this, start, delta] {
+            QList<QPointF> positions;
+            for (const QPointF &p : std::as_const(*start))
+                positions.append(p + delta);
+            touchPoints(positions, QList<QEventPoint::State>(positions.size(), QEventPoint::Released));
+            return 500;
+        });
+    }
+
+    void touchPoints(const QList<QPointF> &positions, const QList<QEventPoint::State> &states)
+    {
+        if (!m_touchscreen) {
+            m_touchscreen =
+                new QPointingDevice(u"qtos-script touchscreen"_s, 0x51530002, QInputDevice::DeviceType::TouchScreen,
+                                    QPointingDevice::PointerType::Finger,
+                                    QInputDevice::Capability::Position | QInputDevice::Capability::Area, 10, 0,
+                                    QString(), QPointingDeviceUniqueId(), this);
+            QWindowSystemInterface::registerInputDevice(m_touchscreen);
+        }
+        QList<QWindowSystemInterface::TouchPoint> points;
+        for (qsizetype i = 0; i < positions.size(); ++i) {
+            QWindowSystemInterface::TouchPoint point;
+            point.id = int(i) + 1;
+            point.state = states.at(i);
+            point.pressure = states.at(i) == QEventPoint::Released ? 0 : 1;
+            // Touch areas are in native screen coordinates.
+            const QPointF global = QHighDpi::toNativeGlobalPosition(m_window->mapToGlobal(positions.at(i)), m_window);
+            point.area = QRectF(global - QPointF(4, 4), QSizeF(8, 8));
+            points.append(point);
+        }
+        const input::InjectedInput injected;
+        QWindowSystemInterface::handleTouchEvent(m_window, ulong(m_gestureTime), m_touchscreen, points);
+    }
+
+    QPointF centre() const { return QPointF(m_window->width() / 2.0, m_window->height() / 2.0); }
+
+    QJsonObject gestureState() const
+    {
+        QObject *gestures = m_desktop->findChild<QObject *>(u"systemGestures"_s);
+        if (!gestures)
+            return {};
+        const QPointF translation = gestures->property("translation").toPointF();
+        const int axis = gestures->property("axis").toInt();
+        return {
+            { u"active"_s, gestures->property("active").toBool() },
+            { u"axis"_s, axis == Qt::Horizontal ? u"horizontal"_s
+                         : axis == Qt::Vertical ? u"vertical"_s
+                                                : QString() },
+            { u"source"_s, gestures->property("source").toString() },
+            { u"fingers"_s, gestures->property("fingers").toInt() },
+            { u"translation"_s, QJsonArray { translation.x(), translation.y() } },
+        };
+    }
+
     // ── Virtual game controller ─────────────────────────────────────────────
 
     // {"gamepad": {"connect": "xbox|playstation|nintendo|generic", "name": ...}}
@@ -493,6 +657,10 @@ private:
             });
         } else if (step.contains(u"drag"_s)) {
             enqueueDrag(step[u"drag"_s].toObject());
+        } else if (step.contains(u"gesture"_s)) {
+            enqueueGesture(step[u"gesture"_s].toObject());
+        } else if (step.contains(u"touch"_s)) {
+            enqueueTouch(step[u"touch"_s].toObject());
         } else if (step.contains(u"gamepad"_s)) {
             const QJsonObject spec = step[u"gamepad"_s].toObject();
             m_queue.push_back([this, spec] { return gamepad(spec); });
@@ -599,6 +767,7 @@ private:
         } else if (step.contains(u"expect"_s)) {
             // {"expect": {"path": "settings.reduceMotion", "equals": true}}
             // {"expect": {"window": spec, "path": "frameRect", "near": [x, y, w, h], "tolerance": 2}}
+            // {"expect": {"path": "spaceOffset", "near": 0.25, "tolerance": 0.01}}
             const QJsonObject expectation = step[u"expect"_s].toObject();
             m_queue.push_back([this, expectation] {
                 QJsonValue value;
@@ -622,7 +791,8 @@ private:
                 if (expectation.contains(u"near"_s)) {
                     // "near" is a literal array, or a path into the state (for
                     // example "workArea"), optionally scaled per component.
-                    QJsonArray want = expectation[u"near"_s].toArray();
+                    const QJsonValue near = expectation[u"near"_s];
+                    QJsonArray want = near.isDouble() ? QJsonArray { near } : near.toArray();
                     if (expectation[u"near"_s].isString()) {
                         QJsonValue reference = state();
                         for (const QString &key : expectation[u"near"_s].toString().split(u'.', Qt::SkipEmptyParts))
@@ -632,7 +802,7 @@ private:
                         for (qsizetype i = 0; i < want.size() && i < scale.size(); ++i)
                             want[i] = want.at(i).toDouble() * scale.at(i).toDouble();
                     }
-                    const QJsonArray have = value.toArray();
+                    const QJsonArray have = value.isDouble() ? QJsonArray { value } : value.toArray();
                     const double tolerance = expectation[u"tolerance"_s].toDouble(2);
                     bool ok = want.size() == have.size();
                     for (qsizetype i = 0; ok && i < want.size(); ++i)
@@ -706,6 +876,7 @@ private:
             { u"minimized"_s, w->property("minimized").toBool() },
             { u"closing"_s, w->property("closing").toBool() },
             { u"inOverview"_s, w->property("inOverview").toBool() },
+            { u"overviewMix"_s, w->property("overviewMix").toDouble() },
             { u"space"_s, w->property("space").toInt() },
             // Drawn at all: on the Space in view (or sliding past it).
             { u"visible"_s, w->isVisible() },
@@ -804,6 +975,9 @@ private:
             { u"workArea"_s, rectJson(manager ? manager->property("workArea") : QVariant()) },
             { u"overview"_s, manager ? manager->property("overview").toBool() : false },
             { u"currentSpace"_s, manager ? manager->property("currentSpace").toInt() : 0 },
+            { u"spaceOffset"_s, manager ? manager->property("spaceOffset").toDouble() : 0 },
+            { u"overviewProgress"_s, m_desktop->property("overviewProgress").toDouble() },
+            { u"gesture"_s, gestureState() },
             { u"surface"_s, m_desktop->property("surface").toString() },
             { u"controller"_s, QJsonValue::fromVariant(plain(m_desktop->property("controllerState"))) },
             // Frames the shell has drawn: a client inside Prism gets frame
@@ -827,6 +1001,13 @@ private:
     QPointF m_pointer;
     QString m_error;
     std::atomic<quint64> m_frames { 0 };
+    // A scripted touchpad and touchscreen, registered on first use, and the
+    // gesture in progress with its virtual clock.
+    QPointingDevice *m_touchpad = nullptr;
+    QPointingDevice *m_touchscreen = nullptr;
+    int m_gestureFingers = 0;
+    QPointF m_gesturePoint;
+    qint64 m_gestureTime = 0;
 };
 
 } // namespace

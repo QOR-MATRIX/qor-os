@@ -160,6 +160,39 @@ the strip with it. Windows of Spaces out of view are not drawn.
   Click empty space to exit. Drag a window onto a Space chip to move it
   there.
 
+### Gestures
+
+Swipes with three or more fingers, on a touchpad or a touchscreen, belong to
+the shell. It takes them for the whole window before any app or Wayland
+client sees them (`SystemGestures` in `QTOS.Input`).
+
+| Swipe | Effect |
+|-------|--------|
+| Left / right | Next / previous Space. The desktop follows the fingers and resists past the first and last Space. On release it settles on the nearest Space, and a flick carries on to the next |
+| Up | Opens Overview as far as the fingers go (300 px for all the way). Windows sit between their places and the grid. Release past halfway, or flick, to open |
+| Down | Closes Overview the same way |
+
+A swipe picks its axis after 10 px and keeps it. On release the springs carry
+on with the fingers' velocity, measured over the last 100 ms, so fingers
+that stop before lifting do not fling. Two-finger touchpad swipes on the
+empty desktop still switch Spaces, and two fingers on a touchscreen stay with
+the app.
+
+Where swipes come from:
+
+- **Touchpads in nested Prism**: the host compositor's pointer gestures
+  (`zwp_pointer_gestures_v1`, from GNOME, KDE, Weston and others), which Qt
+  delivers as native gestures.
+- **Touchpads in the Windows simulator**: Windows keeps multi-finger
+  touchpad gestures for itself, so QTOS reads precision touchpads through Raw
+  Input. Set Settings › Bluetooth & devices › Touchpad › Three-finger gestures
+  › Swipes to Nothing, or Windows acts on the same swipe. `QTOS_TOUCHPAD=off`
+  turns the reader off; automated runs do.
+- **Touchscreens, everywhere**: three fingers moving together past 16 px. The
+  apps under them get a touch cancel.
+- **Bare metal**: Qt's libinput backend reports no gestures. Prism's KMS
+  backend will read them from libinput (Phase 2).
+
 ## Keyboard reference
 
 | Shortcut | Action |
@@ -194,7 +227,7 @@ On a device, <kbd>Super</kbd> bindings are added in Prism.
 |--------------------|--------|
 | Unlock focus pull | Implemented |
 | Launch from Shelf icon | Implemented |
-| Overview with live windows | Implemented (keyboard and Shelf. Three-finger gesture under Prism, Phase 1) |
+| Overview with live windows | Implemented (keyboard, Shelf and three-finger swipes that follow the fingers) |
 | Beam streaming results with preview | Implemented |
 | Appearance change through OKLab | Implemented (uniform morph. Radial sweep is Phase 4) |
 | Hero handoff between apps | Phase 4 (`qtos_hero` protocol) |

@@ -51,6 +51,8 @@ Item {
     property bool focused: false
     property rect origin: Qt.rect(0, 0, 0, 0)
     property bool inOverview: false
+    // Placed in the Overview grid (in Overview, or during an Overview gesture).
+    property bool inOverviewGrid: false
     property rect overviewRect: Qt.rect(0, 0, 0, 0)
     property real overviewScale: 1
 
@@ -99,11 +101,31 @@ Item {
     }
 
     // ── Geometry springs ────────────────────────────────────────────────────
-    Spring { id: gx; target: win.inOverview ? win.overviewRect.x : win.frameRect.x; preset: Motion.smooth }
-    Spring { id: gy; target: win.inOverview ? win.overviewRect.y : win.frameRect.y; preset: Motion.smooth }
+    // How far the window is into its Overview place: 0 or 1, or an Overview
+    // gesture's progress, which the springs then follow exactly.
+    readonly property bool overviewTracking: manager !== null && manager.overviewTracking
+    readonly property real overviewMix: manager !== null && manager.overviewGesture >= 0 && inOverviewGrid
+                                        ? manager.overviewGesture : inOverview ? 1 : 0
+    Spring {
+        id: gx
+        target: win.frameRect.x + (win.overviewRect.x - win.frameRect.x) * win.overviewMix
+        enabled: !win.overviewTracking
+        preset: Motion.smooth
+    }
+    Spring {
+        id: gy
+        target: win.frameRect.y + (win.overviewRect.y - win.frameRect.y) * win.overviewMix
+        enabled: !win.overviewTracking
+        preset: Motion.smooth
+    }
     Spring { id: gw; target: win.frameRect.width; preset: Motion.smooth }
     Spring { id: gh; target: win.frameRect.height; preset: Motion.smooth }
-    Spring { id: gs; target: win.inOverview ? win.overviewScale : 1; preset: Motion.smooth }
+    Spring {
+        id: gs
+        target: 1 + (win.overviewScale - 1) * win.overviewMix
+        enabled: !win.overviewTracking
+        preset: Motion.smooth
+    }
     // The window's Space on the strip. Moving it with the view carries the
     // window across while the desktop slides underneath.
     Spring { id: gspace; target: win.space; preset: Motion.smooth }
