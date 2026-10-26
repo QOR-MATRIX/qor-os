@@ -128,28 +128,48 @@ numbers above validate the tooling only.
 #### Running the decision gate
 
 Prism drives several outputs (`--outputs` nested, every screen on eglfs), and
-`tools/dev/prism-gate.sh` runs the whole gate in one command:
+`tools/dev/prism-gate.sh` runs the whole gate in one command. The machine
+under test needs neither a Qt kit nor a build: `tools/dev/prism-gate-bundle.sh`
+packs Prism, the test client, the Qt runtime they use and the gate script
+into one archive (about 100 MB) that runs on a stock Ubuntu desktop, a live
+USB session included. Build the bundle on the Ubuntu release it targets,
+against that release's ISO manifest:
 
-1. Boot Linux on the reference machine (a USB install of Ubuntu 26.04 works)
-   with two displays at different refresh rates connected, for example the
-   laptop panel and an external monitor.
-2. Install the toolchain and the Qt kit, and build the `linux-release`
-   preset, as in [BUILDING.md](BUILDING.md#linux-on-wsl2-windows-workstation)
-   (the steps are the same outside WSL).
-3. Switch to a text console (<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>F3</kbd>),
-   log in, and run:
+```bash
+tools/dev/prism-gate-bundle.sh --build-dir ~/qtos-build/linux-release     --manifest ubuntu-26.04.1-desktop-amd64.manifest --out qtos-gate.tar.gz
+```
 
-   ```bash
-   tools/dev/prism-gate.sh --build-dir ~/qtos-build/linux-release --seconds 20
-   ```
+On the machine under test, booted into Ubuntu (a live USB session is enough)
+with two displays at different refresh rates on one GPU:
 
-It starts Prism on Qt's eglfs KMS integration (atomic modesetting, one
-output per connected display, side by side), opens an animating Wayland
-client on each output (`--spread-clients`), runs the benchmark, and checks
-the criteria above. It writes `report.json` and `summary.md` (machine, GPU,
-outputs and their refresh rates, per-output results, input to swap, and the
-verdict) into a `gate-<time>` folder, and exits 0 when every criterion
-passes. `summary.md` is the data ADR-0011 records.
+1. Unpack the bundle, and join the groups for the displays and input:
+   `sudo usermod -aG video,render,input $USER`. A live session's user needs
+   a password for the console: `sudo passwd $USER`.
+2. `qtos-gate/prism-gate.sh --probe` lists the GPUs and the displays on
+   each. Prism drives one GPU, so both displays must be on it; on a laptop,
+   the panel is usually on the integrated GPU and some video ports are wired
+   to the discrete one.
+3. `qtos-gate/prism-gate.sh --try` runs a trial inside the desktop session,
+   as two windows: it checks the bundle on this machine (its numbers are not
+   gate data).
+4. Switch to a text console (<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>F3</kbd>),
+   log in, and run `qtos-gate/prism-gate.sh`.
+
+It picks the GPU with both displays (`--device` overrides), starts Prism on
+Qt's eglfs KMS integration (atomic modesetting, one output per display, the
+built-in panel first), opens an animating Wayland client on each output,
+runs the benchmark, and checks the criteria above. It writes `report.json`,
+`summary.md` (machine, GPU, outputs and their refresh rates, per-output
+results, input to swap, and the verdict) and the logs into a `gate-<time>`
+folder, with a `.tgz` of it to upload; a live session forgets them at power
+off. It exits 0 when every criterion passes. <kbd>Ctrl</kbd>+<kbd>C</kbd>
+stops a run, and a watchdog ends one that hangs.
+
+`--mode eDP-1=1920x1080@60` picks a display's mode, to separate frame pacing
+from raw GPU throughput on a very fast panel; `--no-atomic` falls back to
+legacy modesetting if a driver rejects atomic commits. With a Qt kit and a
+`linux-release` build on the machine, `--build-dir` runs without a bundle.
+`summary.md` is the data ADR-0011 records.
 
 The **Monitor** app shows the same probe live: frame time and fps while the
 shell animates, and **Idle · Rendering on demand** when nothing changes.

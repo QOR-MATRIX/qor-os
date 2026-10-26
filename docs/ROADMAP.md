@@ -35,7 +35,7 @@ display refresh; compositor backend decision gate
 - [x] Wayland extensions: fractional-scale, cursor-shape, presentation-time, idle-inhibit (`tools/dev/prism-protocol-check.sh`)
 - [x] Three-finger gestures for Overview and Spaces that follow the fingers: touchpads (the host's pointer gestures in nested Prism; precision touchpads through Raw Input on Windows) and touchscreens ([SHELL.md](design/SHELL.md#gestures))
 - [x] Several displays in Prism: one output per display, windows move between them, Spaces and Overview span them all; `--outputs N` nested, every screen on eglfs
-- [ ] Decision-gate benchmark on the reference hardware: multi-output frame pacing and input latency. The kit is ready: `tools/dev/prism-gate.sh` ([PERFORMANCE.md](PERFORMANCE.md#running-the-decision-gate)); the run and ADR-0011 remain
+- [ ] Decision-gate benchmark on the reference hardware: multi-output frame pacing and input latency. The kit is ready: `tools/dev/prism-gate.sh` and a bundle that runs from an Ubuntu live USB session ([PERFORMANCE.md](PERFORMANCE.md#running-the-decision-gate)); the run and ADR-0011 remain
 - [ ] Evaluate Qt Interface Framework for service codegen and simulation (ADR)
 - [ ] Qt Design Studio project for Lumen components
 

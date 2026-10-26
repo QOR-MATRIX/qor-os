@@ -2,88 +2,241 @@
 # The compositor decision gate (ADR-0003, issue #9) on real hardware.
 #
 # Runs Prism on Qt's eglfs platform with its KMS integration, one output per
-# connected display, with an animating Wayland client on each. It records
+# display on the GPU, with an animating Wayland client on each. It records
 # `prism --benchmark` and judges it against the criteria in
 # docs/PERFORMANCE.md: under 1% missed frames on every output at its own
 # refresh rate, and input to swap within two refresh periods at p95.
 #
 # Run it from a text console (Ctrl+Alt+F3), not inside a desktop session:
-# Prism must be the DRM master. Your user needs the video, render and input
-# groups. See docs/PERFORMANCE.md, "Running the decision gate".
+# Prism drives the displays itself. Ctrl+C stops a run.
 #
-#   tools/dev/prism-gate.sh --build-dir ~/qtos-build/linux-release [--seconds 20] [--out DIR]
+#   prism-gate.sh [--build-dir DIR] [--seconds 20] [--out DIR] [--device /dev/dri/cardN]
+#                 [--mode CONNECTOR=WxH@HZ]... [--no-atomic]
+#   prism-gate.sh --probe    list the GPUs and the displays on each, then exit
+#   prism-gate.sh --try      a trial run inside a desktop session, as two windows
 #
-# Writes report.json, summary.md (the data for ADR-0011) and the logs to the
-# output folder. Exits 0 when every criterion passes.
+# --build-dir defaults to this script's folder in a gate bundle
+# (prism-gate-bundle.sh). --mode picks a display's mode, e.g. eDP-1=1920x1080@60
+# (connector names as --probe prints them). Writes report.json, summary.md (the
+# data for ADR-0011), the logs and a .tgz of them all. Exits 0 when every
+# criterion passes. See docs/PERFORMANCE.md, "Running the decision gate".
 
 set -euo pipefail
 
+here=$(cd "$(dirname "$0")" && pwd)
 build=""
 seconds=20
 out="gate-$(date +%Y%m%d-%H%M%S)"
+device=""
+modes=()
+atomic=1
+action=gate
 while [ $# -gt 0 ]; do
     case "$1" in
         --build-dir) build="$2"; shift 2 ;;
         --seconds) seconds="$2"; shift 2 ;;
         --out) out="$2"; shift 2 ;;
-        -h | --help) sed -n '2,17p' "$0"; exit 0 ;;
+        --device) device="$2"; shift 2 ;;
+        --mode) modes+=("$2"); shift 2 ;;
+        --no-atomic) atomic=0; shift ;;
+        --probe) action=probe; shift ;;
+        --try) action=try; out="${out/gate-/try-}"; shift ;;
+        -h | --help) sed -n '2,23p' "$0"; exit 0 ;;
         *) echo "unknown option: $1" >&2; exit 2 ;;
     esac
 done
+
+# The GPUs and their connectors. Sets best (the card with the most displays),
+# best_count, total and panel (the built-in display's connector on best).
+probe() {
+    best=""
+    best_count=0
+    total=0
+    panel=""
+    local card name driver gpu count connector label status first_panel
+    for card in /sys/class/drm/card[0-9]*; do
+        [ -e "$card/device" ] || continue
+        name=${card##*/}
+        case "$name" in *-*) continue ;; esac
+        driver=$(basename "$(readlink -f "$card/device/driver")")
+        gpu=$(lspci -s "$(basename "$(readlink -f "$card/device")")" 2> /dev/null | cut -d' ' -f2- || true)
+        echo "GPU $name ($driver): ${gpu:-unknown}"
+        count=0
+        first_panel=""
+        for connector in "$card"-*; do
+            [ -e "$connector/status" ] || continue
+            label=${connector##*/"$name"-}
+            status=$(cat "$connector/status")
+            if [ "$status" = connected ]; then
+                count=$((count + 1))
+                printf '    %-12s connected     %s\n' "$label" "$(head -n 1 "$connector/modes" 2> /dev/null || true)"
+                case "$label" in eDP-* | LVDS-* | DSI-*) first_panel=$label ;; esac
+            else
+                printf '    %-12s %s\n' "$label" "$status"
+            fi
+        done
+        total=$((total + count))
+        if [ "$count" -gt "$best_count" ] || { [ "$count" -eq "$best_count" ] && [ -n "$first_panel" ]; }; then
+            best=$name
+            best_count=$count
+            panel=$first_panel
+        fi
+    done
+}
+
+if [ "$action" = probe ]; then
+    probe
+    echo
+    if [ "$best_count" -ge 2 ]; then
+        echo "Ready: $best drives $best_count displays."
+    elif [ "$total" -ge 2 ]; then
+        echo "The displays are on different GPUs; the gate needs two on one GPU."
+    else
+        echo "$total display(s) connected; the gate needs two on one GPU."
+    fi
+    exit 0
+fi
+
+if [ -z "$build" ] && [ -x "$here/prism/compositor/prism" ]; then
+    build=$here
+fi
 [ -n "$build" ] || { echo "--build-dir is required" >&2; exit 2; }
 prism="$build/prism/compositor/prism"
 client="$build/tests/prism-test-client"
 for binary in "$prism" "$client"; do
     [ -x "$binary" ] || { echo "missing: $binary (build the linux-release preset first)" >&2; exit 2; }
 done
-if [ -n "${WAYLAND_DISPLAY:-}${DISPLAY:-}" ]; then
-    echo "A desktop session is running here. Switch to a text console (Ctrl+Alt+F3) and run this again." >&2
-    exit 3
+# A gate bundle carries its own Qt.
+if [ -d "$build/qt/lib" ]; then
+    export LD_LIBRARY_PATH="$build/qt/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+    export QT_PLUGIN_PATH="$build/qt/plugins"
+    export QML_IMPORT_PATH="$build/qt/qml"
 fi
-compgen -G "/dev/dri/card*" > /dev/null || { echo "No DRM device (/dev/dri/card*)." >&2; exit 3; }
+export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+
+prism_args=(--spread-clients --benchmark "$seconds")
+if [ "$action" = try ]; then
+    if [ -z "${WAYLAND_DISPLAY:-}${DISPLAY:-}" ]; then
+        echo "--try runs inside a desktop session; without one, run the gate itself." >&2
+        exit 3
+    fi
+    prism_args+=(--outputs 2 --size 1280x720)
+else
+    if [ -n "${WAYLAND_DISPLAY:-}${DISPLAY:-}" ]; then
+        echo "A desktop session is running here. Switch to a text console (Ctrl+Alt+F3), log in and run this again." >&2
+        echo "(prism-gate.sh --try runs a trial in this session.)" >&2
+        exit 3
+    fi
+    probe
+    if [ -z "$device" ]; then
+        if [ "$best_count" -lt 2 ]; then
+            echo >&2
+            if [ "$total" -ge 2 ]; then
+                echo "The displays are on different GPUs, and Prism drives one GPU. Connect the external display to a" >&2
+                echo "port on the same GPU as the other: try the laptop's other video port (USB-C instead of HDMI, or" >&2
+                echo "the reverse), or two external displays on one GPU. The list above shows which GPU has which." >&2
+            else
+                echo "Only $total display is connected; the gate needs two on one GPU, at different refresh rates." >&2
+            fi
+            echo "(--device /dev/dri/CARD runs anyway, on that GPU's displays.)" >&2
+            exit 5
+        fi
+        device=/dev/dri/$best
+    elif [ "$device" != "/dev/dri/$best" ]; then
+        panel=""
+    fi
+    if [ ! -r "$device" ] || [ ! -w "$device" ]; then
+        echo "No access to $device. Log in on this console itself, or join the video and render groups:" >&2
+        echo "  sudo usermod -aG video,render,input $USER    (then log out and back in)" >&2
+        exit 3
+    fi
+    if [[ " $(id -nG) " != *" input "* ]]; then
+        echo "Note: without the input group Prism gets no keyboard or mouse. The measurement does not need them."
+    fi
+fi
 
 mkdir -p "$out"
 out=$(cd "$out" && pwd)
-# Every connected display is a screen, side by side, with the hardware cursor.
-printf '{ "hwcursor": true, "virtualDesktopLayout": "horizontal" }\n' > "$out/kms.json"
+if [ "$action" = gate ]; then
+    # Every display on the GPU is a screen, side by side, the built-in one first.
+    python3 - "$out/kms.json" "$device" "$panel" ${modes[@]+"${modes[@]}"} << 'PY'
+import json
+import re
+import sys
 
-export QT_QPA_PLATFORM=eglfs
-export QT_QPA_EGLFS_INTEGRATION=eglfs_kms
-export QT_QPA_EGLFS_KMS_CONFIG="$out/kms.json"
-export QT_QPA_EGLFS_KMS_ATOMIC=1
-export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+path, device, panel, *modes = sys.argv[1:]
+
+
+def qt_name(connector):  # The kernel's "HDMI-A-1" is Qt's "HDMI1".
+    return re.sub(r"^HDMI-[AB]-", "HDMI-", connector).replace("-", "")
+
+
+outputs = {}
+if panel:
+    outputs[panel] = {"name": qt_name(panel), "primary": True}
+for mode in modes:
+    connector, _, value = mode.partition("=")
+    outputs.setdefault(connector, {"name": qt_name(connector)})["mode"] = value
+config = {"device": device, "hwcursor": True, "virtualDesktopLayout": "horizontal"}
+if outputs:
+    config["outputs"] = list(outputs.values())
+json.dump(config, open(path, "w"), indent=1)
+PY
+    export QT_QPA_PLATFORM=eglfs
+    export QT_QPA_EGLFS_INTEGRATION=eglfs_kms
+    export QT_QPA_EGLFS_KMS_CONFIG="$out/kms.json"
+    export QT_QPA_EGLFS_KMS_ATOMIC=$atomic
+    # The modes each display offers, in prism.log.
+    export QT_LOGGING_RULES="qt.qpa.eglfs.kms=true"
+fi
+
+pids=()
+cleanup() {
+    if [ ${#pids[@]} -gt 0 ]; then
+        kill "${pids[@]}" 2> /dev/null || true
+    fi
+}
+trap cleanup EXIT
+trap 'echo "Stopped." >&2; exit 130' INT TERM
 
 socket="wayland-gate-$$"
-"$prism" --socket "$socket" --spread-clients --benchmark "$seconds" --benchmark-out "$out/report.json" \
-    > "$out/prism.log" 2>&1 &
+# The timeout is a watchdog, in case Prism hangs holding the displays.
+timeout --kill-after=10 $((seconds + 120)) "$prism" --socket "$socket" "${prism_args[@]}" \
+    --benchmark-out "$out/report.json" > "$out/prism.log" 2>&1 < /dev/null &
 prism_pid=$!
-for _ in $(seq 1 150); do
+pids+=("$prism_pid")
+for _ in $(seq 1 300); do
     grep -q "Prism is running" "$out/prism.log" 2> /dev/null && break
     kill -0 "$prism_pid" 2> /dev/null || break
     sleep 0.1
 done
-outputs=$(grep -c '^Output ' "$out/prism.log" || true)
+if [ "$action" = try ]; then
+    outputs=2
+else
+    outputs=$(grep -c '^Output ' "$out/prism.log" || true)
+fi
 if ! grep -q "Prism is running" "$out/prism.log" || [ "$outputs" -lt 1 ]; then
-    echo "Prism did not start:" >&2
-    cat "$out/prism.log" >&2
+    echo "Prism did not start; the end of $out/prism.log:" >&2
+    tail -n 25 "$out/prism.log" >&2
     exit 4
 fi
-grep '^Output ' "$out/prism.log"
+grep '^Output ' "$out/prism.log" || true
 
 # One animating client per output (--spread-clients places them).
-clients=()
 for i in $(seq 1 "$outputs"); do
     WAYLAND_DISPLAY="$socket" QT_QPA_PLATFORM=wayland "$client" --title "Gate client $i" \
-        --app-id org.qtos.GateClient --size 900x560 --animate > "$out/client-$i.log" 2>&1 &
-    clients+=($!)
+        --app-id org.qtos.GateClient --size 900x560 --animate > "$out/client-$i.log" 2>&1 < /dev/null &
+    pids+=($!)
     sleep 0.5
 done
-echo "Measuring for ${seconds} s…"
+echo "Measuring for ${seconds} s. The screens return when it is done."
 wait "$prism_pid" || true
-kill "${clients[@]}" 2> /dev/null || true
-[ -f "$out/report.json" ] || { echo "No report; see $out/prism.log" >&2; exit 4; }
+cleanup
+pids=()
+[ -f "$out/report.json" ] || { echo "No report; the end of $out/prism.log:" >&2; tail -n 25 "$out/prism.log" >&2; exit 4; }
 
-python3 - "$out" << 'PY'
+status=0
+GATE_TRIAL=$([ "$action" = try ] && echo 1 || echo 0) GATE_DEVICE="$device" python3 - "$out" << 'PY' || status=$?
 import json
 import os
 import platform
@@ -92,6 +245,7 @@ import sys
 from datetime import date
 
 out = sys.argv[1]
+trial = os.environ.get("GATE_TRIAL") == "1"
 report = json.load(open(os.path.join(out, "report.json")))
 outputs = report.get("outputs", [])
 latency = report.get("inputToSwap", {})
@@ -120,10 +274,12 @@ passed &= latency_ok
 distinct = len({round(o.get("refreshHz", 0)) for o in outputs}) > 1
 enough = len(outputs) >= 2
 
-summary = f"""# Compositor decision gate: measurement ({date.today().isoformat()})
+title = "Trial inside a desktop session (not gate data)" if trial else "Compositor decision gate: measurement"
+summary = f"""# {title} ({date.today().isoformat()})
 
 - Machine: {platform.node()}, kernel {platform.release()}
 - GPU: {gpu or "unknown"}
+- DRM device: {os.environ.get("GATE_DEVICE") or "none (nested)"}
 - Graphics API: {report.get("graphicsApi", "?")}
 - Outputs: {len(outputs)}{"" if enough else " (the gate asks for two)"}, refresh rates \
 {"differ" if distinct else "are the same (the gate asks for different ones)"}
@@ -142,6 +298,8 @@ Record the decision in ADR-0011 (docs/adr/).
 """
 open(os.path.join(out, "summary.md"), "w").write(summary)
 print(summary)
-print(f"Saved {out}")
-sys.exit(0 if passed and enough else 1)
+sys.exit(0 if trial or (passed and enough) else 1)
 PY
+tar -C "$(dirname "$out")" -czf "$out.tgz" "$(basename "$out")"
+echo "Saved $out and $out.tgz"
+exit $status
