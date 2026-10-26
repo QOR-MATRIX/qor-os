@@ -44,11 +44,12 @@ OpenGL/EGL/xkbcommon development packages:
 
 ```bash
 sudo apt-get install ninja-build libgl1-mesa-dev libegl1-mesa-dev libxkbcommon-dev \
-  libfontconfig1-dev libfreetype-dev libwayland-dev libpulse0
+  libfontconfig1-dev libfreetype-dev libwayland-dev libpulse0 libssl-dev
 ```
 
 `libpulse0` is needed by Qt Multimedia (the audio engine); desktops running
-PipeWire are used through it automatically.
+PipeWire are used through it automatically. `libssl-dev` (OpenSSL 3's
+libcrypto) verifies Store signatures; Windows uses CNG instead.
 
 ### Linux on WSL2 (Windows workstation)
 
@@ -61,7 +62,7 @@ with GCC 15 and CMake 4.2.
 sudo apt-get install build-essential cmake ninja-build git python3 pkg-config \
   libgl1-mesa-dev libegl1-mesa-dev libgles-dev libdrm-dev libgbm-dev libvulkan-dev \
   libxkbcommon-dev libxkbcommon-x11-dev libfontconfig1-dev libfreetype-dev libdbus-1-3 \
-  libwayland-dev wayland-protocols libinput-dev libxcb-cursor0 libpulse0 weston
+  libwayland-dev wayland-protocols libinput-dev libxcb-cursor0 libpulse0 libssl-dev weston
 
 # 2. The commercial Qt kit, unattended. This reuses the Qt Account sign-in
 #    from Windows. Copy it once and keep it private:
@@ -156,8 +157,10 @@ modules in `build/<preset>/qml/`, plugins in `build/<preset>/plugins/`.
 `--screenshot`, `--benchmark` and `--script` render audio silently (the
 engine's null output; see [AUDIO.md](AUDIO.md)), see only virtual game
 controllers (`QTOS_GAMEPADS=virtual`; see [CONTROLLERS.md](CONTROLLERS.md)),
-and leave the touchpad alone (`QTOS_TOUCHPAD=off`; see
-[SHELL.md](design/SHELL.md#gestures)).
+leave the touchpad alone (`QTOS_TOUCHPAD=off`; see
+[SHELL.md](design/SHELL.md#gestures)), and install from the Store into a
+temporary folder (`QTOS_STORE_DIR`; see [STORE.md](STORE.md)).
+`QTOS_STORE_URL` points the Store at another signed catalogue.
 
 Persistent preferences (appearance, accent, motion, transparency, living
 wallpaper, audio and the audio-reactive interface) are stored with `QSettings`

@@ -1,0 +1,18 @@
+{
+  "id": "org.qtos.theme.paper",
+  "name": "Paper",
+  "version": "1.0.0",
+  "developer": "org.qtos",
+  "summary": "Warm paper and vermilion ink.",
+  "description": "Paper is a light theme with the warmth of uncoated stock and an ink-red accent. The wallpaper fades back so documents come first.",
+  "whatsNew": "First release.",
+  "released": "2026-10-26",
+  "tags": [
+    "light",
+    "warm",
+    "red",
+    "minimal"
+  ],
+  "featured": false,
+  "price": 0
+}

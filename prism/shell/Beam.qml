@@ -4,6 +4,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QTOS.Kit
 import QTOS.Services
+import QTOS.Store
 import QTOS.Apps
 import "search.js" as Search
 
@@ -83,8 +84,16 @@ Item {
                    "activity", "audio reactive visualizer music beat wallpaper spectrum",
                    qsTr("The wallpaper, Now Playing and the Rail move with what's playing.")),
             action("notify.test", qsTr("Send Test Notification"), "bell-ring", "notification banner",
-                   qsTr("Posts through qtos-notifyd over Qt Remote Objects."))
+                   qsTr("Posts through qtos-notifyd over Qt Remote Objects.")),
+            action("widgets.edit", qsTr("Edit Widgets"), "layout-grid", "widgets desktop add arrange clock calendar",
+                   qsTr("Add, arrange and remove the widgets on your desktop.")),
+            action("store.open", qsTr("Get Themes and Widgets"), "shopping-bag", "store shop download themes widgets",
+                   qsTr("Signed themes and widgets from the QTOS Store."), { page: "discover" })
         ];
+        for (const theme of Themes.all)
+            actions.push(action("theme.apply", qsTr("Theme: %1").arg(theme.name), "palette",
+                                "theme look style " + theme.name.toLowerCase(),
+                                qsTr("Sets the accent, the surfaces' tint and the wallpaper."), { id: theme.id }));
         for (let i = 0; i < 3; ++i)
             actions.push(action("space.go", qsTr("Go to Space %1").arg(i + 1), "layers", "space desktop workspace switch",
                                 qsTr("Switch the window strip to Space %1.").arg(i + 1), { index: i }));

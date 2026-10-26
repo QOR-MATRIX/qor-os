@@ -18,6 +18,12 @@
 *.ico             binary
 *.qsb             binary
 
+# Signed store artifacts: the signatures cover their exact bytes.
+*.qtospkg         binary
+*.sig             binary
+store/catalog/catalog.json            -text
+tests/store/fixtures/**/catalog.json  -text
+
 # Generated files: collapse in diffs, exclude from language stats
 kit/Tokens.qml                  linguist-generated=true
 platform/common/lumentokens.h   linguist-generated=true

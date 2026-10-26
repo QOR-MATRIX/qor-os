@@ -1,0 +1,17 @@
+{
+  "id": "org.qtos.theme.glacier",
+  "name": "Glacier",
+  "version": "1.0.0",
+  "developer": "org.qtos",
+  "summary": "Ice blue in clear daylight.",
+  "description": "Glacier is a crisp light theme: blue-white surfaces, an ice-blue accent and a wallpaper like light through ice.",
+  "whatsNew": "First release.",
+  "released": "2026-10-26",
+  "tags": [
+    "light",
+    "blue",
+    "cool"
+  ],
+  "featured": false,
+  "price": 0
+}

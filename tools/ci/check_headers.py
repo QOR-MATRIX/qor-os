@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
-ROOTS = ["kit", "services", "sim", "prism", "apps", "platform", "tools", "tests"]
+ROOTS = ["kit", "services", "sim", "prism", "apps", "platform", "tools", "tests", "store", "input", "audio"]
 EXTENSIONS = {".cpp", ".h", ".qml", ".frag", ".vert", ".js", ".rep"}
 MARKER = "SPDX-License-Identifier:"
 HEAD_LINES = 5

@@ -17,6 +17,7 @@
 #include <QtCore/QCommandLineParser>
 #include <QtCore/QDir>
 #include <QtCore/QLoggingCategory>
+#include <QtCore/QTemporaryDir>
 #include <QtCore/QTimer>
 #include <QtGui/QGuiApplication>
 #include <QtGui/QImage>
@@ -152,13 +153,18 @@ int main(int argc, char *argv[])
 
     const HostOptions options = parseOptions(app);
     // Automated runs use virtual controllers only, so a controller on the
-    // desk never prompts in a screenshot or presses buttons in a test, and
-    // leave the touchpad alone.
+    // desk never prompts in a screenshot or presses buttons in a test, leave
+    // the touchpad alone, and install from the Store into a folder of their own.
+    std::unique_ptr<QTemporaryDir> automationStore;
     if (!options.screenshotPath.isEmpty() || options.benchmarkSeconds > 0 || !options.scriptPath.isEmpty()) {
         if (qEnvironmentVariableIsEmpty("QTOS_GAMEPADS"))
             qputenv("QTOS_GAMEPADS", "virtual");
         if (qEnvironmentVariableIsEmpty("QTOS_TOUCHPAD"))
             qputenv("QTOS_TOUCHPAD", "off");
+        if (qEnvironmentVariableIsEmpty("QTOS_STORE_DIR")) {
+            automationStore = std::make_unique<QTemporaryDir>();
+            qputenv("QTOS_STORE_DIR", automationStore->path().toUtf8());
+        }
     }
     qCInfo(lcHost) << "GPU:" << qtos::host::applyGpuPreference(options.gpu);
 

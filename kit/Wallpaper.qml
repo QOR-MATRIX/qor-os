@@ -2,8 +2,9 @@
 import QtQuick
 import QTOS.Kit
 
-// "Aurora", the procedural QTOS wallpaper. Follows the accent hue and the
-// appearance spring; animates only when `living` is on.
+// "Aurora", the procedural QTOS wallpaper. Follows the accent hue, the
+// appearance spring and the theme's seed and intensity; animates only when
+// `living` is on.
 //
 // The noise field is rendered once into a cached layer with a small overscan.
 // Zoom and parallax (lock screen, Overview, Space switches) are applied as
@@ -19,8 +20,8 @@ Item {
     // Offset in units of the wallpaper height (positive moves the view right).
     property vector2d parallax: Qt.vector2d(0, 0)
     property real zoom: 1
-    property real intensity: 1
-    property real seed: 42
+    property real intensity: _intensity.value
+    property real seed: Theme.wallpaperSeed
     // Extra field rendered around the visible area to absorb parallax.
     property real overscan: 0.14
     // Audio-reactive light (Reactive.energy and Reactive.pulse in the shell):
@@ -30,6 +31,15 @@ Item {
 
     property real _time: seed
     property real _glowTime: 0
+    // A new seed (another theme) restarts the field there, even after the
+    // living wallpaper has moved it on.
+    onSeedChanged: _time = seed
+
+    Spring {
+        id: _intensity
+        target: Theme.wallpaperIntensity
+        preset: Tokens.motion.smooth
+    }
 
     ShaderEffect {
         id: field

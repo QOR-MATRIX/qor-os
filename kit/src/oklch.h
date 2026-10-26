@@ -30,7 +30,10 @@ public:
     //   highContrast    optional {light, dark} blended in by `contrast`
     //   followAccent    the token hue is an offset from accentHue
     //   maxLuminance    optional cap on WCAG relative luminance (lowers L)
-    Q_INVOKABLE QColor themed(const QVariantMap &token, double darkness, double accentHue, double contrast = 0.0) const;
+    // A theme tints the neutral roles: a `neutralHue` of 0 or more replaces
+    // the token's hue, and `neutralChroma` scales its chroma.
+    Q_INVOKABLE QColor themed(const QVariantMap &token, double darkness, double accentHue, double contrast = 0.0,
+                              double neutralHue = -1.0, double neutralChroma = 1.0) const;
 
     // Interpolates two colors in OKLab space.
     Q_INVOKABLE QColor mix(const QColor &from, const QColor &to, double t) const;

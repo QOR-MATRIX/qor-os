@@ -21,6 +21,7 @@
 #include "simservices.h"
 
 #include <QtCore/QCommandLineParser>
+#include <QtCore/QTemporaryDir>
 #include <QtCore/QTimer>
 #include <QtGui/QGuiApplication>
 #include <QtQml/QQmlApplicationEngine>
@@ -80,6 +81,15 @@ int main(int argc, char *argv[])
 
     qtos::Kit::initialize();
     QQuickStyle::setStyle(u"Lumen"_s);
+
+    // Automated runs install from the Store into a folder of their own, gone
+    // with the run.
+    std::unique_ptr<QTemporaryDir> automationStore;
+    if ((parser.isSet(screenshot) || parser.isSet(benchmark) || parser.isSet(script))
+        && qEnvironmentVariableIsEmpty("QTOS_STORE_DIR")) {
+        automationStore = std::make_unique<QTemporaryDir>();
+        qputenv("QTOS_STORE_DIR", automationStore->path().toUtf8());
+    }
 
     std::unique_ptr<qtos::sim::SimServices> simulator;
     QUrl servicesUrl = qtos::Services::defaultUrl();

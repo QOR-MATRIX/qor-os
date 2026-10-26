@@ -1,0 +1,18 @@
+{
+  "id": "org.qtos.widget.system",
+  "name": "System",
+  "version": "1.0.0",
+  "developer": "org.qtos",
+  "summary": "Battery and network in one glance.",
+  "description": "A ring for the battery that turns green while charging and warns when low, with the Wi-Fi network beneath.",
+  "whatsNew": "First release.",
+  "released": "2026-10-26",
+  "tags": [
+    "battery",
+    "wifi",
+    "network",
+    "status"
+  ],
+  "featured": false,
+  "price": 0
+}

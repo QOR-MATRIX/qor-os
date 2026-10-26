@@ -32,6 +32,8 @@ qt_add_qml_module(qtos_shell
         ControllerKeyboard.qml
         ControllerPrompt.qml
         ShellToast.qml
+        WidgetLayer.qml
+        WidgetGallery.qml
         search.js
     SOURCES
         desktopentries.h desktopentries.cpp
@@ -42,6 +44,7 @@ qt_add_qml_module(qtos_shell
         QTOS.Services
         QTOS.Apps
         QTOS.Input
+        QTOS.Store
 )
 
 # The --benchmark and --script drivers shared by qtos-shell and prism. The
@@ -57,6 +60,7 @@ target_link_libraries(qtos_shell
         qtos_services
         qtos_apps
         qtos_input
+        qtos_store
     PRIVATE
         qtos::compiler_settings
 )

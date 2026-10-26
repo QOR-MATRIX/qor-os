@@ -114,3 +114,7 @@ wifi-off
 wifi-zero
 x
 zap
+badge-check
+shopping-bag
+timer
+wrench

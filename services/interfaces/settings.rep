@@ -10,6 +10,10 @@ class Settings
     PROP(bool reduceTransparency=false READWRITE)
     PROP(bool increaseContrast=false READWRITE)
     PROP(bool livingWallpaper=false READWRITE)
+    // The theme in use: a Store theme's id, or empty for Aurora.
+    PROP(QString theme READWRITE)
+    // The desktop's widgets, as JSON: [{ "id", "key", "col", "row" }].
+    PROP(QString widgets READWRITE)
     // Audio-reactive interface: the wallpaper, Now Playing and visualisers
     // move with what is playing.
     PROP(bool audioReactive=true READWRITE)

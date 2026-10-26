@@ -1,0 +1,13 @@
+{
+  "accentHue": 250,
+  "appearance": "any",
+  "neutral": {
+    "hue": 262,
+    "tint": 0.25
+  },
+  "wallpaper": {
+    "style": "aurora",
+    "seed": 404.4,
+    "intensity": 0.6
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "id": "org.qtos.theme.dusk",
+  "name": "Dusk",
+  "version": "1.0.0",
+  "developer": "org.qtos",
+  "summary": "Violet twilight with a magenta glow.",
+  "description": "Dusk is the half hour after sunset: plum surfaces, a vivid magenta accent and a wallpaper that glows a little brighter than the rest.",
+  "whatsNew": "First release.",
+  "released": "2026-10-26",
+  "tags": [
+    "purple",
+    "magenta",
+    "dark"
+  ],
+  "featured": true,
+  "price": 0
+}

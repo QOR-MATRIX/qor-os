@@ -1,0 +1,435 @@
+{
+  "format": 1,
+  "store": "QTOS Store",
+  "developers": {
+    "org.qtos": {
+      "name": "QOR-MATRIX",
+      "verified": true,
+      "key": "BJrFrnnjUKfOotSjCJNrdaCWkgnWO0Mgsf5hrnjDZgIC+xrevcXrEKR7pp7OCAEr2l9F223A6sihwx6SCe0ppvE="
+    }
+  },
+  "items": [
+    {
+      "id": "org.qtos.theme.dusk",
+      "kind": "theme",
+      "name": "Dusk",
+      "developer": "org.qtos",
+      "version": "1.0.0",
+      "summary": "Violet twilight with a magenta glow.",
+      "description": "Dusk is the half hour after sunset: plum surfaces, a vivid magenta accent and a wallpaper that glows a little brighter than the rest.",
+      "whatsNew": "First release.",
+      "released": "2026-10-26",
+      "tags": [
+        "purple",
+        "magenta",
+        "dark"
+      ],
+      "featured": true,
+      "price": 0,
+      "preview": {
+        "accentHue": 318,
+        "appearance": "dark",
+        "neutralHue": 300,
+        "neutralTint": 1.4,
+        "wallpaperSeed": 201.9,
+        "wallpaperIntensity": 1.25
+      },
+      "package": {
+        "file": "packages/org.qtos.theme.dusk-1.0.0.qtospkg",
+        "size": 807,
+        "sha256": "9384685ee807b9a5e4c9e9217237dcc7fa6863359ab64d1f01806a89c4df4db2"
+      }
+    },
+    {
+      "id": "org.qtos.theme.ember",
+      "kind": "theme",
+      "name": "Ember",
+      "developer": "org.qtos",
+      "version": "1.0.0",
+      "summary": "Warm charcoal and glowing coals.",
+      "description": "Ember turns the neutrals a warm charcoal and the accent to the orange of a banked fire. The Aurora wallpaper burns low and amber behind your windows. Made for long evenings.",
+      "whatsNew": "First release.",
+      "released": "2026-10-26",
+      "tags": [
+        "warm",
+        "orange",
+        "dark"
+      ],
+      "featured": true,
+      "price": 0,
+      "preview": {
+        "accentHue": 38,
+        "appearance": "dark",
+        "neutralHue": 40,
+        "neutralTint": 1.5,
+        "wallpaperSeed": 11.7,
+        "wallpaperIntensity": 1.15
+      },
+      "package": {
+        "file": "packages/org.qtos.theme.ember-1.0.0.qtospkg",
+        "size": 806,
+        "sha256": "6162620dbe1dc59d7689197e9c234591c0d68d650a362caa6ce5f2c5eab0004a"
+      }
+    },
+    {
+      "id": "org.qtos.theme.glacier",
+      "kind": "theme",
+      "name": "Glacier",
+      "developer": "org.qtos",
+      "version": "1.0.0",
+      "summary": "Ice blue in clear daylight.",
+      "description": "Glacier is a crisp light theme: blue-white surfaces, an ice-blue accent and a wallpaper like light through ice.",
+      "whatsNew": "First release.",
+      "released": "2026-10-26",
+      "tags": [
+        "light",
+        "blue",
+        "cool"
+      ],
+      "featured": false,
+      "price": 0,
+      "preview": {
+        "accentHue": 228,
+        "appearance": "light",
+        "neutralHue": 230,
+        "neutralTint": 1.1,
+        "wallpaperSeed": 640.1,
+        "wallpaperIntensity": 0.8
+      },
+      "package": {
+        "file": "packages/org.qtos.theme.glacier-1.0.0.qtospkg",
+        "size": 813,
+        "sha256": "6e6cfce56e52d7fb8a99302f5501022e8947e87bea0d445769fc15f8c446fee9"
+      }
+    },
+    {
+      "id": "org.qtos.theme.graphite",
+      "kind": "theme",
+      "name": "Graphite",
+      "developer": "org.qtos",
+      "version": "1.0.0",
+      "summary": "Near-monochrome, for focus.",
+      "description": "Graphite takes the colour out of the neutrals and quiets the wallpaper, leaving a single blue accent for what matters.",
+      "whatsNew": "First release.",
+      "released": "2026-10-26",
+      "tags": [
+        "grey",
+        "monochrome",
+        "minimal",
+        "focus"
+      ],
+      "featured": false,
+      "price": 0,
+      "preview": {
+        "accentHue": 250,
+        "appearance": "any",
+        "neutralHue": 262,
+        "neutralTint": 0.25,
+        "wallpaperSeed": 404.4,
+        "wallpaperIntensity": 0.6
+      },
+      "package": {
+        "file": "packages/org.qtos.theme.graphite-1.0.0.qtospkg",
+        "size": 814,
+        "sha256": "bc2b3c5a6f1180075b7438c69c130c2cb789df48d4847100efbd471bfe2304b8"
+      }
+    },
+    {
+      "id": "org.qtos.theme.moss",
+      "kind": "theme",
+      "name": "Moss",
+      "developer": "org.qtos",
+      "version": "1.0.0",
+      "summary": "Forest-floor greens, quiet and calm.",
+      "description": "Moss brings a soft green accent and neutrals with a hint of leaf. The wallpaper moves like light through a canopy.",
+      "whatsNew": "First release.",
+      "released": "2026-10-26",
+      "tags": [
+        "green",
+        "nature",
+        "calm"
+      ],
+      "featured": false,
+      "price": 0,
+      "preview": {
+        "accentHue": 145,
+        "appearance": "any",
+        "neutralHue": 130,
+        "neutralTint": 1.2,
+        "wallpaperSeed": 128.4,
+        "wallpaperIntensity": 0.9
+      },
+      "package": {
+        "file": "packages/org.qtos.theme.moss-1.0.0.qtospkg",
+        "size": 805,
+        "sha256": "52cb813b5efda44440b766fe996147ec90f491edefcbf6002898fb79425ed355"
+      }
+    },
+    {
+      "id": "org.qtos.theme.paper",
+      "kind": "theme",
+      "name": "Paper",
+      "developer": "org.qtos",
+      "version": "1.0.0",
+      "summary": "Warm paper and vermilion ink.",
+      "description": "Paper is a light theme with the warmth of uncoated stock and an ink-red accent. The wallpaper fades back so documents come first.",
+      "whatsNew": "First release.",
+      "released": "2026-10-26",
+      "tags": [
+        "light",
+        "warm",
+        "red",
+        "minimal"
+      ],
+      "featured": false,
+      "price": 0,
+      "preview": {
+        "accentHue": 28,
+        "appearance": "light",
+        "neutralHue": 75,
+        "neutralTint": 1.6,
+        "wallpaperSeed": 333.3,
+        "wallpaperIntensity": 0.55
+      },
+      "package": {
+        "file": "packages/org.qtos.theme.paper-1.0.0.qtospkg",
+        "size": 808,
+        "sha256": "f6b486c84a2010057a231bef866c7def1d8c213975e2294a8fa0966462f1a234"
+      }
+    },
+    {
+      "id": "org.qtos.theme.saffron",
+      "kind": "theme",
+      "name": "Saffron",
+      "developer": "org.qtos",
+      "version": "1.0.0",
+      "summary": "Spice gold, bright and generous.",
+      "description": "Saffron sets a golden accent over neutrals with the faintest warmth. It is cheerful in light appearance and rich in dark.",
+      "whatsNew": "First release.",
+      "released": "2026-10-26",
+      "tags": [
+        "gold",
+        "yellow",
+        "warm"
+      ],
+      "featured": false,
+      "price": 0,
+      "preview": {
+        "accentHue": 78,
+        "appearance": "any",
+        "neutralHue": 70,
+        "neutralTint": 1.2,
+        "wallpaperSeed": 512.5,
+        "wallpaperIntensity": 1.05
+      },
+      "package": {
+        "file": "packages/org.qtos.theme.saffron-1.0.0.qtospkg",
+        "size": 810,
+        "sha256": "632787bf58c08194b5337c6e54afd0b8bca323e961189c5092df25a5d049b86a"
+      }
+    },
+    {
+      "id": "org.qtos.theme.tidepool",
+      "kind": "theme",
+      "name": "Tidepool",
+      "developer": "org.qtos",
+      "version": "1.0.0",
+      "summary": "Deep teal water over cool slate.",
+      "description": "Tidepool tints every surface with the cool grey of wet slate and sets the accent to a clear teal. Works in light and dark.",
+      "whatsNew": "First release.",
+      "released": "2026-10-26",
+      "tags": [
+        "teal",
+        "cool",
+        "blue"
+      ],
+      "featured": true,
+      "price": 0,
+      "preview": {
+        "accentHue": 200,
+        "appearance": "any",
+        "neutralHue": 215,
+        "neutralTint": 1.3,
+        "wallpaperSeed": 73.2,
+        "wallpaperIntensity": 1.0
+      },
+      "package": {
+        "file": "packages/org.qtos.theme.tidepool-1.0.0.qtospkg",
+        "size": 812,
+        "sha256": "dd60c0f842e923fecf2048ebfe3309d11adcd7b01bc43d6948d859ae043f7c19"
+      }
+    },
+    {
+      "id": "org.qtos.widget.calendar",
+      "kind": "widget",
+      "name": "Calendar",
+      "developer": "org.qtos",
+      "version": "1.0.0",
+      "summary": "This month at a glance.",
+      "description": "The whole month on your desktop, with today marked in your accent colour. Weeks start on your locale's first day.",
+      "whatsNew": "First release.",
+      "released": "2026-10-26",
+      "tags": [
+        "date",
+        "month",
+        "calendar"
+      ],
+      "featured": false,
+      "price": 0,
+      "preview": {
+        "size": "large",
+        "glyph": "calendar",
+        "hue": 25
+      },
+      "package": {
+        "file": "packages/org.qtos.widget.calendar-1.0.0.qtospkg",
+        "size": 3919,
+        "sha256": "31e2527e9a49c349833501e56ab6eb869117b8ff297412ddfb4b2b4e6d6aaa1a"
+      }
+    },
+    {
+      "id": "org.qtos.widget.clock",
+      "kind": "widget",
+      "name": "Clock",
+      "developer": "org.qtos",
+      "version": "1.0.0",
+      "summary": "The time, large and light, with the date.",
+      "description": "A calm desktop clock: the time in light Inter at display size, today's date beneath it, and the minute passing as a hairline in your accent colour. Follows your locale's 12- or 24-hour time.",
+      "whatsNew": "First release.",
+      "released": "2026-10-26",
+      "tags": [
+        "time",
+        "date",
+        "clock"
+      ],
+      "featured": true,
+      "price": 0,
+      "preview": {
+        "size": "medium",
+        "glyph": "clock",
+        "hue": 228
+      },
+      "package": {
+        "file": "packages/org.qtos.widget.clock-1.0.0.qtospkg",
+        "size": 2727,
+        "sha256": "29dbe90d1a69b86b8cb84c378af0cc9cf28a2af3d9bb1c957d2d8d39447fd68b"
+      }
+    },
+    {
+      "id": "org.qtos.widget.focus",
+      "kind": "widget",
+      "name": "Focus",
+      "developer": "org.qtos",
+      "version": "1.0.0",
+      "summary": "A 25-minute focus timer.",
+      "description": "Tap to start a 25-minute focus session, tap again to pause, and press and hold to reset. The ring empties as the session runs.",
+      "whatsNew": "First release.",
+      "released": "2026-10-26",
+      "tags": [
+        "timer",
+        "productivity",
+        "pomodoro",
+        "focus"
+      ],
+      "featured": false,
+      "price": 0,
+      "preview": {
+        "size": "small",
+        "glyph": "timer",
+        "hue": 30
+      },
+      "package": {
+        "file": "packages/org.qtos.widget.focus-1.0.0.qtospkg",
+        "size": 3604,
+        "sha256": "35ab31c23bd1ee5c371aa4675e8a0ebd2321aa652ea0833d054f7a262c9987fb"
+      }
+    },
+    {
+      "id": "org.qtos.widget.now-playing",
+      "kind": "widget",
+      "name": "Now Playing",
+      "developer": "org.qtos",
+      "version": "1.0.0",
+      "summary": "What's playing, with the controls at hand.",
+      "description": "Artwork, title and artist from QTOS Media, with previous, play and next and the track's progress. When nothing plays, one tap starts your queue.",
+      "whatsNew": "First release.",
+      "released": "2026-10-26",
+      "tags": [
+        "music",
+        "media",
+        "audio",
+        "player"
+      ],
+      "featured": true,
+      "price": 0,
+      "preview": {
+        "size": "medium",
+        "glyph": "music",
+        "hue": 355
+      },
+      "package": {
+        "file": "packages/org.qtos.widget.now-playing-1.0.0.qtospkg",
+        "size": 3649,
+        "sha256": "500d10e208c39458e5f6dbe486ee6b9ff77083a9810e8a3a6ec97a96bf48b5a9"
+      }
+    },
+    {
+      "id": "org.qtos.widget.system",
+      "kind": "widget",
+      "name": "System",
+      "developer": "org.qtos",
+      "version": "1.0.0",
+      "summary": "Battery and network in one glance.",
+      "description": "A ring for the battery that turns green while charging and warns when low, with the Wi-Fi network beneath.",
+      "whatsNew": "First release.",
+      "released": "2026-10-26",
+      "tags": [
+        "battery",
+        "wifi",
+        "network",
+        "status"
+      ],
+      "featured": false,
+      "price": 0,
+      "preview": {
+        "size": "small",
+        "glyph": "battery-full",
+        "hue": 150
+      },
+      "package": {
+        "file": "packages/org.qtos.widget.system-1.0.0.qtospkg",
+        "size": 3955,
+        "sha256": "4eea40906d57fe82e33eef586c2a1b71f72323f0871229d5258b81de1b7c0a5d"
+      }
+    },
+    {
+      "id": "org.qtos.widget.visualizer",
+      "kind": "widget",
+      "name": "Visualizer",
+      "developer": "org.qtos",
+      "version": "1.0.0",
+      "summary": "The live spectrum of your music.",
+      "description": "Thirty-two bars of live spectrum from the QTOS audio engine, in your accent colour. It rests when nothing plays.",
+      "whatsNew": "First release.",
+      "released": "2026-10-26",
+      "tags": [
+        "music",
+        "audio",
+        "spectrum",
+        "reactive"
+      ],
+      "featured": false,
+      "price": 0,
+      "preview": {
+        "size": "medium",
+        "glyph": "audio-lines",
+        "hue": 300
+      },
+      "package": {
+        "file": "packages/org.qtos.widget.visualizer-1.0.0.qtospkg",
+        "size": 1891,
+        "sha256": "f703db10085cbf5dcf719a20c975ed35a5b286f56f14458426de39661fc4028c"
+      }
+    }
+  ]
+}

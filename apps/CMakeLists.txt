@@ -25,6 +25,7 @@ qt_add_qml_module(qtos_apps
         TerminalApp.qml
         MonitorApp.qml
         SettingsApp.qml
+        StoreApp.qml
     DEPENDENCIES
         QtQuick
         QtQuick.Controls
@@ -34,6 +35,7 @@ qt_add_qml_module(qtos_apps
         QTOS.Kit
         QTOS.Services
         QTOS.Input
+        QTOS.Store
 )
 
 target_link_libraries(qtos_apps
@@ -45,6 +47,7 @@ target_link_libraries(qtos_apps
         qtos_kit
         qtos_services
         qtos_input
+        qtos_store
     PRIVATE
         qtos::compiler_settings
 )

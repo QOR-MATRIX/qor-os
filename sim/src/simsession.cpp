@@ -268,6 +268,10 @@ void SimSettings::load(const QJsonObject &config)
         setReduceTransparency(store.value(u"reduceTransparency"_s, reduceTransparency()).toBool());
         setIncreaseContrast(store.value(u"increaseContrast"_s, increaseContrast()).toBool());
         setLivingWallpaper(store.value(u"livingWallpaper"_s, livingWallpaper()).toBool());
+        setTheme(store.value(u"theme"_s, theme()).toString());
+        store.endGroup();
+        store.beginGroup(u"desktop"_s);
+        setWidgets(store.value(u"widgets"_s, widgets()).toString());
         store.endGroup();
         store.beginGroup(u"reactive"_s);
         setAudioReactive(store.value(u"enabled"_s, audioReactive()).toBool());
@@ -290,6 +294,8 @@ void SimSettings::load(const QJsonObject &config)
            &SettingsSimpleSource::controllerAutoSwitchChanged, &SettingsSimpleSource::controllerVibrationChanged,
            &SettingsSimpleSource::controllerLightbarChanged })
         connect(this, signal, this, &SimSettings::save);
+    for (auto signal : { &SettingsSimpleSource::themeChanged, &SettingsSimpleSource::widgetsChanged })
+        connect(this, signal, this, &SimSettings::save);
     for (auto signal : { &SettingsSimpleSource::accentHueChanged, &SettingsSimpleSource::reactiveIntensityChanged,
                          &SettingsSimpleSource::reactiveLowHzChanged, &SettingsSimpleSource::reactiveHighHzChanged,
                          &SettingsSimpleSource::controllerCursorSpeedChanged })
@@ -308,6 +314,10 @@ void SimSettings::save()
     store.setValue(u"reduceTransparency"_s, reduceTransparency());
     store.setValue(u"increaseContrast"_s, increaseContrast());
     store.setValue(u"livingWallpaper"_s, livingWallpaper());
+    store.setValue(u"theme"_s, theme());
+    store.endGroup();
+    store.beginGroup(u"desktop"_s);
+    store.setValue(u"widgets"_s, widgets());
     store.endGroup();
     store.beginGroup(u"reactive"_s);
     store.setValue(u"enabled"_s, audioReactive());

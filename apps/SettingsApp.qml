@@ -5,6 +5,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Shapes
 import QTOS.Kit
+import QTOS.Store
 import QTOS.Services
 import QTOS.Input
 
@@ -140,6 +141,70 @@ Item {
         Column {
             spacing: 18
             PageTitle { text: qsTr("Appearance") }
+
+            SectionLabel { objectName: "themes"; text: qsTr("Theme") }
+            Flow {
+                width: parent.width
+                spacing: 14
+                Repeater {
+                    model: Themes.all
+                    delegate: Column {
+                        id: themeOption
+                        required property var modelData
+                        readonly property bool chosen: Themes.activeId === modelData.id
+                        objectName: "themeOption:" + modelData.id
+                        spacing: 6
+                        Item {
+                            width: 168
+                            height: 105
+                            ThemePreview {
+                                anchors.fill: parent
+                                theme: themeOption.modelData
+                            }
+                            Surface {
+                                anchors.fill: parent
+                                anchors.margins: -3
+                                visible: themeOption.chosen
+                                radius: Tokens.radius.l + 3
+                                color: "transparent"
+                                strokeColor: Theme.accent
+                                strokeWidth: 2.5
+                            }
+                            TapHandler { onTapped: Themes.apply(themeOption.modelData.id) }
+                        }
+                        Text {
+                            text: themeOption.modelData.name
+                            color: Theme.textPrimary
+                            font: themeOption.chosen ? Theme.bodyStrong : Theme.body
+                        }
+                    }
+                }
+                Surface {
+                    objectName: "getMoreThemes"
+                    width: 168
+                    height: 105
+                    radius: Tokens.radius.l
+                    color: moreThemesHover.hovered ? Theme.fillControlHover : Theme.fillControl
+                    strokeColor: Theme.separator
+                    Column {
+                        anchors.centerIn: parent
+                        spacing: 6
+                        Icon {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            name: "shopping-bag"
+                            size: 22
+                            color: Theme.accentText
+                        }
+                        Text {
+                            text: qsTr("Get more themes")
+                            color: Theme.textPrimary
+                            font: Theme.footnote
+                        }
+                    }
+                    HoverHandler { id: moreThemesHover }
+                    TapHandler { onTapped: Intents.openApp("store", { page: "themes" }) }
+                }
+            }
 
             Row {
                 spacing: 16

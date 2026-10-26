@@ -58,7 +58,8 @@ Flatpaks run sandboxed.
 
 - [ ] Real daemons for every contract (`qtos-netd`, `-btd`, `-powerd`, `-audiod`, `-notifyd`, `-settingsd`)
 - [ ] xdg-desktop-portal backend (`qtos-portald`) with trusted-UI prompts
-- [ ] Qt Application Manager packages; Flatpak; Store
+- [x] Store, stage 1: the Store app, a signed catalogue with developer-signed packages verified by platform crypto, first-party themes and desktop widgets ([STORE.md](STORE.md))
+- [ ] Qt Application Manager packages; Flatpak; third-party widgets and apps in the Store, out of process
 - [ ] RAUC A/B updates with rollback; fwupd
 - [ ] `qtos-indexd` (SQLite FTS5) for Beam file search
 - [ ] Translations (Qt Linguist)
@@ -81,6 +82,8 @@ shell surface.
 Exit: an external developer ships an app using only the public SDK.
 
 - [ ] Installable SDK (Kit + Lumen + Services) and Qt Creator wizard
+- [ ] Store stage 2: developer program and portal, review, privacy-preserving analytics ([STORE.md](STORE.md#roadmap))
+- [ ] Store stage 3: paid items (prepaid balance, Stripe Connect payouts, sales tax), once Qt licensing for the SDK is confirmed
 - [ ] Intents → Flows automation; HTTP and MCP surfaces for automation
 - [ ] Continuity (KDE Connect protocol)
 - [ ] Optional on-device intelligence (`qtos-assistd`, Qt gRPC)

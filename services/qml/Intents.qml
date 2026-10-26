@@ -11,6 +11,8 @@ import QtQml
 //   shell.overview  {}                show Overview
 //   shell.beam      { query? }        open Beam
 //   shell.space     { index }         switch Space
+//   widgets.add     { id }            put an installed Store widget on the desktop
+//   widgets.edit    {}                edit the desktop's widgets
 QtObject {
     signal requested(string action, var args)
 

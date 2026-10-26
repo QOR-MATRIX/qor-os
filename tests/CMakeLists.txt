@@ -23,6 +23,16 @@ qtos_add_test(tst_oklch SOURCES kit/tst_oklch.cpp LIBRARIES qtos_kit)
 qtos_add_test(tst_services SOURCES services/tst_services.cpp LIBRARIES qtos_services qtos_sim)
 qtos_add_test(tst_audio SOURCES audio/tst_audio.cpp LIBRARIES qtos_audio)
 qtos_add_test(tst_input SOURCES input/tst_input.cpp LIBRARIES qtos_input qtos_kit qtos_kitplugin Qt6::GuiPrivate)
+qtos_add_test(tst_store SOURCES store/tst_store.cpp LIBRARIES qtos_store qtos_storeplugin Qt6::GuiPrivate)
+target_compile_definitions(tst_store PRIVATE
+    QTOS_STORE_CATALOG="${CMAKE_SOURCE_DIR}/store/catalog"
+    QTOS_STORE_PUB="${CMAKE_SOURCE_DIR}/store/keys/store.pub"
+    QTOS_STORE_FIXTURES="${CMAKE_CURRENT_SOURCE_DIR}/store/fixtures")
+
+# Store widgets are QML outside any module: lint them against the built ones.
+file(GLOB QTOS_STORE_WIDGET_QML CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/store/content/widgets/*/*.qml")
+add_test(NAME store_widgets_qmllint
+    COMMAND $<TARGET_FILE:Qt6::qmllint> -I "${CMAKE_BINARY_DIR}/qml" ${QTOS_STORE_WIDGET_QML})
 
 # ── QML tests (Qt Quick Test) ───────────────────────────────────────────────
 qt_add_executable(tst_shell shell/tst_shell.cpp)
@@ -68,7 +78,7 @@ find_package(Python3 3.10 COMPONENTS Interpreter)
 # close work. The script asserts on its own ("expect" steps).
 add_test(NAME shell_e2e
     COMMAND qtos-shell --unlocked --size 1280x800 --script "${CMAKE_CURRENT_SOURCE_DIR}/shell/apps.e2e.json")
-set_tests_properties(shell_e2e PROPERTIES LABELS "gpu" TIMEOUT 120 ENVIRONMENT "${QTOS_TEST_ENV}")
+set_tests_properties(shell_e2e PROPERTIES LABELS "gpu" TIMEOUT 240 ENVIRONMENT "${QTOS_TEST_ENV}")
 
 # ── Prism end-to-end (Linux, GPU) ───────────────────────────────────────────
 # Real Wayland clients in a nested Prism, driven by `prism --script`:

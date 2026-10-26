@@ -2,10 +2,12 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Controls
 import QTOS.Kit
 import QTOS.Services
 import QTOS.Apps
 import QTOS.Input
+import QTOS.Store
 
 // The Prism desktop for one output.
 //
@@ -40,6 +42,11 @@ FocusScope {
     Binding { target: Theme; property: "reduceTransparency"; value: Services.settings.reduceTransparency }
     Binding { target: Theme; property: "increaseContrast"; value: Services.settings.increaseContrast }
     Binding { target: Theme; property: "livingWallpaper"; value: Services.settings.livingWallpaper }
+    // The theme's tint and wallpaper (QTOS.Store Themes).
+    Binding { target: Theme; property: "neutralHue"; value: Themes.active.neutralHue }
+    Binding { target: Theme; property: "neutralTint"; value: Themes.active.neutralTint }
+    Binding { target: Theme; property: "wallpaperSeed"; value: Themes.active.wallpaperSeed }
+    Binding { target: Theme; property: "wallpaperIntensity"; value: Themes.active.wallpaperIntensity }
 
     // ── Interface sounds follow qtos-audiod ─────────────────────────────────
     Binding {
@@ -266,6 +273,25 @@ FocusScope {
         currentSpace = Math.max(0, Math.min(spaceCount - 1, index));
     }
 
+    // ── Widgets ─────────────────────────────────────────────────────────────
+    // Editing the desktop's widgets moves the windows aside and opens the
+    // gallery in place of the Shelf.
+    property bool editingWidgets: false
+
+    function editWidgets(on: bool) {
+        if (on && locked)
+            return;
+        if (on)
+            setSurface("");
+        editingWidgets = on;
+    }
+
+    function addWidget(id: string) {
+        editWidgets(true);
+        if (!widgets.add(id))
+            toast.show("layout-grid", qsTr("There is no room for that widget"));
+    }
+
     // ── Gestures ────────────────────────────────────────────────────────────
     // Three fingers, on a touchpad or a touchscreen: sideways moves between
     // Spaces, up opens Overview and down closes it. The view follows the
@@ -386,6 +412,9 @@ FocusScope {
         case "window.space": windows.moveActiveTo(args.index); break;
         case "accent.set": settings.accentHue = args.hue; break;
         case "app.open": launch(args.id, args); break;
+        case "widgets.edit": editWidgets(true); break;
+        case "store.open": launch("store", args); break;
+        case "theme.apply": Themes.apply(args.id ?? ""); break;
         default: console.warn("Unknown shell action", id);
         }
     }
@@ -399,6 +428,8 @@ FocusScope {
             case "shell.overview": desktop.setSurface("overview"); break;
             case "shell.beam": desktop.setSurface("beam"); break;
             case "shell.space": desktop.switchSpace(args.index); break;
+            case "widgets.add": desktop.addWidget(args.id); break;
+            case "widgets.edit": desktop.editWidgets(true); break;
             default: console.warn("Unhandled intent", action);
             }
         }
@@ -450,6 +481,7 @@ FocusScope {
 
     // ── Motion drivers ──────────────────────────────────────────────────────
     Spring { id: lockDepth; target: desktop.locked ? 1 : 0; preset: Motion.gentle }
+    Spring { id: editDepth; target: desktop.editingWidgets ? 1 : 0; preset: Motion.smooth }
     Spring {
         id: overviewDepth
         target: desktop.overviewDragging ? desktop.overviewDrag : desktop.overview ? 1 : 0
@@ -494,6 +526,26 @@ FocusScope {
             visible: opacity > 0.002
         }
 
+        WidgetLayer {
+            id: widgets
+            objectName: "widgetLayer"
+            anchors.fill: parent
+            area: desktop.workArea
+            backdrop: wallpaperBackdrop
+            editing: desktop.editingWidgets
+            opacity: (1 - lockDepth.value) * (1 - overviewDepth.value)
+            visible: opacity > 0.002
+            // Only for the desktop itself. A right click on a window (or the
+            // Rail, or the Shelf) reaches this layer's TapHandler too.
+            onMenuRequested: scenePosition => {
+                const area = desktop.workArea;
+                if (desktop.surface === "" && !windows.windowAt(scenePosition)
+                        && scenePosition.x >= area.x && scenePosition.x <= area.x + area.width
+                        && scenePosition.y >= area.y && scenePosition.y <= area.y + area.height)
+                    desktopMenu.popup(scenePosition.x, scenePosition.y);
+            }
+        }
+
         WindowLayer {
             id: windows
             anchors.fill: parent
@@ -501,9 +553,10 @@ FocusScope {
             currentSpace: desktop.currentSpace
             spaceOffset: spaceTravel.value
             overview: desktop.overview
-            opacity: 1 - lockDepth.value
+            opacity: (1 - lockDepth.value) * (1 - editDepth.value)
             scale: 1 - 0.035 * lockDepth.value
             visible: opacity > 0.002
+            enabled: !desktop.editingWidgets
             onOverviewPicked: desktop.setSurface("")
             originProvider: appId => shelf.originFor(appId)
             spaceAt: scenePoint => spaceSwitcher.indexAt(scenePoint)
@@ -548,11 +601,29 @@ FocusScope {
             onSurfaceRequested: name => desktop.toggleSurface(name)
         }
 
+        WidgetGallery {
+            id: widgetGallery
+            objectName: "widgetGallery"
+            anchors.horizontalCenter: parent.horizontalCenter
+            width: Math.min(parent.width - 48, 1040)
+            height: implicitHeight
+            y: parent.height - height - 16 + (height + 40) * (1 - editDepth.value)
+            open: desktop.editingWidgets
+            visible: editDepth.value > 0.002
+            backdrop: sceneBackdrop
+            onAddRequested: id => desktop.addWidget(id)
+            onStoreRequested: {
+                desktop.editWidgets(false);
+                desktop.launch("store", { page: "widgets" });
+            }
+            onDoneRequested: desktop.editWidgets(false)
+        }
+
         Shelf {
             id: shelf
             objectName: "shelf"
             anchors.horizontalCenter: parent.horizontalCenter
-            y: parent.height - height - 12 + 110 * lockDepth.value
+            y: parent.height - height - 12 + 110 * Math.max(lockDepth.value, editDepth.value)
             backdrop: sceneBackdrop
             runningApps: windows.runningApps
             attentionApps: windows.attentionApps
@@ -760,8 +831,30 @@ FocusScope {
     }
     Shortcut {
         sequence: "Escape"
-        enabled: desktop.surface !== ""
-        onActivated: desktop.setSurface("")
+        enabled: desktop.surface !== "" || desktop.editingWidgets
+        onActivated: desktop.editingWidgets ? desktop.editWidgets(false) : desktop.setSurface("")
+    }
+
+    // The desktop's own menu (right click, or press and hold, on the desktop).
+    Menu {
+        id: desktopMenu
+        objectName: "desktopMenu"
+        MenuItem {
+            objectName: "editWidgets"
+            text: qsTr("Edit Widgets")
+            onTriggered: desktop.editWidgets(true)
+        }
+        MenuItem {
+            objectName: "changeTheme"
+            text: qsTr("Change Theme…")
+            onTriggered: desktop.launch("settings", { page: "appearance" })
+        }
+        MenuSeparator { }
+        MenuItem {
+            objectName: "openStore"
+            text: qsTr("Get Themes and Widgets…")
+            onTriggered: desktop.launch("store", { page: "discover" })
+        }
     }
     Repeater {
         model: desktop.spaceCount

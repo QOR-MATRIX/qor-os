@@ -51,6 +51,13 @@ find_package(Qt6 ${QTOS_QT_MIN_VERSION} REQUIRED COMPONENTS
     Multimedia
 )
 
+# The Store verifies signatures with the platform's crypto: CNG on Windows,
+# OpenSSL's libcrypto elsewhere. Found here so every target that links
+# qtos_store sees the imported target.
+if(NOT WIN32)
+    find_package(OpenSSL 3 REQUIRED COMPONENTS Crypto)
+endif()
+
 qt_standard_project_setup(REQUIRES ${QTOS_QT_MIN_VERSION})
 
 # All QML modules land in one import directory so qmllint, qmlls and the
@@ -67,6 +74,7 @@ add_subdirectory(kit)
 add_subdirectory(audio)
 add_subdirectory(input)
 add_subdirectory(services)
+add_subdirectory(store)
 add_subdirectory(sim)
 add_subdirectory(apps)
 add_subdirectory(prism)

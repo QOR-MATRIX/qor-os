@@ -224,6 +224,9 @@ The **state** includes:
   the strip is, in Spaces) and `overviewProgress`;
 - `gesture`: the system gesture under way (`active`, `axis`, `source`,
   `fingers`, `translation`);
+- `store`: whether the catalogue is `ready`, its number of `items`, and what
+  is `installed` (`"id@version,…"`); `editingWidgets`, and `desktopWidgets`
+  (`"id@col,row;…"`);
 - `frames`: frames the shell has drawn (a client inside Prism gets frame
   callbacks only when Prism draws);
 - open `popups`, as screen rectangles;

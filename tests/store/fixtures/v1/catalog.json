@@ -1,0 +1,64 @@
+{
+  "format": 1,
+  "store": "QTOS Store",
+  "developers": {
+    "org.example": {
+      "name": "Example",
+      "verified": true,
+      "key": "BNLQv1Mqj9BuchHBGSWSfqPpQB/9bqO1OyGLz5MW7Qtg8sXiVDzwMQ/US9/OijNVc2DPArRN2cD5Ki3+UVr2tuI="
+    }
+  },
+  "items": [
+    {
+      "id": "org.example.theme.test",
+      "kind": "theme",
+      "name": "Test Theme",
+      "developer": "org.example",
+      "version": "1.0.0",
+      "summary": "A test theme.",
+      "description": "For tests.",
+      "whatsNew": "",
+      "released": "2026-10-26",
+      "tags": [],
+      "featured": false,
+      "price": 0,
+      "preview": {
+        "accentHue": 120,
+        "appearance": "dark",
+        "neutralHue": 100,
+        "neutralTint": 1.2,
+        "wallpaperSeed": 3,
+        "wallpaperIntensity": 0.9
+      },
+      "package": {
+        "file": "packages/org.example.theme.test-1.0.0.qtospkg",
+        "size": 775,
+        "sha256": "4d588321985d55d024ce2e738be7a9befa258e41d8203f9fb050acf963e064c5"
+      }
+    },
+    {
+      "id": "org.example.widget.test",
+      "kind": "widget",
+      "name": "Test Widget",
+      "developer": "org.example",
+      "version": "1.0.0",
+      "summary": "A test widget.",
+      "description": "For tests.",
+      "whatsNew": "",
+      "released": "2026-10-26",
+      "tags": [],
+      "featured": false,
+      "price": 0,
+      "preview": {
+        "size": "small",
+        "glyph": "layout-grid",
+        "hue": 274
+      },
+      "package": {
+        "file": "packages/org.example.widget.test-1.0.0.qtospkg",
+        "size": 954,
+        "sha256": "87701cf859333e1bd589fbe59b807c135477f2c1f4b7e785a1b7fe80ef3b7084"
+      }
+    }
+  ]
+}

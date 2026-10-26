@@ -4,6 +4,8 @@
 #include "gamepadmanager.h"
 #include "injection.h"
 #include "services.h"
+#include "store.h"
+#include "storeengine.h"
 
 #include <QtCore/QCoreApplication>
 #include <QtCore/QDir>
@@ -523,6 +525,41 @@ private:
 
     QPointF centre() const { return QPointF(m_window->width() / 2.0, m_window->height() / 2.0); }
 
+    static QJsonObject storeState()
+    {
+        const store::StoreEngine *engine = store::Store::engine();
+        QStringList installed = engine->installed().keys();
+        installed.sort();
+        return {
+            { u"ready"_s, engine->state() == store::StoreEngine::State::Ready },
+            { u"items"_s, int(engine->catalog().items.size()) },
+            // Installed ids with their versions, comma-separated: "id@1.0.0,…".
+            { u"installed"_s,
+              [&] {
+                  QStringList list;
+                  for (const QString &id : installed)
+                      list.append(id + u'@' + engine->installed().value(id).version);
+                  return list.join(u',');
+              }() },
+        };
+    }
+
+    QString desktopWidgets() const
+    {
+        auto *settings = Services::instance()->property("settings").value<QObject *>();
+        const QJsonArray list =
+            QJsonDocument::fromJson(settings ? settings->property("widgets").toString().toUtf8() : QByteArray())
+                .array();
+        QStringList widgets;
+        for (const QJsonValue &value : list) {
+            const QJsonObject entry = value.toObject();
+            widgets.append(u"%1@%2,%3"_s.arg(entry.value(u"id"_s).toString())
+                               .arg(entry.value(u"col"_s).toInt())
+                               .arg(entry.value(u"row"_s).toInt()));
+        }
+        return widgets.join(u';');
+    }
+
     QJsonObject gestureState() const
     {
         QObject *gestures = m_desktop->findChild<QObject *>(u"systemGestures"_s);
@@ -963,9 +1000,10 @@ private:
         };
         return {
             { u"settings"_s,
-              snapshot("settings", { "darkMode", "accentHue", "reduceMotion", "reduceTransparency", "increaseContrast",
-                                     "livingWallpaper", "audioReactive", "reactiveIntensity", "reactiveLowHz",
-                                     "reactiveHighHz", "controllerInterface", "controllerAutoSwitch" }) },
+              snapshot("settings",
+                       { "darkMode", "accentHue", "reduceMotion", "reduceTransparency", "increaseContrast",
+                         "livingWallpaper", "audioReactive", "reactiveIntensity", "reactiveLowHz", "reactiveHighHz",
+                         "controllerInterface", "controllerAutoSwitch", "theme", "widgets" }) },
             { u"audio"_s, snapshot("audio", { "volume", "muted", "outputDevice", "equalizer", "equalizerPreset",
                                               "systemSounds", "systemVolume", "active" }) },
             { u"media"_s,
@@ -978,6 +1016,10 @@ private:
             { u"spaceOffset"_s, manager ? manager->property("spaceOffset").toDouble() : 0 },
             { u"overviewProgress"_s, m_desktop->property("overviewProgress").toDouble() },
             { u"gesture"_s, gestureState() },
+            { u"store"_s, storeState() },
+            { u"editingWidgets"_s, m_desktop->property("editingWidgets").toBool() },
+            // The desktop's widgets in Settings order: "id@col,row;…".
+            { u"desktopWidgets"_s, desktopWidgets() },
             { u"surface"_s, m_desktop->property("surface").toString() },
             { u"controller"_s, QJsonValue::fromVariant(plain(m_desktop->property("controllerState"))) },
             // Frames the shell has drawn: a client inside Prism gets frame

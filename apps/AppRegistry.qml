@@ -29,15 +29,18 @@ QtObject {
           description: qsTr("Live CPU, GPU, memory and frame-time telemetry, drawn with Qt Graphs.") },
         { id: "settings", name: qsTr("Settings"), glyph: "settings", hue: 262, chroma: 0.03, width: 960, height: 660,
           keywords: "preferences control panel configure options system",
-          description: qsTr("Appearance, display, sound, network and accessibility.") }
+          description: qsTr("Appearance, display, sound, network and accessibility.") },
+        { id: "store", name: qsTr("Store"), glyph: "shopping-bag", hue: 300, chroma: 0.17, width: 1100, height: 720,
+          keywords: "shop market download install themes widgets apps games tools get",
+          description: qsTr("Themes and widgets for QTOS, signed and verified.") }
     ]
 
-    readonly property var pinned: ["files", "music", "notes", "terminal", "monitor", "settings"]
+    readonly property var pinned: ["files", "music", "notes", "terminal", "monitor", "store", "settings"]
 
     readonly property var settingsPages: [
         { id: "appearance", title: qsTr("Appearance"), icon: "palette",
-          keywords: "dark light theme accent color wallpaper aurora living",
-          description: qsTr("Light and dark, accent color and the living wallpaper.") },
+          keywords: "dark light theme themes accent color wallpaper aurora living",
+          description: qsTr("Themes, light and dark, accent color and the living wallpaper.") },
         { id: "display", title: qsTr("Display"), icon: "monitor",
           keywords: "brightness night light screen temperature",
           description: qsTr("Brightness and Night Light.") },
@@ -97,6 +100,7 @@ QtObject {
         case "terminal": return terminalComponent;
         case "monitor": return monitorComponent;
         case "settings": return settingsComponent;
+        case "store": return storeComponent;
         }
         return null;
     }
@@ -107,4 +111,5 @@ QtObject {
     readonly property Component terminalComponent: Component { TerminalApp { } }
     readonly property Component monitorComponent: Component { MonitorApp { } }
     readonly property Component settingsComponent: Component { SettingsApp { } }
+    readonly property Component storeComponent: Component { StoreApp { } }
 }

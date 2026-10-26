@@ -1,0 +1,18 @@
+{
+  "id": "org.qtos.widget.focus",
+  "name": "Focus",
+  "version": "1.0.0",
+  "developer": "org.qtos",
+  "summary": "A 25-minute focus timer.",
+  "description": "Tap to start a 25-minute focus session, tap again to pause, and press and hold to reset. The ring empties as the session runs.",
+  "whatsNew": "First release.",
+  "released": "2026-10-26",
+  "tags": [
+    "timer",
+    "productivity",
+    "pomodoro",
+    "focus"
+  ],
+  "featured": false,
+  "price": 0
+}

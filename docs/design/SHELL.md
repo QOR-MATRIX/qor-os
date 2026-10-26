@@ -160,6 +160,26 @@ the strip with it. Windows of Spaces out of view are not drawn.
   Click empty space to exit. Drag a window onto a Space chip to move it
   there.
 
+### Themes and widgets
+
+Themes and widgets come from the Store ([STORE.md](../STORE.md)).
+
+- **Themes** set the accent, a preferred appearance, a tint for every
+  neutral surface (hue and chroma, sprung like the accent) and the Aurora
+  wallpaper's seed and intensity. Choose one in Settings › Appearance, the
+  Store or Beam.
+- **Widgets** (`WidgetLayer.qml`) sit on glass cards over the wallpaper and
+  under the windows, the same on every Space. They use a grid of 152 px
+  cells from the work area's top left, clear of notifications. They fade out
+  for Overview and the lock screen.
+- **Editing widgets**: right-click the desktop (or press and hold on a
+  touchscreen) and choose Edit Widgets, or use Beam. The windows step aside
+  and the gallery (`WidgetGallery.qml`) replaces the Shelf, showing live
+  previews of installed widgets. Click one to add it, drag a widget to a free
+  cell, × removes one; Escape or Done finishes.
+- **The desktop menu** also offers Change Theme… and Get Themes and
+  Widgets….
+
 ### Gestures
 
 Swipes with three or more fingers, on a touchpad or a touchscreen, belong to

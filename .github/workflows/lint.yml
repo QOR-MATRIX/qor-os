@@ -36,6 +36,9 @@ jobs:
       - name: Token generator tests
         run: python -m unittest discover -s tests/tools -v
 
+      - name: Store catalogue is signed and matches its content
+        run: python tools/store/build_store.py check
+
       - name: SPDX license headers
         run: python tools/ci/check_headers.py
 

@@ -31,6 +31,13 @@ Q_IMPORT_QML_PLUGIN(QTOS_ServicesPlugin)
 To appear in the shell today, add the app to `QTOS.Apps` instead
 ([DEVELOPMENT.md → Add an app](../docs/DEVELOPMENT.md#add-an-app)).
 
+## Themes and widgets
+
+Themes and desktop widgets ship through the QTOS Store as signed packages.
+The formats, the widget contract and the signing tool are in
+[docs/STORE.md](../docs/STORE.md). Until the developer program opens, the
+Store installs only QOR-MATRIX's own.
+
 ## Guidelines
 
 - Use Lumen controls (`import QtQuick.Controls`), Kit components, `Theme`
