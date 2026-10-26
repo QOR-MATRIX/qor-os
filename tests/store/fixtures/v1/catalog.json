@@ -5,7 +5,7 @@
     "org.example": {
       "name": "Example",
       "verified": true,
-      "key": "BEUTlEs4r4F1F+mar/oi70OwH7pGMJ+KEmjNkU17VFB8wv9Ear6aYA84mIUPuMs3uuzsRUJ/OwtZEQkdI9to/Gg="
+      "key": "BNLQv1Mqj9BuchHBGSWSfqPpQB/9bqO1OyGLz5MW7Qtg8sXiVDzwMQ/US9/OijNVc2DPArRN2cD5Ki3+UVr2tuI="
     }
   },
   "items": [
@@ -33,7 +33,7 @@
       "package": {
         "file": "packages/org.example.theme.test-1.0.0.qtospkg",
         "size": 775,
-        "sha256": "8f9be7c6bb61c29c092067b90c93620202a4e052dbb982847153243859def74d"
+        "sha256": "4d588321985d55d024ce2e738be7a9befa258e41d8203f9fb050acf963e064c5"
       }
     },
     {
@@ -57,7 +57,7 @@
       "package": {
         "file": "packages/org.example.widget.test-1.0.0.qtospkg",
         "size": 954,
-        "sha256": "ff8ebbfa0f93546b7f82c9ce9c8a51359259659a89517f8d6cf38e13b3f8e8a1"
+        "sha256": "87701cf859333e1bd589fbe59b807c135477f2c1f4b7e785a1b7fe80ef3b7084"
       }
     }
   ]

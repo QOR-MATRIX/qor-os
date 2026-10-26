@@ -5,7 +5,7 @@
     "org.example": {
       "name": "Example",
       "verified": true,
-      "key": "BEUTlEs4r4F1F+mar/oi70OwH7pGMJ+KEmjNkU17VFB8wv9Ear6aYA84mIUPuMs3uuzsRUJ/OwtZEQkdI9to/Gg="
+      "key": "BNLQv1Mqj9BuchHBGSWSfqPpQB/9bqO1OyGLz5MW7Qtg8sXiVDzwMQ/US9/OijNVc2DPArRN2cD5Ki3+UVr2tuI="
     }
   },
   "items": [
@@ -33,7 +33,7 @@
       "package": {
         "file": "packages/org.example.theme.test-1.0.0.qtospkg",
         "size": 775,
-        "sha256": "2d5b0fdd5d39b4075aff36df07aaba23b9a5031d3fa4f752d8407a196ad131c3"
+        "sha256": "def5d2dcea14a408d1cece2ebc45a90dcd20f278f3c762d9e98e038d48e78fcd"
       }
     }
   ]
