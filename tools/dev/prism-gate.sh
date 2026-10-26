@@ -196,7 +196,12 @@ cleanup() {
         kill "${pids[@]}" 2> /dev/null || true
     fi
 }
-trap cleanup EXIT
+# The results, or the logs of a run that failed, packed for upload.
+# shellcheck disable=SC2329 # called from the EXIT trap
+pack() {
+    tar -C "$(dirname "$out")" -czf "$out.tgz" "$(basename "$out")" && echo "Saved $out and $out.tgz"
+}
+trap 'cleanup; pack' EXIT
 trap 'echo "Stopped." >&2; exit 130' INT TERM
 
 socket="wayland-gate-$$"
@@ -229,7 +234,7 @@ for i in $(seq 1 "$outputs"); do
     pids+=($!)
     sleep 0.5
 done
-echo "Measuring for ${seconds} s. The screens return when it is done."
+echo "Measuring for about $((seconds + 15)) s. The screens return when it is done."
 wait "$prism_pid" || true
 cleanup
 pids=()
@@ -300,6 +305,4 @@ open(os.path.join(out, "summary.md"), "w").write(summary)
 print(summary)
 sys.exit(0 if trial or (passed and enough) else 1)
 PY
-tar -C "$(dirname "$out")" -czf "$out.tgz" "$(basename "$out")"
-echo "Saved $out and $out.tgz"
 exit $status
