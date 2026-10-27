@@ -145,8 +145,9 @@ Unchanged items keep their signed packages, so rebuilding changes nothing.
 bytes alone (`.gitattributes`).
 
 **Signing keys never enter the repository.** `build` keeps them in
-`~/.qor-os/store-signing/`, or in QTOS's `~/.qtos/store-signing/` while the
-keys are still there, so a missing folder never creates a new store key:
+`~/.qor-os/store-signing/` (moved there from QTOS's `~/.qtos/store-signing/`
+on 27 October 2026). If a machine still has only the old folder, `build`
+uses it, so a missing folder never creates a new store key:
 `store.pem` signs the catalogue and
 `developer-<id>.pem` signs that developer's packages. The first build creates
 them and writes the store's public key to `store/keys/store.pub`. Back these

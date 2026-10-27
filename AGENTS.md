@@ -108,8 +108,9 @@ Makers are paid when their work is used, licensed or remixed.
   them is checked for this in the same change, whatever the value is called.
 - **Secrets stay out of the repository:**
   - The Store's signing keys live on the owner's machine, in
-    `~/.qor-os/store-signing/` (or QTOS's `~/.qtos/store-signing/` until the
-    owner moves them; `tools/store/build_store.py` uses whichever holds them).
+    `~/.qor-os/store-signing/` (moved from QTOS's `~/.qtos/store-signing/` on
+    27 October 2026, with a dated backup beside them). Never read, print, copy
+    or move them unless the owner asks.
   - Qt Account credentials (`qtaccount.ini`) are never printed or copied into
     the tree.
   - Runner registration tokens are piped from `gh`, never printed.
