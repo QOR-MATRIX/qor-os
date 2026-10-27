@@ -9,6 +9,7 @@ kept true.
 | [../OWNER.md](../OWNER.md) | see where QOR OS stands, on one page |
 | [../VISION.md](../VISION.md) | understand what QOR OS is and where it is going |
 | [ROADMAP.md](ROADMAP.md) | see what is done, what is next, and the release gates |
+| [release/](release/README.md) | act on each release gate: who must act, the next step, and the drafts for the owner's advisers (Qt, trademarks, terms and privacy, signing, the security review, sign-in) |
 | [decisions/](decisions/README.md) | read why decisions were made (QOR, QTOS and Demiurge records); propose new ones |
 | [UPSTREAM.md](UPSTREAM.md) | know what is carried from demiurge-chain, how to pull it, and how the QOR core's pin moves |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | understand how the code is organised and how the pieces talk |

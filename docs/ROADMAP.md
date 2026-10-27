@@ -94,14 +94,16 @@ SDK.
 
 Nothing is published until all of these hold
 ([QOR-0008](decisions/QOR-0008-before-a-public-release.md)). They are the
-owner's to obtain:
+owner's to obtain. This list is their status. [release/](release/README.md)
+holds, for each one, who must act, the next step, and what is prepared for
+the owner's advisers.
 
-- [ ] The Qt Company's written confirmation of the licence to distribute Qt in a QOR OS image and SDK
-- [ ] Trademark clearance for "QOR OS", QQ and ARQADE
-- [ ] Terms of Service, a privacy policy, and a legal opinion on rewards, prizes, identity checks, sanctions and age limits
-- [ ] Code-signing certificates and the Secure Boot key
-- [ ] An external security review of the QOR core and the vault service
-- [ ] QOR ID in a second region with offline login; the key exposed on 5 October 2026 replaced
+- [ ] The Qt Company's written confirmation of the licence to distribute Qt in a QOR OS image and SDK ([release/QT.md](release/QT.md))
+- [ ] Trademark clearance for "QOR OS", QQ and ARQADE ([release/TRADEMARKS.md](release/TRADEMARKS.md))
+- [ ] Terms of Service, a privacy policy, and a legal opinion on rewards, prizes, identity checks, sanctions and age limits ([release/LEGAL.md](release/LEGAL.md))
+- [ ] Code-signing certificates and the Secure Boot key ([release/SIGNING.md](release/SIGNING.md))
+- [ ] An external security review of the QOR core and the vault service ([release/SECURITY-REVIEW.md](release/SECURITY-REVIEW.md))
+- [ ] QOR ID in a second region with offline login; the key exposed on 5 October 2026 replaced ([release/SIGN-IN.md](release/SIGN-IN.md))
 
 ## History: QTOS phases
 

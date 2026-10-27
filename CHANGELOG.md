@@ -24,6 +24,7 @@ QOR OS begins: QTOS and Demiurge's device-side products in one repository
 - `OWNER.md`: where QOR OS stands, on one page, rewritten every session.
 - `tools/ci/runners.ps1` moves the workstation's two CI runners to the organisation or a repository and starts them. It leaves a runner already in place alone and never stops one that is running a job. Both runners serve the organisation since 27 October.
 - `LICENSES/Apache-2.0.txt` and the carried paths in `THIRD_PARTY_NOTICES.md` and `LICENSE`.
+- **`docs/release/`**, the owner's pack for the six release gates, linked from ROADMAP.md's gates, which stay the only status: the letter to The Qt Company, a trademark knockout brief for an attorney, a brief for counsel on the terms, the privacy policy and the legal opinion, code signing and the Secure Boot key, an RFP for the external security review, and a runbook for replacing the 5 October key. It is research, not legal advice, and ticks no gate. `THIRD_PARTY_NOTICES.md` now says what licence the core's crate declares at the pin, and that upstream records which licence governs it as open.
 
 ### Changed
 

@@ -23,10 +23,22 @@ repository is proprietary ([LICENSE](LICENSE)).
 
 The **QOR core** is built from demiurge-chain at a pinned commit and linked
 into QOR OS, not carried in this repository
-([QOR-0003](docs/decisions/QOR-0003-the-qor-core-at-a-pinned-commit.md)). Its
-crate declares the MIT license, and its Rust dependencies are listed by its
-`Cargo.lock` at that commit. Their notices must accompany any distributed
-binary (Phase 3: generated with the image's SBOM).
+([QOR-0003](docs/decisions/QOR-0003-the-qor-core-at-a-pinned-commit.md)). At
+the current pin, `e99c7ce`, the core's manifest (`qor-launcher-core`) declares
+`license = "MIT"`, while demiurge-chain's root `LICENSE` is Apache-2.0
+("Copyright 2026 Demiurge") and that repository holds no MIT text for the
+crate. At that commit, which of the two governs the crate is recorded upstream
+as open, for the owner to decide (`HANDOFF.md` §4.0, "The launcher's crates'
+licence"). The `mesh-proof` crate it compiles in from the same repository
+(through its `chain` feature, which `desktop` turns on) declares Apache-2.0.
+demiurge-chain's ADR-122, proposed for the owner on 27 October 2026 (its pull
+request #108), would set the core's manifest, with five other active crates',
+to Apache-2.0 from the commit that accepts it; earlier commits keep what they
+declared. When the pin moves to a commit that includes it, the commit that
+moves the pin ([docs/UPSTREAM.md](docs/UPSTREAM.md#moving-the-cores-pin))
+updates this paragraph. The core's Rust dependencies are listed by its
+`Cargo.lock` at the pinned commit. Their notices must accompany any
+distributed binary (Phase 3: generated with the image's SBOM).
 
 ## Components
 

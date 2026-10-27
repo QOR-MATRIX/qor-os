@@ -1,6 +1,6 @@
 # Where QOR OS stands
 
-For Andrew, 27 October 2026. One page, rewritten every session (`AGENTS.md` §2).
+For Andrew, 27 October 2026 (evening). One page, rewritten every session (`AGENTS.md` §2).
 
 ## What QOR OS is
 
@@ -14,50 +14,46 @@ inside Prism, driven by a controller.
 
 ## This session
 
-1. **The QOR core moved to your merge of #107** (`e99c7ce`) with every module
-   the Windows launcher has: QOR ID's and Social's clients, the chain client,
-   the Library's index, the Mesh and Qontrol. CI passed on Windows and Linux.
-   I also fixed a trap: CI reuses its build folders, which would have kept the
-   old core. A moved pin now always takes effect.
-2. **One name: QOR OS**, as you asked, in the interface, the documents and the
-   code ([QOR-0009](docs/decisions/QOR-0009-the-name-is-qor-os.md)).
-   - Programs are `qor-shell`, `qorctl` and `qor-simd`; code is `qor`; QML
-     modules are `QOR.Kit`, `QOR.Shell` and so on, beside the carried
-     `QOR.Media`; settings are `QOR_*`.
-   - The Store's items are `dev.qorsync.*`, on the ecosystem's real domain,
-     and the catalogue is the "QOR OS Store".
-   - "QTOS" now means only the predecessor: its frozen repository and its
-     history.
-   - Nothing of yours is lost. The shell and simulator copy your settings and
-     installed Store items from the old names the first time they run. The
-     Store was re-signed with **your existing key**, so its root of trust is
-     unchanged.
-3. **The runners serve the whole organisation.** You moved them. A second run
-   of the script stopped the Windows runner mid-job; I restarted it, and the
-   script now refuses to touch a busy runner and skips one already in place.
-   That interrupted job was QTOS's last build, so I reran it and QTOS ends
-   green.
-4. **QTOS is tidy:** its phase issues #2–#6 and milestones are closed, each
-   pointing to where its work went in QOR OS.
+1. **The core** — *the Rust code that holds keys* — is built at your merge of
+   #107, with all its modules. One name, **QOR OS**, runs through the code
+   ([QOR-0009](docs/decisions/QOR-0009-the-name-is-qor-os.md)). CI passed.
+2. **The Store's signing keys moved** to `C:\Users\Godmode\.qor-os\store-signing`,
+   checked byte for byte, with a backup beside them
+   (`store-signing-backup-2026-10-27`). The Store tool uses the new place.
+3. **demiurge-chain #108**, records only, waits for your merge:
+   - **ADR-121 accepted** at your "proceed with", logged as a retroactive
+     approval because the merge came first.
+   - **ADR-122 proposed:** should the six active Rust crates say Apache-2.0,
+     like the repository, instead of MIT? I recommend yes, but it is yours:
+     my own list told you it was yours to decide, and changing a licence is
+     the copyright holder's act.
+   - A fault found in Demiurge's gates page, reported, not fixed.
+4. **The release gates have a pack:** [`docs/release/`](docs/release/README.md)
+   holds, for each gate, the facts, drafts, questions and next step, checked
+   by two reviewers each. It found things you should know (below).
 
 ## Needs you
 
-1. **Move the Store's signing keys when convenient** (optional): rename
-   `C:\Users\Godmode\.qtos\store-signing` to
-   `C:\Users\Godmode\.qor-os\store-signing`. Back them up first. The tools use
-   either. `developer-org.qtos.pem` in there is no longer used.
-2. **Two loose ends in demiurge-chain**, by your rules there:
-   - ADR-121's file still says "Proposed", although #107 merged with its
-     option A. Its next records update should mark it accepted.
-   - The core's crates say MIT while the repository is Apache-2.0
-     (ADR-120's open question).
-3. **The release gates**, before anything is public:
-   - The Qt Company's written OK to ship Qt in an OS image;
-   - a trademark attorney for "QOR OS";
-   - the legal list in Demiurge's `OWNER.md`.
+1. **Which legal entity?** Four names appear as the copyright holder or Qt
+   licensee: QOR-MATRIX, Demiurge, Laustrup Group, Astra Matrix, Inc. The Qt
+   letter, trademark filings, the terms and code signing all need one real
+   entity. See [the pack's first question](docs/release/README.md#one-question-first-which-legal-entity).
+2. **Trademarks, before more public use.** The preliminary search — *not
+   legal advice* — found close live marks: Tencent's **QQ** (game software),
+   Arqiva's **ARQADE**, and Stack Exchange's "Arqade" gaming site; "QOR OS"
+   sounds like Red Hat's **COREOS**. Take
+   [TRADEMARKS.md](docs/release/TRADEMARKS.md) to an attorney soon.
+3. **Qt:** Qt's published terms do not say whether a free OS image is an
+   *application* (no fee) or a *device* (a fee per copy). The letter asking
+   them is ready in [QT.md](docs/release/QT.md), with blanks only you can
+   fill from your Qt account.
+4. **Merge #108**, and say "accept ADR-122" (or not).
+5. **Now, needing nobody else:** find which account the phrase pasted on
+   5 October controls and replace it
+   ([SIGN-IN.md](docs/release/SIGN-IN.md)), and move the Store keys' backup
+   off this PC.
 
 ## Next
 
 Phase 1: QQ, ARQADE and QOR Media built on Linux and running inside Prism,
-driven by a DualSense. Then sign-in and keys (Phase 2), then booting on the
-G15 with Steam (Phase 3).
+driven by a DualSense.

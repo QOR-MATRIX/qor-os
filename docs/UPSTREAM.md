@@ -119,15 +119,22 @@ QOR OS only is split before it lands.
 
 ### Open upstream
 
-- **The crates' licence.** The core's manifests say MIT while demiurge-chain
-  is Apache-2.0; its ADR-120 leaves this to the owner. QOR OS's
-  [`THIRD_PARTY_NOTICES.md`](../THIRD_PARTY_NOTICES.md) follows whatever is
-  decided.
-- **ADR-121's status line.** #107 carried the record's option A (the core's
-  audit ignores RUSTSEC-2026-0344 in `ruzstd`, which only subxt's light client
-  reaches and nothing builds, as the launcher's audit already does) and was
-  merged with it. The record itself still reads "Proposed", so demiurge-chain's
-  next records update marks it accepted.
+Both are in
+[demiurge-chain #108](https://github.com/QOR-MATRIX/demiurge-chain/pull/108),
+a records-only pull request opened on 27 October 2026 for the owner to merge.
+Neither changes the core's code, so neither moves the pin by itself.
+
+- **ADR-121, accepted.** #107 carried the record's option A (the core's audit
+  ignores RUSTSEC-2026-0344 in `ruzstd`, which only subxt's light client
+  reaches and nothing builds, as the launcher's audit already does). The owner
+  then answered "proceed with" to marking it accepted, and #108 records that,
+  with GATES' approval logged as retroactive.
+- **ADR-122, proposed: the crates' licence.** The core's manifest says MIT
+  while demiurge-chain is Apache-2.0 (ADR-120 left this to the owner). ADR-122
+  recommends that the six active crates declare Apache-2.0 and waits for the
+  owner to accept it. If accepted, the manifests change in a later
+  demiurge-chain commit; when the pin moves to it, the same QOR OS commit
+  updates [`THIRD_PARTY_NOTICES.md`](../THIRD_PARTY_NOTICES.md).
 
 ## Cutting over
 
