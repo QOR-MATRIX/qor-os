@@ -254,9 +254,12 @@ network. Its source is `tools/qor-launcher/core/` in demiurge-chain, and
 QOR OS never copies it
 ([QOR-0003](decisions/QOR-0003-the-qor-core-at-a-pinned-commit.md)).
 
-- `core/CMakeLists.txt` fetches demiurge-chain at `QOR_CORE_COMMIT` (or uses
-  `QOR_CORE_SOURCE_DIR`), and Corrosion builds the `qor-launcher-core` crate as
-  a static library from its `Cargo.lock`.
+- `core/CMakeLists.txt` fetches demiurge-chain at the pin, `QOR_CORE_COMMIT`
+  (or uses `QOR_CORE_SOURCE_DIR`), and Corrosion builds the `qor-launcher-core`
+  crate as a static library from its `Cargo.lock`, with the `desktop` feature:
+  every module demiurge-chain's L13.2 moved into the core, as the Windows
+  launcher builds it. Those modules are QOR ID's and Social's clients, the
+  chain client, the Library's index, the Mesh and Qontrol.
 - The bridge is three C functions:
   - `qor_core_version()`;
   - `qor_core_call(request)`, which takes `{"command": …, "args": {…}}` and
@@ -265,7 +268,9 @@ QOR OS never copies it
 
   Amounts cross as decimal strings of embers, and no command answers with a key.
 - At the current pin the bridge answers `core_version`, `token_info`,
-  `parse_amount` and `format_sparks`. It grows upstream as Phase 2 needs it.
+  `parse_amount` and `format_sparks`. The modules L13.2 moved in are compiled
+  and linked but not yet reachable through it; the bridge grows upstream as
+  Phase 2 needs them.
 - `QOR_BUILD_CORE` is on where `cargo` is found, and the CI presets require it.
 
 ## 11. Carried products

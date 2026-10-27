@@ -67,18 +67,26 @@ runners:
 
 ### Runners for the organisation
 
-A runner serves either one repository or the organisation. Registered to the
-organisation (`QOR-MATRIX`), in its Default runner group, the same two runners
-serve QOR OS and the frozen QTOS. That is the intended setup
-([ROADMAP](ROADMAP.md) Phase 0).
+A runner serves either one repository or the organisation. Both runners are
+registered to the organisation (`QOR-MATRIX`, since 27 October 2026), in its
+Default runner group, so the same two serve QOR OS and the frozen QTOS. The
+Default group does not allow public repositories, so the public
+demiurge-chain never runs on this workstation, and it must stay that way: a
+self-hosted runner on a public repository runs code from anyone's pull
+request.
 
 `tools/ci/runners.ps1` moves both runners in one command:
 
-1. It removes each from where it is registered now.
-2. It registers it at the new scope, with the same names and labels.
-3. It pins the Linux runner's PATH (with `~/.cargo/bin`) and display
+1. It leaves a runner already registered at the scope asked for as it is, so
+   running it twice is harmless.
+2. It refuses to touch a runner GitHub reports busy. Stopping one mid-job
+   orphans the job, and GitHub then refuses to remove the runner until the
+   job times out.
+3. It removes each other runner from where it is registered now, and
+   registers it at the new scope with the same name and labels.
+4. It pins the Linux runner's PATH (with `~/.cargo/bin`) and display
    variables.
-4. It starts both, minimised.
+5. It starts both, minimised.
 
 Tokens are piped from `gh`, never printed.
 
@@ -89,8 +97,7 @@ gh auth refresh -h github.com -s admin:org   # once: organisation runners need t
 .\tools\ci\runners.ps1 -StartOnly            # just start them (after a reboot, without Startup entries)
 ```
 
-Until the token has `admin:org`, the runners are registered to `qor-os` alone.
-QTOS is frozen, so its CI does not run.
+QTOS is frozen, so its CI runs only if someone pushes to it.
 
 Repository variables (*Settings → Secrets and variables → Actions → Variables*,
 or `gh variable set <NAME> --body <VALUE> --repo QOR-MATRIX/qor-os`). The

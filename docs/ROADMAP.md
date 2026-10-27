@@ -20,9 +20,9 @@ products included on Windows.
 - [x] The QOR core built from demiurge-chain at a pinned commit and tested through its C bridge (`core/`, `tst_qorcore`; [QOR-0003](decisions/QOR-0003-the-qor-core-at-a-pinned-commit.md))
 - [x] One rulebook ([AGENTS.md](../AGENTS.md)) and one decision log, QOR-0001 to QOR-0008 ([decisions/](decisions/README.md))
 - [x] The carried products build and pass their suites here (`tools/dev/products.ps1`)
-- [ ] The CI runners serve both QTOS and QOR OS from the organisation ([CI.md](CI.md#runners-for-the-organisation))
+- [x] The CI runners serve both QTOS and QOR OS from the organisation, since 27 October ([CI.md](CI.md#runners-for-the-organisation))
 - [x] CI green on Windows (with the products) and Linux: the first run on 26 October passed every job, the products on their first attempt
-- [ ] Demiurge's L13.2 merged upstream (QOR ID's client, the chain client, Social's client, the Library's index, the Mesh and Qontrol in the core), and the core's pin moved to it
+- [x] Demiurge's L13.2 merged upstream (#107, `e99c7ce`, 27 October: QOR ID's client, the chain client, Social's client, the Library's index, the Mesh and Qontrol in the core), and the core's pin moved to it with the `desktop` feature ([UPSTREAM.md](UPSTREAM.md#moves-so-far))
 
 ## Phase 1 · One stack
 

@@ -138,13 +138,18 @@ Build options (`-D<option>=ON|OFF`):
 | `QTOS_WARNINGS_AS_ERRORS` | OFF | `/WX` or `-Werror` |
 | `QTOS_QT_PINNED_VERSION` | 6.12.0 | Version used by Qt auto-location |
 | `QOR_BUILD_CORE` | ON where `cargo` is found | The QOR core and `tst_qorcore` ([UPSTREAM.md](UPSTREAM.md)) |
-| `QOR_CORE_COMMIT` | the pin in `core/CMakeLists.txt` | The demiurge-chain commit the core is built from |
-| `QOR_CORE_SOURCE_DIR` | empty | A local demiurge-chain checkout to build the core from instead, to change the core and QOR OS together |
+| `QOR_CORE_SOURCE_DIR` | empty | A local demiurge-chain checkout to build the core from instead: to change the core and QOR OS together, or to try a commit before the pin moves to it |
+
+The pin (`QOR_CORE_COMMIT`) and the core's Cargo features
+(`QOR_CORE_FEATURES`, `desktop`) are set in `core/CMakeLists.txt` and written
+on every configure, so they are not options. A build folder configured at an
+older pin follows a new one and says so ("the pin moved to …").
 
 The first configure with the core clones demiurge-chain at the pin and
 Corrosion v0.6.1 into the build tree, and the first build compiles the core's
-Rust dependencies. Both need network access and take a few minutes. Later
-builds are incremental.
+Rust dependencies. Both need network access and take a few minutes; with
+`desktop`, the first build of the core takes about 3–4 minutes on the
+workstation. Later builds are incremental.
 
 Outputs (Windows): executables and test binaries in `build/<preset>/`, QML
 modules in `build/<preset>/qml/`, plugins in `build/<preset>/plugins/`.

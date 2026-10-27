@@ -653,5 +653,6 @@ The detail, with every item, is [docs/ROADMAP.md](docs/ROADMAP.md).
 3. ✅ Carry QQ, ARQADE and QOR Media with their history; build and test them here.
 4. ✅ Build the QOR core from demiurge-chain at a pinned commit, tested through its bridge.
 5. ✅ One rulebook and one decision log, QOR-0001 to QOR-0008.
-6. ⏭ CI green on Windows and Linux, with runners shared across the organisation.
-7. ⏭ Move the core's pin to Demiurge's L13.2, then start Phase 1: the products inside Prism on Linux.
+6. ✅ CI green on Windows and Linux, with runners shared across the organisation.
+7. ✅ Move the core's pin to Demiurge's L13.2.
+8. ⏭ Phase 1: the products inside Prism on Linux.

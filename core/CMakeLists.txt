@@ -3,19 +3,26 @@
 # Corrosion, as the QOR Launcher's Qt shell does upstream, and QOR OS reaches it through its C bridge
 # (tools/qor-launcher/core/include/qor_core.h upstream): one JSON request in, one JSON answer out.
 #
-#   QOR_CORE_COMMIT      the demiurge-chain commit the core is built from; docs/UPSTREAM.md says how to move it
-#   QOR_CORE_SOURCE_DIR  a local demiurge-chain checkout to build instead, to change the core and QOR OS together
-#   QOR_CORE_FEATURES    the crate's Cargo features: none at the current pin; "desktop" once the pin includes
-#                        demiurge-chain's L13.2, which puts the modules it moved behind that feature (ADR-120 there)
+#   QOR_CORE_COMMIT      the pin: the demiurge-chain commit the core is built from; docs/UPSTREAM.md says how to move it
+#   QOR_CORE_FEATURES    the crate's Cargo features: "desktop", every module demiurge-chain's L13.2 moved into the core
+#                        (QOR ID's and Social's clients, the chain client, the Library's index, the Mesh and Qontrol),
+#                        as the Windows launcher builds it (ADR-120 there)
+#   QOR_CORE_SOURCE_DIR  a local demiurge-chain checkout to build instead: to change the core and QOR OS together, or
+#                        to try another commit before the pin moves to it
 #
-# The target is qor::core: the static library and the bridge's header.
+# The pin and the features are written here on every configure, never kept from an earlier one, so a build folder
+# configured at an older pin follows a new one; CI reuses its build folders. The target is qor::core: the static
+# library and the bridge's header.
 
 set(QOR_CORE_REPOSITORY "https://github.com/QOR-MATRIX/demiurge-chain.git"
     CACHE STRING "The repository the QOR core comes from")
-set(QOR_CORE_COMMIT "28d9e970fef3bcedb0d0cfbdcf71c74949fed5ec"
-    CACHE STRING "The demiurge-chain commit the QOR core is built from (QOR-0003)")
-set(QOR_CORE_SOURCE_DIR "" CACHE PATH "A local demiurge-chain checkout to build the core from instead of the pinned commit")
-set(QOR_CORE_FEATURES "" CACHE STRING "The QOR core's Cargo features (\"desktop\" once the pin includes L13.2)")
+set(qor_core_cached "$CACHE{QOR_CORE_COMMIT}")
+set(QOR_CORE_COMMIT "e99c7ce62045da08701a2ad6f7769a1a1d87afe6" CACHE INTERNAL "The pin (QOR-0003)")
+set(QOR_CORE_FEATURES "desktop" CACHE INTERNAL "The QOR core's Cargo features")
+set(QOR_CORE_SOURCE_DIR "" CACHE PATH "A local demiurge-chain checkout to build the core from instead of the pin")
+if(qor_core_cached AND NOT qor_core_cached STREQUAL QOR_CORE_COMMIT)
+    message(STATUS "QOR core: the pin moved to ${QOR_CORE_COMMIT} (this build folder had ${qor_core_cached})")
+endif()
 
 include(FetchContent)
 
@@ -37,7 +44,7 @@ endif()
 
 set(qor_core_crate "${qor_core_root}/tools/qor-launcher/core")
 if(NOT EXISTS "${qor_core_crate}/Cargo.toml")
-    message(FATAL_ERROR "No QOR core at ${qor_core_crate}. Check QOR_CORE_COMMIT or QOR_CORE_SOURCE_DIR.")
+    message(FATAL_ERROR "No QOR core at ${qor_core_crate}. Check the pin (QOR_CORE_COMMIT) or QOR_CORE_SOURCE_DIR.")
 endif()
 
 # The Corrosion release the upstream shell uses (tools/qor-launcher/shell/CMakeLists.txt).

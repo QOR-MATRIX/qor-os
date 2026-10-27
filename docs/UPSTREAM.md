@@ -31,11 +31,12 @@ The paths match upstream so that ARQADE's build still finds QQ's runtime at
 
 | Carried path | Upstream commit it was last split at |
 |--------------|---------------------------------------|
-| All five | demiurge-chain `28d9e97` (`main`, 26 October 2026) |
+| All five | demiurge-chain `28d9e97` (`main`, 26 October 2026). Unchanged upstream as of `e99c7ce` (27 October), so no pull was needed |
 
-| QOR core pin | What that core has |
-|--------------|---------------------|
-| `28d9e970fef3bcedb0d0cfbdcf71c74949fed5ec` | Sparks and errors, the vault, profiles and their confirmations; bridge commands `core_version`, `token_info`, `parse_amount`, `format_sparks` |
+| QOR core pin | Features | What that core has |
+|--------------|----------|---------------------|
+| `e99c7ce62045da08701a2ad6f7769a1a1d87afe6` (27 October 2026, the merge of #107) | `desktop` | Everything below, plus the modules L13.2 moved in from the Windows launcher: QOR ID's and Social's clients, the chain client, the Library's index, the Mesh and Qontrol. The bridge's commands are unchanged |
+| `28d9e970fef3bcedb0d0cfbdcf71c74949fed5ec` (26 October 2026, the first pin) | none | Sparks and errors, the vault, profiles and their confirmations; bridge commands `core_version`, `token_info`, `parse_amount`, `format_sparks` |
 
 `tools/upstream/demiurge.sh status` prints the live values. Update the tables
 above whenever they change.
@@ -87,39 +88,46 @@ QOR OS only is split before it lands.
 ## Moving the core's pin
 
 1. Pick a commit on demiurge-chain's `main` (never a branch commit).
-2. Build and test against it, either by setting the pin or by pointing at a
-   local checkout:
+2. Build and test against it from a checkout of that commit:
 
    ```bash
-   cmake --preset windows-release -DQOR_CORE_COMMIT=<full hash>
-   cmake --preset windows-release -DQOR_CORE_SOURCE_DIR=X:/Repoz/demiurge-chain   # a local checkout
+   git -C X:/Repoz/_upstream/demiurge-chain checkout <full hash>
+   cmake --preset windows-release -DQOR_CORE_SOURCE_DIR=X:/Repoz/_upstream/demiurge-chain
    ```
 
-3. Change `QOR_CORE_COMMIT` in [`core/CMakeLists.txt`](../core/CMakeLists.txt)
-   and the table above in one commit, named "Pin the QOR core at
-   demiurge-chain `<short hash>`", saying what changed in the core.
+3. Change `QOR_CORE_COMMIT` (and `QOR_CORE_FEATURES`, if the crate's features
+   changed) in [`core/CMakeLists.txt`](../core/CMakeLists.txt) and the table
+   above in one commit, named "Pin the QOR core at demiurge-chain
+   `<short hash>`", saying what changed in the core. Both are written on every
+   configure, so every build folder, CI's included, follows the move.
 4. CI must pass, including `tst_qorcore`.
 
-**Next move:** to the merge commit of
-[demiurge-chain #107](https://github.com/QOR-MATRIX/demiurge-chain/pull/107)
-(L13.2), once the owner merges it. That change moves QOR ID's client, the
-chain client, Social's client, the Library's index, the Mesh and Qontrol into
-the core, each behind a Cargo feature. `desktop` turns on all of them, and the
-Windows launcher and QOR OS build with it (demiurge-chain's ADR-120). So the
-same commit that moves the pin sets `QOR_CORE_FEATURES` to `desktop` in
-`core/CMakeLists.txt`. Checked ahead on 26 October 2026: QOR OS configured
-with `QOR_CORE_SOURCE_DIR` at #107's branch (`48e9bfa`) and
-`QOR_CORE_FEATURES=desktop`, with warnings as errors. The whole core compiled
-and linked on Windows in 3 min 22 s, and `tst_qorcore` passed 9 of 9.
+### Moves so far
 
-Two of the owner's decisions come first:
+- **27 October 2026, to `e99c7ce`:** the merge of
+  [demiurge-chain #107](https://github.com/QOR-MATRIX/demiurge-chain/pull/107)
+  (L13.2), with the `desktop` feature. That change moved QOR ID's client, the
+  chain client, Social's client, the Library's index, the Mesh and Qontrol from
+  the Windows launcher into the core, each behind a Cargo feature, and
+  `desktop` turns on all of them, as the Windows launcher and QOR OS build it
+  (demiurge-chain's ADR-120). It was checked ahead at the PR's head (`48e9bfa`)
+  and again at the merge: the whole core compiles and links into QOR OS with
+  warnings as errors, and `tst_qorcore` passes 9 of 9. The move also stopped
+  the pin and the features being cache options, so a build folder follows the
+  pin in the file.
+- **26 October 2026, `28d9e97`:** the first pin, with no features.
 
-- **ADR-121, proposed in that PR.** It extends the launcher's guarded audit
-  ignore of RUSTSEC-2026-0344 (`ruzstd`, reached only through subxt's light
-  client, which nothing builds) to the core's lockfile. The PR must not merge
-  until it is accepted.
-- **The crates' licence.** The manifests say MIT while the repository is
-  Apache-2.0. ADR-120 there notes this as the owner's question.
+### Open upstream
+
+- **The crates' licence.** The core's manifests say MIT while demiurge-chain
+  is Apache-2.0; its ADR-120 leaves this to the owner. QOR OS's
+  [`THIRD_PARTY_NOTICES.md`](../THIRD_PARTY_NOTICES.md) follows whatever is
+  decided.
+- **ADR-121's status line.** #107 carried the record's option A (the core's
+  audit ignores RUSTSEC-2026-0344 in `ruzstd`, which only subxt's light client
+  reaches and nothing builds, as the launcher's audit already does) and was
+  merged with it. The record itself still reads "Proposed", so demiurge-chain's
+  next records update marks it accepted.
 
 ## Cutting over
 

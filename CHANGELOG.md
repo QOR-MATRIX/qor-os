@@ -17,10 +17,12 @@ QOR OS begins: QTOS and Demiurge's device-side products in one repository
 - **QQ, ARQADE and QOR Media**, carried from demiurge-chain (`28d9e97`) with their history by `git subtree`, at the same paths as upstream: `products/qq/`, `products/arqade/qt/`, `products/arqade/games/`, `products/arqade/tests/fixtures/` and `tools/qor-media/`, with `docs/design/tokens.json` copied at the same commit. All three build here and pass their suites: QQ 8 suites, ARQADE 4, QOR Media 9.
   - `tools/dev/products.ps1` builds and tests them with their own scripts, and tries a failing product once more.
   - `tools/upstream/demiurge.sh` shows their upstream state, pulls from demiurge-chain, and writes patches for upstream ([docs/UPSTREAM.md](docs/UPSTREAM.md)).
-- **The QOR core**, built from demiurge-chain at a pinned commit through Corrosion (`core/`, `qor::core`, `QOR_BUILD_CORE`, `QOR_CORE_COMMIT`, `QOR_CORE_SOURCE_DIR`), never copied ([QOR-0003](docs/decisions/QOR-0003-the-qor-core-at-a-pinned-commit.md)). `tst_qorcore` calls it through its C bridge: the core's version, CGT's units, amounts read exactly, the largest amount never rounded, refusals as errors, and no command that reads a key.
+- **The QOR core**, built from demiurge-chain at a pinned commit through Corrosion (`core/`, `qor::core`, `QOR_BUILD_CORE`, `QOR_CORE_SOURCE_DIR`), never copied ([QOR-0003](docs/decisions/QOR-0003-the-qor-core-at-a-pinned-commit.md)). `tst_qorcore` calls it through its C bridge: the core's version, CGT's units, amounts read exactly, the largest amount never rounded, refusals as errors, and no command that reads a key.
+  - The pin moved from `28d9e97` to `e99c7ce`, the merge of demiurge-chain's L13.2 (#107), with the `desktop` feature: QOR ID's and Social's clients, the chain client, the Library's index, the Mesh and Qontrol are now in the core QOR OS builds.
+  - The pin (`QOR_CORE_COMMIT`) and features (`QOR_CORE_FEATURES`) are written on every configure instead of cached, so a build folder, CI's included, follows a moved pin.
 - **One rulebook and one decision log.** `AGENTS.md` (with `CLAUDE.md` pointing to it) merges Demiurge's rules on checking claims, money, language and secrets with QTOS's build and CI practice. `docs/decisions/` holds QOR-0001 to QOR-0008, and QTOS's records as QTOS-0001 to QTOS-0010.
 - `OWNER.md`: where QOR OS stands, on one page, rewritten every session.
-- `tools/ci/runners.ps1` moves the workstation's two CI runners to the organisation or a repository and starts them.
+- `tools/ci/runners.ps1` moves the workstation's two CI runners to the organisation or a repository and starts them. It leaves a runner already in place alone and never stops one that is running a job. Both runners serve the organisation since 27 October.
 - `LICENSES/Apache-2.0.txt` and the carried paths in `THIRD_PARTY_NOTICES.md` and `LICENSE`.
 
 ### Changed
