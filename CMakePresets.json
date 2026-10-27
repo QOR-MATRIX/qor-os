@@ -100,17 +100,20 @@
       "displayName": "CI · Windows",
       "inherits": "windows-release",
       "cacheVariables": {
-        "QTOS_WARNINGS_AS_ERRORS": "ON"
-      }
+        "QTOS_WARNINGS_AS_ERRORS": "ON",
+        "QOR_BUILD_CORE": "ON"
+      },
+      "description": "Warnings are errors; the QOR core is required, so a runner without cargo fails rather than skipping it."
     },
     {
       "name": "ci-linux",
       "displayName": "CI · Linux",
       "inherits": "linux-release",
       "cacheVariables": {
-        "QTOS_WARNINGS_AS_ERRORS": "ON"
+        "QTOS_WARNINGS_AS_ERRORS": "ON",
+        "QOR_BUILD_CORE": "ON"
       },
-      "description": "Warnings are errors, as on Windows."
+      "description": "Warnings are errors and the QOR core is required, as on Windows."
     }
   ],
   "buildPresets": [

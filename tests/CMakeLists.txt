@@ -28,6 +28,10 @@ target_compile_definitions(tst_store PRIVATE
     QTOS_STORE_CATALOG="${CMAKE_SOURCE_DIR}/store/catalog"
     QTOS_STORE_PUB="${CMAKE_SOURCE_DIR}/store/keys/store.pub"
     QTOS_STORE_FIXTURES="${CMAKE_CURRENT_SOURCE_DIR}/store/fixtures")
+# The QOR core through its C bridge, built from demiurge-chain at the pinned commit (core/, QOR-0003).
+if(TARGET qor::core)
+    qtos_add_test(tst_qorcore SOURCES core/tst_qorcore.cpp LIBRARIES qor::core)
+endif()
 
 # Store widgets are QML outside any module: lint them against the built ones.
 file(GLOB QTOS_STORE_WIDGET_QML CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/store/content/widgets/*/*.qml")
