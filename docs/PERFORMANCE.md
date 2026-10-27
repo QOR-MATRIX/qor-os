@@ -161,9 +161,10 @@ built-in panel first), opens an animating Wayland client on each output,
 runs the benchmark, and checks the criteria above. It writes `report.json`,
 `summary.md` (machine, GPU, outputs and their refresh rates, per-output
 results, input to swap, and the verdict) and the logs into a `gate-<time>`
-folder, with a `.tgz` of it to upload; a live session forgets them at power
-off. It exits 0 when every criterion passes. <kbd>Ctrl</kbd>+<kbd>C</kbd>
-stops a run, and a watchdog ends one that hangs.
+folder, with a `.zip` of it to attach to the issue (GitHub refuses `.tgz`
+attachments); a live session forgets them at power off. It exits 0 when
+every criterion passes. <kbd>Ctrl</kbd>+<kbd>C</kbd> stops a run, and a
+watchdog ends one that hangs.
 
 `--mode eDP-1=1920x1080@60` picks a display's mode, to separate frame pacing
 from raw GPU throughput on a very fast panel; `--no-atomic` falls back to

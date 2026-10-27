@@ -18,7 +18,7 @@
 # --build-dir defaults to this script's folder in a gate bundle
 # (prism-gate-bundle.sh). --mode picks a display's mode, e.g. eDP-1=1920x1080@60
 # (connector names as --probe prints them). Writes report.json, summary.md (the
-# data for ADR-0011), the logs and a .tgz of them all. Exits 0 when every
+# data for ADR-0011), the logs and a .zip of them all. Exits 0 when every
 # criterion passes. See docs/PERFORMANCE.md, "Running the decision gate".
 
 set -euo pipefail
@@ -196,10 +196,22 @@ cleanup() {
         kill "${pids[@]}" 2> /dev/null || true
     fi
 }
-# The results, or the logs of a run that failed, packed for upload.
+# The results, or the logs of a run that failed, packed for upload. A .zip:
+# GitHub issues refuse .tgz attachments.
 # shellcheck disable=SC2329 # called from the EXIT trap
 pack() {
-    tar -C "$(dirname "$out")" -czf "$out.tgz" "$(basename "$out")" && echo "Saved $out and $out.tgz"
+    python3 - "$out" << 'PY' && echo "Saved $out and $out.zip"
+import os
+import sys
+import zipfile
+
+folder = sys.argv[1]
+with zipfile.ZipFile(folder + ".zip", "w", zipfile.ZIP_DEFLATED) as archive:
+    for root, _, files in os.walk(folder):
+        for name in files:
+            path = os.path.join(root, name)
+            archive.write(path, os.path.relpath(path, os.path.dirname(folder)))
+PY
 }
 trap 'cleanup; pack' EXIT
 trap 'echo "Stopped." >&2; exit 130' INT TERM
