@@ -88,20 +88,33 @@ if (-not $StartOnly) {
     wsl.exe -d $Distro --cd '~' --exec bash -c "for p in `$(pgrep -f '$pattern'); do kill `$p; done; true"
     if ($url) {
         Write-Host "Linux runner '$name': removing from $url"
+        # The token reaches Linux with Windows' line ending, which a token in an HTTP header must not carry.
         Get-Token $url 'remove' |
-            wsl.exe -d $Distro --cd '~' --exec bash -c "read -r t; cd $linuxRunner && ./config.sh remove --token `$t >/dev/null"
+            wsl.exe -d $Distro --cd '~' --exec bash -c "t=`$(tr -d '\r\n'); cd $linuxRunner && ./config.sh remove --token `$t >/dev/null"
         if ($LASTEXITCODE) { throw "config.sh remove failed ($LASTEXITCODE)" }
     }
     Write-Host "Linux runner '$name': registering at $target"
     Get-Token $target 'registration' |
-        wsl.exe -d $Distro --cd '~' --exec bash -c "read -r t; cd $linuxRunner && ./config.sh --unattended --url $target --token `$t --name $name --labels qt,gcc,wsl,gpu --work _work --replace >/dev/null"
+        wsl.exe -d $Distro --cd '~' --exec bash -c "t=`$(tr -d '\r\n'); cd $linuxRunner && ./config.sh --unattended --url $target --token `$t --name $name --labels qt,gcc,wsl,gpu --work _work --replace >/dev/null"
     if ($LASTEXITCODE) { throw "config.sh failed ($LASTEXITCODE)" }
     # Pinned rather than captured: a Linux-only PATH (cargo for the QOR core), and WSLg's display (docs/CI.md).
     wsl.exe -d $Distro --cd '~' --exec bash -c "cd $linuxRunner && printf '%s\n' `$HOME/.cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/lib/wsl/lib > .path && printf '%s\n' LANG=C.UTF-8 DISPLAY=:0 WAYLAND_DISPLAY=/mnt/wslg/runtime-dir/wayland-0 XDG_RUNTIME_DIR=/run/user/`$(id -u) > .env"
 }
 
 # ── Start both, minimised ───────────────────────────────────────────────────
-Start-Process cmd.exe -ArgumentList '/c', "`"$windowsRunner\run.cmd`"" -WindowStyle Minimized
-$linuxHome = (wsl.exe -d $Distro --cd '~' --exec pwd).Trim()
-Start-Process wsl.exe -ArgumentList '-d', $Distro, '--cd', '~', '--exec', "$linuxHome/$linuxRunner/run.sh" -WindowStyle Minimized
-Write-Host "Both runners started. Check: gh api orgs/$Org/actions/runners (organisation) or repos/$Org/$Repo/actions/runners"
+# WSL's clock can drift hours from Windows' after sleep. The runner's session is a signed token with a time window,
+# so a drifted clock makes GitHub refuse it ("the runner registration has been deleted"). Set it from Windows first.
+$utc = (Get-Date).ToUniversalTime().ToString('yyyy-MM-dd HH:mm:ss')
+wsl.exe -d $Distro -u root --exec date -u -s $utc | Out-Null
+
+$windowsRunning = Get-Process Runner.Listener -ErrorAction SilentlyContinue |
+    Where-Object { $_.Path -and $_.Path.StartsWith($windowsRunner, [StringComparison]::OrdinalIgnoreCase) }
+if (-not $windowsRunning) {
+    Start-Process cmd.exe -ArgumentList '/c', "`"$windowsRunner\run.cmd`"" -WindowStyle Minimized
+}
+$linuxRunning = wsl.exe -d $Distro --cd '~' --exec bash -c "pgrep -f '[$($linuxRunner[0])]$($linuxRunner.Substring(1))/bin/Runner.Listener' >/dev/null && echo yes"
+if (-not $linuxRunning) {
+    $linuxHome = (wsl.exe -d $Distro --cd '~' --exec pwd).Trim()
+    Start-Process wsl.exe -ArgumentList '-d', $Distro, '--cd', '~', '--exec', "$linuxHome/$linuxRunner/run.sh" -WindowStyle Minimized
+}
+Write-Host "Both runners are running. Check: gh api orgs/$Org/actions/runners (organisation) or repos/$Org/$Repo/actions/runners"

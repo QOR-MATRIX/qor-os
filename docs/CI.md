@@ -177,6 +177,14 @@ WSL keeps the distribution running while the runner's `wsl.exe` process is
 alive, so start the runner from Windows (`tools/ci/runners.ps1 -StartOnly`, or
 the Startup entry above).
 
+**WSL's clock drifts.** After the laptop sleeps, WSL's clock can be hours away
+from Windows'. It was 6 h 25 min ahead on 26 October 2026. The runner's session
+is a signed token with a time window, so GitHub refuses it, and the runner logs
+"The runner registration has been deleted from the server" and exits, even
+though the registration exists. `tools/ci/runners.ps1` sets WSL's clock from
+Windows before it starts the runners. To fix it by hand:
+`wsl -u root date -u -s "<Windows' UTC time>"`, then start the runner again.
+
 ### Option B: hosted runners with the Qt Online Installer
 
 Add repository **secrets**:
