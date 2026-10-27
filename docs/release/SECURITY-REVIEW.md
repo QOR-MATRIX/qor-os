@@ -127,8 +127,8 @@ log:
 - Dependency advisories accepted with conditions, each ignored only while a CI
   step proves it does not apply: RUSTSEC-2023-0071 (`rsa`), RUSTSEC-2026-0344
   (`ruzstd`: ADR-089 for the launcher host; for the core, ADR-121: Proposed
-  at `e99c7ce`, accepted on 27 October 2026 in a records commit on a branch
-  not yet merged), RUSTSEC-2026-0383 (ADR-107), RUSTSEC-2026-0387 (ADR-115).
+  at `e99c7ce`, accepted on 27 October 2026, on demiurge-chain's `main` since
+  `694e5d8`), RUSTSEC-2026-0383 (ADR-107), RUSTSEC-2026-0387 (ADR-115).
   The log is `docs/GATES.toml` `[[change_log]]`.
 - `chain/`'s advisories: measured on 20 September 2026 (10 vulnerabilities,
   13 warnings); "Not re-measured since"; CI's later reports list 20
@@ -231,5 +231,5 @@ Doing these first saves paid days and keeps the report about real issues.
 | Engineering items before the review | `docs/audit/RECONCILIATION.md` §8 |
 | Components and features | `tools/qor-launcher/core/Cargo.toml` (`[features]`); `chain/` tree; `services/qor-auth/`; `docs/SYSTEMS.md` |
 | Releases | `gh release list -R QOR-MATRIX/demiurge-chain`, 27 October 2026; `git rev-list -n1 launcher-v0.1.17` |
-| The core's `ruzstd` ignore; ADR-121's state | `tools/qor-launcher/core/.cargo/audit.toml` and `docs/GATES.toml` `[[change_log]]` at `e99c7ce`; ADR-121 on demiurge-chain's branch `session/after-107` (`76616a3`), not yet merged |
+| The core's `ruzstd` ignore; ADR-121's state | `tools/qor-launcher/core/.cargo/audit.toml` and `docs/GATES.toml` `[[change_log]]` at `e99c7ce`; ADR-121, accepted, on demiurge-chain's `main` at `694e5d8` (#108) |
 | Dependency count of the core | `cargo tree` of the core at `e99c7ce`, `desktop`, Linux target: 497 crates (research of 27 October 2026) |

@@ -64,8 +64,8 @@ the owner answers, every file here writes **[Legal entity]**.
 3. Must the Qt licence or the copyright move to it? Ask The Qt Company how a
    licence transfers ([QT.md](QT.md)). Ask a lawyer about the copyright. Most
    commits in both repositories carry a `Co-Authored-By` line naming an AI
-   assistant (counted on 27 October 2026; demiurge-chain's ADR-122, proposed
-   in its pull request #108, notes the same); ask counsel how that bears on
+   assistant (counted on 27 October 2026; demiurge-chain's ADR-122, accepted
+   by the owner the same day, notes the same); ask counsel how that bears on
    ownership.
 4. Afterwards, one records change makes the names in `LICENSE` files and
    metadata agree. That waits for the answer.
@@ -191,9 +191,9 @@ These are public today. Several gates touch them.
 
 - **demiurge-chain** is public under Apache-2.0 (the repository's licence; at
   `e99c7ce` six active crates, the core, the launcher, QOR ID and Social among
-  them, still declare MIT in their manifests; ADR-122, proposed for the owner in
-  pull request #108, would move them to Apache-2.0), with QQ,
-  ARQADE and QOR Media in it, and names QQ and ARQADE throughout.
+  them, still declare MIT in their manifests; ADR-122, accepted by the owner on
+  27 October 2026, moves them to Apache-2.0 when pull request #109 merges),
+  with QQ, ARQADE and QOR Media in it, and names QQ and ARQADE throughout.
 - **Demiurge's Windows launcher**: tester pre-releases `launcher-v0.1.10` (17
   October 2026) to `launcher-v0.1.17` (25 October 2026) on GitHub (there is
   no 0.1.13), all unsigned. Every one bundles QOR Media, with Qt Multimedia

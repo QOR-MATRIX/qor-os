@@ -31,7 +31,7 @@ The paths match upstream so that ARQADE's build still finds QQ's runtime at
 
 | Carried path | Upstream commit it was last split at |
 |--------------|---------------------------------------|
-| All five | demiurge-chain `28d9e97` (`main`, 26 October 2026). Unchanged upstream as of `e99c7ce` (27 October), so no pull was needed |
+| All five | demiurge-chain `28d9e97` (`main`, 26 October 2026). Unchanged upstream as of `694e5d8` (27 October, the merge of #108), so no pull was needed |
 
 | QOR core pin | Features | What that core has |
 |--------------|----------|---------------------|
@@ -119,22 +119,22 @@ QOR OS only is split before it lands.
 
 ### Open upstream
 
-Both are in
-[demiurge-chain #108](https://github.com/QOR-MATRIX/demiurge-chain/pull/108),
-a records-only pull request opened on 27 October 2026 for the owner to merge.
-Neither changes the core's code, so neither moves the pin by itself.
+[demiurge-chain #108](https://github.com/QOR-MATRIX/demiurge-chain/pull/108)
+merged on 27 October 2026 at `694e5d8`. It held records only, so the pin did
+not move for it.
 
-- **ADR-121, accepted.** #107 carried the record's option A (the core's audit
-  ignores RUSTSEC-2026-0344 in `ruzstd`, which only subxt's light client
-  reaches and nothing builds, as the launcher's audit already does). The owner
-  then answered "proceed with" to marking it accepted, and #108 records that,
-  with GATES' approval logged as retroactive.
-- **ADR-122, proposed: the crates' licence.** The core's manifest says MIT
-  while demiurge-chain is Apache-2.0 (ADR-120 left this to the owner). ADR-122
-  recommends that the six active crates declare Apache-2.0 and waits for the
-  owner to accept it. If accepted, the manifests change in a later
-  demiurge-chain commit; when the pin moves to it, the same QOR OS commit
-  updates [`THIRD_PARTY_NOTICES.md`](../THIRD_PARTY_NOTICES.md).
+- **ADR-121, accepted, on `main`.** #107 carried the record's option A (the
+  core's audit ignores RUSTSEC-2026-0344 in `ruzstd`, which only subxt's light
+  client reaches and nothing builds, as the launcher's audit already does).
+  The owner then answered "proceed with" to marking it accepted, and #108
+  recorded that, with GATES' approval logged as retroactive.
+- **ADR-122, accepted: the crates' licence.** The owner accepted it on 27
+  October 2026, after #108 merged. Its change, the six active crates' manifests
+  declaring Apache-2.0 instead of MIT, is in [demiurge-chain #109](https://github.com/QOR-MATRIX/demiurge-chain/pull/109)
+  (branch `session/after-108`), for the owner to merge. The pin then moves to
+  that merge, and the same QOR OS commit updates
+  [`THIRD_PARTY_NOTICES.md`](../THIRD_PARTY_NOTICES.md): from it, the core QOR
+  OS builds declares Apache-2.0. The core's code does not change.
 
 ## Cutting over
 
