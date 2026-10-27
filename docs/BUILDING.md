@@ -38,6 +38,7 @@ Install these for the `MSVC 2022 64-bit` kit in the Qt Maintenance Tool
 | Qt Task Tree (TP) | `qt.qt6.6120.addons.qttasktree` | Dependency of Qt's own QML asset-downloader plugin; without it CMake prints a warning at configure time |
 
 The carried products also need these, from the same kit:
+
 - **Qt Multimedia**;
 - **Qt Quick 3D**, with **Qt Quick 3D Physics**;
 - **Qt Spatial Audio**;

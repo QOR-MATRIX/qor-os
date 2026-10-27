@@ -30,6 +30,7 @@ ARQADE and QOR Media through `tools/dev/products.ps1`. Each product's own
 script runs every suite, and QOR Media's needs PDFium, which its script fetches
 and checks by SHA-256. The suites take about ten minutes and drive real windows
 on the runner's desktop, so they run only when:
+
 - the push or pull request changes `products/`, `tools/qor-media/`,
   `docs/design/tokens.json`, `tools/dev/products.ps1` or `build.yml`;
 - the run is for a tag;
@@ -72,6 +73,7 @@ serve QOR OS and the frozen QTOS. That is the intended setup
 ([ROADMAP](ROADMAP.md) Phase 0).
 
 `tools/ci/runners.ps1` moves both runners in one command:
+
 1. It removes each from where it is registered now.
 2. It registers it at the new scope, with the same names and labels.
 3. It pins the Linux runner's PATH (with `~/.cargo/bin`) and display

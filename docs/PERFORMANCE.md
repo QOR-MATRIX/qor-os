@@ -124,6 +124,7 @@ refusal of `.tgz` files. QTOS's ADR-0011 was never written.
 
 The question is now answered by building Prism's own KMS backend (Phase 3)
 against the owner's requirement:
+
 - every display at its own native mode and refresh rate, 60 Hz and 360 Hz
   together;
 - VRR where supported;

@@ -21,7 +21,7 @@ products included on Windows.
 - [x] One rulebook ([AGENTS.md](../AGENTS.md)) and one decision log, QOR-0001 to QOR-0008 ([decisions/](decisions/README.md))
 - [x] The carried products build and pass their suites here (`tools/dev/products.ps1`)
 - [ ] The CI runners serve both QTOS and QOR OS from the organisation ([CI.md](CI.md#runners-for-the-organisation))
-- [ ] CI green on Windows (with the products) and Linux
+- [x] CI green on Windows (with the products) and Linux: the first run on 26 October passed every job, the products on their first attempt
 - [ ] Demiurge's L13.2 merged upstream (QOR ID's client, the chain client, Social's client, the Library's index, the Mesh and Qontrol in the core), and the core's pin moved to it
 
 ## Phase 1 · One stack

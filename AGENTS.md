@@ -89,6 +89,7 @@ From Demiurge's rules and
 QOR is infrastructure for players and makers, not a vehicle for appreciation
 (Demiurge ADR-008). These never appear in copy, comments, identifiers or
 documents:
+
 - APY, yield, or return in the financial sense;
 - ROI, investment, passive income;
 - any statement about CGT's price or future value.

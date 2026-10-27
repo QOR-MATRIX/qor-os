@@ -164,6 +164,7 @@ over every widget (`store_widgets_qmllint`) and the Store section of
 **QOR OS 1.0 moves no money**
 ([QOR-0006](decisions/QOR-0006-qor-os-1-0-moves-no-money.md)). The Store
 ships free items only.
+
 - Stage 2 may proceed without its fee, which is a payment.
 - Stage 3 below is QTOS's proposal, kept as the starting point. It is not
   decided. It waits for:

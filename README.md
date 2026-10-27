@@ -66,6 +66,7 @@ When nothing changes, the shell renders nothing at all. See
 ## Quick start (Windows)
 
 Requirements:
+
 - **Qt 6.12.0 for MSVC 2022 64-bit**, commercial; the module list is in
   [docs/BUILDING.md](docs/BUILDING.md);
 - **Visual Studio 2022 Build Tools**, with the C++ workload;
@@ -127,6 +128,7 @@ On Linux, Prism runs as a real Wayland compositor nested in your session; see
 ## Status
 
 **Phase 0 · Clear the ground**, under way. This repository holds:
+
 - QTOS's complete shell, which runs in simulation on Windows and as a nested
   Wayland compositor on Linux;
 - Demiurge's QQ, ARQADE and QOR Media, which build and pass their suites here;
