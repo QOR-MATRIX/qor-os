@@ -1,4 +1,4 @@
-QTOS — Proprietary License
+QOR OS — Proprietary License
 SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
 
 Copyright (c) 2026 QOR-MATRIX. All rights reserved.
@@ -15,6 +15,14 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE.
 
+Code carried from demiurge-chain
+--------------------------------
+The paths listed under "Code carried from demiurge-chain" in
+THIRD_PARTY_NOTICES.md (products/qq, products/arqade/qt, products/arqade/games,
+products/arqade/tests/fixtures, tools/qor-media and docs/design/tokens.json)
+are licensed under the Apache License, Version 2.0, not under this license.
+Its text is LICENSES/Apache-2.0.txt.
+
 Third-party components
 ----------------------
 Fonts, icons and other third-party material in this repository remain under
@@ -22,6 +30,9 @@ their own licenses, listed in THIRD_PARTY_NOTICES.md.
 
 Qt
 --
-QTOS is developed with Qt, used under a commercial Qt license held by
-QOR-MATRIX. Distribution of QTOS binaries is subject to the terms of that
-license.
+QOR OS is developed with Qt, used under a commercial Qt license held by
+QOR-MATRIX. Distribution of QOR OS binaries is subject to the terms of that
+license (see docs/decisions/QOR-0008-before-a-public-release.md).
+
+The SPDX identifier keeps its QTOS name until the product name is cleared
+(QOR-0008).

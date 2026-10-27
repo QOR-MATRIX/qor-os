@@ -1,6 +1,9 @@
 name: Build
 
-# Builds and tests QTOS with the commercial Qt 6.12 kit on Windows and Linux.
+# Builds and tests QOR OS with the commercial Qt 6.12 kit on Windows and Linux:
+# the OS itself, the QOR core from demiurge-chain at its pinned commit (core/,
+# needs cargo), and on Windows the products carried from demiurge-chain (QQ,
+# ARQADE, QOR Media) through their own build scripts.
 #
 # Each OS job runs when it has a Qt source (first match wins):
 #   1. Repository variable QTOS_WINDOWS_QT_DIR / QTOS_LINUX_QT_DIR
@@ -139,15 +142,42 @@ jobs:
           path: build/ci-windows/tests/golden-out
           retention-days: 7
 
+      # The products' suites take about ten minutes and drive real windows on
+      # the runner's desktop, so they run when the carried code (or how it is
+      # built) changed, on tags and on manual runs.
+      - name: Did the carried products change?
+        id: products
+        if: vars.QTOS_RUN_GPU_TESTS == 'true'
+        shell: pwsh
+        env:
+          EVENT: ${{ github.event_name }}
+          BEFORE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          $run = $true
+          if ($env:EVENT -in 'push', 'pull_request' -and $env:BEFORE -and $env:BEFORE -notmatch '^0+$' -and -not $env:GITHUB_REF.StartsWith('refs/tags/')) {
+            git fetch --quiet --no-tags --depth=1 origin $env:BEFORE
+            $changed = git diff --name-only $env:BEFORE HEAD
+            $run = [bool]($changed | Where-Object { $_ -match '^(products/|tools/qor-media/|docs/design/tokens\.json$|tools/dev/products\.ps1$|\.github/workflows/build\.yml$)' })
+          }
+          "run=$($run.ToString().ToLower())" >> $env:GITHUB_OUTPUT
+          "Carried products: $(if ($run) { 'built and tested' } else { 'unchanged, skipped' })" >> $env:GITHUB_STEP_SUMMARY
+
+      # Each product's own script builds and tests it, exactly as upstream
+      # (docs/UPSTREAM.md); a product that fails is tried once more.
+      - name: Products (QQ, ARQADE, QOR Media)
+        if: steps.products.outputs.run == 'true'
+        shell: pwsh
+        run: .\tools\dev\products.ps1 -Qt $env:QTOS_QT_DIR -BuildRoot build\ci-products
+
       - name: Package
         if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')
-        run: cmake --install build/ci-windows --prefix dist/qtos
+        run: cmake --install build/ci-windows --prefix dist/qor-os
 
       - uses: actions/upload-artifact@v7
         if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')
         with:
-          name: qtos-windows-x64
-          path: dist/qtos
+          name: qor-os-windows-x64
+          path: dist/qor-os
           retention-days: 7
 
   linux:
@@ -170,9 +200,11 @@ jobs:
         if: vars.QTOS_LINUX_QT_DIR == ''
         run: |
           sudo apt-get update
+          # libdbus-1-dev: the QOR core's keychain uses the Secret Service over D-Bus.
           sudo apt-get install -y --no-install-recommends ninja-build libgl1-mesa-dev libegl1-mesa-dev \
             libxkbcommon-dev libxkbcommon-x11-0 libfontconfig1-dev libfreetype-dev libdbus-1-3 \
-            libxcb-cursor0 libxcb-icccm4 libxcb-keysyms1 libxcb-shape0 libwayland-dev libpulse0
+            libxcb-cursor0 libxcb-icccm4 libxcb-keysyms1 libxcb-shape0 libwayland-dev libpulse0 \
+            libssl-dev libdbus-1-dev pkg-config
 
       - name: Restore Qt
         id: qt-cache

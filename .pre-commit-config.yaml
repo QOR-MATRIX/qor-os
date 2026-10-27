@@ -1,8 +1,9 @@
 # Install once:  python -m pip install -r requirements-dev.txt && pre-commit install
 # Run on demand: pre-commit run --all-files
 
-# Vendored third-party assets and generated files are never rewritten by hooks.
-exclude: '^(kit/fonts/|kit/icons/|prism/compositor/protocols/|kit/Tokens\.qml$|platform/common/lumentokens\.h$|docs/design/tokens\.md$|store/catalog/|tests/store/fixtures/)'
+# Vendored third-party assets, generated files and the code carried from
+# demiurge-chain (docs/UPSTREAM.md) are never rewritten by hooks.
+exclude: '^(kit/fonts/|kit/icons/|prism/compositor/protocols/|kit/Tokens\.qml$|platform/common/lumentokens\.h$|docs/design/tokens\.(md|json)$|store/catalog/|tests/store/fixtures/|products/|tools/qor-media/)'
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks

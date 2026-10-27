@@ -42,9 +42,11 @@ jobs:
       - name: SPDX license headers
         run: python tools/ci/check_headers.py
 
+      # Code carried from demiurge-chain keeps its upstream form (docs/UPSTREAM.md).
       - name: clang-format (pinned in requirements-dev.txt)
         run: |
           git ls-files '*.cpp' '*.h' ':!:platform/common/lumentokens.h' ':!:sdk/**' \
+            ':!:products/**' ':!:tools/qor-media/**' \
             | xargs clang-format --dry-run --Werror
 
       - name: JSON is valid

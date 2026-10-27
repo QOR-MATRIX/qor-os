@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Verifies every QTOS source file carries an SPDX license identifier.
+"""Verifies every QOR OS source file carries an SPDX license identifier.
+
+Code carried from demiurge-chain keeps its own Apache-2.0 notices and is not
+checked (docs/UPSTREAM.md).
 
 Usage: python tools/ci/check_headers.py   (exit code 1 lists offenders)
 """
@@ -11,6 +14,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
 ROOTS = ["kit", "services", "sim", "prism", "apps", "platform", "tools", "tests", "store", "input", "audio"]
+CARRIED = ("tools/qor-media/",)
 EXTENSIONS = {".cpp", ".h", ".qml", ".frag", ".vert", ".js", ".rep"}
 MARKER = "SPDX-License-Identifier:"
 HEAD_LINES = 5
@@ -22,6 +26,8 @@ def main() -> int:
     for root in ROOTS:
         for path in sorted((REPO / root).rglob("*")):
             if path.suffix not in EXTENSIONS or not path.is_file():
+                continue
+            if path.relative_to(REPO).as_posix().startswith(CARRIED):
                 continue
             checked += 1
             with path.open(encoding="utf-8") as handle:
