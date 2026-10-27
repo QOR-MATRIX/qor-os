@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
 #include "source.h"
@@ -7,10 +7,10 @@
 
 #include <memory>
 
-namespace qtos::audio {
+namespace qor::audio {
 
-// A generative "QTOS Session": original music synthesised in real time, so
-// QTOS has sound out of the box without shipping recordings. Deterministic
+// A generative "QOR Session": original music synthesised in real time, so
+// QOR OS has sound out of the box without shipping recordings. Deterministic
 // for a given spec.
 struct SessionSpec
 {
@@ -42,4 +42,4 @@ private:
     std::unique_ptr<Impl> d;
 };
 
-} // namespace qtos::audio
+} // namespace qor::audio

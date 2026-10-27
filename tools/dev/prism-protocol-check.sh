@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+# SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #
 # Runs Prism nested in the current Wayland/X11 session (or WSLg), connects real
 # clients and checks on the wire that each protocol Prism provides works.
@@ -10,10 +10,10 @@
 # and weston's demo clients (weston). Exit status is the number of failures.
 set -uo pipefail
 
-BUILD=${1:-$HOME/qtos-build/linux-release}
+BUILD=${1:-$HOME/qor-build/linux-release}
 PRISM="$BUILD/prism/compositor/prism"
 GALLERY="$BUILD/platform/lumen-widgets-gallery"
-SOCKET=wayland-qtos-check
+SOCKET=wayland-qor-check
 WORK=$(mktemp -d)
 trap 'kill $(jobs -p) 2>/dev/null; rm -rf "$WORK"' EXIT
 

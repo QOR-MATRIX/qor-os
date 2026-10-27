@@ -1,6 +1,6 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 import QtQuick
-import QTOS.Kit
+import QOR.Kit
 
 // Lumen application icon: a continuous-curvature tile with a perceptual
 // two-stop gradient built from one hue, a specular rim and a white symbol.

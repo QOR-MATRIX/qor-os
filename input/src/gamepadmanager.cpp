@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "gamepadmanager.h"
 
 #include "backends.h"
@@ -10,9 +10,9 @@
 
 using namespace Qt::StringLiterals;
 
-Q_LOGGING_CATEGORY(lcGamepads, "qtos.input.gamepads")
+Q_LOGGING_CATEGORY(lcGamepads, "qor.input.gamepads")
 
-namespace qtos::input {
+namespace qor::input {
 
 namespace {
 constexpr int kPollMs = 8;
@@ -56,14 +56,14 @@ GamepadManager *GamepadManager::instance()
 
 GamepadManager::GamepadManager(QObject *parent) : QObject(parent), m_light(QColor::fromRgb(0x6b, 0x5b, 0xff))
 {
-    qRegisterMetaType<qtos::input::GamepadInfo>();
-    qRegisterMetaType<qtos::input::GamepadState>();
+    qRegisterMetaType<qor::input::GamepadInfo>();
+    qRegisterMetaType<qor::input::GamepadState>();
 
     auto virtualBackend = std::make_unique<VirtualBackend>();
     m_virtual = virtualBackend.get();
     addBackend(std::move(virtualBackend));
 
-    const QString mode = qEnvironmentVariable("QTOS_GAMEPADS");
+    const QString mode = qEnvironmentVariable("QOR_GAMEPADS");
     if (mode != u"virtual"_s && mode != u"off"_s) {
         for (auto &backend : createHardwareBackends())
             addBackend(std::move(backend));
@@ -261,4 +261,4 @@ void GamepadManager::setVirtualState(const QString &id, const GamepadState &stat
 
 void GamepadManager::removeVirtual(const QString &id) { m_virtual->remove(id); }
 
-} // namespace qtos::input
+} // namespace qor::input

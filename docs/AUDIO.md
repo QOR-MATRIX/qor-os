@@ -1,20 +1,20 @@
 # Audio
 
-QTOS plays real audio: generated "QTOS Sessions", your own music files and
+QOR OS plays real audio: generated "QOR Sessions", your own music files and
 interface sounds. The interface reacts to what is playing, in a frequency
 range and with an intensity you choose in **Settings › Sound**.
 
 | Piece | Where | What it does |
 |-------|-------|--------------|
-| Audio engine | [`audio/`](../audio/) (`qtos_audio`) | Plays, equalises, limits and analyses |
+| Audio engine | [`audio/`](../audio/) (`qor_audio`) | Plays, equalises, limits and analyses |
 | `Audio` and `Media` services | [`services/interfaces/`](../services/interfaces/), [`sim/`](../sim/) | Volume, outputs, EQ, interface sounds, analysis; now playing |
-| `Reactive` | [`services/qml/Reactive.qml`](../services/qml/Reactive.qml) (`QTOS.Services`) | Turns the analysis into motion the interface animates with |
-| `Spectrum`, `Sounds`, `Wallpaper` | [`kit/`](../kit/) (`QTOS.Kit`) | Visualiser, interface sounds, reactive light |
+| `Reactive` | [`services/qml/Reactive.qml`](../services/qml/Reactive.qml) (`QOR.Services`) | Turns the analysis into motion the interface animates with |
+| `Spectrum`, `Sounds`, `Wallpaper` | [`kit/`](../kit/) (`QOR.Kit`) | Visualiser, interface sounds, reactive light |
 | Settings › Sound, Music, Live Activity, Control Center | [`apps/`](../apps/), [`prism/shell/`](../prism/shell/) | Where you see and control it |
 
-On a device, `qtos-audiod` implements the same `Audio` contract over
+On a device, `qor-audiod` implements the same `Audio` contract over
 PipeWire. In simulation (every desktop build today) the simulator owns a
-`qtos::audio::Engine` and plays through the machine's own outputs.
+`qor::audio::Engine` and plays through the machine's own outputs.
 
 ## The engine
 
@@ -31,7 +31,7 @@ PipeWire. In simulation (every desktop build today) the simulator owns a
   stereo and adapts to what the device offers (other rates, `Int16`, mono or
   more channels).
 - **Threads.** The `Engine` object is a thread-safe front. Control,
-  decoding and analysis run on an engine thread (`qtos-audio`); mixing runs
+  decoding and analysis run on an engine thread (`qor-audio`); mixing runs
   on the output's real-time thread. The [`Renderer`](../audio/src/renderer.h)
   never locks, allocates or frees on that thread: sources arrive through a
   wait-free queue and go back through another one to be deleted, and every
@@ -48,15 +48,15 @@ PipeWire. In simulation (every desktop build today) the simulator owns a
 - **Soft limiter**: transparent below 0.85 (−1.4 dBFS), then a `tanh` knee
   towards 0.98, so EQ boosts and loud material never clip hard.
 - **Idle**: after 3 s of silence with nothing playing, the device stream is
-  suspended (and resumed on play), so an idle QTOS costs no audio wake-ups.
+  suspended (and resumed on play), so an idle QOR OS costs no audio wake-ups.
 - **Device changes** (a headset plugged in, the default output changing, a
   device disappearing) are followed through `QMediaDevices`. A chosen output
   is remembered by name.
 
 ### Sources
 
-**QTOS Sessions** ([`session.cpp`](../audio/src/session.cpp)) are original
-music generated live and deterministically from a small spec, so QTOS has
+**QOR Sessions** ([`session.cpp`](../audio/src/session.cpp)) are original
+music generated live and deterministically from a small spec, so QOR OS has
 sound out of the box without shipping recordings:
 
 | Field | Values |
@@ -76,7 +76,7 @@ It renders about 50 to 100 times faster than real time.
 published to the audio thread lock-free, so playback starts while decoding
 continues. MP3, FLAC, Ogg Vorbis, Opus, WAV, AAC/M4A, WMA and AIFF are
 supported, up to about 93 minutes per file. The simulator queues the files
-in your Music folder and in `QTOS_MUSIC_DIR` (several folders separated like
+in your Music folder and in `QOR_MUSIC_DIR` (several folders separated like
 `PATH`), three levels deep, after the sessions. Titles come from the layout:
 `Artist - Title.ext` or `Artist/Album/01 Title.ext`.
 
@@ -148,7 +148,7 @@ simulator runs ephemerally.
 
 The Music app is a library as well as a player: **Songs** (with the live
 spectrum beside the playing track), **Albums** and **Artists**, plus the
-**QTOS Sessions** and **Music Folder** collections. Shuffle plays every track
+**QOR Sessions** and **Music Folder** collections. Shuffle plays every track
 once per pass; repeat cycles through all, one and off. Shuffle and repeat
 persist (`QSettings` group `media`).
 
@@ -159,7 +159,7 @@ arrives as *Media Play* (XF86AudioPlay); both toggle.
 
 ## Interface sounds
 
-[`Sounds`](../kit/Sounds.qml) (`QTOS.Kit`) plays short cues with Qt
+[`Sounds`](../kit/Sounds.qml) (`QOR.Kit`) plays short cues with Qt
 Multimedia's `SoundEffect`: `notification`, `lock`, `unlock`, `volume`
 (when a volume slider is released) and `connect` (charging starts). The
 shell binds it to the `Audio` service: on when interface sounds are on and a
@@ -178,9 +178,9 @@ Tests, screenshots, benchmarks and scripted runs never make sound. The
 engine's **null output** renders in real time to nowhere, so playback,
 positions and analysis behave exactly as with a device:
 
-- `QTOS_AUDIO_OUTPUT=null` (ctest sets it for every test),
-- `qtos-shell` and `prism` with `--screenshot`, `--benchmark` or `--script`,
-- `qtos-simd --silent`.
+- `QOR_AUDIO_OUTPUT=null` (ctest sets it for every test),
+- `qor-shell` and `prism` with `--screenshot`, `--benchmark` or `--script`,
+- `qor-simd --silent`.
 
 With the null output the `Audio` service presents the scenario's simulated
 devices and `outputAvailable` is false.
@@ -188,12 +188,12 @@ devices and `outputAvailable` is false.
 ## Tools and tests
 
 ```bash
-qtosctl media play
-qtosctl spectrum 10          # live spectrum, level, range energy and beats in the terminal
-qtosctl eq "Bass Boost"
-qtosctl reactive range 300 3000
-qtosctl reactive intensity 80
-qtosctl status               # includes output, EQ, reactive settings and the play position
+qorctl media play
+qorctl spectrum 10          # live spectrum, level, range energy and beats in the terminal
+qorctl eq "Bass Boost"
+qorctl reactive range 300 3000
+qorctl reactive intensity 80
+qorctl status               # includes output, EQ, reactive settings and the play position
 ```
 
 - `tst_audio`: FFT scaling, EQ band gains, limiter, volume taper, analysis
@@ -210,9 +210,9 @@ qtosctl status               # includes output, EQ, reactive settings and the pl
 
 | Symptom | Check |
 |---------|-------|
-| No sound | `qtosctl status`: is media playing, and is the output a real device (not "(silent)")? Is `QTOS_AUDIO_OUTPUT=null` set? The log names the device it opened: `qtos.audio: Output: "<device>", 48000 Hz, 2 ch, Float` |
+| No sound | `qorctl status`: is media playing, and is the output a real device (not "(silent)")? Is `QOR_AUDIO_OUTPUT=null` set? The log names the device it opened: `qor.audio: Output: "<device>", 48000 Hz, 2 ch, Float` |
 | Linux build: undefined `pa_*` symbols | Qt Multimedia links PulseAudio: `sudo apt-get install libpulse0` |
-| Linux: a crash in `QPlatformAudioDevices::create` | Qt 6.12's PipeWire backend crashes when libpipewire is installed but no PipeWire daemon runs (WSLg serves PulseAudio; Weston pulls in libpipewire). QTOS detects the missing PipeWire socket and asks for the PulseAudio backend (`qtos::audio::configureBackend()`); other Qt programs need `QT_AUDIO_BACKEND=pulseaudio` |
+| Linux: a crash in `QPlatformAudioDevices::create` | Qt 6.12's PipeWire backend crashes when libpipewire is installed but no PipeWire daemon runs (WSLg serves PulseAudio; Weston pulls in libpipewire). QOR OS detects the missing PipeWire socket and asks for the PulseAudio backend (`qor::audio::configureBackend()`); other Qt programs need `QT_AUDIO_BACKEND=pulseaudio` |
 | WSL: no device | WSLg's server is `unix:/mnt/wslg/PulseServer`; set `PULSE_SERVER` if your environment lacks it |
 | A music file does not appear | Only the extensions above, at most three folders deep, at most 500 files |
-| The interface does not react | **React to sound** on? **Reduce Motion** off? Is the chosen range where the music has energy? `qtosctl spectrum` shows the range energy |
+| The interface does not react | **React to sound** on? **Reduce Motion** off? Is the chosen range where the music has energy? `qorctl spectrum` shows the range energy |

@@ -17,7 +17,8 @@ record supersedes it, and both say so.
 | [QOR-0005](QOR-0005-every-display-at-its-own-refresh.md) | Every display at its own refresh rate on every GPU is the acceptance test; Prism's own KMS backend; the bare-metal gate deferred, not failed | Accepted 2026-10-26 |
 | [QOR-0006](QOR-0006-qor-os-1-0-moves-no-money.md) | 1.0 moves no money: free items and test CGT only; Demiurge's money rules apply everywhere | Accepted 2026-10-26 |
 | [QOR-0007](QOR-0007-what-1-0-ships.md) | What 1.0 ships, and what waits | Accepted 2026-10-26 |
-| [QOR-0008](QOR-0008-before-a-public-release.md) | Release gates the owner holds (Qt distribution licence, name clearance, legal list, keys, sign-in redundancy); the code keeps QTOS names until the name clears | Accepted 2026-10-26 |
+| [QOR-0008](QOR-0008-before-a-public-release.md) | Release gates the owner holds (Qt distribution licence, name clearance, legal list, keys, sign-in redundancy); the code keeps QTOS names until the name clears | Accepted 2026-10-26; decision 2 superseded by QOR-0009 |
+| [QOR-0009](QOR-0009-the-name-is-qor-os.md) | The name is QOR OS, in the code too: `qor-os`, `qor`, `QOR.*`, `QOR_*`, `dev.qorsync.*` where a space cannot go; QTOS names only the predecessor | Accepted 2026-10-27 |
 
 ## QTOS (inherited)
 

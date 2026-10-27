@@ -1,8 +1,8 @@
 {
-  "id": "org.qtos.theme.saffron",
+  "id": "dev.qorsync.theme.saffron",
   "name": "Saffron",
   "version": "1.0.0",
-  "developer": "org.qtos",
+  "developer": "dev.qorsync",
   "summary": "Spice gold, bright and generous.",
   "description": "Saffron sets a golden accent over neutrals with the faintest warmth. It is cheerful in light appearance and rich in dark.",
   "whatsNew": "First release.",

@@ -1,9 +1,9 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "keycodes.h"
 
 #include <QtCore/QHash>
 
-namespace qtos::input {
+namespace qor::input {
 
 namespace {
 
@@ -104,4 +104,4 @@ quint32 evdevKeyCode(int qtKey)
 
 bool needsShift(int qtKey) { return shiftedKeys().contains(qtKey); }
 
-} // namespace qtos::input
+} // namespace qor::input

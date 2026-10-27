@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "kit.h"
 
 #include <QtCore/QDir>
@@ -17,12 +17,12 @@
 #include <array>
 #include <cmath>
 
-Q_IMPORT_QML_PLUGIN(QTOS_KitPlugin)
+Q_IMPORT_QML_PLUGIN(QOR_KitPlugin)
 Q_IMPORT_QML_PLUGIN(LumenPlugin)
 
 using namespace Qt::StringLiterals;
 
-// Golden-image tests for QTOS.Kit and the Lumen controls.
+// Golden-image tests for QOR.Kit and the Lumen controls.
 //
 // Every scene in golden/scenes is rendered on the GPU in each variant
 // (appearance × contrast, plus right-to-left) and compared with
@@ -34,10 +34,10 @@ using namespace Qt::StringLiterals;
 // on Linux differ on under 0.01% of pixels); a platform that renders a case
 // differently on purpose can override it in golden/references/<os>/.
 //
-//   QTOS_GOLDEN_UPDATE=1          rewrite the shared references
-//   QTOS_GOLDEN_UPDATE=platform   write overrides for this platform only
+//   QOR_GOLDEN_UPDATE=1          rewrite the shared references
+//   QOR_GOLDEN_UPDATE=platform   write overrides for this platform only
 //
-// A failing case writes <case>-actual.png and <case>-diff.png to QTOS_GOLDEN_OUT.
+// A failing case writes <case>-actual.png and <case>-diff.png to QOR_GOLDEN_OUT.
 
 namespace {
 
@@ -190,14 +190,14 @@ private Q_SLOTS:
 
         // A fresh engine per case: the Theme singleton starts clean, and with
         // Reduce Motion its springs jump straight to the variant's values.
-        auto *theme = view.engine()->singletonInstance<QObject *>("QTOS.Kit", "Theme");
+        auto *theme = view.engine()->singletonInstance<QObject *>("QOR.Kit", "Theme");
         QVERIFY(theme);
         theme->setProperty("reduceMotion", true);
         theme->setProperty("dark", v.dark);
         theme->setProperty("increaseContrast", v.highContrast);
 
         view.setInitialProperties({ { u"rtl"_s, v.rtl } });
-        view.setSource(QUrl::fromLocalFile(QStringLiteral(QTOS_GOLDEN_DIR) + u"/scenes/"_s + scene + u".qml"_s));
+        view.setSource(QUrl::fromLocalFile(QStringLiteral(QOR_GOLDEN_DIR) + u"/scenes/"_s + scene + u".qml"_s));
         if (view.status() != QQuickView::Ready) {
             QStringList errors;
             for (const QQmlError &error : view.errors())
@@ -210,11 +210,11 @@ private Q_SLOTS:
         const QImage actual = settledGrab(view);
         QVERIFY(!actual.isNull());
 
-        const QString references = QStringLiteral(QTOS_GOLDEN_DIR) + u"/references/"_s;
+        const QString references = QStringLiteral(QOR_GOLDEN_DIR) + u"/references/"_s;
         const QString sharedPath = references + name + u".png"_s;
         const QString platformPath = references + platformKey() + u'/' + name + u".png"_s;
 
-        if (const QByteArray update = qgetenv("QTOS_GOLDEN_UPDATE"); update == "1" || update == "platform") {
+        if (const QByteArray update = qgetenv("QOR_GOLDEN_UPDATE"); update == "1" || update == "platform") {
             const QString path = update == "platform" ? platformPath : sharedPath;
             QDir().mkpath(QFileInfo(path).absolutePath());
             QVERIFY(actual.save(path));
@@ -225,11 +225,11 @@ private Q_SLOTS:
         const QString referencePath = QFileInfo::exists(platformPath) ? platformPath : sharedPath;
         const QImage expected = QImage(referencePath).convertToFormat(QImage::Format_RGB32);
         if (expected.isNull())
-            QSKIP(qPrintable(u"No reference %1. Run with QTOS_GOLDEN_UPDATE=1 (see docs/DEVELOPMENT.md)."_s.arg(
+            QSKIP(qPrintable(u"No reference %1. Run with QOR_GOLDEN_UPDATE=1 (see docs/DEVELOPMENT.md)."_s.arg(
                 QDir::toNativeSeparators(sharedPath))));
 
         const auto writeFailure = [&](const QImage *heatmap) {
-            const QString out = QStringLiteral(QTOS_GOLDEN_OUT);
+            const QString out = QStringLiteral(QOR_GOLDEN_OUT);
             QDir().mkpath(out);
             actual.save(out + u'/' + name + u"-actual.png"_s);
             if (heatmap)
@@ -266,7 +266,7 @@ int main(int argc, char **argv)
     // References are captured at 1:1; display scaling must not change the size.
     qputenv("QT_ENABLE_HIGHDPI_SCALING", "0");
     QGuiApplication app(argc, argv);
-    qtos::Kit::initialize();
+    qor::Kit::initialize();
     QQuickStyle::setStyle(u"Lumen"_s);
     tst_Golden test;
     QTEST_SET_MAIN_SOURCE_PATH

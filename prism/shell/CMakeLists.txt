@@ -1,13 +1,13 @@
-# QTOS.Shell — the Prism shell UI, shared by qtos-shell (simulation) and the
+# QOR.Shell — the Prism shell UI, shared by qor-shell (simulation) and the
 # prism Wayland compositor (device).
 
 # Imported by relative path from QML; not exported as a module member.
 set_source_files_properties(search.js PROPERTIES QT_QML_SKIP_QMLDIR_ENTRY TRUE)
 
-qt_add_library(qtos_shell STATIC)
+qt_add_library(qor_shell STATIC)
 
-qt_add_qml_module(qtos_shell
-    URI QTOS.Shell
+qt_add_qml_module(qor_shell
+    URI QOR.Shell
     VERSION 1.0
     RESOURCE_PREFIX /qt/qml
     QML_FILES
@@ -41,27 +41,27 @@ qt_add_qml_module(qtos_shell
     DEPENDENCIES
         QtQuick
         QtQuick.Controls
-        QTOS.Kit
-        QTOS.Services
-        QTOS.Apps
-        QTOS.Input
-        QTOS.Store
+        QOR.Kit
+        QOR.Services
+        QOR.Apps
+        QOR.Input
+        QOR.Store
 )
 
-# The --benchmark and --script drivers shared by qtos-shell and prism. The
+# The --benchmark and --script drivers shared by qor-shell and prism. The
 # script runner injects input through QWindowSystemInterface (Qt GUI private).
-target_sources(qtos_shell PRIVATE shellbenchmark.h shellbenchmark.cpp shellscript.h shellscript.cpp)
-target_link_libraries(qtos_shell PRIVATE Qt6::GuiPrivate)
-target_include_directories(qtos_shell PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
+target_sources(qor_shell PRIVATE shellbenchmark.h shellbenchmark.cpp shellscript.h shellscript.cpp)
+target_link_libraries(qor_shell PRIVATE Qt6::GuiPrivate)
+target_include_directories(qor_shell PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 
-target_link_libraries(qtos_shell
+target_link_libraries(qor_shell
     PUBLIC
         Qt6::Quick
-        qtos_kit
-        qtos_services
-        qtos_apps
-        qtos_input
-        qtos_store
+        qor_kit
+        qor_services
+        qor_apps
+        qor_input
+        qor_store
     PRIVATE
-        qtos::compiler_settings
+        qor::compiler_settings
 )

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
 #include "rep_simcontrol_source.h"
@@ -12,11 +12,11 @@
 
 #include <memory>
 
-namespace qtos::sim {
+namespace qor::sim {
 
 class SimServices;
 
-// Simulation-only control surface (qtosctl, tests).
+// Simulation-only control surface (qorctl, tests).
 class SimControlSource : public SimControlSimpleSource
 {
     Q_OBJECT
@@ -39,9 +39,9 @@ struct SimOptions
     bool silent = false;    // render audio to the null output (automation)
 };
 
-// Hosts every simulated QTOS service on a Qt Remote Objects node, so the
-// shell, qtosctl and tests talk to them exactly as they would to the real
-// qtos-*d daemons on a device.
+// Hosts every simulated QOR OS service on a Qt Remote Objects node, so the
+// shell, qorctl and tests talk to them exactly as they would to the real
+// qor-*d daemons on a device.
 class SimServices : public QObject
 {
     Q_OBJECT
@@ -85,4 +85,4 @@ private:
     std::unique_ptr<SimControlSource> m_control;
 };
 
-} // namespace qtos::sim
+} // namespace qor::sim

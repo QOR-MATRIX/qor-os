@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 import QtQuick
 import QtQuick.Templates as T
 

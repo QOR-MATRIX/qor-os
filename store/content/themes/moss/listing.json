@@ -1,8 +1,8 @@
 {
-  "id": "org.qtos.theme.moss",
+  "id": "dev.qorsync.theme.moss",
   "name": "Moss",
   "version": "1.0.0",
-  "developer": "org.qtos",
+  "developer": "dev.qorsync",
   "summary": "Forest-floor greens, quiet and calm.",
   "description": "Moss brings a soft green accent and neutrals with a hint of leaf. The wallpaper moves like light through a canopy.",
   "whatsNew": "First release.",

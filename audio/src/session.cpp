@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "session.h"
 
 #include <QtCore/QHash>
@@ -9,7 +9,7 @@
 #include <numbers>
 #include <vector>
 
-namespace qtos::audio {
+namespace qor::audio {
 
 namespace {
 
@@ -657,4 +657,4 @@ double SessionSource::position() const { return double(d->position) / d->rate; }
 
 double SessionSource::duration() const { return d->spec.duration; }
 
-} // namespace qtos::audio
+} // namespace qor::audio

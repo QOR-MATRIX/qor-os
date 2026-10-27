@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "lumenstyle.h"
 
 #include <QtGui/QPainter>
@@ -13,7 +13,7 @@
 
 using namespace Qt::StringLiterals;
 
-namespace qtos {
+namespace qor {
 
 namespace {
 
@@ -392,4 +392,4 @@ void LumenStyle::drawComplexControl(ComplexControl control, const QStyleOptionCo
     QProxyStyle::drawComplexControl(control, option, p, widget);
 }
 
-} // namespace qtos
+} // namespace qor

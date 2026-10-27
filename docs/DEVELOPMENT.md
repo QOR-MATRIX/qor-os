@@ -9,7 +9,7 @@ changing them.
 ## 1. Daily loop
 
 ```powershell
-. .\tools\dev\Enter-QtosShell.ps1
+. .\tools\dev\Enter-QorShell.ps1
 cmake --build --preset windows-release            # incremental build (QML is compiled too)
 .\tools\dev\run.ps1 -- --unlocked --open files    # run
 ctest --preset windows-release                    # test
@@ -21,8 +21,8 @@ produces deterministic frames you can compare before and after a change.
 
 ## 2. C++ conventions
 
-- C++20, Qt 6.12. Namespaces: `qtos` (Kit, Services), `qtos::sim`,
-  `qtos::lumen`, `qtos::host`, `qtos::color`.
+- C++20, Qt 6.12. Namespaces: `qor` (Kit, Services), `qor::sim`,
+  `qor::lumen`, `qor::host`, `qor::color`.
 - Strict Qt string hygiene is on: `QT_NO_CAST_FROM_ASCII`,
   `QT_NO_CAST_TO_ASCII`, `QT_NO_URL_CAST_FROM_STRING`, `QT_USE_QSTRINGBUILDER`.
   Use `u"…"_s` (`using namespace Qt::StringLiterals`) and wrap QStringBuilder
@@ -36,7 +36,7 @@ produces deterministic frames you can compare before and after a change.
   (`requirements-dev.txt`, pre-commit, CI). Do not hand-format.
 - Warnings: `/W4` (MSVC) or `-Wall -Wextra -Wpedantic …`. Third-party headers are
   external. `ci-windows` builds with warnings as errors.
-- Every file starts with `// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary`.
+- Every file starts with `// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary`.
 
 ## 3. QML conventions
 
@@ -83,7 +83,7 @@ produces deterministic frames you can compare before and after a change.
    not uniforms (see `Wallpaper.qml`).
 4. **Prefer SDF `Surface`** over `Rectangle` + effects for anything rounded,
    stroked or shadowed.
-5. Measure with `qtos-shell --benchmark 8` before and after (see
+5. Measure with `qor-shell --benchmark 8` before and after (see
    [PERFORMANCE.md](PERFORMANCE.md)) and include the numbers in the PR.
 
 ## 5. Recipes
@@ -139,7 +139,7 @@ cmake --build --preset ci-windows --target update_golden          # rewrite the 
 ```
 
 If a platform must render a case differently on purpose, run the test with
-`QTOS_GOLDEN_UPDATE=platform`. That writes an override to
+`QOR_GOLDEN_UPDATE=platform`. That writes an override to
 `tests/golden/references/<os>/`, which takes precedence on that OS.
 
 When a case fails, `build/<preset>/tests/golden-out/` holds `<case>-actual.png`
@@ -158,7 +158,7 @@ rather than failed.
 
 ### Shell scripts and end-to-end tests
 
-`qtos-shell --script file.json` and `prism --script file.json` drive the
+`qor-shell --script file.json` and `prism --script file.json` drive the
 shell with synthetic input, then exit with 0 (every step passed) or 4 (a
 step failed, with the reason on stderr). Input enters through
 `QWindowSystemInterface`, the way a device's (and `QTest`'s) does. It
@@ -204,7 +204,7 @@ step, so the velocity a swipe ends with is the scripted one, however busy the
 machine is.
 
 While a script runs, only its own input and the controller interface's
-reach the window (`qtos::input::InjectedInput`). Real pointer and key input
+reach the window (`qor::input::InjectedInput`). Real pointer and key input
 is dropped: a person's mouse crossing the window, or a host compositor's
 pointer over a nested Prism, would otherwise cancel scripted drags or fire
 shortcuts. Running tests on a machine in use is safe.
@@ -244,7 +244,7 @@ The **state** includes:
 
 Two suites use the runner (label `gpu`):
 
-- **`shell_e2e`** runs `tests/shell/apps.e2e.json` in `qtos-shell` on every
+- **`shell_e2e`** runs `tests/shell/apps.e2e.json` in `qor-shell` on every
   platform. A Lumen `Switch` receives a click, and maximise, snap, minimise,
   Shelf restore, Overview and close work for a first-party app.
 - **`prism_e2e`** (Linux) runs `tools/dev/prism-e2e.py`. It starts a nested
@@ -270,7 +270,7 @@ with `npm pack lucide-static`). CMake picks the list up automatically.
 
 ### Add a Kit component
 
-Create `kit/MyComponent.qml` (SPDX header, `import QTOS.Kit`), add it to
+Create `kit/MyComponent.qml` (SPDX header, `import QOR.Kit`), add it to
 `QML_FILES` in `kit/CMakeLists.txt`, use tokens and Theme only, and add a
 Quick Test if it has logic.
 
@@ -286,14 +286,14 @@ Create `kit/style/<Control>.qml` deriving from `QtQuick.Templates`
 1. Edit or add `services/interfaces/<name>.rep`. Use `READWRITE` for
    user-settable properties and `SOURCEONLYSETTER` for service-owned state.
    Slots return `void` unless a reply is essential.
-2. New file: add it to `QTOS_SERVICE_INTERFACES` in `services/CMakeLists.txt`.
+2. New file: add it to `QOR_SERVICE_INTERFACES` in `services/CMakeLists.txt`.
 3. Implement the simulated source in `sim/src/` (subclass `<Name>SimpleSource`),
    load initial state from the scenario, and `enableRemoting` it in
    `SimServices::start`.
-4. Expose the replica: add a member and `Q_PROPERTY` to `qtos::Services`,
+4. Expose the replica: add a member and `Q_PROPERTY` to `qor::Services`,
    acquire it in `connectTo`, and add a `<Name>ServiceForeign` declaration.
 5. Extend `tests/services/tst_services.cpp` and [SERVICES.md](SERVICES.md).
-6. Optionally add `qtosctl` commands.
+6. Optionally add `qorctl` commands.
 
 ### Add an app
 
@@ -305,10 +305,10 @@ Create `kit/style/<Control>.qml` deriving from `QtQuick.Templates`
    system state, and `Intents` for system actions.
 4. Add a capture scene in `tools/screenshots/capture.ps1` if it is a showcase.
 
-### Add a shell action (Beam, Terminal, qtosctl)
+### Add a shell action (Beam, Terminal, qorctl)
 
 Add a `case` in `Desktop.runAction()`, an entry in `Beam.catalog()`, and if it
-is useful from outside, a `qtosctl` command or an `Intents` action.
+is useful from outside, a `qorctl` command or an `Intents` action.
 
 ### Pull the carried products from upstream
 
@@ -346,23 +346,23 @@ and mark any record it supersedes or amends.
 
 | Need | How |
 |------|-----|
-| QTOS logs | `QT_FORCE_STDERR_LOGGING=1`, `QT_LOGGING_RULES="qtos.*=true"` |
+| QOR OS logs | `QT_FORCE_STDERR_LOGGING=1`, `QT_LOGGING_RULES="qor.*=true"` |
 | QML warnings with file and line | Same as above. Warnings print on stderr |
 | Graphics backend, adapter, pipeline cache | `QSG_INFO=1` |
 | Overdraw and batching | `QSG_VISUALIZE=overdraw` / `batches` / `clip` / `changes` |
 | Render timing per frame | `QSG_RENDER_TIMING=1` |
 | QML profiler / debugger | Launch config "QML debugger" in `.vscode/launch.json` (`-qmljsdebugger=port:3768,block`), then attach from Qt Creator |
-| GPU frame capture | RenderDoc or PIX on `qtos-shell.exe` (D3D11) |
-| Service traffic | `qtosctl watch`; `QT_LOGGING_RULES="qt.remoteobjects*=true"` |
-| Frame pacing | `qtos-shell --benchmark 8 --benchmark-out bench.json` |
+| GPU frame capture | RenderDoc or PIX on `qor-shell.exe` (D3D11) |
+| Service traffic | `qorctl watch`; `QT_LOGGING_RULES="qt.remoteobjects*=true"` |
+| Frame pacing | `qor-shell --benchmark 8 --benchmark-out bench.json` |
 
 ## 7. Tooling reference
 
 | Tool | Purpose |
 |------|---------|
-| `tools/dev/Enter-QtosShell.ps1` | Load MSVC + Qt + CMake + Ninja into PowerShell |
+| `tools/dev/Enter-QorShell.ps1` | Load MSVC + Qt + CMake + Ninja into PowerShell |
 | `tools/dev/build.ps1` | Configure, build, optionally test or build a target |
-| `tools/dev/run.ps1` | Run `qtos-shell` with arguments |
+| `tools/dev/run.ps1` | Run `qor-shell` with arguments |
 | `tools/screenshots/capture.ps1` | Deterministic doc screenshots (`docs/images/*.webp`) |
 | `tools/tokens/generate_tokens.py` | Lumen token generator (`--check` in CI) |
 | `tools/icons/import_lucide.py` | Reproducible icon import |
@@ -372,4 +372,4 @@ and mark any record it supersedes or amends.
 | `tools/dev/products.ps1` | Build and test QQ, ARQADE and QOR Media with their own scripts |
 | `tools/upstream/demiurge.sh` | Pull carried code from demiurge-chain, show its state, write patches for upstream |
 | `tools/ci/runners.ps1` | Move the workstation's two CI runners to the organisation or a repository, and start them |
-| `qtosctl` | Drive services from the command line ([SERVICES.md](SERVICES.md#qtosctl)) |
+| `qorctl` | Drive services from the command line ([SERVICES.md](SERVICES.md#qorctl)) |

@@ -1,8 +1,8 @@
 {
-  "id": "org.qtos.theme.graphite",
+  "id": "dev.qorsync.theme.graphite",
   "name": "Graphite",
   "version": "1.0.0",
-  "developer": "org.qtos",
+  "developer": "dev.qorsync",
   "summary": "Near-monochrome, for focus.",
   "description": "Graphite takes the colour out of the neutrals and quiets the wallpaper, leaving a single blue accent for what matters.",
   "whatsNew": "First release.",

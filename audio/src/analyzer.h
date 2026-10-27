@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
 #include "fft.h"
@@ -6,7 +6,7 @@
 #include <array>
 #include <vector>
 
-namespace qtos::audio {
+namespace qor::audio {
 
 // What the interface reacts to, for one moment of the audio being heard.
 struct AnalysisFrame
@@ -68,4 +68,4 @@ private:
     double m_sinceBeat = 1;
 };
 
-} // namespace qtos::audio
+} // namespace qor::audio

@@ -1,9 +1,9 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "dsp.h"
 
 #include <numbers>
 
-namespace qtos::audio {
+namespace qor::audio {
 
 void Biquad::set(Type type, double sampleRate, double frequency, double q, double gainDb)
 {
@@ -103,4 +103,4 @@ void GainRamp::process(float *samples, int frames)
     }
 }
 
-} // namespace qtos::audio
+} // namespace qor::audio

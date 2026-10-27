@@ -1,7 +1,7 @@
-# apps — QTOS.Apps
+# apps — QOR.Apps
 
 First-party apps, hosted by the shell inside Prism windows. Apps depend on
-QTOS.Kit, the Lumen style and QTOS.Services, **never** on the shell.
+QOR.Kit, the Lumen style and QOR.Services, **never** on the shell.
 
 | App | File | Highlights |
 |-----|------|------------|

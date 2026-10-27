@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+# SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 """End-to-end window management in Prism with real Wayland clients.
 
 Starts a nested Prism (in a Wayland session or WSLg) with a JSON UI script
@@ -14,7 +14,7 @@ menu, a shortcut and its title bar, and Spaces across both; a third runs the
 benchmark on two outputs. This file then checks the window-manager state the script
 recorded at each step.
 
-    tools/dev/prism-e2e.py --build-dir ~/qtos-build/linux-release [--keep]
+    tools/dev/prism-e2e.py --build-dir ~/qor-build/linux-release [--keep]
 
 Exit status is the number of failed checks (100+ for setup errors).
 """
@@ -234,12 +234,12 @@ def verify(out: Path, with_terminal: bool) -> int:
     c.check("window placed inside the work area", bool(a and a["frameRect"][1] >= work[1]),
             f"frame {a and a['frameRect']} work area {work}")
     initial = a["frameRect"] if a else []
-    c.check("app id from the client (xdg_toplevel.set_app_id)", bool(a and a["appId"] == "org.qtos.PrismTestA"),
+    c.check("app id from the client (xdg_toplevel.set_app_id)", bool(a and a["appId"] == "dev.qorsync.PrismTestA"),
             f"{a and a['appId']}")
     c.check("Shelf name from the app's desktop entry", bool(a and a["identity"]["name"] == "Prism Test App"),
             f"{a and a['identity']}")
     c.check("Shelf icon from the XDG icon theme",
-            bool(a and a["identity"]["icon"].endswith("/hicolor/scalable/apps/org.qtos.PrismTestA.svg")),
+            bool(a and a["identity"]["icon"].endswith("/hicolor/scalable/apps/dev.qorsync.PrismTestA.svg")),
             f"{a and a['identity']}")
     if with_terminal:
         t = find(s, TERMINAL)
@@ -448,7 +448,7 @@ def run_prism(prism: Path, client: Path, out: Path, arguments: list[str], data_d
                 return 102
             time.sleep(0.1)
         env = dict(os.environ, WAYLAND_DISPLAY=socket, QT_QPA_PLATFORM="wayland")
-        start("client-a", [str(client), "--title", "Prism Test A", "--app-id", "org.qtos.PrismTestA",
+        start("client-a", [str(client), "--title", "Prism Test A", "--app-id", "dev.qorsync.PrismTestA",
                            "--size", "640x420", "--min", "480x320", "--animate"], env)
         if terminal:
             time.sleep(0.8)
@@ -496,9 +496,9 @@ def main() -> int:
     icons = data / "icons" / "hicolor" / "scalable" / "apps"
     (data / "applications").mkdir(parents=True)
     icons.mkdir(parents=True)
-    (data / "applications" / "org.qtos.PrismTestA.desktop").write_text(
-        "[Desktop Entry]\nType=Application\nName=Prism Test App\nIcon=org.qtos.PrismTestA\nExec=true\n")
-    (icons / "org.qtos.PrismTestA.svg").write_text(
+    (data / "applications" / "dev.qorsync.PrismTestA.desktop").write_text(
+        "[Desktop Entry]\nType=Application\nName=Prism Test App\nIcon=dev.qorsync.PrismTestA\nExec=true\n")
+    (icons / "dev.qorsync.PrismTestA.svg").write_text(
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">'
         '<rect width="64" height="64" rx="14" fill="#5a68e6"/></svg>')
     data_dirs = f"{data}:{os.environ.get('XDG_DATA_DIRS', '/usr/local/share:/usr/share')}"

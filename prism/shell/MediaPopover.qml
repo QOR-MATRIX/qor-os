@@ -1,8 +1,8 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 import QtQuick
 import QtQuick.Controls
-import QTOS.Kit
-import QTOS.Services
+import QOR.Kit
+import QOR.Services
 
 // Expanded Now Playing, opened from the Live Activity capsule.
 Item {

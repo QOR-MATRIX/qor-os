@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "library.h"
 
 #include <QtCore/QDir>
@@ -13,7 +13,7 @@
 
 using namespace Qt::StringLiterals;
 
-namespace qtos::audio {
+namespace qor::audio {
 
 namespace {
 
@@ -65,7 +65,7 @@ QVariantMap describe(const QFileInfo &file, const QDir &root)
 QStringList libraryRoots()
 {
     QStringList roots;
-    const QString configured = qEnvironmentVariable("QTOS_MUSIC_DIR");
+    const QString configured = qEnvironmentVariable("QOR_MUSIC_DIR");
     for (const QString &path : configured.split(QDir::listSeparator(), Qt::SkipEmptyParts))
         roots.append(QDir::cleanPath(path));
     for (const QString &path : QStandardPaths::standardLocations(QStandardPaths::MusicLocation))
@@ -102,4 +102,4 @@ QVariantList scanLibrary(const QStringList &roots, int limit)
     return tracks;
 }
 
-} // namespace qtos::audio
+} // namespace qor::audio

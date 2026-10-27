@@ -1,8 +1,8 @@
 {
-  "id": "org.qtos.widget.calendar",
+  "id": "dev.qorsync.widget.calendar",
   "name": "Calendar",
   "version": "1.0.0",
-  "developer": "org.qtos",
+  "developer": "dev.qorsync",
   "summary": "This month at a glance.",
   "description": "The whole month on your desktop, with today marked in your accent colour. Weeks start on your locale's first day.",
   "whatsNew": "First release.",

@@ -5,8 +5,8 @@
 # the machine under test. See docs/PERFORMANCE.md, "Running the decision
 # gate".
 #
-#   tools/dev/prism-gate-bundle.sh --build-dir ~/qtos-build/linux-release \
-#       --manifest ubuntu-26.04.1-desktop-amd64.manifest [--qt DIR] [--out qtos-gate.tar.gz]
+#   tools/dev/prism-gate-bundle.sh --build-dir ~/qor-build/linux-release \
+#       --manifest ubuntu-26.04.1-desktop-amd64.manifest [--qt DIR] [--out qor-gate.tar.gz]
 #
 # Build on the Ubuntu release the bundle targets. Libraries from the Qt kit
 # always go in. System libraries go in only when the target's package
@@ -18,7 +18,7 @@ set -euo pipefail
 build=""
 qt=""
 manifest=""
-out="qtos-gate.tar.gz"
+out="qor-gate.tar.gz"
 while [ $# -gt 0 ]; do
     case "$1" in
         --build-dir) build="$2"; shift 2 ;;
@@ -38,7 +38,7 @@ done
 
 stage=$(mktemp -d)
 trap 'rm -rf "$stage"' EXIT
-root="$stage/qtos-gate"
+root="$stage/qor-gate"
 mkdir -p "$root/prism/compositor" "$root/tests" "$root/qt/lib" "$root/qt/plugins" "$root/qt/qml"
 cp "$build/prism/compositor/prism" "$root/prism/compositor/"
 cp "$build/tests/prism-test-client" "$root/tests/"
@@ -99,7 +99,7 @@ fi
 commit=$(git -C "$here" -c safe.directory='*' rev-parse --short HEAD 2> /dev/null || echo unknown)
 bundled="${!packages[*]}"
 {
-    echo "QTOS decision-gate bundle"
+    echo "QOR OS decision-gate bundle"
     echo "Commit: $commit"
     echo "Built: $(date -u +%Y-%m-%dT%H:%MZ) on $(sed -n 's/^PRETTY_NAME="\(.*\)"$/\1/p' /etc/os-release)"
     echo "Qt: $qt"
@@ -108,6 +108,6 @@ bundled="${!packages[*]}"
     echo "Run ./prism-gate.sh --help for usage."
 } > "$root/BUNDLE.txt"
 
-tar -C "$stage" -czf "$out" qtos-gate
+tar -C "$stage" -czf "$out" qor-gate
 echo "Wrote $out ($(du -h "$out" | cut -f1); $(du -sh "$root" | cut -f1) unpacked)"
 echo "Bundled system packages: ${bundled:-none}"

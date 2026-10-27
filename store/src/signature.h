@@ -1,9 +1,9 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
 #include <QtCore/QByteArray>
 
-namespace qtos::store {
+namespace qor::store {
 
 // Verifies an ECDSA P-256 signature over SHA-256 of `message`.
 //
@@ -12,4 +12,4 @@ namespace qtos::store {
 // done by the platform's vetted crypto: CNG on Windows, OpenSSL elsewhere.
 bool verifySignature(const QByteArray &publicKey, const QByteArray &message, const QByteArray &signature);
 
-} // namespace qtos::store
+} // namespace qor::store

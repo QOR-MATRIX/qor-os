@@ -1,64 +1,57 @@
 # Where QOR OS stands
 
-For Andrew, 26 October 2026. One page, rewritten every session (`AGENTS.md` §2).
+For Andrew, 27 October 2026. One page, rewritten every session (`AGENTS.md` §2).
 
 ## What QOR OS is
 
-The operating system for players, game makers and creators: QTOS's Prism
-shell — *the compositor and desktop in one* — and Lumen design, joined with
+The operating system for players, game makers and creators: the Prism shell
+— *the compositor and desktop in one* — and Lumen design, joined with
 Demiurge's QQ engine, ARQADE and QOR Media, on a Linux base. Code:
 `github.com/QOR-MATRIX/qor-os` (private), on this PC at `X:\Repoz\QOR-OS`.
 
-## This session (all checked in the tree today)
+**Phase 0 is complete.** Next is Phase 1: QQ, ARQADE and QOR Media on Linux,
+inside Prism, driven by a controller.
 
-1. **Space:** the build drive X: went from 9.6 GB to 204.7 GB free. I removed
-   Demiurge's Rust build output and three finished agent worktrees, *spare
-   copies of the repository*, whose work was already merged.
-2. **The repository:** `qor-os` holds QTOS's full history. QTOS is frozen with
-   a note pointing here.
-3. **The products came with their history:** QQ, ARQADE (app, games and
-   fixtures) and QOR Media, at the same paths as in demiurge-chain. In CI all
-   their suites passed first time: QQ 8, ARQADE 4, QOR Media 9. On this PC,
-   QOR Media's reader suite failed now and then while the desktop was busy,
-   because a test window lost the keyboard; CI retries a failure once.
-4. **The QOR core** — *the Rust code that holds keys* — is built from
-   demiurge-chain at a pinned commit and never copied. Its test passes on
-   Windows and Linux. Moving the rest of the launcher's Rust into it (QOR ID,
-   chain, Social, Library, Mesh, Qontrol) is done in demiurge-chain #107,
-   waiting for you.
-5. **Eight decisions** written down (`docs/decisions/`):
-   - one rulebook;
-   - the repository layout;
-   - the core pinned;
-   - **Fedora Atomic** as the base;
-   - **every display at its own refresh on every GPU**, with the display test
-     deferred, not failed;
-   - **no money in 1.0**;
-   - what 1.0 ships;
-   - the release gates.
-6. **CI is green:** both runners on this PC now serve `qor-os`, and the first
-   run passed on Windows and Linux, products included (25 minutes; later runs
-   are incremental). WSL's clock was 6 h 25 min fast, which stopped the Linux
-   runner; the runner script now fixes it.
+## This session
+
+1. **The QOR core moved to your merge of #107** (`e99c7ce`) with every module
+   the Windows launcher has: QOR ID's and Social's clients, the chain client,
+   the Library's index, the Mesh and Qontrol. CI passed on Windows and Linux.
+   I also fixed a trap: CI reuses its build folders, which would have kept the
+   old core. A moved pin now always takes effect.
+2. **One name: QOR OS**, as you asked, in the interface, the documents and the
+   code ([QOR-0009](docs/decisions/QOR-0009-the-name-is-qor-os.md)).
+   - Programs are `qor-shell`, `qorctl` and `qor-simd`; code is `qor`; QML
+     modules are `QOR.Kit`, `QOR.Shell` and so on, beside the carried
+     `QOR.Media`; settings are `QOR_*`.
+   - The Store's items are `dev.qorsync.*`, on the ecosystem's real domain,
+     and the catalogue is the "QOR OS Store".
+   - "QTOS" now means only the predecessor: its frozen repository and its
+     history.
+   - Nothing of yours is lost. The shell and simulator copy your settings and
+     installed Store items from the old names the first time they run. The
+     Store was re-signed with **your existing key**, so its root of trust is
+     unchanged.
+3. **The runners serve the whole organisation.** You moved them. A second run
+   of the script stopped the Windows runner mid-job; I restarted it, and the
+   script now refuses to touch a busy runner and skips one already in place.
+   That interrupted job was QTOS's last build, so I reran it and QTOS ends
+   green.
+4. **QTOS is tidy:** its phase issues #2–#6 and milestones are closed, each
+   pointing to where its work went in QOR OS.
 
 ## Needs you
 
-1. **demiurge-chain #107** — *the rest of the launcher's Rust moved into the
-   core* (L13.2). It also records ADR-120, QOR OS from Demiurge's side.
-   - First decide **ADR-121** in it. Option A, recommended, ignores one
-     advisory in a crate that is listed but never built, guarded by CI exactly
-     as the launcher already does.
-   - Then review and merge #107. Merging to that public `main` is yours; I
-     was not allowed to.
-   - After the merge I move QOR OS's pin, with the `desktop` feature.
-   - ADR-120 also asks which licence the core's crates carry: MIT, as their
-     manifests say, or Apache-2.0, as the repository is.
-2. **Share the runners with QTOS too:** run
-   `gh auth refresh -h github.com -s admin:org`, then
-   `.\tools\ci\runners.ps1 -Scope org` in `X:\Repoz\QOR-OS`.
-3. **Close QTOS's phase issues #2–#6** with a note pointing to QOR OS. I was
-   not allowed to.
-4. **The release gates**, before anything is public:
+1. **Move the Store's signing keys when convenient** (optional): rename
+   `C:\Users\Godmode\.qtos\store-signing` to
+   `C:\Users\Godmode\.qor-os\store-signing`. Back them up first. The tools use
+   either. `developer-org.qtos.pem` in there is no longer used.
+2. **Two loose ends in demiurge-chain**, by your rules there:
+   - ADR-121's file still says "Proposed", although #107 merged with its
+     option A. Its next records update should mark it accepted.
+   - The core's crates say MIT while the repository is Apache-2.0
+     (ADR-120's open question).
+3. **The release gates**, before anything is public:
    - The Qt Company's written OK to ship Qt in an OS image;
    - a trademark attorney for "QOR OS";
    - the legal list in Demiurge's `OWNER.md`.

@@ -1,6 +1,6 @@
 # Prism shell specification
 
-The Prism shell (`QTOS.Shell`, `prism/shell/`) is the desktop: the lock
+The Prism shell (`QOR.Shell`, `prism/shell/`) is the desktop: the lock
 screen, the Rail, the Shelf, Beam, Control Center, notifications, windows,
 Spaces and Overview. This document specifies behaviour as implemented. The
 visual language is in [LUMEN.md](LUMEN.md).
@@ -24,7 +24,7 @@ visual language is in [LUMEN.md](LUMEN.md).
 
 A floating glass bar, 34 px high with 8 px margins and radius 13.
 
-- **Left**: the QTOS mark (opens Beam), the active window's title (or
+- **Left**: the QOR OS mark (opens Beam), the active window's title (or
   "Desktop"), and Space dots (the current Space is a 14 px pill; tap to switch).
 - **Centre**: the **Live Activity** capsule (`LiveActivity.qml`). It shows
   media artwork, title, artist and a live equaliser. Its width springs to the
@@ -52,7 +52,7 @@ A floating glass dock, radius 24, centred 12 px above the bottom edge.
 ### Beam (`Beam.qml`, `search.js`)
 
 The universal command bar. <kbd>Ctrl</kbd>+<kbd>Space</kbd>,
-<kbd>Alt</kbd>+<kbd>Space</kbd>, the QTOS mark or the Shelf.
+<kbd>Alt</kbd>+<kbd>Space</kbd>, the QOR OS mark or the Shelf.
 
 - A scrim plus a 24 px-radius glass panel at 16% of screen height, up to
   860 px wide. A results list on the left (56%) with section headers, and a
@@ -207,7 +207,7 @@ by side from left to right.
 
 Swipes with three or more fingers, on a touchpad or a touchscreen, belong to
 the shell. It takes them for the whole window before any app or Wayland
-client sees them (`SystemGestures` in `QTOS.Input`).
+client sees them (`SystemGestures` in `QOR.Input`).
 
 | Swipe | Effect |
 |-------|--------|
@@ -227,9 +227,9 @@ Where swipes come from:
   (`zwp_pointer_gestures_v1`, from GNOME, KDE, Weston and others), which Qt
   delivers as native gestures.
 - **Touchpads in the Windows simulator**: Windows keeps multi-finger
-  touchpad gestures for itself, so QTOS reads precision touchpads through Raw
+  touchpad gestures for itself, so QOR OS reads precision touchpads through Raw
   Input. Set Settings › Bluetooth & devices › Touchpad › Three-finger gestures
-  › Swipes to Nothing, or Windows acts on the same swipe. `QTOS_TOUCHPAD=off`
+  › Swipes to Nothing, or Windows acts on the same swipe. `QOR_TOUCHPAD=off`
   turns the reader off; automated runs do.
 - **Touchscreens, everywhere**: three fingers moving together past 16 px. The
   apps under them get a touch cancel.
@@ -262,7 +262,7 @@ On a device, <kbd>Super</kbd> bindings are added in Prism.
 `Desktop` exposes `setSurface(name)`, `toggleSurface(name)`,
 `launch(appId, args)`, `lock()`, `unlock()`, `switchSpace(index)`,
 `runAction(id, args)`, `adoptSurface(shellSurface, toplevel)` and
-`windowLayer`. `qtos-shell --benchmark` drives `setSurface` and
+`windowLayer`. `qor-shell --benchmark` drives `setSurface` and
 `switchSpace` through these.
 
 ## Signature moments: status
@@ -274,4 +274,4 @@ On a device, <kbd>Super</kbd> bindings are added in Prism.
 | Overview with live windows | Implemented (keyboard, Shelf and three-finger swipes that follow the fingers) |
 | Beam streaming results with preview | Implemented |
 | Appearance change through OKLab | Implemented (uniform morph. Radial sweep is Phase 4) |
-| Hero handoff between apps | Phase 4 (`qtos_hero` protocol) |
+| Hero handoff between apps | Phase 4 (`qor_hero` protocol) |

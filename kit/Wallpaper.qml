@@ -1,8 +1,8 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 import QtQuick
-import QTOS.Kit
+import QOR.Kit
 
-// "Aurora", the procedural QTOS wallpaper. Follows the accent hue, the
+// "Aurora", the procedural QOR OS wallpaper. Follows the accent hue, the
 // appearance spring and the theme's seed and intensity; animates only when
 // `living` is on.
 //

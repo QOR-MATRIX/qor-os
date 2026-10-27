@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
 #include "engine.h"
@@ -11,7 +11,7 @@
 #include <QtCore/QJsonObject>
 #include <QtCore/QTimer>
 
-namespace qtos::sim {
+namespace qor::sim {
 
 // Simulated Wi-Fi: access points come from the scenario; connecting takes a
 // realistic moment and toggling the radio drops and restores the link.
@@ -69,7 +69,7 @@ private:
     bool m_warned10 = false;
 };
 
-// Audio backed by the QTOS audio engine: the machine's real outputs (or the
+// Audio backed by the QOR OS audio engine: the machine's real outputs (or the
 // scenario's, when the engine renders silently), perceptual volume, the
 // equaliser, interface-sound preferences and live analysis for the
 // audio-reactive interface.
@@ -104,4 +104,4 @@ public:
     using DisplaySimpleSource::DisplaySimpleSource;
 };
 
-} // namespace qtos::sim
+} // namespace qor::sim

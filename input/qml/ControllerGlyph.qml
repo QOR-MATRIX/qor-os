@@ -1,10 +1,10 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Shapes
-import QTOS.Kit
-import QTOS.Input
+import QOR.Kit
+import QOR.Input
 
 // A controller button as it is printed on the controller in use: Xbox
 // letters in their colours, PlayStation symbols, Nintendo letters, or the

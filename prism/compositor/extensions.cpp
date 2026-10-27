@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "extensions.h"
 
 #include <QtCore/QLoggingCategory>
@@ -17,9 +17,9 @@
 
 #include <cmath>
 
-Q_LOGGING_CATEGORY(lcExtensions, "qtos.prism.extensions")
+Q_LOGGING_CATEGORY(lcExtensions, "qor.prism.extensions")
 
-namespace qtos::prism {
+namespace qor::prism {
 
 namespace {
 
@@ -440,4 +440,4 @@ void PresentationFeedback::report(timespec presented)
                               Q_ARG(quint32, quint32(presented.tv_nsec)));
 }
 
-} // namespace qtos::prism
+} // namespace qor::prism

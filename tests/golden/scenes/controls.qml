@@ -1,8 +1,8 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import QTOS.Kit
+import QOR.Kit
 
 // Golden scene: the Lumen Qt Quick Controls style in its resting states.
 Rectangle {

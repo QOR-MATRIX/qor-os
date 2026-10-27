@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 // Display configuration owned by the compositor (Prism) and persisted by settingsd.
 
 class Display

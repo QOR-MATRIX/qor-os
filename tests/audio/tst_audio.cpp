@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "analyzer.h"
 #include "dsp.h"
 #include "engine.h"
@@ -19,7 +19,7 @@
 #include <numbers>
 #include <vector>
 
-using namespace qtos::audio;
+using namespace qor::audio;
 using namespace Qt::StringLiterals;
 
 namespace {
@@ -246,7 +246,7 @@ private slots:
         QVERIFY2(beats >= 9 && beats <= 12, qPrintable(u"%1 beats"_s.arg(beats)));
     }
 
-    // ── QTOS Sessions ────────────────────────────────────────────────────────
+    // ── QOR Sessions ────────────────────────────────────────────────────────
     void sessionsAreDeterministicAndHaveHeadroom_data()
     {
         QTest::addColumn<QString>("style");

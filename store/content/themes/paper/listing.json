@@ -1,8 +1,8 @@
 {
-  "id": "org.qtos.theme.paper",
+  "id": "dev.qorsync.theme.paper",
   "name": "Paper",
   "version": "1.0.0",
-  "developer": "org.qtos",
+  "developer": "dev.qorsync",
   "summary": "Warm paper and vermilion ink.",
   "description": "Paper is a light theme with the warmth of uncoated stock and an ink-red accent. The wallpaper fades back so documents come first.",
   "whatsNew": "First release.",

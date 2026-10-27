@@ -1,9 +1,9 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QTOS.Kit
-import QTOS.Input
+import QOR.Kit
+import QOR.Input
 
 // What the controller's buttons do right now, with the glyphs printed on the
 // controller in use. Fades after a while without input and returns with it.

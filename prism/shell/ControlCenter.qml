@@ -1,10 +1,10 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Controls
-import QTOS.Kit
-import QTOS.Services
+import QOR.Kit
+import QOR.Services
 
 // Control Center: connectivity, appearance, display, sound, media and power.
 // Every control is a live binding to a system-service replica.

@@ -1,7 +1,7 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 import QtQuick
-import QTOS.Kit
-import QTOS.Services
+import QOR.Kit
+import QOR.Services
 
 // Now Playing: the artwork, the track and the transport, with the position
 // beneath. Shows a play button to start the queue when nothing plays.

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
 #include <QtCore/QObject>
@@ -8,7 +8,7 @@
 
 #include <memory>
 
-namespace qtos {
+namespace qor {
 
 class SpringDriver;
 
@@ -113,4 +113,4 @@ private:
     std::unique_ptr<SpringDriver> m_driver;
 };
 
-} // namespace qtos
+} // namespace qor

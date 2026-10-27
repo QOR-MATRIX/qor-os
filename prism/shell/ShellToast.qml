@@ -1,6 +1,6 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 import QtQuick
-import QTOS.Kit
+import QOR.Kit
 
 // A brief, quiet confirmation from the shell itself ("Controller interface
 // on"), shown under the Rail for a couple of seconds.

@@ -2,7 +2,7 @@
   "meta": {
     "name": "Lumen",
     "version": "0.1.0",
-    "description": "Design tokens for the QTOS Lumen design language. Colors are OKLCH: [lightness 0-1, chroma, hue degrees, alpha]. Roles with followAccent=true treat the hue as an offset from the live accent hue. Optional highContrast values replace light/dark when Increase Contrast is on. maxLuminance caps WCAG relative luminance (lowering lightness) so text on the role keeps its contrast at every accent hue."
+    "description": "Design tokens for the QOR OS Lumen design language. Colors are OKLCH: [lightness 0-1, chroma, hue degrees, alpha]. Roles with followAccent=true treat the hue as an offset from the live accent hue. Optional highContrast values replace light/dark when Increase Contrast is on. maxLuminance caps WCAG relative luminance (lowering lightness) so text on the role keeps its contrast at every accent hue."
   },
   "color": {
     "accentDefaultHue": 274,

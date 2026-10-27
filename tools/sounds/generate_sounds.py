@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+# SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 """Synthesises the Lumen interface sounds into kit/sounds/*.wav.
 
 Every sound is generated from first principles (sines, FM bells, filtered

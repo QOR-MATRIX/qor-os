@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Configures, builds and optionally tests QTOS with a CMake preset.
+    Configures, builds and optionally tests QOR OS with a CMake preset.
 
 .EXAMPLE
     .\tools\dev\build.ps1                      # windows-release
@@ -17,7 +17,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $repo = Resolve-Path (Join-Path $PSScriptRoot '..\..')
-. (Join-Path $PSScriptRoot 'Enter-QtosShell.ps1')
+. (Join-Path $PSScriptRoot 'Enter-QorShell.ps1')
 
 Push-Location $repo
 try {

@@ -1,12 +1,12 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
 #include <QtCore/QStringList>
 #include <QtCore/QVariantList>
 
-namespace qtos::audio {
+namespace qor::audio {
 
-// The folders music is read from: $QTOS_MUSIC_DIR (any number, separated like
+// The folders music is read from: $QOR_MUSIC_DIR (any number, separated like
 // PATH) and the user's Music folder.
 QStringList libraryRoots();
 
@@ -16,4 +16,4 @@ QStringList libraryRoots();
 // "Artist/Album/01 Title.ext"; the duration is learnt when a file is played.
 QVariantList scanLibrary(const QStringList &roots, int limit = 500);
 
-} // namespace qtos::audio
+} // namespace qor::audio

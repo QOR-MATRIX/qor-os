@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
-// qtos-settingsd: user appearance and accessibility preferences.
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
+// qor-settingsd: user appearance and accessibility preferences.
 
 class Settings
 {

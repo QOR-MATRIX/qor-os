@@ -1,9 +1,9 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Templates as T
-import QTOS.Kit
+import QOR.Kit
 
 T.RangeSlider {
     id: control

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 //
 // lumen-widgets-gallery — previews the Lumen QStyle on classic Qt Widgets.
 //
@@ -50,11 +50,11 @@ int main(int argc, char *argv[])
             QFontDatabase::addApplicationFont(parser.value(fonts) + u'/' + file);
     }
 
-    qtos::lumen::Appearance appearance;
+    qor::lumen::Appearance appearance;
     appearance.dark = !parser.isSet(light);
     if (parser.isSet(accent))
         appearance.accentHue = parser.value(accent).toDouble();
-    auto *style = new qtos::LumenStyle(appearance);
+    auto *style = new qor::LumenStyle(appearance);
     QApplication::setStyle(style);
     QApplication::setPalette(style->standardPalette());
 
@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
 
     auto *title = new QLabel(u"Lumen for Qt Widgets"_s);
     QFont titleFont = title->font();
-    titleFont.setPixelSize(qtos::lumen::kTypeTitle1Size);
+    titleFont.setPixelSize(qor::lumen::kTypeTitle1Size);
     titleFont.setWeight(QFont::Bold);
     title->setFont(titleFont);
     root->addWidget(title);
@@ -139,7 +139,7 @@ int main(int argc, char *argv[])
 
     auto *text = new QTextEdit;
     text->setPlainText(u"Widgets apps such as Krita, OBS Studio, Wireshark and KeePassXC pick up Lumen "
-                       "automatically through the qtos platform theme."_s);
+                       "automatically through the qor platform theme."_s);
     grid->addWidget(text, 1, 1, 1, 2);
 
     auto *box = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);

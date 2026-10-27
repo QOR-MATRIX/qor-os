@@ -1,13 +1,13 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 //
-// qtos-gamepads — lists the game controllers QTOS sees and streams their state,
-// in the standard QTOS layout. The first thing to run when a controller does
+// qor-gamepads — lists the game controllers QOR OS sees and streams their state,
+// in the standard QOR OS layout. The first thing to run when a controller does
 // not behave.
 //
-//   qtos-gamepads                 list, then stream until Ctrl+C
-//   qtos-gamepads --seconds 5     stream for five seconds
-//   qtos-gamepads --rumble        a short vibration on every controller
-//   qtos-gamepads --light ff6b00  set the light bar (PlayStation)
+//   qor-gamepads                 list, then stream until Ctrl+C
+//   qor-gamepads --seconds 5     stream for five seconds
+//   qor-gamepads --rumble        a short vibration on every controller
+//   qor-gamepads --light ff6b00  set the light bar (PlayStation)
 
 #include "gamepadmanager.h"
 
@@ -17,7 +17,7 @@
 #include <QtCore/QTimer>
 
 using namespace Qt::StringLiterals;
-using namespace qtos::input;
+using namespace qor::input;
 
 namespace {
 
@@ -73,11 +73,11 @@ QString describe(const GamepadState &state)
 int main(int argc, char *argv[])
 {
     QCoreApplication app(argc, argv);
-    QCoreApplication::setApplicationName(u"qtos-gamepads"_s);
-    QCoreApplication::setApplicationVersion(QStringLiteral(QTOS_VERSION_STRING));
+    QCoreApplication::setApplicationName(u"qor-gamepads"_s);
+    QCoreApplication::setApplicationVersion(QStringLiteral(QOR_VERSION_STRING));
 
     QCommandLineParser parser;
-    parser.setApplicationDescription(u"Lists the game controllers QTOS sees and streams their state."_s);
+    parser.setApplicationDescription(u"Lists the game controllers QOR OS sees and streams their state."_s);
     parser.addHelpOption();
     parser.addVersionOption();
     const QCommandLineOption seconds(u"seconds"_s, u"Stream for this many seconds, then exit."_s, u"n"_s);

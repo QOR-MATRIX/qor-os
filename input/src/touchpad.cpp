@@ -1,9 +1,9 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "touchpad.h"
 
 #include <utility>
 
-namespace qtos::input {
+namespace qor::input {
 
 std::optional<QList<TouchpadContact>> TouchpadFrames::add(int contactCount, const QList<TouchpadContact> &contacts)
 {
@@ -71,4 +71,4 @@ std::optional<TouchpadSwipe::Event> TouchpadSwipe::reset()
     return Event { Phase::End, {}, m_fingers };
 }
 
-} // namespace qtos::input
+} // namespace qor::input

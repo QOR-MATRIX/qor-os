@@ -2,7 +2,7 @@
 """Imports the curated Lucide icon subset into kit/icons.
 
 Each icon is rewritten for GPU tinting: strokes become pure white (the
-QTOS.Kit `Icon` shader turns alpha into any theme color) and the stroke width
+QOR.Kit `Icon` shader turns alpha into any theme color) and the stroke width
 is set to Lumen's 1.75 px optical weight.
 
 Usage::
@@ -42,7 +42,7 @@ def convert(svg: str, name: str, version: str) -> str:
     svg = svg.replace('stroke="currentColor"', 'stroke="#ffffff"')
     svg = re.sub(r'stroke-width="[^"]*"', f'stroke-width="{STROKE_WIDTH}"', svg)
     svg = re.sub(r"\n\s*", " ", svg).replace("> <", "><").strip()
-    return f"<!-- Lucide '{name}' v{version} (ISC). Recolored for QTOS. -->\n{svg}\n"
+    return f"<!-- Lucide '{name}' v{version} (ISC). Recolored for QOR OS. -->\n{svg}\n"
 
 
 def main(argv: list[str]) -> int:

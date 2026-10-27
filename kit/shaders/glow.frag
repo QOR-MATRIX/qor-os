@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 //
 // The audio-reactive light over the Aurora wallpaper: three soft blooms in
 // the accent's neighbourhood that swell with the music's energy and flare on

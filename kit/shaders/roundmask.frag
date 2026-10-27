@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 //
 // Clips a layer (for example a whole window) to a continuous-curvature
 // rounded rectangle with analytic anti-aliasing. Used as `layer.effect`.

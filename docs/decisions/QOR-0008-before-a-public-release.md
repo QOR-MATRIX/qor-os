@@ -1,6 +1,7 @@
 # QOR-0008: Before a public release; the code keeps its QTOS names until the name is cleared
 
-- **Status:** Accepted
+- **Status:** Accepted; decision 2 (the code keeps QTOS names) superseded by
+  [QOR-0009](QOR-0009-the-name-is-qor-os.md) on 2026-10-27
 - **Date:** 2026-10-26
 - **Deciders:** the owner
 - **Relates to:** [QTOS-0004](qtos/QTOS-0004-commercial-qt-and-proprietary-repository.md), QOR-0006; Demiurge

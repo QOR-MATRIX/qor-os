@@ -1,12 +1,12 @@
-# Lumen — the QTOS Qt Quick Controls 2 style.
+# Lumen — the QOR OS Qt Quick Controls 2 style.
 #
 # Selected with QQuickStyle::setStyle("Lumen") (or QT_QUICK_CONTROLS_STYLE=Lumen),
 # so any app that imports plain `QtQuick.Controls` renders in Lumen. Controls
 # not implemented here fall back to the Basic style.
 
-qt_add_library(qtos_lumen_style STATIC)
+qt_add_library(qor_lumen_style STATIC)
 
-qt_add_qml_module(qtos_lumen_style
+qt_add_qml_module(qor_lumen_style
     URI Lumen
     VERSION 1.0
     RESOURCE_PREFIX /qt/qml
@@ -40,13 +40,13 @@ qt_add_qml_module(qtos_lumen_style
     DEPENDENCIES
         QtQuick
         QtQuick.Templates
-        QTOS.Kit
+        QOR.Kit
 )
 
-target_link_libraries(qtos_lumen_style
+target_link_libraries(qor_lumen_style
     PUBLIC
         Qt6::QuickControls2
-        qtos_kit
+        qor_kit
     PRIVATE
-        qtos::compiler_settings
+        qor::compiler_settings
 )

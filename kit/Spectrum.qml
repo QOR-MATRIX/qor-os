@@ -1,8 +1,8 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QTOS.Kit
+import QOR.Kit
 
 // A spectrum visualiser. `values` are bands from low to high frequencies
 // (0..1, any number of them, e.g. Reactive.spectrum); they are drawn as `bars`

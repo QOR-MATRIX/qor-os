@@ -22,7 +22,7 @@
 param(
     [ValidateSet('qq', 'arqade', 'media')]
     [string[]] $Product = @('qq', 'arqade', 'media'),
-    [string] $Qt = $(if ($env:QTOS_QT_DIR) { $env:QTOS_QT_DIR } else { 'C:\Qt\6.12.0\msvc2022_64' }),
+    [string] $Qt = $(if ($env:QOR_QT_DIR) { $env:QOR_QT_DIR } else { 'C:\Qt\6.12.0\msvc2022_64' }),
     [string] $BuildRoot,
     [ValidateRange(1, 3)]
     [int] $Attempts = 2

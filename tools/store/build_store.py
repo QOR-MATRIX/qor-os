@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Builds and checks the QTOS Store's signed first-party catalogue.
+"""Builds and checks the QOR OS Store's signed first-party catalogue.
 
     python tools/store/build_store.py build      # sign changed packages and the catalogue
     python tools/store/build_store.py check      # verify store/catalog against store/content (CI)
@@ -7,15 +7,16 @@
 
 store/content/ holds the sources: developers.json, then one folder per item
 under themes/ or widgets/ with a listing.json (the catalogue text) and the
-files the package carries. `build` writes store/catalog/: one .qtospkg per
+files the package carries. `build` writes store/catalog/: one .qorpkg per
 item and catalog.json with its signature, catalog.json.sig.
 
 Signing keys (ECDSA P-256) never enter the repository. They live in --keys
-(default ~/.qtos/store-signing): store.pem signs the catalogue and
-developer-<id>.pem signs that developer's packages. `build` creates missing
-keys and writes the store's public key to store/keys/store.pub, which QTOS
-embeds as its root of trust. Items whose content is unchanged keep their
-existing signed package, so a rebuild changes nothing. See docs/STORE.md.
+(default ~/.qor-os/store-signing, or QTOS's ~/.qtos/store-signing while the
+keys are still there): store.pem signs the catalogue and developer-<id>.pem
+signs that developer's packages. `build` creates missing keys and writes the
+store's public key to store/keys/store.pub, which QOR OS embeds as its root of
+trust. Items whose content is unchanged keep their existing signed package, so
+a rebuild changes nothing. See docs/STORE.md.
 """
 
 from __future__ import annotations
@@ -41,7 +42,11 @@ CONTENT = REPO / "store" / "content"
 CATALOG = REPO / "store" / "catalog"
 STORE_PUB = REPO / "store" / "keys" / "store.pub"
 FIXTURES = REPO / "tests" / "store" / "fixtures"
-DEFAULT_KEYS = Path.home() / ".qtos" / "store-signing"
+# Never a new folder while the old one holds the keys: `build` would create a new store key, and every installation
+# trusts the old one.
+KEYS = Path.home() / ".qor-os" / "store-signing"
+KEYS_BEFORE = Path.home() / ".qtos" / "store-signing"
+DEFAULT_KEYS = KEYS_BEFORE if KEYS_BEFORE.is_dir() and not KEYS.exists() else KEYS
 
 ID_PATTERN = re.compile(r"^[a-z][a-z0-9]*(\.[a-z0-9][a-z0-9-]*){2,}$")
 VERSION_PATTERN = re.compile(r"^\d{1,5}\.\d{1,5}\.\d{1,5}$")
@@ -107,7 +112,7 @@ class Item:
 
     @property
     def package_name(self) -> str:
-        return f"{self.id}-{self.version}.qtospkg"
+        return f"{self.id}-{self.version}.qorpkg"
 
     def preview(self) -> dict:
         if self.kind == "theme":
@@ -215,7 +220,7 @@ def catalog_entry(item: Item, package: bytes) -> dict:
 def catalog_bytes(developers: dict, developer_keys: dict[str, bytes], entries: list[dict]) -> bytes:
     catalog = {
         "format": 1,
-        "store": "QTOS Store",
+        "store": "QOR OS Store",
         "developers": {
             developer_id: {"name": info["name"], "verified": bool(info.get("verified", False)),
                            "key": base64.b64encode(developer_keys[developer_id]).decode("ascii")}
@@ -258,7 +263,7 @@ def build(content: Path, out: Path, store_key: ec.EllipticCurvePrivateKey,
             written += 1
         entries.append(catalog_entry(item, package))
     wanted = {item.package_name for item in items}
-    for stale in packages_dir.glob("*.qtospkg"):
+    for stale in packages_dir.glob("*.qorpkg"):
         if stale.name not in wanted:
             stale.unlink()
             print(f"Removed {stale.name}")
@@ -319,7 +324,7 @@ def check(content: Path, out: Path, store_pub: Path) -> int:
     for leftover in by_id:
         errors.append(f"{leftover} is in the catalogue but not in the content")
     listed = {Path(entry["package"]["file"]).name for entry in parsed["items"]}
-    for package in (out / "packages").glob("*.qtospkg"):
+    for package in (out / "packages").glob("*.qorpkg"):
         if package.name not in listed:
             errors.append(f"{package.name} is not in the catalogue")
 
@@ -331,7 +336,7 @@ def check(content: Path, out: Path, store_pub: Path) -> int:
 
 # ── Test fixtures ───────────────────────────────────────────────────────────
 
-FIXTURE_WIDGET = b"""// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+FIXTURE_WIDGET = b"""// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 import QtQuick
 
 Rectangle { color: "teal" }

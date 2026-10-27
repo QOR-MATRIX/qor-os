@@ -1,9 +1,9 @@
 # Lumen design language
 
-Lumen is the QTOS design language: physically inspired materials,
+Lumen is the QOR OS design language: physically inspired materials,
 spring-driven motion, continuous-curvature shapes, perceptual color, and calm
 typography. This specification describes the system as implemented in
-`QTOS.Kit` (`kit/`) and the `Lumen` Qt Quick Controls style (`kit/style/`).
+`QOR.Kit` (`kit/`) and the `Lumen` Qt Quick Controls style (`kit/style/`).
 
 Exact values live in the tokens. See the generated
 [token reference](tokens.md) and the source
@@ -210,7 +210,7 @@ different palettes of the same field.
 | `Backdrop` | Shared blurred texture of a subtree |
 | `RoundMask` | Layer effect clipping to a continuous-curvature shape |
 | `Wallpaper` | Aurora |
-| `Icon`, `AppIcon`, `Artwork`, `QtosMark` | Symbols, app tiles, generated media art, brand mark |
+| `Icon`, `AppIcon`, `Artwork`, `QorMark` | Symbols, app tiles, generated media art, brand mark |
 | `IconButton`, `SidebarItem`, `SectionHeader`, `Card`, `SegmentedControl`, `SearchField`, `Kbd`, `Divider` | App building blocks |
 | `Spectrum` | Audio visualiser: any number of 0..1 bands drawn as rounded bars, optionally mirrored, with a highlighted sub-range |
 | `Sounds` | Interface sounds (`Sounds.play("notification")`); the shell binds `enabled`, `volume` and `device` |
@@ -228,7 +228,7 @@ symbol names. `Button.highlighted` is the primary accent button.
 
 ### Qt Widgets
 
-`platform/style` (the Lumen `QStyle`) and `platform/theme` (the `qtos` QPA
+`platform/style` (the Lumen `QStyle`) and `platform/theme` (the `qor` QPA
 theme) apply the same tokens to Widgets apps: palette, Inter, rounded
 controls, accent default buttons, focus rings and thin scroll bars.
 

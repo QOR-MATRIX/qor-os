@@ -1,10 +1,10 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtGraphs
-import QTOS.Kit
-import QTOS.Services
+import QOR.Kit
+import QOR.Services
 
 // Monitor: live system telemetry rendered with Qt Graphs. CPU and GPU load
 // are simulated; the frame-time panel measures this very window's render loop.

@@ -1,8 +1,8 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 pragma Singleton
 
 import QtQml
-import QTOS.Kit
+import QOR.Kit
 
 // Spring presets for Lumen motion. Assign one to `Spring.preset`.
 //   snappy – controls, hover, small state changes

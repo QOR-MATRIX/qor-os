@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
 #include <QtCore/QMetaType>
@@ -7,10 +7,10 @@
 #include <array>
 #include <cmath>
 
-// The QTOS controller model: every supported controller, whatever its driver,
+// The QOR OS controller model: every supported controller, whatever its driver,
 // is presented as one standard layout (the Xbox / "south-east-west-north"
 // layout that SDL, the Linux gamepad spec and the W3C Gamepad API share).
-namespace qtos::input {
+namespace qor::input {
 
 enum class Button : int {
     South,         // A, Cross
@@ -120,7 +120,7 @@ inline void setHat(GamepadState &state, int hat)
     state.set(Button::DPadLeft, hat >= 5 && hat <= 7);
 }
 
-} // namespace qtos::input
+} // namespace qor::input
 
-Q_DECLARE_METATYPE(qtos::input::GamepadState)
-Q_DECLARE_METATYPE(qtos::input::GamepadInfo)
+Q_DECLARE_METATYPE(qor::input::GamepadState)
+Q_DECLARE_METATYPE(qor::input::GamepadInfo)

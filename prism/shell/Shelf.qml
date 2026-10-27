@@ -1,9 +1,9 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QTOS.Kit
-import QTOS.Apps
+import QOR.Kit
+import QOR.Apps
 
 // The Shelf: a floating glass dock with Beam, pinned and running apps, and
 // Overview. Icons magnify around the pointer and hop when launching.

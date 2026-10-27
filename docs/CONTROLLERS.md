@@ -1,20 +1,20 @@
 # Controllers
 
-QTOS can be driven entirely with a game controller. Keyboard and mouse stay
-the default: when a controller connects, QTOS asks whether to switch to the
+QOR OS can be driven entirely with a game controller. Keyboard and mouse stay
+the default: when a controller connects, QOR OS asks whether to switch to the
 **controller interface** (or switches by itself, if you chose that), and it
 returns to keyboard and mouse when the last controller disconnects.
 Keyboard and mouse keep working throughout.
 
 | Piece | Where | What it does |
 |-------|-------|--------------|
-| Controller backends and `GamepadManager` | [`input/src/`](../input/src/) (`qtos_input`) | Find controllers, read them, present one standard layout |
-| `Gamepads` | [`input/qml/gamepads.h`](../input/qml/gamepads.h) (`QTOS.Input`) | The connected controllers and their live state, for QML |
+| Controller backends and `GamepadManager` | [`input/src/`](../input/src/) (`qor_input`) | Find controllers, read them, present one standard layout |
+| `Gamepads` | [`input/qml/gamepads.h`](../input/qml/gamepads.h) (`QOR.Input`) | The connected controllers and their live state, for QML |
 | `ControllerNavigator` | [`input/qml/navigator.h`](../input/qml/navigator.h) | Turns a controller into pointer, scroll and key input, and shell actions |
 | `ControllerGlyph` | [`input/qml/ControllerGlyph.qml`](../input/qml/ControllerGlyph.qml) | A button as printed on the controller in use |
 | Prompt, cursor, hints, keyboard | [`prism/shell/`](../prism/shell/) `Controller*.qml` | The controller interface in the shell |
 | Settings › Controllers | [`apps/SettingsApp.qml`](../apps/SettingsApp.qml) | Preferences, connected controllers, a live tester |
-| `qtos-gamepads` | [`tools/gamepads/`](../tools/gamepads/) | Lists controllers and streams their state |
+| `qor-gamepads` | [`tools/gamepads/`](../tools/gamepads/) | Lists controllers and streams their state |
 
 ## Supported controllers
 
@@ -33,7 +33,7 @@ with clicks, and the D-pad. Glyphs follow the controller: A B X Y for Xbox,
 | Stratus Duo in Android (Bluetooth) mode, other HID game pads | Generic HID, best effort (Android-style and DirectInput-style layouts) | Any pad the kernel exposes with gamepad buttons |
 | Nintendo Switch Pro | Generic HID (Bluetooth) | `hid-nintendo` through evdev |
 
-No third-party libraries are involved. On Windows, QTOS loads XInput at run
+No third-party libraries are involved. On Windows, QOR OS loads XInput at run
 time (including `XInputGetStateEx`, for the Guide button) and reads HID
 devices with the Windows HID and SetupAPI functions; arrivals and removals
 come from Configuration Manager notifications. On Linux it reads
@@ -59,7 +59,7 @@ combined before the interface acts on it, so a press never counts twice.
   feature-report read) and their output reports carry the CRC-32 they need.
 - Report layouts follow the Linux kernel's `hid-playstation` driver.
 - The Linux `xpad` driver reports the Xbox X and Y buttons as `BTN_X` and
-  `BTN_Y`, which the gamepad specification names north and west. QTOS swaps
+  `BTN_Y`, which the gamepad specification names north and west. QOR OS swaps
   them for Xbox controllers.
 
 ## The controller interface
@@ -113,15 +113,15 @@ Controllers › Vibration).
 ## Tools and tests
 
 ```bash
-qtos-gamepads                  # list controllers, then stream their state
-qtos-gamepads --seconds 5
-qtos-gamepads --rumble         # a short vibration on each
-qtos-gamepads --light ff6b00   # light bar colour (PlayStation)
+qor-gamepads                  # list controllers, then stream their state
+qor-gamepads --seconds 5
+qor-gamepads --rumble         # a short vibration on each
+qor-gamepads --light ff6b00   # light bar colour (PlayStation)
 ```
 
-`QTOS_GAMEPADS=virtual` keeps only virtual controllers (every test sets it,
+`QOR_GAMEPADS=virtual` keeps only virtual controllers (every test sets it,
 and `--screenshot`, `--benchmark` and `--script` runs do too), and
-`QTOS_GAMEPADS=off` none. `QT_LOGGING_RULES="qtos.input.*=true"` logs what
+`QOR_GAMEPADS=off` none. `QT_LOGGING_RULES="qor.input.*=true"` logs what
 the backends find.
 
 Shell scripts drive a virtual controller:

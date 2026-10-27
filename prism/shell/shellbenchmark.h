@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
 #include <QtCore/QList>
@@ -6,20 +6,20 @@
 
 class QQuickWindow;
 
-namespace qtos {
+namespace qor {
 
 struct ShellBenchmarkOptions
 {
-    QString tool;       // reported as "tool": qtos-shell or prism
+    QString tool;       // reported as "tool": qor-shell or prism
     int seconds = 8;    // length of the measured tour
     QString outputPath; // also write the JSON report here when set
 };
 
-// The shell benchmark shared by qtos-shell and prism (`--benchmark`).
+// The shell benchmark shared by qor-shell and prism (`--benchmark`).
 //
 // 1. After a warm-up, drives a scripted tour on the Desktop (objectName
 //    "desktop") in the first window: Overview, Beam, Control Center and a
-//    Space switch every 750 ms, while qtos::FrameStats records the frame
+//    Space switch every 750 ms, while qor::FrameStats records the frame
 //    intervals of every window (one per output under prism).
 // 2. Measures input-to-swap latency: synthetic pointer moves over the Shelf
 //    (objectName "shelf"), timed from posting the event to the swap of the
@@ -29,4 +29,4 @@ struct ShellBenchmarkOptions
 //    missed frames judged against that output's own refresh rate.
 void runShellBenchmark(const QList<QQuickWindow *> &windows, const ShellBenchmarkOptions &options);
 
-} // namespace qtos
+} // namespace qor

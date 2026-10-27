@@ -1,16 +1,16 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Shapes
-import QTOS.Kit
-import QTOS.Store
-import QTOS.Services
-import QTOS.Input
+import QOR.Kit
+import QOR.Store
+import QOR.Services
+import QOR.Input
 
-// Settings: every control is a live binding to a QTOS service replica, so
-// changes apply system-wide instantly (and persist via qtos-settingsd).
+// Settings: every control is a live binding to a QOR OS service replica, so
+// changes apply system-wide instantly (and persist via qor-settingsd).
 Item {
     id: app
 
@@ -878,7 +878,7 @@ Item {
                 SettingRow {
                     title: qsTr("Controller interface")
                     subtitle: Gamepads.count === 0 ? qsTr("Connect a controller to use it.")
-                              : Services.settings.controllerInterface ? qsTr("On · the controller drives QTOS")
+                              : Services.settings.controllerInterface ? qsTr("On · the controller drives QOR OS")
                               : qsTr("Off · keyboard and mouse")
                     Switch {
                         objectName: "controllerInterfaceSwitch"
@@ -969,7 +969,7 @@ Item {
 
                 Text {
                     width: tester.width - 36
-                    text: Gamepads.count > 0 ? qsTr("Press buttons and move the sticks; everything QTOS receives lights up here.")
+                    text: Gamepads.count > 0 ? qsTr("Press buttons and move the sticks; everything QOR OS receives lights up here.")
                                              : qsTr("Connect a controller to test it.")
                     font: Theme.footnote
                     color: Theme.textTertiary
@@ -1130,7 +1130,7 @@ Item {
                 }
                 SettingRow {
                     title: qsTr("Test notification")
-                    subtitle: qsTr("Delivered by qtos-notifyd over Qt Remote Objects.")
+                    subtitle: qsTr("Delivered by qor-notifyd over Qt Remote Objects.")
                     last: true
                     Button {
                         text: qsTr("Send")
@@ -1186,10 +1186,10 @@ Item {
             spacing: 18
             Row {
                 spacing: 18
-                QtosMark { size: 72 }
+                QorMark { size: 72 }
                 Column {
                     anchors.verticalCenter: parent.verticalCenter
-                    Text { text: "QTOS"; font: Theme.display; color: Theme.textPrimary }
+                    Text { text: "QOR OS"; font: Theme.display; color: Theme.textPrimary }
                     Text { text: qsTr("Version %1 · Prism shell in simulation").arg(Kit.version); font: Theme.callout; color: Theme.textSecondary }
                 }
             }

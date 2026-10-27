@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
 #include <QtCore/QObject>
@@ -9,7 +9,7 @@
 
 #include "oklchmath.h"
 
-namespace qtos {
+namespace qor {
 
 // QML singleton `Oklch`.
 class Oklch : public QObject
@@ -45,4 +45,4 @@ public:
     Q_INVOKABLE QColor alpha(const QColor &color, double alpha) const;
 };
 
-} // namespace qtos
+} // namespace qor

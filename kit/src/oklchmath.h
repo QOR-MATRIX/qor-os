@@ -1,16 +1,16 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
 #include <QtGui/QColor>
 
-// Perceptual color math shared by QTOS.Kit (QML), the Lumen QStyle and the
+// Perceptual color math shared by QOR.Kit (QML), the Lumen QStyle and the
 // QPA platform theme. Depends on Qt Gui only.
 //
 // Lumen defines every color in OKLCH (lightness, chroma, hue). Converting at
 // runtime lets the accent hue and light/dark appearance animate smoothly:
 // interpolation happens in OKLab, which keeps perceived lightness linear and
 // avoids the muddy midpoints of sRGB blending.
-namespace qtos::color {
+namespace qor::color {
 
 struct Lab
 {
@@ -34,4 +34,4 @@ double relativeLuminance(const Lab &lab);
 // fills for any accent hue: OKLCH lightness alone does not fix luminance.
 Lab capLuminance(const Lab &lab, double maxLuminance);
 
-} // namespace qtos::color
+} // namespace qor::color

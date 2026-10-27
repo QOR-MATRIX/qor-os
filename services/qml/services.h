@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
 #include "rep_audio_replica.h"
@@ -20,14 +20,14 @@
 class QQmlEngine;
 class QJSEngine;
 
-namespace qtos {
+namespace qor {
 
-// The shell's view of the QTOS system services, exposed to QML as the
+// The shell's view of the QOR OS system services, exposed to QML as the
 // `Services` singleton.
 //
 // Every property is a Qt Remote Objects *replica*: the shell never talks to a
-// service implementation directly. In simulation the sources live in qtos-sim
-// (in-process or in qtos-simd); on device they are the qtos-*d daemons. The
+// service implementation directly. In simulation the sources live in qor-sim
+// (in-process or in qor-simd); on device they are the qor-*d daemons. The
 // QML code is identical in both cases.
 class Services : public QObject
 {
@@ -88,7 +88,7 @@ private:
     std::unique_ptr<SettingsReplica> m_settings;
 };
 
-} // namespace qtos
+} // namespace qor
 
 // QML type information for the repc-generated replica classes, so qmllint and
 // the QML compilers type-check `Services.network.wifiEnabled` and friends.

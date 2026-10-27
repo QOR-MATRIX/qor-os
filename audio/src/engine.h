@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
 #include "analyzer.h"
@@ -9,7 +9,7 @@
 #include <QtCore/QThread>
 #include <QtCore/QVariantMap>
 
-namespace qtos::audio {
+namespace qor::audio {
 
 struct OutputDevice
 {
@@ -20,7 +20,7 @@ struct OutputDevice
 
 class EngineWorker;
 
-// The QTOS audio engine: plays generative sessions and music files through
+// The QOR OS audio engine: plays generative sessions and music files through
 // the system output, with a five-band equaliser, perceptual volume, a soft
 // limiter, and live analysis of what is being heard for the audio-reactive
 // interface.
@@ -30,7 +30,7 @@ class EngineWorker;
 // interface). This object is the thread-safe front; its signals arrive on the
 // thread that created it.
 //
-// QTOS_AUDIO_OUTPUT=null (or Output::Null) renders in real time to nowhere:
+// QOR_AUDIO_OUTPUT=null (or Output::Null) renders in real time to nowhere:
 // playback, positions and analysis behave exactly as with a device, which is
 // what tests and headless runs use.
 class Engine : public QObject
@@ -66,8 +66,8 @@ Q_SIGNALS:
     void finished();
     void loadFailed(const QString &message);
     void bufferingChanged(bool buffering);
-    void analysisReady(const qtos::audio::AnalysisFrame &frame);
-    void outputsChanged(const QList<qtos::audio::OutputDevice> &outputs, const QString &currentId);
+    void analysisReady(const qor::audio::AnalysisFrame &frame);
+    void outputsChanged(const QList<qor::audio::OutputDevice> &outputs, const QString &currentId);
 
 private:
     QThread m_thread;
@@ -75,7 +75,7 @@ private:
     bool m_null;
 };
 
-} // namespace qtos::audio
+} // namespace qor::audio
 
-Q_DECLARE_METATYPE(qtos::audio::AnalysisFrame)
-Q_DECLARE_METATYPE(qtos::audio::OutputDevice)
+Q_DECLARE_METATYPE(qor::audio::AnalysisFrame)
+Q_DECLARE_METATYPE(qor::audio::OutputDevice)

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
 #include <QtCore/QObject>
@@ -8,7 +8,7 @@
 #include <QtQuick/QQuickItem>
 #include <QtQuick/QQuickWindow>
 
-namespace qtos {
+namespace qor {
 
 // Tracks an item's bounding rectangle in another item's (or the scene's)
 // coordinate system, including every ancestor transform.
@@ -55,4 +55,4 @@ private:
     QRectF m_rect;
 };
 
-} // namespace qtos
+} // namespace qor

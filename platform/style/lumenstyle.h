@@ -1,11 +1,11 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
 #include "lumenpalette.h"
 
 #include <QtWidgets/QProxyStyle>
 
-namespace qtos {
+namespace qor {
 
 // Lumen for Qt Widgets: a proxy over Fusion that applies the Lumen palette,
 // typography, radii and control shapes, so classic Widgets apps (Krita, OBS,
@@ -13,7 +13,7 @@ namespace qtos {
 //
 // Widgets cannot get Glass, but they get the same colors, type, focus rings,
 // rounded geometry and accent behaviour. Select it with `-style Lumen`,
-// QT_STYLE_OVERRIDE=Lumen, or the qtos platform theme on device.
+// QT_STYLE_OVERRIDE=Lumen, or the qor platform theme on device.
 class LumenStyle : public QProxyStyle
 {
     Q_OBJECT
@@ -52,4 +52,4 @@ private:
     lumen::Appearance m_appearance;
 };
 
-} // namespace qtos
+} // namespace qor

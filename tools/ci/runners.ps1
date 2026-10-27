@@ -8,7 +8,7 @@
     organisation's Default runner group allows can use it. This script removes each runner from wherever it is
     registered now and registers it again at -Scope:
 
-        org    QOR-MATRIX, so QOR OS and QTOS share the runners (needs the gh token's admin:org scope:
+        org    QOR-MATRIX, so QOR OS and QOR OS share the runners (needs the gh token's admin:org scope:
                gh auth refresh -h github.com -s admin:org)
         repo   one repository (-Repo), with the token's repo scope
 
@@ -101,7 +101,7 @@ if (-not $StartOnly) {
     $field = { param($key) (wsl.exe -d $Distro --cd '~' --exec sed -n -E "s/.*$key.: .([^,]*).,.*/\1/p" "$linuxRunner/.runner" 2>$null | Out-String).Trim() }
     $url = & $field 'gitHubUrl'
     $name = & $field 'agentName'
-    if (-not $name) { $name = "$((wsl.exe -d $Distro --exec hostname).Trim())-qtos-linux" }
+    if (-not $name) { $name = "$((wsl.exe -d $Distro --exec hostname).Trim())-qor-linux" }
     if ($url -eq $target) {
         Write-Host "Linux runner '$name': already registered at $target"
     }

@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
-// qtos-notifyd: notification routing and Focus rules. On device it also serves
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
+// qor-notifyd: notification routing and Focus rules. On device it also serves
 // org.freedesktop.Notifications so every Linux app can post notifications.
 
 class Notifications

@@ -1,5 +1,5 @@
 .pragma library
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 //
 // Beam search: fuzzy ranking and a safe arithmetic evaluator.
 // Pure functions only, so they are unit-tested in tests/shell/tst_search.qml.

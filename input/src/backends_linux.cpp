@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 //
 // Linux controller backend: every game pad the kernel supports (xpad for
 // Xbox controllers, hid-playstation for DualShock 4 and DualSense, hid-generic
@@ -27,9 +27,9 @@
 
 using namespace Qt::StringLiterals;
 
-Q_LOGGING_CATEGORY(lcEvdev, "qtos.input.evdev")
+Q_LOGGING_CATEGORY(lcEvdev, "qor.input.evdev")
 
-namespace qtos::input {
+namespace qor::input {
 
 namespace {
 
@@ -271,4 +271,4 @@ std::vector<std::unique_ptr<Backend>> createHardwareBackends()
     return backends;
 }
 
-} // namespace qtos::input
+} // namespace qor::input

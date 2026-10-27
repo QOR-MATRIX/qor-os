@@ -1,15 +1,15 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 pragma ComponentBehavior: Bound
 
 import QtCore
 import QtQuick
 import QtQuick.Controls
-import QTOS.Kit
-import QTOS.Services
+import QOR.Kit
+import QOR.Services
 
 // Music: a now-playing hero bound to the media service, with transport,
 // seeking, shuffle and repeat, volume, a live visualiser and the queue, and a
-// library of songs, albums and artists. QTOS Sessions (music the audio engine
+// library of songs, albums and artists. QOR Sessions (music the audio engine
 // generates live) come first; files from the Music folder follow.
 Item {
     id: app
@@ -126,7 +126,7 @@ Item {
         SectionHeader { text: qsTr("Collections") }
         SidebarItem {
             objectName: "musicSessions"
-            width: 180; icon: "sparkles"; text: qsTr("QTOS Sessions"); badge: String(app.sessionCount)
+            width: 180; icon: "sparkles"; text: qsTr("QOR Sessions"); badge: String(app.sessionCount)
             selected: app.section === "songs" && app.collection === "session"
             onClicked: { app.section = "songs"; app.collection = "session"; }
         }
@@ -200,7 +200,7 @@ Item {
                 Icon { anchors.verticalCenter: parent.verticalCenter; name: "sparkles"; size: 12; color: Theme.textTertiary }
                 Text {
                     anchors.verticalCenter: parent.verticalCenter
-                    text: qsTr("QTOS Session · generated live, %1 BPM").arg(app.track.session?.bpm ?? "")
+                    text: qsTr("QOR Session · generated live, %1 BPM").arg(app.track.session?.bpm ?? "")
                     font: Theme.caption
                     color: Theme.textTertiary
                 }
@@ -462,7 +462,7 @@ Item {
         id: songsView
         Item {
             id: songsPage
-            readonly property string title: app.collection === "session" ? qsTr("QTOS Sessions")
+            readonly property string title: app.collection === "session" ? qsTr("QOR Sessions")
                                             : app.collection === "file" ? qsTr("Music Folder") : qsTr("Songs")
 
             LibraryHeader {
@@ -609,7 +609,7 @@ Item {
                     width: parent.width
                     horizontalAlignment: Text.AlignHCenter
                     wrapMode: Text.Wrap
-                    text: qsTr("Add MP3, FLAC, Ogg, Opus, WAV or AAC files to %1 (or set QTOS_MUSIC_DIR), then restart QTOS.")
+                    text: qsTr("Add MP3, FLAC, Ogg, Opus, WAV or AAC files to %1 (or set QOR_MUSIC_DIR), then restart QOR OS.")
                           .arg(app.musicFolder())
                     font: Theme.callout
                     color: Theme.textSecondary

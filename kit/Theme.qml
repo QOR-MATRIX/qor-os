@@ -1,14 +1,14 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 pragma Singleton
 
 import QtQuick
-import QTOS.Kit
+import QOR.Kit
 
 // Live Lumen theme. Every color is resolved from an OKLCH token at runtime, so
 // light/dark and the accent hue animate continuously: `darkness` and the
 // accent hue are springs, and all roles re-resolve as they move.
 //
-// The shell binds the appearance state to qtos-settingsd; apps only read it.
+// The shell binds the appearance state to qor-settingsd; apps only read it.
 QtObject {
     id: theme
 
@@ -22,7 +22,7 @@ QtObject {
 
     // The theme's tint for the neutral roles (surfaces, text, strokes): their
     // hue, and a multiplier for their chroma. Lumen's own neutrals are a cool
-    // blue-grey at hue 262. Store themes set these (QTOS.Store Themes).
+    // blue-grey at hue 262. Store themes set these (QOR.Store Themes).
     property real neutralHue: 262
     property real neutralTint: 1
     // The theme's Aurora wallpaper: where its pattern starts, and how bright.

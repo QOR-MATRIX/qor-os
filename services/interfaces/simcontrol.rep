@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
-// Simulation-only control surface used by qtosctl and tests to drive the
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
+// Simulation-only control surface used by qorctl and tests to drive the
 // simulated hardware. Never present on a real device.
 
 class SimControl

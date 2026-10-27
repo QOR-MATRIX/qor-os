@@ -3,7 +3,7 @@
   "description": "A calm workday: connected to Wi-Fi, headphones paired, music playing, a few notifications arriving.",
   "user": {
     "name": "Alex Morgan",
-    "host": "qtos-studio"
+    "host": "qor-studio"
   },
   "network": {
     "ssid": "Lumen Studio",
@@ -50,9 +50,9 @@
     ]
   },
   "notifications": [
-    { "atMs": 3500, "app": "system", "title": "Welcome to QTOS", "body": "Press Ctrl+Space to open Beam, the universal command bar.", "icon": "sparkles" },
+    { "atMs": 3500, "app": "system", "title": "Welcome to QOR OS", "body": "Press Ctrl+Space to open Beam, the universal command bar.", "icon": "sparkles" },
     { "atMs": 11000, "app": "messages", "title": "Maya Chen", "body": "The new Lumen glass looks unreal. Ship it!", "icon": "mail" },
     { "atMs": 24000, "app": "calendar", "title": "Design review in 10 minutes", "body": "Prism shell walkthrough · Studio B", "icon": "calendar" },
-    { "atMs": 52000, "app": "system", "title": "Update ready", "body": "QTOS 0.1.1 installs automatically on next restart.", "icon": "download" }
+    { "atMs": 52000, "app": "system", "title": "Update ready", "body": "QOR OS 0.1.1 installs automatically on next restart.", "icon": "download" }
   ]
 }

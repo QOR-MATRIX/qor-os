@@ -1,6 +1,6 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 import QtQuick
-import QTOS.Kit
+import QOR.Kit
 
 // A keycap used to display keyboard shortcuts.
 Surface {

@@ -1,9 +1,9 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
 #include <QtCore/QtTypes>
 
-namespace qtos::input {
+namespace qor::input {
 
 // The Linux evdev key code for a Qt key on a US layout (0 when unknown).
 // Synthetic key events carry it as their native scan code (+8, as XKB
@@ -13,4 +13,4 @@ quint32 evdevKeyCode(int qtKey);
 // Whether a US layout types the key with Shift (Key_Exclam is Shift+1).
 bool needsShift(int qtKey);
 
-} // namespace qtos::input
+} // namespace qor::input

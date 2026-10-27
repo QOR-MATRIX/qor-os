@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
 #include <QtCore/QHash>
@@ -7,15 +7,15 @@
 #include <QtCore/QVariantMap>
 #include <QtQml/qqmlregistration.h>
 
-namespace qtos::store {
+namespace qor::store {
 
 class StoreEngine;
 
-// QML singleton `Store`: the QTOS Store for the shell and its apps.
+// QML singleton `Store`: the QOR OS Store for the shell and its apps.
 //
-// The catalogue comes from QTOS_STORE_URL (a catalog.json URL) or, by
-// default, the signed first-party catalogue built into QTOS. Packages install
-// per user under QTOS_STORE_DIR, by default the app data folder's "store".
+// The catalogue comes from QOR_STORE_URL (a catalog.json URL) or, by
+// default, the signed first-party catalogue built into QOR OS. Packages install
+// per user under QOR_STORE_DIR, by default the app data folder's "store".
 //
 // Items are plain maps: the catalogue entry plus `developerName`, `verified`,
 // `installed`, `installedVersion`, `updateAvailable`, `busy` and `progress`.
@@ -40,7 +40,7 @@ public:
 
     // The process-wide store client (created on first use).
     static StoreEngine *engine();
-    // The QTOS Store's public key: the root of trust for every install.
+    // The QOR OS Store's public key: the root of trust for every install.
     static QByteArray storeKey();
 
     bool isReady() const;
@@ -81,4 +81,4 @@ private:
     mutable QVariantList m_widgets;
 };
 
-} // namespace qtos::store
+} // namespace qor::store

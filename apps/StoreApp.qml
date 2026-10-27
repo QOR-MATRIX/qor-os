@@ -1,15 +1,15 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Controls
-import QTOS.Kit
-import QTOS.Services
-import QTOS.Store
+import QOR.Kit
+import QOR.Services
+import QOR.Store
 
-// Store: themes and widgets for QTOS today; apps, games, tools and music
+// Store: themes and widgets for QOR OS today; apps, games, tools and music
 // with the developer program. Every item is signed by its developer and
-// verified against the QTOS Store's signed catalogue before it installs
+// verified against the QOR OS Store's signed catalogue before it installs
 // (docs/STORE.md).
 Item {
     id: app
@@ -228,7 +228,7 @@ Item {
 
             PageTitle {
                 text: qsTr("Discover")
-                subtitle: qsTr("Themes and widgets for QTOS, signed by their developers and verified by the Store.")
+                subtitle: qsTr("Themes and widgets for QOR OS, signed by their developers and verified by the Store.")
             }
 
             // The featured theme.
@@ -321,13 +321,13 @@ Item {
                         spacing: 4
                         anchors.verticalCenter: parent.verticalCenter
                         Text {
-                            text: qsTr("Build for QTOS")
+                            text: qsTr("Build for QOR OS")
                             color: Theme.textPrimary
                             font: Theme.headline
                         }
                         Text {
                             width: parent.width
-                            text: qsTr("The developer program opens with the QTOS SDK: themes, widgets, apps and games from developers everywhere, each signed and reviewed before it reaches the Store.")
+                            text: qsTr("The developer program opens with the QOR OS SDK: themes, widgets, apps and games from developers everywhere, each signed and reviewed before it reaches the Store.")
                             color: Theme.textSecondary
                             font: Theme.body
                             wrapMode: Text.Wrap
@@ -384,7 +384,7 @@ Item {
             spacing: 20
             PageTitle {
                 text: qsTr("Apps")
-                subtitle: qsTr("Apps from other developers arrive with the developer program, each running in its own sandbox. These come with QTOS.")
+                subtitle: qsTr("Apps from other developers arrive with the developer program, each running in its own sandbox. These come with QOR OS.")
             }
             Card {
                 width: parent.width
@@ -769,7 +769,7 @@ Item {
                 Text {
                     anchors.verticalCenter: parent.verticalCenter
                     width: Math.min(page.width - 40, 640)
-                    text: qsTr("Signed by %1 and verified against the QTOS Store's signed catalogue before it installs.")
+                    text: qsTr("Signed by %1 and verified against the QOR OS Store's signed catalogue before it installs.")
                           .arg(app.selected.developerName)
                     color: Theme.textSecondary
                     font: Theme.footnote

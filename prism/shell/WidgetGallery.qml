@@ -1,10 +1,10 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Controls
-import QTOS.Kit
-import QTOS.Store
+import QOR.Kit
+import QOR.Store
 
 // The widget gallery, shown while editing the desktop's widgets: live
 // previews of every installed widget (click to add), and the way to the

@@ -1,4 +1,4 @@
-# QTOS C++ style — Qt-flavoured, 120 columns. Enforced in CI with the pinned
+# QOR OS C++ style — Qt-flavoured, 120 columns. Enforced in CI with the pinned
 # clang-format from requirements-dev.txt (see docs/DEVELOPMENT.md).
 Language: Cpp
 BasedOnStyle: WebKit

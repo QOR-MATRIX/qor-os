@@ -1,10 +1,10 @@
 {
-  "id": "org.qtos.widget.now-playing",
+  "id": "dev.qorsync.widget.now-playing",
   "name": "Now Playing",
   "version": "1.0.0",
-  "developer": "org.qtos",
+  "developer": "dev.qorsync",
   "summary": "What's playing, with the controls at hand.",
-  "description": "Artwork, title and artist from QTOS Media, with previous, play and next and the track's progress. When nothing plays, one tap starts your queue.",
+  "description": "Artwork, title and artist of what's playing, with previous, play and next and the track's progress. When nothing plays, one tap starts your queue.",
   "whatsNew": "First release.",
   "released": "2026-10-26",
   "tags": [

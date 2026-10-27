@@ -1,8 +1,8 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QTOS.Kit
+import QOR.Kit
 
 // Calendar: this month at a glance, today in the accent colour. Weeks start
 // on the locale's first day.

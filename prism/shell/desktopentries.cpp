@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "desktopentries.h"
 
 #include <QtCore/QDir>
@@ -12,7 +12,7 @@
 
 using namespace Qt::StringLiterals;
 
-namespace qtos {
+namespace qor {
 
 namespace {
 
@@ -154,4 +154,4 @@ QVariantMap DesktopEntries::resolve(const QString &appId) const
     };
 }
 
-} // namespace qtos
+} // namespace qor

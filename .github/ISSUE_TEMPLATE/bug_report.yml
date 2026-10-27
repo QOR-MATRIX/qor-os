@@ -15,7 +15,7 @@ body:
         - Lumen Qt Quick Controls style
         - Shell (Rail, Shelf, Beam, Control Center, windows)
         - Prism compositor
-        - Services / simulator / qtosctl
+        - Services / simulator / qorctl
         - Apps
         - Platform theme / QStyle
         - Controllers and input
@@ -41,7 +41,7 @@ body:
     attributes:
       label: Steps to reproduce
       placeholder: |
-        1. qtos-shell --unlocked --open files
+        1. qor-shell --unlocked --open files
         2. …
     validations:
       required: true
@@ -64,5 +64,5 @@ body:
     id: logs
     attributes:
       label: Logs and screenshots
-      description: Run with QT_FORCE_STDERR_LOGGING=1 and QT_LOGGING_RULES="qtos.*=true". Attach screenshots or captures.
+      description: Run with QT_FORCE_STDERR_LOGGING=1 and QT_LOGGING_RULES="qor.*=true". Attach screenshots or captures.
       render: shell

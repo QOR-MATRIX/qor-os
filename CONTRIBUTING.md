@@ -71,7 +71,7 @@ core.
 - [ ] `pre-commit run --all-files` is clean (clang-format, generated tokens, SPDX headers)
 - [ ] Changes that touch QQ, ARQADE or QOR Media pass `tools/dev/products.ps1`
 - [ ] New behaviour has tests: C++ in `tests/`, QML logic in Qt Quick Test, Python tools with `unittest`
-- [ ] Shell and Kit changes keep `qtos-shell --benchmark 8` p95 at or below the documented baseline
+- [ ] Shell and Kit changes keep `qor-shell --benchmark 8` p95 at or below the documented baseline
       ([`docs/PERFORMANCE.md`](docs/PERFORMANCE.md))
 - [ ] Works in light and dark, with two accent hues, Reduce Motion and Reduce Transparency, and with a controller
 - [ ] Documentation, [`CHANGELOG.md`](CHANGELOG.md) and, at the end of a session, [`OWNER.md`](OWNER.md) updated

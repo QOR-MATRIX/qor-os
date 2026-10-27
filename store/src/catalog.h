@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
 #include <QtCore/QByteArray>
@@ -8,7 +8,7 @@
 #include <QtCore/QStringList>
 #include <QtCore/QVariantMap>
 
-namespace qtos::store {
+namespace qor::store {
 
 // A publisher, as the store vouches for it. `key` is the developer's ECDSA
 // P-256 public key (65-byte uncompressed point): every package from this
@@ -24,7 +24,7 @@ struct Developer
 // One listing in the catalogue.
 struct CatalogItem
 {
-    QString id;   // reverse-DNS, e.g. org.qtos.theme.ember
+    QString id;   // reverse-DNS, e.g. dev.qorsync.theme.ember
     QString kind; // "theme" | "widget"
     QString name;
     QString developer; // a Developer id
@@ -71,4 +71,4 @@ int compareVersions(const QString &a, const QString &b);
 bool isValidItemId(const QString &id);
 bool isValidVersion(const QString &version);
 
-} // namespace qtos::store
+} // namespace qor::store

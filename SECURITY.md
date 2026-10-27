@@ -51,7 +51,7 @@ summary:
 Secrets never reach a log, test output, screenshot or commit
 ([`AGENTS.md`](AGENTS.md) §6).
 
-The **simulator** (`qtos-shell`, `qtos-simd`) is a development tool. It
+The **simulator** (`qor-shell`, `qor-simd`) is a development tool. It
 exposes simulation controls (`SimControl`) on a local socket with no
 authentication and must never be shipped on a device.
 

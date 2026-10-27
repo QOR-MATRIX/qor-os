@@ -1,14 +1,14 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QTOS.Kit
-import QTOS.Services
-import QTOS.Store
+import QOR.Kit
+import QOR.Services
+import QOR.Store
 
 // Desktop widgets: Store widgets on a grid over the wallpaper, below the
 // windows, the same on every Space. Each sits on a glass card that blurs the
-// wallpaper. The layout lives in qtos-settingsd (Settings.widgets) as
+// wallpaper. The layout lives in qor-settingsd (Settings.widgets) as
 // [{ "id", "key", "col", "row" }]; while `editing`, widgets can be dragged to
 // a free cell or removed.
 //

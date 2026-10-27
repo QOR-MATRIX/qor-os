@@ -1,11 +1,11 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 pragma Singleton
 
 import QtQuick
-import QTOS.Kit
-import QTOS.Services
+import QOR.Kit
+import QOR.Services
 
-// The themes the user can choose from: Aurora, which QTOS ships with, and
+// The themes the user can choose from: Aurora, which QOR OS ships with, and
 // those installed from the Store. A theme is data only: an accent, a
 // preferred appearance, a tint for the neutral surfaces and the wallpaper's
 // character. Applying one sets the accent and appearance in Settings, so the
@@ -16,7 +16,7 @@ QtObject {
     readonly property var aurora: ({
         id: "",
         name: qsTr("Aurora"),
-        developerName: "QTOS",
+        developerName: "QOR OS",
         builtIn: true,
         accentHue: Tokens.accentDefaultHue,
         appearance: "any",

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
 #include <QtCore/QObject>
@@ -8,9 +8,9 @@
 class QQmlEngine;
 class QJSEngine;
 
-namespace qtos {
+namespace qor {
 
-// Process-wide QTOS.Kit state, exposed to QML as the `Kit` singleton.
+// Process-wide QOR.Kit state, exposed to QML as the `Kit` singleton.
 //
 // Call Kit::initialize() once after constructing QGuiApplication: it registers
 // the bundled Inter / JetBrains Mono variable fonts and makes Inter the
@@ -49,4 +49,4 @@ private:
     bool m_reducedMotion = false;
 };
 
-} // namespace qtos
+} // namespace qor

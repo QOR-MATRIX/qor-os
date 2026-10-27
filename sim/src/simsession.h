@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
 #include "rep_media_source.h"
@@ -11,13 +11,13 @@
 #include <QtCore/QList>
 #include <QtCore/QTimer>
 
-namespace qtos::audio {
+namespace qor::audio {
 class Engine;
 }
 
-namespace qtos::sim {
+namespace qor::sim {
 
-// Now playing, played for real by the audio engine: the scenario's QTOS
+// Now playing, played for real by the audio engine: the scenario's QOR OS
 // Sessions (music generated live) followed by the user's music files.
 class SimMedia : public MediaSimpleSource
 {
@@ -25,7 +25,7 @@ class SimMedia : public MediaSimpleSource
 public:
     SimMedia(audio::Engine *engine, bool persistent, QObject *parent = nullptr);
     // `library`: also queue the music files in the user's Music folder and
-    // $QTOS_MUSIC_DIR (read in the background).
+    // $QOR_MUSIC_DIR (read in the background).
     void load(const QJsonObject &config, bool library);
 
     void togglePlayback() override;
@@ -85,4 +85,4 @@ private:
     bool m_persistent;
 };
 
-} // namespace qtos::sim
+} // namespace qor::sim

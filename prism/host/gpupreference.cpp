@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "gpupreference.h"
 
 #include <QtCore/QtEnvironmentVariables>
@@ -10,7 +10,7 @@
 
 using namespace Qt::StringLiterals;
 
-namespace qtos::host {
+namespace qor::host {
 
 QString applyGpuPreference(const QString &preference)
 {
@@ -52,4 +52,4 @@ QString applyGpuPreference(const QString &preference)
 #endif
 }
 
-} // namespace qtos::host
+} // namespace qor::host

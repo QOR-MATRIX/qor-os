@@ -1,9 +1,9 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "framestats.h"
 
 #include <algorithm>
 
-namespace qtos {
+namespace qor {
 
 namespace {
 constexpr int kPublishIntervalMs = 250;
@@ -136,4 +136,4 @@ void FrameStats::reset()
     m_lastFrameNs = -1;
 }
 
-} // namespace qtos
+} // namespace qor

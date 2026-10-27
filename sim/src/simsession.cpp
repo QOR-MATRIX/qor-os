@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "simsession.h"
 
 #include "engine.h"
@@ -14,9 +14,9 @@
 
 using namespace Qt::StringLiterals;
 
-Q_LOGGING_CATEGORY(lcSimMedia, "qtos.sim.media")
+Q_LOGGING_CATEGORY(lcSimMedia, "qor.sim.media")
 
-namespace qtos::sim {
+namespace qor::sim {
 
 // ── Media ────────────────────────────────────────────────────────────────────
 
@@ -256,8 +256,8 @@ SimSettings::SimSettings(bool persistent, QObject *parent) : SettingsSimpleSourc
 
 void SimSettings::load(const QJsonObject &config)
 {
-    setUserName(config.value(u"name"_s).toString(u"QTOS User"_s));
-    setHostName(config.value(u"host"_s).toString(u"qtos-sim"_s));
+    setUserName(config.value(u"name"_s).toString(u"QOR OS User"_s));
+    setHostName(config.value(u"host"_s).toString(u"qor-sim"_s));
 
     if (m_persistent) {
         QSettings store;
@@ -333,4 +333,4 @@ void SimSettings::save()
     store.endGroup();
 }
 
-} // namespace qtos::sim
+} // namespace qor::sim

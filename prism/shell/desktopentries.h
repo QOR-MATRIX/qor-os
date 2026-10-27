@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
 #include <QtCore/QHash>
@@ -6,7 +6,7 @@
 #include <QtCore/QVariantMap>
 #include <QtQml/qqmlregistration.h>
 
-namespace qtos {
+namespace qor {
 
 // QML singleton `DesktopEntries`: the identity of a Wayland app.
 //
@@ -33,4 +33,4 @@ private:
     QHash<QString, QVariantMap> m_cache;
 };
 
-} // namespace qtos
+} // namespace qor

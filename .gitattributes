@@ -19,7 +19,7 @@
 *.qsb             binary
 
 # Signed store artifacts: the signatures cover their exact bytes.
-*.qtospkg         binary
+*.qorpkg         binary
 *.sig             binary
 store/catalog/catalog.json            -text
 tests/store/fixtures/**/catalog.json  -text

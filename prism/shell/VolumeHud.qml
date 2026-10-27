@@ -1,7 +1,7 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 import QtQuick
-import QTOS.Kit
-import QTOS.Services
+import QOR.Kit
+import QOR.Services
 
 // Feedback for the volume keys: a glass pill with the output level, shown
 // briefly while the volume changes from the keyboard.

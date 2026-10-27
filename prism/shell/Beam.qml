@@ -1,11 +1,11 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QTOS.Kit
-import QTOS.Services
-import QTOS.Store
-import QTOS.Apps
+import QOR.Kit
+import QOR.Services
+import QOR.Store
+import QOR.Apps
 import "search.js" as Search
 
 // Beam: the universal command bar. One field searches apps, actions, settings
@@ -62,9 +62,9 @@ Item {
             action("media.next", qsTr("Next Track"), "skip-forward", "music skip song", qsTr("Skip to the next song.")),
             action("wifi.toggle", Services.network.wifiEnabled ? qsTr("Turn Wi-Fi Off") : qsTr("Turn Wi-Fi On"),
                    Services.network.wifiEnabled ? "wifi-off" : "wifi", "wireless network internet",
-                   qsTr("Handled by qtos-netd.")),
+                   qsTr("Handled by qor-netd.")),
             action("bluetooth.toggle", Services.bluetooth.enabled ? qsTr("Turn Bluetooth Off") : qsTr("Turn Bluetooth On"),
-                   "bluetooth", "wireless devices headphones", qsTr("Handled by qtos-btd.")),
+                   "bluetooth", "wireless devices headphones", qsTr("Handled by qor-btd.")),
             action("dnd.toggle", Services.notifications.doNotDisturb ? qsTr("Turn Off Do Not Disturb")
                                                                      : qsTr("Turn On Do Not Disturb"),
                    "moon-star", "focus notifications silence quiet", qsTr("Silence banners; nothing is lost.")),
@@ -84,11 +84,11 @@ Item {
                    "activity", "audio reactive visualizer music beat wallpaper spectrum",
                    qsTr("The wallpaper, Now Playing and the Rail move with what's playing.")),
             action("notify.test", qsTr("Send Test Notification"), "bell-ring", "notification banner",
-                   qsTr("Posts through qtos-notifyd over Qt Remote Objects.")),
+                   qsTr("Posts through qor-notifyd over Qt Remote Objects.")),
             action("widgets.edit", qsTr("Edit Widgets"), "layout-grid", "widgets desktop add arrange clock calendar",
                    qsTr("Add, arrange and remove the widgets on your desktop.")),
             action("store.open", qsTr("Get Themes and Widgets"), "shopping-bag", "store shop download themes widgets",
-                   qsTr("Signed themes and widgets from the QTOS Store."), { page: "discover" })
+                   qsTr("Signed themes and widgets from the QOR OS Store."), { page: "discover" })
         ];
         for (const theme of Themes.all)
             actions.push(action("theme.apply", qsTr("Theme: %1").arg(theme.name), "palette",

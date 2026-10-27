@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "engine.h"
 
 #include "backend.h"
@@ -18,9 +18,9 @@
 
 using namespace Qt::StringLiterals;
 
-Q_LOGGING_CATEGORY(lcAudio, "qtos.audio")
+Q_LOGGING_CATEGORY(lcAudio, "qor.audio")
 
-namespace qtos::audio {
+namespace qor::audio {
 
 namespace {
 
@@ -127,8 +127,8 @@ Q_SIGNALS:
     void finished();
     void loadFailed(const QString &message);
     void bufferingChanged(bool buffering);
-    void analysisReady(const qtos::audio::AnalysisFrame &frame);
-    void outputsChanged(const QList<qtos::audio::OutputDevice> &outputs, const QString &currentId);
+    void analysisReady(const qor::audio::AnalysisFrame &frame);
+    void outputsChanged(const QList<qor::audio::OutputDevice> &outputs, const QString &currentId);
 
 private:
     Source *createSource(const QVariantMap &track, double position)
@@ -454,11 +454,11 @@ private:
 // ── Engine ───────────────────────────────────────────────────────────────────
 
 Engine::Engine(Output output, QObject *parent)
-    : QObject(parent), m_null(output == Output::Null || qEnvironmentVariable("QTOS_AUDIO_OUTPUT") == u"null"_s)
+    : QObject(parent), m_null(output == Output::Null || qEnvironmentVariable("QOR_AUDIO_OUTPUT") == u"null"_s)
 {
     configureBackend();
-    qRegisterMetaType<qtos::audio::AnalysisFrame>();
-    qRegisterMetaType<QList<qtos::audio::OutputDevice>>();
+    qRegisterMetaType<qor::audio::AnalysisFrame>();
+    qRegisterMetaType<QList<qor::audio::OutputDevice>>();
 
     m_worker = new EngineWorker(m_null);
     m_worker->moveToThread(&m_thread);
@@ -471,7 +471,7 @@ Engine::Engine(Output output, QObject *parent)
     connect(m_worker, &EngineWorker::analysisReady, this, &Engine::analysisReady);
     connect(m_worker, &EngineWorker::outputsChanged, this, &Engine::outputsChanged);
 
-    m_thread.setObjectName(u"qtos-audio"_s);
+    m_thread.setObjectName(u"qor-audio"_s);
     m_thread.start(QThread::HighPriority);
     QMetaObject::invokeMethod(m_worker, &EngineWorker::start);
 }
@@ -526,6 +526,6 @@ void Engine::selectOutput(const QString &id)
     QMetaObject::invokeMethod(m_worker, [worker = m_worker, id] { worker->selectOutput(id); });
 }
 
-} // namespace qtos::audio
+} // namespace qor::audio
 
 #include "engine.moc"

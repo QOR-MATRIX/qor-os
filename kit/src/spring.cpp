@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "spring.h"
 
 #include "kit.h"
@@ -11,7 +11,7 @@
 
 using namespace Qt::StringLiterals;
 
-namespace qtos {
+namespace qor {
 
 // Bridges Qt's animation timer (which Qt Quick drives from vsync) to Spring.
 class SpringDriver final : public QAbstractAnimation
@@ -274,4 +274,4 @@ void Spring::componentComplete()
     }
 }
 
-} // namespace qtos
+} // namespace qor

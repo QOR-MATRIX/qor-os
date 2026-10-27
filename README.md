@@ -16,7 +16,7 @@ and its studio, the arcade, the media player and the account system are all
 QOR OS's own. It joins two projects
 ([QOR-0002](docs/decisions/QOR-0002-one-repository-from-qtos-and-demiurge.md)):
 
-- **QTOS** is the operating system. It brings Prism, a Wayland compositor whose
+- **QTOS**, the operating system QOR OS grew from, brings Prism, a Wayland compositor whose
   shell and windows share one Qt Quick scene, plus the Lumen design language,
   system services, controllers, audio and a signed Store.
 - **Demiurge** is the QOR ecosystem. It brings the QQ game engine and QQ
@@ -38,7 +38,7 @@ still to come.
 | **Players** | A controller-first Home with every game in one Library: QQ games, ARQADE, and Steam through Proton. Each display runs at its own refresh rate, up to 360 Hz. Friends and chat sit over any game. |
 | **Game designers** | QQ Studio builds lit 3D and pixel-perfect 2D worlds with physics, logic, sound and animation. An agent can help over MCP, using the designer's own key. |
 | **Game developers** | QQ's runtime plays natively and in a browser. Games are published from the Studio, with a provenance record on the QOR network. |
-| **App developers** | QTOS.Kit, the Lumen controls, typed system services and a simulator that runs the whole shell on Windows. |
+| **App developers** | QOR.Kit, the Lumen controls, typed system services and a simulator that runs the whole shell on Windows. |
 | **Creators** | Themes and widgets in the Store, versioning with Qontrol, and royalties that follow a remix once real value exists. |
 
 ## Highlights
@@ -98,18 +98,18 @@ On Linux, Prism runs as a real Wayland compositor nested in your session; see
 
 | Path | What it is |
 |------|------------|
-| [`prism/`](prism/) | **Prism**: the shell (`shell/`, QTOS.Shell), the `qtos-shell` simulation host (`host/`) and the `prism` Wayland compositor (`compositor/`) |
-| [`kit/`](kit/) | **QTOS.Kit**: Lumen tokens, `Theme`, `Spring`, OKLCH, SDF `Surface`, `Glass`, `Backdrop`, Aurora wallpaper, icons and fonts. [`kit/style/`](kit/style/) is the **Lumen** Qt Quick Controls style |
+| [`prism/`](prism/) | **Prism**: the shell (`shell/`, QOR.Shell), the `qor-shell` simulation host (`host/`) and the `prism` Wayland compositor (`compositor/`) |
+| [`kit/`](kit/) | **QOR.Kit**: Lumen tokens, `Theme`, `Spring`, OKLCH, SDF `Surface`, `Glass`, `Backdrop`, Aurora wallpaper, icons and fonts. [`kit/style/`](kit/style/) is the **Lumen** Qt Quick Controls style |
 | [`input/`](input/), [`audio/`](audio/) | Game controllers (XInput, HID, evdev) and the controller interface; the real-time audio engine |
-| [`services/`](services/), [`sim/`](sim/) | System service contracts and **QTOS.Services**; the simulated services and `qtos-simd` |
+| [`services/`](services/), [`sim/`](sim/) | System service contracts and **QOR.Services**; the simulated services and `qor-simd` |
 | [`store/`](store/), [`apps/`](apps/) | The signed Store; first-party apps (Files, Music, Notes, Terminal, Monitor, Settings, Store) |
-| [`platform/`](platform/) | Lumen `QStyle` for Qt Widgets, the `qtos` platform theme, a widgets gallery |
+| [`platform/`](platform/) | Lumen `QStyle` for Qt Widgets, the `qor` platform theme, a widgets gallery |
 | [`core/`](core/) | The **QOR core**, built from demiurge-chain at a pinned commit ([QOR-0003](docs/decisions/QOR-0003-the-qor-core-at-a-pinned-commit.md)) |
 | [`products/qq/`](products/qq/) | **QQ**, the QOR Engine: runtime, QQ Studio, QQ Player, the agent's tools (carried, Apache-2.0) |
 | [`products/arqade/`](products/arqade/) | **ARQADE**: the Qt app, its games and their replay fixtures (carried, Apache-2.0) |
 | [`tools/qor-media/`](tools/qor-media/) | **QOR Media**: player, viewer, editor and PDF reader (carried, Apache-2.0) |
 | [`image/`](image/) | The QOR OS image on Fedora Atomic (Phase 3) |
-| [`sdk/`](sdk/), [`tools/`](tools/), [`tests/`](tests/) | App template; `qtosctl`, generators, dev, CI and upstream scripts; tests |
+| [`sdk/`](sdk/), [`tools/`](tools/), [`tests/`](tests/) | App template; `qorctl`, generators, dev, CI and upstream scripts; tests |
 | [`docs/`](docs/) | Architecture, building, development, CI, performance, roadmap, design, decisions |
 
 ## Documentation
@@ -127,15 +127,19 @@ On Linux, Prism runs as a real Wayland compositor nested in your session; see
 
 ## Status
 
-**Phase 0 · Clear the ground**, under way. This repository holds:
+**Phase 0 · Clear the ground**, complete on 27 October 2026. This repository
+holds:
 
-- QTOS's complete shell, which runs in simulation on Windows and as a nested
-  Wayland compositor on Linux;
+- the complete Prism shell, carried from QTOS, which runs in simulation on
+  Windows and as a nested Wayland compositor on Linux;
 - Demiurge's QQ, ARQADE and QOR Media, which build and pass their suites here;
-- the QOR core at a pinned commit.
+- the QOR core at demiurge-chain `e99c7ce`, with every module the Windows
+  launcher has (`desktop`);
+- one name throughout: QOR OS
+  ([QOR-0009](docs/decisions/QOR-0009-the-name-is-qor-os.md)).
 
-Next is **Phase 1 · One stack**: the products running inside Prism on Linux,
-driven by a controller. See [docs/ROADMAP.md](docs/ROADMAP.md).
+Now under way: **Phase 1 · One stack**, the products running inside Prism on
+Linux, driven by a controller. See [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## License
 

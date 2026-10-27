@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "lumenstyle.h"
 
 #include <QtWidgets/QStylePlugin>
@@ -13,7 +13,7 @@ class LumenStylePlugin : public QStylePlugin
 public:
     QStyle *create(const QString &key) override
     {
-        return key.compare(u"lumen"_s, Qt::CaseInsensitive) == 0 ? new qtos::LumenStyle() : nullptr;
+        return key.compare(u"lumen"_s, Qt::CaseInsensitive) == 0 ? new qor::LumenStyle() : nullptr;
     }
 };
 

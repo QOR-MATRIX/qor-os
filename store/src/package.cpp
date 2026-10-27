@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "package.h"
 
 #include "catalog.h"
@@ -14,7 +14,7 @@
 
 using namespace Qt::StringLiterals;
 
-namespace qtos::store {
+namespace qor::store {
 
 namespace {
 
@@ -100,4 +100,4 @@ PackageResult openPackage(const QByteArray &archive, const QByteArray &developer
     return result;
 }
 
-} // namespace qtos::store
+} // namespace qor::store

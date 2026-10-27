@@ -1,14 +1,14 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
 #include <QtCore/QString>
 
 class QQuickWindow;
 
-namespace qtos {
+namespace qor {
 
 // Runs a JSON UI script against the shell in `window` (`--script` in
-// qtos-shell and prism), then quits: exit code 0 when every step succeeded,
+// qor-shell and prism), then quits: exit code 0 when every step succeeded,
 // 4 when one failed (the reason goes to stderr).
 //
 // Input is synthesised as real Qt mouse and key events on the window, so it
@@ -17,4 +17,4 @@ namespace qtos {
 // ("Shell scripts"); tools/dev/prism-e2e.py drives Prism with it.
 void runShellScript(QQuickWindow *window, const QString &path);
 
-} // namespace qtos
+} // namespace qor

@@ -1,10 +1,10 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Controls
-import QTOS.Kit
-import QTOS.Apps
+import QOR.Kit
+import QOR.Apps
 
 // A managed window: Prism-drawn decoration, app content clipped to a
 // continuous-curvature shape, and spring-driven geometry for open, close,

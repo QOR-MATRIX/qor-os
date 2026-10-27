@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
 #include "gamepadbackend.h"
@@ -8,7 +8,7 @@
 #include <memory>
 #include <vector>
 
-namespace qtos::input {
+namespace qor::input {
 
 // Controllers driven by code: tests, the shell's script runner, and demos.
 class VirtualBackend : public Backend
@@ -32,4 +32,4 @@ private:
 // Linux).
 std::vector<std::unique_ptr<Backend>> createHardwareBackends();
 
-} // namespace qtos::input
+} // namespace qor::input

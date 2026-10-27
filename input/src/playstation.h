@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
 #include "gamepad.h"
@@ -12,7 +12,7 @@
 // Bluetooth): input reports, rumble and the light bar. Layouts follow the
 // Linux kernel's hid-playstation driver. Platform independent, so the parsing
 // is unit tested without a controller.
-namespace qtos::input::playstation {
+namespace qor::input::playstation {
 
 enum class Model { DualShock4, DualSense };
 
@@ -55,4 +55,4 @@ FeatureRequest fullReportRequest(Model model);
 // expect on Bluetooth (seed 0xA2 for output reports).
 quint32 crc32(quint8 seed, const quint8 *data, int size);
 
-} // namespace qtos::input::playstation
+} // namespace qor::input::playstation

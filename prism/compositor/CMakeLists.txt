@@ -1,8 +1,8 @@
-# prism — the QTOS Wayland compositor (Linux only, experimental).
+# prism — the QOR OS Wayland compositor (Linux only, experimental).
 
 # WaylandCompositorPrivate: which configures a client has yet to acknowledge
 # (WindowManagement.configureAcked), which Qt keeps private.
-find_package(Qt6 ${QTOS_QT_MIN_VERSION} QUIET COMPONENTS
+find_package(Qt6 ${QOR_QT_MIN_VERSION} QUIET COMPONENTS
     WaylandCompositor WaylandCompositorPrivate WaylandScannerTools)
 if(NOT Qt6WaylandCompositor_FOUND OR NOT Qt6WaylandCompositorPrivate_FOUND)
     message(WARNING "Qt Wayland Compositor not found: skipping the prism compositor. "
@@ -32,7 +32,7 @@ foreach(protocol IN ITEMS fractional-scale-v1 cursor-shape-v1 tablet-v2 xdg-acti
 endforeach()
 
 qt_add_qml_module(prism
-    URI QTOS.Prism
+    URI QOR.Prism
     VERSION 1.0
     RESOURCE_PREFIX /qt/qml
     QML_FILES
@@ -42,8 +42,8 @@ qt_add_qml_module(prism
     DEPENDENCIES
         QtQuick
         QtWayland.Compositor
-        QTOS.Kit
-        QTOS.Shell
+        QOR.Kit
+        QOR.Shell
 )
 
 target_include_directories(prism PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
@@ -53,18 +53,18 @@ target_link_libraries(prism PRIVATE
     Qt6::QuickControls2
     Qt6::WaylandCompositor
     Qt6::WaylandCompositorPrivate
-    qtos_kit
-    qtos_services
-    qtos_kitplugin
-    qtos_lumen_styleplugin
-    qtos_servicesplugin
-    qtos_appsplugin
-    qtos_inputplugin
-    qtos_storeplugin
-    qtos_shell
-    qtos_shellplugin
-    qtos_sim
-    qtos::compiler_settings
+    qor_kit
+    qor_services
+    qor_kitplugin
+    qor_lumen_styleplugin
+    qor_servicesplugin
+    qor_appsplugin
+    qor_inputplugin
+    qor_storeplugin
+    qor_shell
+    qor_shellplugin
+    qor_sim
+    qor::compiler_settings
 )
 
 install(TARGETS prism RUNTIME DESTINATION bin)

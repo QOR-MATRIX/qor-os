@@ -1,9 +1,9 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
 #include <QtCore/QString>
 
-namespace qtos::host {
+namespace qor::host {
 
 // Points Qt's RHI at the GPU matching `preference` ("high-performance",
 // "low-power" or "default") before the first window is created.
@@ -14,4 +14,4 @@ namespace qtos::host {
 // description of the decision for logging.
 QString applyGpuPreference(const QString &preference);
 
-} // namespace qtos::host
+} // namespace qor::host

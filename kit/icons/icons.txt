@@ -1,4 +1,4 @@
-# Curated Lucide icon subset used by QTOS (https://lucide.dev, ISC license).
+# Curated Lucide icon subset used by QOR OS (https://lucide.dev, ISC license).
 # One icon name per line. Re-import with:
 #   python tools/icons/import_lucide.py <path-to-lucide-static-package>
 accessibility

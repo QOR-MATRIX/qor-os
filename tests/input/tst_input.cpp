@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "gamepadmanager.h"
 #include "injection.h"
 #include "mapping.h"
@@ -20,7 +20,7 @@
 #include <array>
 #include <memory>
 
-using namespace qtos::input;
+using namespace qor::input;
 using namespace Qt::StringLiterals;
 
 namespace {

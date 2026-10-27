@@ -1,11 +1,11 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QTOS.Kit
-import QTOS.Services
+import QOR.Kit
+import QOR.Services
 
-// The Rail: a floating glass bar. Left: the QTOS mark, the active app and
+// The Rail: a floating glass bar. Left: the QOR OS mark, the active app and
 // the Space indicator. Centre: the Live Activity capsule. Right: system
 // status and the clock, which open Control Center.
 Glass {
@@ -46,7 +46,7 @@ Glass {
             width: 22
             height: 22
             anchors.verticalCenter: parent.verticalCenter
-            QtosMark {
+            QorMark {
                 anchors.centerIn: parent
                 size: 20
                 scale: markHover.hovered ? 1.08 : 1

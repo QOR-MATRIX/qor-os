@@ -1,9 +1,9 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
 #include <QtCore/QString>
 
-namespace qtos::audio {
+namespace qor::audio {
 
 // Something the engine plays: renders interleaved stereo float frames at the
 // engine's sample rate. Called on the audio thread.
@@ -25,4 +25,4 @@ public:
     virtual QString errorString() const { return {}; }
 };
 
-} // namespace qtos::audio
+} // namespace qor::audio

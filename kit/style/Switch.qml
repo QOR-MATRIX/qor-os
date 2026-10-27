@@ -1,7 +1,7 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 import QtQuick
 import QtQuick.Templates as T
-import QTOS.Kit
+import QOR.Kit
 
 // Lumen toggle: the thumb rides a spring and the track color morphs in OKLab.
 T.Switch {

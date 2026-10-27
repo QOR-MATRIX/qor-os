@@ -19,7 +19,7 @@ operating system. It contains:
 | Base | Fedora Atomic: kernel, systemd, PipeWire, NetworkManager, BlueZ, UPower, fwupd, Mesa, libinput |
 | Graphics | NVIDIA's open kernel modules for every RTX card, built for the image's kernel and signed with the QOR OS Secure Boot key; Mesa for Intel and AMD |
 | Games | Steam and its 32-bit runtime, gamescope |
-| QOR OS | Prism and the shell, QTOS.Kit and Lumen, the service daemons, QQ, ARQADE, QOR Media, the vault service from the QOR core, the `qtos` platform theme and Lumen QStyle |
+| QOR OS | Prism and the shell, QOR.Kit and Lumen, the service daemons, QQ, ARQADE, QOR Media, the vault service from the QOR core, the `qor` platform theme and Lumen QStyle |
 | Session | A systemd unit that starts Prism on the first virtual terminal through a greeter (below) |
 
 Updates are whole images: `bootc upgrade` stages the next one, and a boot that
@@ -47,13 +47,13 @@ same environment until Prism's own backend replaces Qt's KMS integration:
 
 ```ini
 [Service]
-User=qtos
+User=qor
 PAMName=login
 TTYPath=/dev/tty1
 Environment=QT_QPA_PLATFORM=eglfs
 Environment=QT_QPA_EGLFS_INTEGRATION=eglfs_kms
 Environment=QT_QPA_EGLFS_KMS_ATOMIC=1
-Environment=QT_QPA_PLATFORMTHEME=qtos
+Environment=QT_QPA_PLATFORMTHEME=qor
 Environment=XDG_SESSION_TYPE=wayland
 ExecStart=/usr/bin/prism
 ```

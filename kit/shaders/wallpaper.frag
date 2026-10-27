@@ -1,6 +1,6 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 //
-// "Aurora" — the default QTOS wallpaper. Domain-warped fractal noise drives a
+// "Aurora" — the default QOR OS wallpaper. Domain-warped fractal noise drives a
 // palette that is built and blended in OKLab, so the accent hue can rotate and
 // light/dark can morph without banding or muddy transitions. Static unless
 // `time` changes, so it costs one frame when nothing animates.

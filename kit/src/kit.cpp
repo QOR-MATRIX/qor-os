@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "kit.h"
 
 #include <QtCore/QLoggingCategory>
@@ -10,9 +10,9 @@
 
 using namespace Qt::StringLiterals;
 
-Q_LOGGING_CATEGORY(lcKit, "qtos.kit")
+Q_LOGGING_CATEGORY(lcKit, "qor.kit")
 
-namespace qtos {
+namespace qor {
 
 namespace {
 
@@ -47,7 +47,7 @@ Kit *Kit::create(QQmlEngine *, QJSEngine *)
 void Kit::initialize()
 {
     Kit *kit = instance();
-    const QString base = u":/qt/qml/QTOS/Kit/fonts/"_s;
+    const QString base = u":/qt/qml/QOR/Kit/fonts/"_s;
 
     if (const QString ui = registerFont(base + u"InterVariable.ttf"_s); !ui.isEmpty())
         kit->m_uiFontFamily = ui;
@@ -63,7 +63,7 @@ void Kit::initialize()
     qCDebug(lcKit) << "UI font" << kit->m_uiFontFamily << "mono font" << kit->m_monoFontFamily;
 }
 
-QString Kit::version() const { return QStringLiteral(QTOS_VERSION_STRING); }
+QString Kit::version() const { return QStringLiteral(QOR_VERSION_STRING); }
 
 void Kit::setReducedMotion(bool reduced)
 {
@@ -73,4 +73,4 @@ void Kit::setReducedMotion(bool reduced)
     Q_EMIT reducedMotionChanged();
 }
 
-} // namespace qtos
+} // namespace qor

@@ -1,6 +1,6 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 import QtQuick
-import QTOS.Kit
+import QOR.Kit
 
 // Clock: the time, large and light, with the day beneath it and the minute
 // passing as a hairline.

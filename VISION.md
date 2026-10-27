@@ -38,7 +38,7 @@
 | **The player** | A controller-first Home with every game in one Library (QQ games, ARQADE, Steam); full-screen games at the display's own refresh rate with VRR; friends, chat and performance in an overlay over any game; one QOR ID with levels and XP |
 | **The game designer** | QQ Studio: worlds in 3D and 2D, physics, particles, sound, animation, prefabs, undo; Play and Stop in place; an agent that designs and builds with them over MCP, on their own key |
 | **The game developer** | QQ's runtime and logic files, deterministic steps and replay; publishing from the Studio with a provenance record on the QOR network; a Store page with signed packages |
-| **The app developer** | QTOS.Kit, the Lumen controls, typed system services, single sign-on through QOR ID, and a simulator that runs the whole shell on Windows |
+| **The app developer** | QOR.Kit, the Lumen controls, typed system services, single sign-on through QOR ID, and a simulator that runs the whole shell on Windows |
 | **The creator** | Themes and widgets in the Store, versioning with Qontrol, distribution over the Mesh, and royalties that follow a remix once real value exists |
 
 ---
@@ -68,9 +68,9 @@
 ╞════════════════════════════════════════════════════════════════════╡
 │ GAMES/APPS  QQ Studio · QQ Player · ARQADE · QOR Media · Steam +   │
 │             Proton in gamescope · first-party apps · Flatpaks      │
-│ PLATFORM    QTOS Kit · Lumen QQC2 style · QStyle · platform theme  │  100% Qt
+│ PLATFORM    QOR Kit · Lumen QQC2 style · QStyle · platform theme  │  100% Qt
 │ SHELL       Prism: compositor + shell in ONE Qt Quick scene graph  │
-│ SERVICES    qtos-*d daemons (Qt Core, C++) · the vault and chain   │
+│ SERVICES    qor-*d daemons (Qt Core, C++) · the vault and chain   │
 │             client from the QOR core (Rust, C bridge)              │
 │             internal: Qt Remote Objects · external: D-Bus          │
 ╞═══════════════════════════ THE QT LINE ════════════════════════════╡
@@ -198,11 +198,11 @@ more. Prism adds the rest in C++ with `QWaylandCompositorExtensionTemplate` + `q
 - Standard: fractional-scale, cursor-shape, idle-inhibit and presentation-time (done); tearing-control,
   color-management, session-lock (internal), screencopy (for portals), xdg-activation, pointer-constraints and
   relative-pointer (games)
-- QOR OS extensions (`qtos_*`), designed to be upstreamable:
-  - `qtos_material`: an app requests backdrop blur/vibrancy regions (precedent: KDE's `org_kde_kwin_blur`)
-  - `qtos_hero`: an app tags a rect as a shared element so Prism can do cross-app morph transitions
-  - `qtos_titlebar`: content extends under a unified title bar while Prism still owns the controls
-  - `qtos_activity`: Live Activities (§6) published by apps
+- QOR OS extensions (`qor_*`), designed to be upstreamable:
+  - `qor_material`: an app requests backdrop blur/vibrancy regions (precedent: KDE's `org_kde_kwin_blur`)
+  - `qor_hero`: an app tags a rect as a shared element so Prism can do cross-app morph transitions
+  - `qor_titlebar`: content extends under a unified title bar while Prism still owns the controls
+  - `qor_activity`: Live Activities (§6) published by apps
 
 ### PC games and X11
 
@@ -234,7 +234,7 @@ follows for other X11 apps. Some anti-cheat systems block Linux; that is each pu
 | Material | Use | Recipe |
 |----------|-----|--------|
 | **Glass** | Shelf, Rail, Beam, Control Center, popovers, the game overlay | Blur + saturation lift + 2% blue-noise grain (prevents banding) + tint from tokens |
-| **Frost** | Sidebars, inspectors inside apps | Lighter blur of the *window's own* backdrop via `qtos_material` |
+| **Frost** | Sidebars, inspectors inside apps | Lighter blur of the *window's own* backdrop via `qor_material` |
 | **Solid** | Content areas, documents | Opaque and calm; content comes first |
 | **Lens** | Trusted system UI only | Glass + a slowly moving specular rim that apps cannot reproduce (see P5) |
 
@@ -283,7 +283,7 @@ has one source.
    with a slight parallax.
 4. **Beam:** results stream in with staggered springs. Arrowing through them morphs the preview pane.
 5. **Theme change:** light/dark sweeps across the screen as a soft radial wave of OKLCH interpolation.
-6. **Hero handoff:** a photo double-clicked in Files expands smoothly into its viewer (`qtos_hero`).
+6. **Hero handoff:** a photo double-clicked in Files expands smoothly into its viewer (`qor_hero`).
 7. **Into the game:** from Home, a game's card grows to fill the screen and hands the display to the game at its own
    refresh rate; the Guide button brings the overlay back over it.
 
@@ -321,22 +321,22 @@ input. Each is socket-activated, sandboxed by systemd, and costs nothing while i
 
 | Service | Responsibility | Built on |
 |---------|----------------|----------|
-| `qtos-sessiond` | Session lifecycle, autostart, app state save/restore, Projects | Qt SCXML state machine |
-| `qtos-settingsd` | Typed, schema-validated settings with change notifications; per-app scoping | SQLite + Qt Remote Objects |
-| `qtos-notifyd` | Notifications, Focus rules, history | freedesktop D-Bus API + QtRO to the shell |
-| `qtos-netd` | Wi-Fi, Ethernet, VPN, cellular | NetworkManagerQt |
-| `qtos-btd` | Bluetooth pairing, audio devices, controllers, battery levels | BluezQt |
-| `qtos-audiod` | Per-app volume, routing, device switching | PipeWire / WirePlumber |
-| `qtos-powerd` | Battery health, power profiles, inhibitors, lid and suspend policy | UPower, power-profiles-daemon, logind |
-| `qtos-portald` | `xdg-desktop-portal` backend: file chooser, screenshot, screencast, permissions | UI rendered by Prism in the trusted layer |
-| `qtos-updated` | OS (bootc), firmware (fwupd), apps and games (Flatpak/qpk) | Rust for signature verification |
+| `qor-sessiond` | Session lifecycle, autostart, app state save/restore, Projects | Qt SCXML state machine |
+| `qor-settingsd` | Typed, schema-validated settings with change notifications; per-app scoping | SQLite + Qt Remote Objects |
+| `qor-notifyd` | Notifications, Focus rules, history | freedesktop D-Bus API + QtRO to the shell |
+| `qor-netd` | Wi-Fi, Ethernet, VPN, cellular | NetworkManagerQt |
+| `qor-btd` | Bluetooth pairing, audio devices, controllers, battery levels | BluezQt |
+| `qor-audiod` | Per-app volume, routing, device switching | PipeWire / WirePlumber |
+| `qor-powerd` | Battery health, power profiles, inhibitors, lid and suspend policy | UPower, power-profiles-daemon, logind |
+| `qor-portald` | `xdg-desktop-portal` backend: file chooser, screenshot, screencast, permissions | UI rendered by Prism in the trusted layer |
+| `qor-updated` | OS (bootc), firmware (fwupd), apps and games (Flatpak/qpk) | Rust for signature verification |
 | **The vault service** | QOR ID profiles, wallet keys, approvals; signs only after an approval Prism draws | **The QOR core** (Rust), from demiurge-chain at a pinned commit |
 | **The chain client** | Reads and submits to the Demiurge chain: assets, licences, royalties, publishing | The QOR core |
 | **The Library index** | Games, creations and files, searchable (SQLite FTS5) | The QOR core |
 | **The Mesh node** | Peer-to-peer distribution of games and creations; off until turned on | The QOR core (iroh) |
-| `qtos-sensord` | Auto-rotate, ambient light, lid angle | Qt Sensors, iio-sensor-proxy |
-| `qtos-backupd` | btrfs snapshots, Rewind, external backup | btrfs + Qt Core |
-| `qtos-assistd` *(optional, later)* | On-device models (§10) | Qt gRPC API around a local inference runtime |
+| `qor-sensord` | Auto-rotate, ambient light, lid angle | Qt Sensors, iio-sensor-proxy |
+| `qor-backupd` | btrfs snapshots, Rewind, external backup | btrfs + Qt Core |
+| `qor-assistd` *(optional, later)* | On-device models (§10) | Qt gRPC API around a local inference runtime |
 
 The services that come from the QOR core reach the rest of the system only through the core's C bridge, which takes
 one JSON request and gives one JSON answer, and never answers with a key
@@ -369,7 +369,7 @@ and no investment language appears anywhere
 
 ## 8. App and game platform
 
-### QTOS Kit (`import QTOS.Kit`)
+### QOR Kit (`import QOR.Kit`)
 
 - **Lumen style for Qt Quick Controls 2.** Any app that writes plain `import QtQuick.Controls` gets Lumen
   automatically.
@@ -379,7 +379,7 @@ and no investment language appears anywhere
 
 ### Making *every* Qt app native
 
-- **`QPlatformTheme` plugin (`qtos`)**: fonts, palette, icon theme, native dialogs (via portals), reduce-motion,
+- **`QPlatformTheme` plugin (`qor`)**: fonts, palette, icon theme, native dialogs (via portals), reduce-motion,
   scroll physics.
 - **Lumen `QStyle`** for Qt Widgets apps (Krita, OBS, Wireshark, VLC, KeePassXC…).
 
@@ -390,14 +390,14 @@ and no investment language appears anywhere
 - **ARQADE** plays its own games and arenas on QQ's runtime, against ARQADE's service.
 - **PC games** run through Steam and Proton inside gamescope (§4), from the Library like any other game.
 - **Controllers** work everywhere: XInput, DualShock 4 and DualSense over HID (USB and Bluetooth), and evdev, with
-  rumble, light bars and battery, through QTOS.Input.
+  rumble, light bars and battery, through QOR.Input.
 
 ### App model
 
 - **Manifest:** identity, capabilities/permissions, file handlers, URL schemes, **intents** (actions exposed to Beam
   and the share sheet), Live Activities, widgets.
 - **Packaging:** signed `.qpk` packages for first-party and SDK apps and QQ games; **Flatpak** for the existing
-  ecosystem (Flathub). Both are sandboxed with bubblewrap and mediated by `qtos-portald`.
+  ecosystem (Flathub). Both are sandboxed with bubblewrap and mediated by `qor-portald`.
 - **Store:** signed catalogues and developer-signed packages, verified by platform crypto (stage 1 exists). Free items
   only in 1.0.
 - **Widgets:** apps supply *data* and choose from a vetted set of QML widget templates the shell renders.
@@ -433,7 +433,7 @@ and no investment language appears anywhere
 | **ARQADE** | The arcade: games, arenas, rankings and the player's Sparks (test value), in 3D (Qt Quick 3D) |
 | **QOR Media** | Plays every format FFmpeg reads, views pictures, edits text, reads, marks and fills PDFs (Qt Multimedia, Qt PDF, PDFium) |
 | **Files** | Column, grid and gallery views, tags, Quick Look, Rewind integration |
-| **Settings** | Search-first, every pane deep-linkable (`qtos://settings/display/night-light`) |
+| **Settings** | Search-first, every pane deep-linkable (`qor://settings/display/night-light`) |
 | **Music** | The audio engine's player: library, equaliser, the audio-reactive interface |
 | **Terminal** | GPU-rendered QML terminal, Lumen glass |
 | **Monitor** | Qt Graphs, per-app energy and frame time |
@@ -460,10 +460,10 @@ Kate (text), Okular (documents), Krita (painting), Kdenlive (video editing), OBS
    remix can pay its sources once real value exists.
 5. **Spatial mode.** Because windows are scene-graph textures, Qt Quick 3D can place them on panels in 3D space; with
    **Qt Quick 3D Xr** the same desktop runs in a headset.
-6. **On-device intelligence (opt-in, local-first).** `qtos-assistd` hosts local models; the assistant acts **only
+6. **On-device intelligence (opt-in, local-first).** `qor-assistd` hosts local models; the assistant acts **only
    through declared intents** and asks for confirmation.
 7. **Rewind.** A btrfs snapshot timeline for any folder, plus system-level undo for settings changes.
-8. **Cross-app shared-element transitions** (`qtos_hero`) and **Trusted UI** users can learn to recognise.
+8. **Cross-app shared-element transitions** (`qor_hero`) and **Trusted UI** users can learn to recognise.
 
 ---
 
@@ -511,28 +511,28 @@ measurements are in [docs/PERFORMANCE.md](docs/PERFORMANCE.md).
 
 ```text
 qor-os/
-├─ kit/              QTOS.Kit: Lumen tokens, Theme, Spring, OKLCH, SDF Surface, Glass, Backdrop, icons, fonts
+├─ kit/              QOR.Kit: Lumen tokens, Theme, Spring, OKLCH, SDF Surface, Glass, Backdrop, icons, fonts
 │  └─ style/         Lumen Qt Quick Controls style
 ├─ input/ audio/     controllers; the audio engine
-├─ services/ sim/    service contracts (interfaces/*.rep), QTOS.Services; simulated services, qtos-simd
+├─ services/ sim/    service contracts (interfaces/*.rep), QOR.Services; simulated services, qor-simd
 ├─ store/ apps/      the signed Store; first-party apps
 ├─ prism/
-│  ├─ shell/         QTOS.Shell: Rail, Shelf, Beam, Control Center, windows, Spaces, Overview, Lock
-│  ├─ host/          qtos-shell: simulation host
+│  ├─ shell/         QOR.Shell: Rail, Shelf, Beam, Control Center, windows, Spaces, Overview, Lock
+│  ├─ host/          qor-shell: simulation host
 │  └─ compositor/    prism: the Wayland compositor (Linux)
-├─ platform/         Lumen QStyle, qtos QPA platform theme, widgets gallery
+├─ platform/         Lumen QStyle, qor QPA platform theme, widgets gallery
 ├─ core/             the QOR core, built from demiurge-chain at a pinned commit (Rust, Corrosion)
 ├─ products/
 │  ├─ qq/            QQ: runtime, Studio, Player, agent (carried, Apache-2.0)
 │  └─ arqade/        ARQADE's Qt app, games and fixtures (carried, Apache-2.0)
-├─ tools/            qtosctl, generators, dev, CI and upstream scripts; qor-media/ (QOR Media, carried)
+├─ tools/            qorctl, generators, dev, CI and upstream scripts; qor-media/ (QOR Media, carried)
 ├─ image/            the Fedora Atomic image (Phase 3)
 ├─ sdk/              app template
 ├─ tests/            Qt Test, Qt Quick Test, Python
 └─ docs/             architecture, building, development, design specs, decisions
 ```
 
-Planned additions: `prism/backend-kms/` (Prism's KMS backend, Phase 3) and `prism/protocols/` (`qtos_*` Wayland
+Planned additions: `prism/backend-kms/` (Prism's KMS backend, Phase 3) and `prism/protocols/` (`qor_*` Wayland
 extensions).
 
 ### Build and toolchain *(decided: [QTOS-0005](docs/decisions/qtos/QTOS-0005-qt-6-12-baseline.md), [QOR-0003](docs/decisions/QOR-0003-the-qor-core-at-a-pinned-commit.md))*
@@ -634,7 +634,8 @@ The detail, with every item, is [docs/ROADMAP.md](docs/ROADMAP.md).
 | Displays and the compositor's backend | Every display at its own rate on every GPU; Prism's own KMS backend; the gate deferred | [QOR-0005](docs/decisions/QOR-0005-every-display-at-its-own-refresh.md), [QTOS-0003](docs/decisions/qtos/QTOS-0003-compositor-strategy.md) |
 | Money | 1.0 moves no money; free items and test CGT | [QOR-0006](docs/decisions/QOR-0006-qor-os-1-0-moves-no-money.md) |
 | 1.0 scope | Shell, Home and Library, QQ, ARQADE, QOR Media, Social, the vault, Steam | [QOR-0007](docs/decisions/QOR-0007-what-1-0-ships.md) |
-| Public release; naming | Release gates; the code keeps QTOS names until the name is cleared | [QOR-0008](docs/decisions/QOR-0008-before-a-public-release.md) |
+| Public release | Release gates the owner holds | [QOR-0008](docs/decisions/QOR-0008-before-a-public-release.md) |
+| The name | QOR OS in prose; `qor-os`, `qor`, `QOR.*`, `QOR_*` and `dev.qorsync.*` where a space cannot go | [QOR-0009](docs/decisions/QOR-0009-the-name-is-qor-os.md) |
 | License posture | Commercial Qt Enterprise; private, proprietary repository | [QTOS-0004](docs/decisions/qtos/QTOS-0004-commercial-qt-and-proprietary-repository.md) |
 | Qt baseline | Qt 6.12 | [QTOS-0005](docs/decisions/qtos/QTOS-0005-qt-6-12-baseline.md) |
 | Service IPC | Qt Remote Objects; D-Bus only at freedesktop edges | [QTOS-0006](docs/decisions/qtos/QTOS-0006-service-ipc-qt-remote-objects.md) |
@@ -642,7 +643,7 @@ The detail, with every item, is [docs/ROADMAP.md](docs/ROADMAP.md).
 | Development model | Simulation-first on Windows, then nested Prism, then the image | [QTOS-0008](docs/decisions/qtos/QTOS-0008-simulation-first-development.md) |
 | Design tokens | OKLCH single source, generated for QML, C++ and docs | [QTOS-0009](docs/decisions/qtos/QTOS-0009-oklch-tokens-single-source.md) |
 | Materials and rendering | Shared backdrops, SDF primitives, render on demand | [QTOS-0010](docs/decisions/qtos/QTOS-0010-materials-and-render-on-demand.md) |
-| Naming | QOR OS (product); Prism (compositor and shell), Lumen (design language), QQ (engine), ARQADE (arcade), QOR Media; Beam, Shelf, Rail, Stash | This document, QOR-0008 |
+| Naming | QOR OS (product); Prism (compositor and shell), Lumen (design language), QQ (engine), ARQADE (arcade), QOR Media; Beam, Shelf, Rail, Stash | This document, QOR-0009 |
 
 ---
 
@@ -652,7 +653,7 @@ The detail, with every item, is [docs/ROADMAP.md](docs/ROADMAP.md).
 2. ✅ Create `qor-os` from QTOS's full history, and freeze QTOS.
 3. ✅ Carry QQ, ARQADE and QOR Media with their history; build and test them here.
 4. ✅ Build the QOR core from demiurge-chain at a pinned commit, tested through its bridge.
-5. ✅ One rulebook and one decision log, QOR-0001 to QOR-0008.
+5. ✅ One rulebook and one decision log, QOR-0001 to QOR-0009.
 6. ✅ CI green on Windows and Linux, with runners shared across the organisation.
 7. ✅ Move the core's pin to Demiurge's L13.2.
 8. ⏭ Phase 1: the products inside Prism on Linux.

@@ -1,8 +1,8 @@
 {
-  "id": "org.qtos.theme.glacier",
+  "id": "dev.qorsync.theme.glacier",
   "name": "Glacier",
   "version": "1.0.0",
-  "developer": "org.qtos",
+  "developer": "dev.qorsync",
   "summary": "Ice blue in clear daylight.",
   "description": "Glacier is a crisp light theme: blue-white surfaces, an ice-blue accent and a wallpaper like light through ice.",
   "whatsNew": "First release.",

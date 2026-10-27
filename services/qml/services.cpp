@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "services.h"
 
 #include <QtCore/QCoreApplication>
@@ -8,9 +8,9 @@
 
 using namespace Qt::StringLiterals;
 
-Q_LOGGING_CATEGORY(lcServices, "qtos.services")
+Q_LOGGING_CATEGORY(lcServices, "qor.services")
 
-namespace qtos {
+namespace qor {
 
 Services::Services(QObject *parent) : QObject(parent) { }
 
@@ -31,9 +31,9 @@ QUrl Services::defaultUrl()
 {
 #if defined(Q_OS_LINUX)
     // Abstract sockets never leave stale files behind after a crash.
-    return QUrl(u"localabstract:qtos-services"_s);
+    return QUrl(u"localabstract:qor-services"_s);
 #else
-    return QUrl(u"local:qtos-services"_s);
+    return QUrl(u"local:qor-services"_s);
 #endif
 }
 
@@ -73,4 +73,4 @@ bool Services::connectTo(const QUrl &url, int timeoutMs)
     return allReady;
 }
 
-} // namespace qtos
+} // namespace qor

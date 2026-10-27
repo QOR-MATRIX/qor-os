@@ -1,10 +1,10 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QTOS.Kit
-import QTOS.Services
-import QTOS.Apps
+import QOR.Kit
+import QOR.Services
+import QOR.Apps
 
 // The lock screen. Owned by Prism, drawn above every client, never coverable.
 // Unlocking runs the signature "focus pull": the blurred wallpaper sharpens

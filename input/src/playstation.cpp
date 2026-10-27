@@ -1,9 +1,9 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "playstation.h"
 
 #include <algorithm>
 
-namespace qtos::input::playstation {
+namespace qor::input::playstation {
 
 namespace {
 
@@ -196,4 +196,4 @@ QByteArray outputReport(Model model, bool bluetooth, quint8 strongMotor, quint8 
     return report;
 }
 
-} // namespace qtos::input::playstation
+} // namespace qor::input::playstation

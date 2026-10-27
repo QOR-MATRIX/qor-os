@@ -1,9 +1,9 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QTOS.Kit
-import QTOS.Input
+import QOR.Kit
+import QOR.Input
 
 // The controller interface's on-screen keyboard. It opens when a text field
 // takes focus (and on the left stick's click), and types into the focused

@@ -18,7 +18,7 @@ kept true.
 | [design/LUMEN.md](design/LUMEN.md) | apply the Lumen design language correctly |
 | [design/tokens.md](design/tokens.md) | look up exact Lumen token values (generated) |
 | [design/SHELL.md](design/SHELL.md) | know exactly how each shell surface behaves; keyboard reference |
-| [SERVICES.md](SERVICES.md) | use or change service contracts; scenarios; `qtosctl` |
+| [SERVICES.md](SERVICES.md) | use or change service contracts; scenarios; `qorctl` |
 | [AUDIO.md](AUDIO.md) | use the audio engine and the audio-reactive interface |
 | [CONTROLLERS.md](CONTROLLERS.md) | use game controllers and the controller interface |
 | [STORE.md](STORE.md) | publish to and verify the signed Store |

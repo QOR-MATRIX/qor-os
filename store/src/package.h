@@ -1,13 +1,13 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
 #include <QtCore/QByteArray>
 #include <QtCore/QMap>
 #include <QtCore/QString>
 
-namespace qtos::store {
+namespace qor::store {
 
-// A QTOS package (.qtospkg): a zip archive holding
+// A QOR OS package (.qorpkg): a zip archive holding
 //   manifest.json  id, kind, version, developer and the SHA-256 of every file
 //   manifest.sig   the developer's ECDSA P-256 signature over manifest.json
 //   the files the manifest lists, and nothing else.
@@ -38,4 +38,4 @@ PackageResult openPackage(const QByteArray &archive, const QByteArray &developer
 
 bool isSafePackagePath(const QString &path);
 
-} // namespace qtos::store
+} // namespace qor::store

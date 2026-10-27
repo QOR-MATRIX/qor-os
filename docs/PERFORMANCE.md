@@ -22,7 +22,7 @@ behaviour.
 
 ## Baseline (2026-10-23)
 
-`qtos-shell --open files,music,notes --benchmark 8`: an 8-second tour that
+`qor-shell --open files,music,notes --benchmark 8`: an 8-second tour that
 cycles Overview → Beam → Control Center → Space 2 → Space 1 every 750 ms.
 Window 1539×844 logical at 125% scaling (1924×1055 physical), Direct3D 11,
 `windows-release`.
@@ -87,18 +87,18 @@ prism --benchmark 8 --benchmark-out prism.json     # Linux: every output of the 
 
 The tour runs for the given number of seconds; then the driver takes 40
 latency samples over about 6 seconds. The driver is `prism/shell/shellbenchmark.cpp`, shared by
-`qtos-shell` and `prism`.
+`qor-shell` and `prism`.
 
 | Field | Meaning |
 |-------|---------|
-| `tool` | `qtos-shell` or `prism` |
+| `tool` | `qor-shell` or `prism` |
 | `frames`, `averageMs`, `averageFps`, `p50Ms`, `p95Ms`, `p99Ms`, `maxMs` | Frame intervals of the first output during the tour |
 | `refreshHz`, `missedFrames`, `missedPercent` | The output's refresh rate, and intervals longer than 1.5 refresh periods |
 | `graphicsApi`, `size`, `devicePixelRatio`, `screen`, `seconds` | Context |
 | `outputs[]` | The same frame fields for every output (one window per `WaylandOutput` under Prism) |
 | `inputToSwap` | `samples`, `posted`, `averageMs`, `p50Ms`, `p95Ms`, `p99Ms`, `maxMs` (see above) |
 
-Intervals come from `QQuickWindow::frameSwapped` through `qtos::FrameStats`,
+Intervals come from `QQuickWindow::frameSwapped` through `qor::FrameStats`,
 which never requests frames itself. While the tour is measured, the benchmark
 keeps every output drawing (each swap asks for the next), so an output with
 nothing animating is measured at its refresh rate rather than by its idle
@@ -153,7 +153,7 @@ USB session included. Build the bundle on the Ubuntu release it targets,
 against that release's ISO manifest:
 
 ```bash
-tools/dev/prism-gate-bundle.sh --build-dir ~/qtos-build/linux-release     --manifest ubuntu-26.04.1-desktop-amd64.manifest --out qtos-gate.tar.gz
+tools/dev/prism-gate-bundle.sh --build-dir ~/qor-build/linux-release     --manifest ubuntu-26.04.1-desktop-amd64.manifest --out qor-gate.tar.gz
 ```
 
 On the machine under test, booted into Ubuntu (a live USB session is enough)
@@ -162,15 +162,15 @@ with two displays at different refresh rates on one GPU:
 1. Unpack the bundle, and join the groups for the displays and input:
    `sudo usermod -aG video,render,input $USER`. A live session's user needs
    a password for the console: `sudo passwd $USER`.
-2. `qtos-gate/prism-gate.sh --probe` lists the GPUs and the displays on
+2. `qor-gate/prism-gate.sh --probe` lists the GPUs and the displays on
    each. Prism drives one GPU, so both displays must be on it; on a laptop,
    the panel is usually on the integrated GPU and some video ports are wired
    to the discrete one.
-3. `qtos-gate/prism-gate.sh --try` runs a trial inside the desktop session,
+3. `qor-gate/prism-gate.sh --try` runs a trial inside the desktop session,
    as two windows: it checks the bundle on this machine (its numbers are not
    gate data).
 4. Switch to a text console (<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>F3</kbd>),
-   log in, and run `qtos-gate/prism-gate.sh`.
+   log in, and run `qor-gate/prism-gate.sh`.
 
 It picks the GPU with both displays (`--device` overrides), starts Prism on
 Qt's eglfs KMS integration (atomic modesetting, one output per display, the
@@ -199,14 +199,14 @@ machine before and after and paste both results.
 ## GPU selection
 
 On hybrid-graphics Windows laptops Qt's Direct3D backends use adapter 0,
-usually the integrated GPU. `qtos-shell` asks DXGI for the adapter matching
+usually the integrated GPU. `qor-shell` asks DXGI for the adapter matching
 `--gpu` (default `high-performance`) and sets `QT_D3D_ADAPTER_INDEX`
 accordingly before the first window is created (`prism/host/gpupreference.cpp`).
 An explicit `QT_D3D_ADAPTER_INDEX` in the environment always wins. The chosen
 adapter is logged as `GPU: …`.
 
 On Linux, GPU selection belongs to the platform (PRIME offload / `DRI_PRIME`);
-on a QTOS device, Prism owns the KMS device.
+on a QOR OS device, Prism owns the KMS device.
 
 ## Techniques
 

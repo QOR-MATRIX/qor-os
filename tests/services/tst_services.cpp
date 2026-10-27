@@ -1,7 +1,7 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 //
 // End-to-end Qt Remote Objects round trips between the simulated sources
-// (qtos-sim) and the replicas the shell consumes (QTOS.Services).
+// (qor-sim) and the replicas the shell consumes (QOR.Services).
 
 #include "services.h"
 #include "simservices.h"
@@ -18,24 +18,24 @@ class tst_Services : public QObject
     Q_OBJECT
 
 private:
-    qtos::sim::SimServices m_sim;
+    qor::sim::SimServices m_sim;
     QUrl m_url;
 
 private Q_SLOTS:
     void initTestCase()
     {
-        qtos::sim::SimOptions options;
-        options.url = QUrl(u"local:qtos-test-"_s + QString::number(QCoreApplication::applicationPid()));
+        qor::sim::SimOptions options;
+        options.url = QUrl(u"local:qor-test-"_s + QString::number(QCoreApplication::applicationPid()));
         options.persistent = false;
         QVERIFY(m_sim.start(options));
         m_url = m_sim.url();
-        QVERIFY(qtos::Services::instance()->connectTo(m_url, 5000));
-        QVERIFY(qtos::Services::instance()->isConnected());
+        QVERIFY(qor::Services::instance()->connectTo(m_url, 5000));
+        QVERIFY(qor::Services::instance()->isConnected());
     }
 
     void initialStateReplicates()
     {
-        auto *services = qtos::Services::instance();
+        auto *services = qor::Services::instance();
         QCOMPARE(services->network()->activeSsid(), u"Lumen Studio"_s);
         QVERIFY(services->network()->online());
         QCOMPARE(services->power()->batteryLevel(), 82);
@@ -46,7 +46,7 @@ private Q_SLOTS:
 
     void replicaWriteReachesSource()
     {
-        auto *settings = qtos::Services::instance()->settings();
+        auto *settings = qor::Services::instance()->settings();
         const bool before = m_sim.settings()->darkMode();
         settings->setDarkMode(!before);
         QTRY_COMPARE(m_sim.settings()->darkMode(), !before);
@@ -56,14 +56,14 @@ private Q_SLOTS:
     void sourceChangeReachesReplica()
     {
         m_sim.power()->setBattery(37, true);
-        auto *power = qtos::Services::instance()->power();
+        auto *power = qor::Services::instance()->power();
         QTRY_COMPARE(power->batteryLevel(), 37);
         QTRY_VERIFY(power->charging());
     }
 
     void remoteSlotAndSignal()
     {
-        auto *notifications = qtos::Services::instance()->notifications();
+        auto *notifications = qor::Services::instance()->notifications();
         QSignalSpy posted(notifications, &NotificationsReplica::posted);
         notifications->notify(u"system"_s, u"Hello"_s, u"From the test"_s, u"bell"_s);
         QTRY_COMPARE(posted.count(), 1);
@@ -73,7 +73,7 @@ private Q_SLOTS:
 
     void wifiToggleDisconnectsAndReconnects()
     {
-        auto *network = qtos::Services::instance()->network();
+        auto *network = qor::Services::instance()->network();
         network->setWifiEnabled(false);
         QTRY_VERIFY(!network->online());
         QTRY_COMPARE(network->activeSsid(), QString());
@@ -84,7 +84,7 @@ private Q_SLOTS:
 
     void connectToUnknownNetworkFails()
     {
-        auto *network = qtos::Services::instance()->network();
+        auto *network = qor::Services::instance()->network();
         QSignalSpy failed(network, &NetworkReplica::connectionFailed);
         network->connectTo(u"Nowhere"_s);
         QTRY_COMPARE(failed.count(), 1);
@@ -92,7 +92,7 @@ private Q_SLOTS:
 
     void mediaQueueAdvances()
     {
-        auto *media = qtos::Services::instance()->media();
+        auto *media = qor::Services::instance()->media();
         const QString first = media->title();
         media->next();
         QTRY_VERIFY(media->title() != first);
@@ -100,12 +100,12 @@ private Q_SLOTS:
         QTRY_COMPARE(media->title(), first);
     }
 
-    // The audio engine renders silently under test (QTOS_AUDIO_OUTPUT=null)
+    // The audio engine renders silently under test (QOR_AUDIO_OUTPUT=null)
     // but in real time, so playback, positions and analysis are all real.
     void playbackRunsThroughTheAudioEngine()
     {
-        auto *media = qtos::Services::instance()->media();
-        auto *audio = qtos::Services::instance()->audio();
+        auto *media = qor::Services::instance()->media();
+        auto *audio = qor::Services::instance()->audio();
         QSignalSpy analysis(audio, &AudioReplica::analysis);
         media->playIndex(0);
         QTRY_VERIFY(media->playing());
@@ -126,7 +126,7 @@ private Q_SLOTS:
 
     void equalizerPresetsAndBands()
     {
-        auto *audio = qtos::Services::instance()->audio();
+        auto *audio = qor::Services::instance()->audio();
         QVERIFY(audio->equalizerPresets().contains(u"Bass Boost"_s));
         audio->applyEqualizerPreset(u"Bass Boost"_s);
         QTRY_COMPARE(audio->equalizerPreset(), u"Bass Boost"_s);
@@ -142,7 +142,7 @@ private Q_SLOTS:
 
     void repeatOneReplaysTheTrack()
     {
-        auto *media = qtos::Services::instance()->media();
+        auto *media = qor::Services::instance()->media();
         media->setRepeat(2);
         media->setShuffle(false);
         media->playIndex(1);
@@ -159,7 +159,7 @@ private Q_SLOTS:
 
     void repeatAllContinuesFromTheTop()
     {
-        auto *media = qtos::Services::instance()->media();
+        auto *media = qor::Services::instance()->media();
         media->setRepeat(1);
         const int last = int(media->queue().size()) - 1;
         media->playIndex(last);
@@ -172,7 +172,7 @@ private Q_SLOTS:
 
     void repeatOffStopsAfterTheLastTrack()
     {
-        auto *media = qtos::Services::instance()->media();
+        auto *media = qor::Services::instance()->media();
         media->setRepeat(0);
         const int last = int(media->queue().size()) - 1;
         media->playIndex(last);
@@ -186,7 +186,7 @@ private Q_SLOTS:
 
     void shufflePlaysEveryTrackOncePerPass()
     {
-        auto *media = qtos::Services::instance()->media();
+        auto *media = qor::Services::instance()->media();
         media->setShuffle(true);
         QTRY_VERIFY(media->shuffle());
         media->playIndex(0);
@@ -206,7 +206,7 @@ private Q_SLOTS:
 
     void reactiveSettingsReachTheSource()
     {
-        auto *settings = qtos::Services::instance()->settings();
+        auto *settings = qor::Services::instance()->settings();
         QVERIFY(settings->audioReactive());
         settings->setReactiveLowHz(300);
         settings->setReactiveHighHz(3000);

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
 #include <QtCore/QString>
@@ -9,9 +9,9 @@ QT_BEGIN_NAMESPACE
 class QWindow;
 QT_END_NAMESPACE
 
-namespace qtos::input {
+namespace qor::input {
 
-// Input QTOS makes itself (the controller interface, shell scripts) enters
+// Input QOR OS makes itself (the controller interface, shell scripts) enters
 // through QWindowSystemInterface like a device's. Inside an InjectedInput
 // scope it is delivered synchronously and isInjecting() is true, so a filter
 // can tell it from a person's: a scripted test drops real input, which would
@@ -38,4 +38,4 @@ bool isInjecting();
 bool sendKeyStroke(QWindow *window, ulong timestamp, int key, Qt::KeyboardModifiers modifiers,
                    const QString &text = {});
 
-} // namespace qtos::input
+} // namespace qor::input

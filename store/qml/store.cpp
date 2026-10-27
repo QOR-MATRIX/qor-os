@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "store.h"
 
 #include "catalog.h"
@@ -17,7 +17,7 @@
 
 using namespace Qt::StringLiterals;
 
-namespace qtos::store {
+namespace qor::store {
 
 namespace {
 
@@ -56,12 +56,12 @@ Store::Store(QObject *parent) : QObject(parent)
 StoreEngine *Store::engine()
 {
     static StoreEngine *shared = [] {
-        QString dir = qEnvironmentVariable("QTOS_STORE_DIR");
+        QString dir = qEnvironmentVariable("QOR_STORE_DIR");
         if (dir.isEmpty())
             dir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + u"/store"_s;
         auto *store = new StoreEngine(dir, storeKey(), QCoreApplication::instance());
-        const QString url = qEnvironmentVariable("QTOS_STORE_URL");
-        store->setCatalogUrl(url.isEmpty() ? QUrl(u"qrc:/qt/qml/QTOS/Store/catalog/catalog.json"_s)
+        const QString url = qEnvironmentVariable("QOR_STORE_URL");
+        store->setCatalogUrl(url.isEmpty() ? QUrl(u"qrc:/qt/qml/QOR/Store/catalog/catalog.json"_s)
                                            : QUrl::fromUserInput(url));
         store->refresh();
         return store;
@@ -71,7 +71,7 @@ StoreEngine *Store::engine()
 
 QByteArray Store::storeKey()
 {
-    QFile file(u":/qt/qml/QTOS/Store/keys/store.pub"_s);
+    QFile file(u":/qt/qml/QOR/Store/keys/store.pub"_s);
     if (!file.open(QIODevice::ReadOnly))
         return {};
     return QByteArray::fromBase64(file.readAll().trimmed());
@@ -255,4 +255,4 @@ QVariantMap Store::widget(const QString &id) const
     return {};
 }
 
-} // namespace qtos::store
+} // namespace qor::store

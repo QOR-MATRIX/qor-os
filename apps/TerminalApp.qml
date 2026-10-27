@@ -1,12 +1,12 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QTOS.Kit
-import QTOS.Services
+import QOR.Kit
+import QOR.Services
 
 // Terminal: a GPU-rendered QML console. In simulation it runs a built-in
-// command set wired to the QTOS services; on device it hosts a PTY.
+// command set wired to the QOR OS services; on device it hosts a PTY.
 FocusScope {
     id: app
 
@@ -46,11 +46,11 @@ FocusScope {
             writeLine(["Built-in commands:",
                    "  qtfetch               system summary",
                    "  ls                    list the home directory",
-                   "  theme dark|light      switch appearance (qtos-settingsd)",
+                   "  theme dark|light      switch appearance (qor-settingsd)",
                    "  accent <hue>          set the accent hue, 0-360",
-                   "  wifi on|off|status    control qtos-netd",
+                   "  wifi on|off|status    control qor-netd",
                    "  play | pause | next   control the media session",
-                   "  notify <text>         post a notification (qtos-notifyd)",
+                   "  notify <text>         post a notification (qor-notifyd)",
                    "  open <app>            open an app (files, music, notes, monitor, settings)",
                    "  lock                  lock the session",
                    "  date | whoami | uname | echo | history | clear"].join("\n"), "dim");
@@ -68,7 +68,7 @@ FocusScope {
             writeLine(app.user, "out");
             break;
         case "uname":
-            writeLine("QTOS " + Kit.version + " prism-simulation x86_64 (Qt Quick, Lumen)", "out");
+            writeLine("QOR OS " + Kit.version + " prism-simulation x86_64 (Qt Quick, Lumen)", "out");
             break;
         case "history":
             writeLine(history.map((h, i) => String(i + 1).padStart(4) + "  " + h).join("\n"), "dim");
@@ -79,7 +79,7 @@ FocusScope {
         case "qtfetch":
             writeLine(["   ▄▀▀▀▀▄      " + app.user + "@" + app.host,
                    "  █  ▄▄  █     ─────────────────────",
-                   "  █ █  █ █     OS       QTOS " + Kit.version,
+                   "  █ █  █ █     OS       QOR OS " + Kit.version,
                    "  █  ▀▀ ▄█     Shell    Prism (Qt Quick)",
                    "   ▀▄▄▄▀ ▀▄    Kit      Lumen · " + Theme.fontFamily,
                    "               Accent   " + Math.round(Services.settings.accentHue) + "° OKLCH",
@@ -236,7 +236,7 @@ FocusScope {
     TapHandler { onTapped: input.forceActiveFocus() }
 
     Component.onCompleted: {
-        writeLine("QTOS " + Kit.version + " · Prism terminal · Qt Quick, Lumen, Qt Remote Objects", "accent");
+        writeLine("QOR OS " + Kit.version + " · Prism terminal · Qt Quick, Lumen, Qt Remote Objects", "accent");
         writeLine("Type 'help' for commands, 'qtfetch' for a system summary.", "dim");
         writeLine("", "out");
         run("qtfetch");

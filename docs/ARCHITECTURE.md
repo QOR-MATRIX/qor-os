@@ -11,14 +11,14 @@ rationale are recorded in [`decisions/`](decisions/README.md).
 │ Products       QQ (Studio, Player, runtime) · ARQADE · QOR Media      │  carried from
 │                each its own process and CMake project                 │  demiurge-chain
 ├───────────────────────────────────────────────────────────────────────┤
-│ Apps           QTOS.Apps        Files · Music · Notes · Terminal · …  │
-│ Shell          QTOS.Shell       Desktop · Rail · Shelf · Beam · …     │
-│ Platform API   QTOS.Services    typed replicas + Intents              │
-│ Design system  QTOS.Kit, Lumen  tokens · Theme · Spring · materials   │
+│ Apps           QOR.Apps        Files · Music · Notes · Terminal · …  │
+│ Shell          QOR.Shell       Desktop · Rail · Shelf · Beam · …     │
+│ Platform API   QOR.Services    typed replicas + Intents              │
+│ Design system  QOR.Kit, Lumen  tokens · Theme · Spring · materials   │
 ├───────────────────────────────────────────────────────────────────────┤
-│ Hosts          qtos-shell (any desktop OS)  │  prism (Wayland, Linux) │
+│ Hosts          qor-shell (any desktop OS)  │  prism (Wayland, Linux) │
 ├───────────────────────────────────────────────────────────────────────┤
-│ Services       qtos-sim / qtos-simd (simulation)  │  qtos-*d (device) │
+│ Services       qor-sim / qor-simd (simulation)  │  qor-*d (device) │
 │                ── Qt Remote Objects contracts: services/interfaces ── │
 │ QOR core       qor::core (Rust, demiurge-chain at a pinned commit)    │
 │                ── C bridge: one JSON request, one JSON answer ──      │
@@ -27,33 +27,33 @@ rationale are recorded in [`decisions/`](decisions/README.md).
 
 The carried products are separate programs today. Phase 1 runs them as
 Wayland clients of Prism and moves their theming and controller input onto
-QTOS.Kit and QTOS.Input. The QOR core is linked into a test today. Phase 2
+QOR.Kit and QOR.Input. The QOR core is linked into a test today. Phase 2
 makes it the vault service, a process of its own.
 
 **Simulation and device share all QML.** The shell and the apps never talk to
 a service implementation directly. They bind to Qt Remote Objects *replicas*.
 In simulation the *sources* are the classes in `sim/`; on a device they are the
-`qtos-*d` daemons. The host program decides which sources it connects to.
+`qor-*d` daemons. The host program decides which sources it connects to.
 
 ## 2. Build targets
 
 | Target | Kind | Module URI | Source | Purpose |
 |--------|------|------------|--------|---------|
-| `qtos_kit` | static lib + QML plugin | `QTOS.Kit` | `kit/` | Tokens, Theme, Motion, Materials, Spring, Oklch, SceneRect, FrameStats, Surface, Glass, Backdrop, RoundMask, Wallpaper, Icon, AppIcon, Artwork, QtosMark, Spectrum, Sounds, building blocks |
-| `qtos_lumen_style` | static lib + QML plugin | `Lumen` | `kit/style/` | Qt Quick Controls 2 style (24 controls, Basic fallback) |
-| `qtos_input` | static lib + QML plugin | `QTOS.Input` | `input/` | Game controllers: XInput, HID and evdev backends, `Gamepads`, `ControllerNavigator`, `ControllerGlyph` ([CONTROLLERS.md](CONTROLLERS.md)) |
-| `qtos_audio` | static lib | — | `audio/` | The audio engine: real-time output, QTOS Sessions synth, file decoding, EQ, limiter, analysis ([AUDIO.md](AUDIO.md)) |
-| `qtos_services` | static lib + QML plugin | `QTOS.Services` | `services/` | `Services` singleton (replicas), `Intents`, `Reactive`, QML type info for replicas |
-| `qtos_sim` | static lib | — | `sim/` | Simulated sources (audio and media on `qtos_audio`) + scenario loader + QtRO host |
-| `qtos_apps` | static lib + QML plugin | `QTOS.Apps` | `apps/` | `AppRegistry` and the six apps |
-| `qtos_shell` | static lib + QML plugin | `QTOS.Shell` | `prism/shell/` | `Main`, `Desktop` and every shell surface |
-| `qtos-shell` | executable | — | `prism/host/` | Simulation host: window, sim services, CLI, screenshot, benchmark, GPU preference |
-| `prism` | executable | `QTOS.Prism` | `prism/compositor/` | Wayland compositor (Linux, needs Qt Wayland Compositor) |
-| `qtos-simd` | executable | — | `sim/simd/` | Services in a separate process |
-| `qtosctl` | executable | — | `tools/qtosctl/` | CLI client of the services |
-| `qtos-gamepads` | executable | — | `tools/gamepads/` | Lists game controllers and streams their state |
-| `qtos_lumen_widgets_style` | plugin (`styles`) | — | `platform/style/` | Lumen `QStyle` for Qt Widgets |
-| `qtos_platformtheme` | plugin (`platformthemes`) | — | `platform/theme/` | `qtos` QPA platform theme |
+| `qor_kit` | static lib + QML plugin | `QOR.Kit` | `kit/` | Tokens, Theme, Motion, Materials, Spring, Oklch, SceneRect, FrameStats, Surface, Glass, Backdrop, RoundMask, Wallpaper, Icon, AppIcon, Artwork, QorMark, Spectrum, Sounds, building blocks |
+| `qor_lumen_style` | static lib + QML plugin | `Lumen` | `kit/style/` | Qt Quick Controls 2 style (24 controls, Basic fallback) |
+| `qor_input` | static lib + QML plugin | `QOR.Input` | `input/` | Game controllers: XInput, HID and evdev backends, `Gamepads`, `ControllerNavigator`, `ControllerGlyph` ([CONTROLLERS.md](CONTROLLERS.md)) |
+| `qor_audio` | static lib | — | `audio/` | The audio engine: real-time output, QOR Sessions synth, file decoding, EQ, limiter, analysis ([AUDIO.md](AUDIO.md)) |
+| `qor_services` | static lib + QML plugin | `QOR.Services` | `services/` | `Services` singleton (replicas), `Intents`, `Reactive`, QML type info for replicas |
+| `qor_sim` | static lib | — | `sim/` | Simulated sources (audio and media on `qor_audio`) + scenario loader + QtRO host |
+| `qor_apps` | static lib + QML plugin | `QOR.Apps` | `apps/` | `AppRegistry` and the six apps |
+| `qor_shell` | static lib + QML plugin | `QOR.Shell` | `prism/shell/` | `Main`, `Desktop` and every shell surface |
+| `qor-shell` | executable | — | `prism/host/` | Simulation host: window, sim services, CLI, screenshot, benchmark, GPU preference |
+| `prism` | executable | `QOR.Prism` | `prism/compositor/` | Wayland compositor (Linux, needs Qt Wayland Compositor) |
+| `qor-simd` | executable | — | `sim/simd/` | Services in a separate process |
+| `qorctl` | executable | — | `tools/qorctl/` | CLI client of the services |
+| `qor-gamepads` | executable | — | `tools/gamepads/` | Lists game controllers and streams their state |
+| `qor_lumen_widgets_style` | plugin (`styles`) | — | `platform/style/` | Lumen `QStyle` for Qt Widgets |
+| `qor_platformtheme` | plugin (`platformthemes`) | — | `platform/theme/` | `qor` QPA platform theme |
 | `lumen-widgets-gallery` | executable | — | `platform/gallery/` | QStyle preview |
 | `qor_core` (`qor::core`) | static lib (Rust) + header | — | `core/` | The QOR core from demiurge-chain at `QOR_CORE_COMMIT`, built by Corrosion; `qor_core.h` is its C bridge ([§10](#10-the-qor-core)) |
 | `tst_*` | tests | — | `tests/` | See [§9](#9-testing) |
@@ -70,12 +70,12 @@ script compiler (`qmlsc`) and lands in a single import directory
 ### Module dependency graph
 
 ```text
-QTOS.Shell ──► QTOS.Apps ──► QTOS.Services
+QOR.Shell ──► QOR.Apps ──► QOR.Services
      │              │              
-     └──────────────┴──► QTOS.Kit ◄── Lumen (QQC2 style)
+     └──────────────┴──► QOR.Kit ◄── Lumen (QQC2 style)
 ```
 
-`QTOS.Kit` depends on nothing from QTOS. Apps depend on Kit and Services,
+`QOR.Kit` depends on nothing from QTOS. Apps depend on Kit and Services,
 never on the Shell. The Shell depends on everything.
 
 ## 3. Rendering model
@@ -154,7 +154,7 @@ continuously.
 
 The shell binds `Theme.dark`, `accentHue`, `reduceMotion`,
 `reduceTransparency` and `livingWallpaper` to the settings service, so
-`qtosctl theme light` restyles the running system.
+`qorctl theme light` restyles the running system.
 
 The same tokens are generated into `platform/common/lumentokens.h` for the
 Widgets `QStyle` and the QPA platform theme, and into `docs/design/tokens.md`.
@@ -164,19 +164,19 @@ Widgets `QStyle` and the QPA platform theme, and into `docs/design/tokens.md`.
 ```text
                    services/interfaces/*.rep   (repc)
                ┌───────────────┴────────────────┐
-         *SimpleSource (sim/)              *Replica (services/, tools/qtosctl)
+         *SimpleSource (sim/)              *Replica (services/, tools/qorctl)
                │                                │
-   QRemoteObjectHost  ◄── local:qtos-services ──►  QRemoteObjectNode
-   (qtos-shell embedded, or qtos-simd)          (Services singleton, qtosctl, tests)
+   QRemoteObjectHost  ◄── local:qor-services ──►  QRemoteObjectNode
+   (qor-shell embedded, or qor-simd)          (Services singleton, qorctl, tests)
 ```
 
-- Endpoint: `local:qtos-services` (Windows and macOS named pipe or socket),
-  `localabstract:qtos-services` (Linux abstract socket). If the default is
+- Endpoint: `local:qor-services` (Windows and macOS named pipe or socket),
+  `localabstract:qor-services` (Linux abstract socket). If the default is
   taken, the host falls back to `…-<pid>`.
 - `Services::connectTo()` acquires all replicas and waits until each has its
   initial state before QML loads, so the UI never flashes default values.
 - Replicas are registered for QML with `QML_FOREIGN` (`NetworkService`,
-  `PowerService` and so on). `cmake/QtosRepc.cmake` generates them so AUTOMOC
+  `PowerService` and so on). `cmake/QorRepc.cmake` generates them so AUTOMOC
   emits metatypes, which gives `qmllint` and `qmlsc` full type information.
 - Apps request system actions through `Intents` (`app.open`, `session.lock`,
   `shell.overview`, `shell.beam`, `shell.space`), which only the shell
@@ -205,13 +205,13 @@ and `adopt()` wraps each xdg-toplevel in the same `AppWindow`.
 
 ## 8. Hosts
 
-### `qtos-shell` (simulation)
+### `qor-shell` (simulation)
 
 1. Applies the GPU preference: high-performance by default via DXGI on Windows ([PERFORMANCE.md](PERFORMANCE.md#gpu-selection)).
 2. `Kit::initialize()` registers Inter and JetBrains Mono and sets the application font.
 3. Selects the `Lumen` Quick Controls style.
 4. Starts `SimServices` in-process (or connects to an external host) and calls `Services::connectTo()`.
-5. Loads `QTOS.Shell/Main` with an `options` map from the command line.
+5. Loads `QOR.Shell/Main` with an `options` map from the command line.
 6. Optionally runs the screenshot timer or the `--benchmark` tour.
 
 ### `prism` (device, experimental)
@@ -289,17 +289,17 @@ project, built and tested by its own `build.ps1`, which
 Their suites render on the GPU in real windows and drive them with input. The
 look tests read `docs/design/tokens.json`, Demiurge's one look. Today they
 build on Windows. The Linux build, running under Prism, Lumen theming and
-QTOS.Input are Phase 1.
+QOR.Input are Phase 1.
 
 ## 12. Repository conventions
 
 - Generated files are committed and checked for staleness: `kit/Tokens.qml`,
   `platform/common/lumentokens.h` and `docs/design/tokens.md` (from
   `tools/tokens/generate_tokens.py`).
-- Every source file carries `SPDX-License-Identifier: LicenseRef-QTOS-Proprietary`,
+- Every source file carries `SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary`,
   except the carried code, which keeps its Apache-2.0 notices and its own
   formatting.
-- Naming: C++ in namespace `qtos` (`qtos::sim`, `qtos::lumen`, `qtos::host`),
-  QML modules under `QTOS.*` except the style module `Lumen`. The code keeps
-  these names until the product name is cleared
-  ([QOR-0008](decisions/QOR-0008-before-a-public-release.md)).
+- Naming ([QOR-0009](decisions/QOR-0009-the-name-is-qor-os.md)): C++ in namespace `qor` (`qor::sim`,
+  `qor::lumen`, `qor::host`), targets `qor_*`, programs `qor-*`, logging
+  categories `qor.*`, and QML modules under `QOR.*` (beside the carried
+  `QOR.Media`) except the style module `Lumen`.

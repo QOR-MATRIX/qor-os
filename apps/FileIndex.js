@@ -1,8 +1,8 @@
 .pragma library
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 //
 // Simulated file index used by Files and by Beam's file search until
-// qtos-indexd (KFileMetaData + SQLite FTS5) is available.
+// qor-indexd (KFileMetaData + SQLite FTS5) is available.
 
 const KINDS = {
     "folder":   { glyph: "folder",       hue: 248, label: "Folder" },
@@ -31,7 +31,7 @@ const TAGS = [
 ];
 
 const FILES = [
-    ["Documents", "QTOS Vision.md", "document", "48 KB", "Today, 09:12", "Lumen"],
+    ["Documents", "QOR OS Vision.md", "document", "48 KB", "Today, 09:12", "Lumen"],
     ["Documents", "Lumen Design Language.pdf", "document", "6.2 MB", "Today, 08:40", "Lumen"],
     ["Documents", "Quarterly Plan.odt", "document", "212 KB", "Yesterday", ""],
     ["Documents", "Prism Roadmap.odp", "slides", "3.4 MB", "Mon", "Lumen"],
@@ -55,7 +55,7 @@ const FILES = [
     ["Projects", "lumen-kit", "folder", "—", "Today, 10:48", "Lumen"],
     ["Projects", "Wallpaper.frag", "code", "4 KB", "Today, 10:15", "Lumen"],
     ["Projects", "Spring.cpp", "code", "7 KB", "Yesterday", "Lumen"],
-    ["Projects", "qtos-image.bb", "code", "2 KB", "Mon", ""]
+    ["Projects", "qor-image.bb", "code", "2 KB", "Mon", ""]
 ];
 
 function kind(id) {

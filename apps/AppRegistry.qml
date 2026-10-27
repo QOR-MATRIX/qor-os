@@ -1,8 +1,8 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 pragma Singleton
 
 import QtQuick
-import QTOS.Kit
+import QOR.Kit
 import "FileIndex.js" as FileIndex
 
 // Catalogue of first-party apps: identity, icon, default window size, search
@@ -23,7 +23,7 @@ QtObject {
           description: qsTr("Capture ideas in a calm, distraction-free editor.") },
         { id: "terminal", name: qsTr("Terminal"), glyph: "terminal", hue: 274, chroma: 0.035, width: 840, height: 540,
           keywords: "shell console command line cli bash",
-          description: qsTr("A GPU-rendered command line wired into the QTOS services.") },
+          description: qsTr("A GPU-rendered command line wired into the QOR OS services.") },
         { id: "monitor", name: qsTr("Monitor"), glyph: "activity", hue: 158, chroma: 0.15, width: 960, height: 620,
           keywords: "system cpu memory gpu performance activity frame time graphs",
           description: qsTr("Live CPU, GPU, memory and frame-time telemetry, drawn with Qt Graphs.") },
@@ -32,7 +32,7 @@ QtObject {
           description: qsTr("Appearance, display, sound, network and accessibility.") },
         { id: "store", name: qsTr("Store"), glyph: "shopping-bag", hue: 300, chroma: 0.17, width: 1100, height: 720,
           keywords: "shop market download install themes widgets apps games tools get",
-          description: qsTr("Themes and widgets for QTOS, signed and verified.") }
+          description: qsTr("Themes and widgets for QOR OS, signed and verified.") }
     ]
 
     readonly property var pinned: ["files", "music", "notes", "terminal", "monitor", "store", "settings"]
@@ -64,12 +64,12 @@ QtObject {
           description: qsTr("Motion, transparency and legibility.") },
         { id: "about", title: qsTr("About"), icon: "info",
           keywords: "version qt system information modules",
-          description: qsTr("QTOS, Qt and graphics information.") }
+          description: qsTr("QOR OS, Qt and graphics information.") }
     ]
 
     // Identities for system senders that are not apps (notifications).
     readonly property var senders: ({
-        "system": { name: "QTOS", glyph: "sparkles", hue: Theme.hue, chroma: 0.16 },
+        "system": { name: "QOR OS", glyph: "sparkles", hue: Theme.hue, chroma: 0.16 },
         "messages": { name: qsTr("Messages"), glyph: "mail", hue: 205, chroma: 0.15 },
         "calendar": { name: qsTr("Calendar"), glyph: "calendar", hue: 25, chroma: 0.17 }
     })

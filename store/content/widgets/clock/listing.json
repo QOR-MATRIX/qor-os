@@ -1,8 +1,8 @@
 {
-  "id": "org.qtos.widget.clock",
+  "id": "dev.qorsync.widget.clock",
   "name": "Clock",
   "version": "1.0.0",
-  "developer": "org.qtos",
+  "developer": "dev.qorsync",
   "summary": "The time, large and light, with the date.",
   "description": "A calm desktop clock: the time in light Inter at display size, today's date beneath it, and the minute passing as a hairline in your accent colour. Follows your locale's 12- or 24-hour time.",
   "whatsNew": "First release.",

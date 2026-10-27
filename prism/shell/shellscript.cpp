@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "shellscript.h"
 
 #include "gamepadmanager.h"
@@ -41,7 +41,7 @@
 
 using namespace Qt::StringLiterals;
 
-namespace qtos {
+namespace qor {
 
 namespace {
 
@@ -480,7 +480,7 @@ private:
     void gestureEvent(Qt::NativeGestureType type, QPointF delta)
     {
         if (!m_touchpad) {
-            m_touchpad = new QPointingDevice(u"qtos-script touchpad"_s, 0x51530001, QInputDevice::DeviceType::TouchPad,
+            m_touchpad = new QPointingDevice(u"qor-script touchpad"_s, 0x51530001, QInputDevice::DeviceType::TouchPad,
                                              QPointingDevice::PointerType::Finger, QInputDevice::Capability::Position,
                                              5, 0, QString(), QPointingDeviceUniqueId(), this);
             QWindowSystemInterface::registerInputDevice(m_touchpad);
@@ -548,7 +548,7 @@ private:
     {
         if (!m_touchscreen) {
             m_touchscreen =
-                new QPointingDevice(u"qtos-script touchscreen"_s, 0x51530002, QInputDevice::DeviceType::TouchScreen,
+                new QPointingDevice(u"qor-script touchscreen"_s, 0x51530002, QInputDevice::DeviceType::TouchScreen,
                                     QPointingDevice::PointerType::Finger,
                                     QInputDevice::Capability::Position | QInputDevice::Capability::Area, 10, 0,
                                     QString(), QPointingDeviceUniqueId(), this);
@@ -633,7 +633,7 @@ private:
     // {"gamepad": {"disconnect": true}}
     int gamepad(const QJsonObject &spec)
     {
-        using namespace qtos::input;
+        using namespace qor::input;
         GamepadManager *manager = GamepadManager::instance();
         if (spec.contains(u"connect"_s)) {
             static const QHash<QString, Family> families { { u"xbox"_s, Family::Xbox },
@@ -1088,7 +1088,7 @@ private:
     QObject *m_desktop = nullptr;
     QQmlEngine *m_engine = nullptr;
     QString m_gamepad;
-    qtos::input::GamepadState m_pad;
+    qor::input::GamepadState m_pad;
     qsizetype m_next = 0;
     std::deque<Action> m_queue;
     QElapsedTimer m_clock;
@@ -1127,4 +1127,4 @@ void runShellScript(QQuickWindow *window, const QString &path)
     script->start();
 }
 
-} // namespace qtos
+} // namespace qor

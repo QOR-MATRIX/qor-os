@@ -1,8 +1,8 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 import QtQuick
-import QTOS.Shell
+import QOR.Shell
 
-// Top-level window used when the shell runs on a desktop OS (qtos-shell).
+// Top-level window used when the shell runs on a desktop OS (qor-shell).
 // On a device, Prism's compositor hosts the same Desktop on each output.
 Window {
     id: window
@@ -15,7 +15,7 @@ Window {
     minimumHeight: 720
     visible: true
     color: "black"
-    title: qsTr("QTOS · Prism Shell (simulation)")
+    title: qsTr("QOR OS · Prism Shell (simulation)")
     visibility: options.fullscreen ? Window.FullScreen : Window.AutomaticVisibility
 
     Desktop {

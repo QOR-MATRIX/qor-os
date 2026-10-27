@@ -1,13 +1,13 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QTOS.Kit
-import QTOS.Services
+import QOR.Kit
+import QOR.Services
 
 // The Live Activity capsule in the centre of the Rail. It shows what is
 // happening right now (media playback today; timers, calls, recordings and
-// downloads publish here through qtos_activity on device) and opens the
+// downloads publish here through qor_activity on device) and opens the
 // matching popover.
 Item {
     id: capsule

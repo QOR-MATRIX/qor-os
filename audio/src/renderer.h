@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
 #include "dsp.h"
@@ -11,7 +11,7 @@
 #include <atomic>
 #include <memory>
 
-namespace qtos::audio {
+namespace qor::audio {
 
 // The real-time half of the engine. One control thread talks to it; one audio
 // thread (the QAudioSink callback, or the null output's clock) calls
@@ -107,4 +107,4 @@ private:
     double m_transportStep = 1.0 / 480;
 };
 
-} // namespace qtos::audio
+} // namespace qor::audio

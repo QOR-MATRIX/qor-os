@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
 #include "gamepad.h"
@@ -13,19 +13,19 @@
 #include <optional>
 #include <vector>
 
-namespace qtos::input {
+namespace qor::input {
 
 class VirtualBackend;
 
 // Every game controller connected to the machine, from every backend, in the
-// standard QTOS layout: dead zones applied, triggers as buttons, and button
+// standard QOR OS layout: dead zones applied, triggers as buttons, and button
 // edges reported. `merged` combines all controllers, so the same controller
 // seen twice (for example a DualShock 4 that Steam Input also presents as an
 // Xbox controller) never acts twice.
 //
 // Backends: XInput and raw HID (PlayStation, generic HID gamepads) on
 // Windows; evdev on Linux; and virtual controllers for tests and scripts.
-// QTOS_GAMEPADS=virtual keeps only the virtual one (tests), =off none.
+// QOR_GAMEPADS=virtual keeps only the virtual one (tests), =off none.
 class GamepadManager : public QObject
 {
     Q_OBJECT
@@ -54,14 +54,14 @@ public:
     void removeVirtual(const QString &id);
 
 Q_SIGNALS:
-    void connected(const qtos::input::GamepadInfo &info);
-    void infoChanged(const qtos::input::GamepadInfo &info);
-    void disconnected(const qtos::input::GamepadInfo &info);
-    void stateChanged(const QString &id, const qtos::input::GamepadState &state);
-    void buttonPressed(const QString &id, qtos::input::Button button);
-    void buttonReleased(const QString &id, qtos::input::Button button);
+    void connected(const qor::input::GamepadInfo &info);
+    void infoChanged(const qor::input::GamepadInfo &info);
+    void disconnected(const qor::input::GamepadInfo &info);
+    void stateChanged(const QString &id, const qor::input::GamepadState &state);
+    void buttonPressed(const QString &id, qor::input::Button button);
+    void buttonReleased(const QString &id, qor::input::Button button);
     // The combined state of every controller changed.
-    void mergedChanged(const qtos::input::GamepadState &now, const qtos::input::GamepadState &before);
+    void mergedChanged(const qor::input::GamepadState &now, const qor::input::GamepadState &before);
     void activeChanged();
 
 private:
@@ -90,4 +90,4 @@ private:
     QHash<QString, QTimer *> m_rumbleStops;
 };
 
-} // namespace qtos::input
+} // namespace qor::input

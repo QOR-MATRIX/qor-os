@@ -1,7 +1,7 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 import QtQuick
 import QtQuick.Effects
-import QTOS.Kit
+import QOR.Kit
 
 // Produces one shared, blurred, saturated copy of `sourceItem` at a fraction
 // of its resolution. Any number of Glass items sample it at their exact

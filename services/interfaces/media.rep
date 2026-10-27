@@ -1,6 +1,6 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 // Now-playing session aggregated from MPRIS players on device; played by the
-// QTOS audio engine in simulation.
+// QOR OS audio engine in simulation.
 #include <QtCore/QVariantList>
 
 class Media
@@ -26,7 +26,7 @@ class Media
     //    "duration": double (0 until known), "hue": double,
     //    "kind": "session" | "file",
     //    "path": string (files),
-    //    "session": { "style", "mode", "bpm", "root", "seed" } (QTOS Sessions:
+    //    "session": { "style", "mode", "bpm", "root", "seed" } (QOR Sessions:
     //                 music generated live by the audio engine) }]
     PROP(QVariantList queue SOURCEONLYSETTER)
     PROP(int queueIndex=0 SOURCEONLYSETTER)

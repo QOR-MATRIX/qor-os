@@ -6,13 +6,13 @@ name: Build
 # ARQADE, QOR Media) through their own build scripts.
 #
 # Each OS job runs when it has a Qt source (first match wins):
-#   1. Repository variable QTOS_WINDOWS_QT_DIR / QTOS_LINUX_QT_DIR
+#   1. Repository variable QOR_WINDOWS_QT_DIR / QOR_LINUX_QT_DIR
 #      - a Qt kit already installed on a self-hosted runner
 #   2. Secrets QT_INSTALLER_JWT_TOKEN, or QT_INSTALLER_EMAIL + QT_INSTALLER_PASSWORD
 #      - unattended Qt Online Installer on a hosted runner, cached
-# Runner selection: repository variables QTOS_WINDOWS_RUNNER / QTOS_LINUX_RUNNER
+# Runner selection: repository variables QOR_WINDOWS_RUNNER / QOR_LINUX_RUNNER
 # take a JSON runner label, e.g. '["self-hosted","windows","qt"]'.
-# Set QTOS_RUN_GPU_TESTS=true on a runner with a desktop session to also run
+# Set QOR_RUN_GPU_TESTS=true on a runner with a desktop session to also run
 # the GPU-labelled suites. See docs/CI.md.
 
 on:
@@ -33,7 +33,7 @@ concurrency:
   cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
 
 env:
-  QTOS_QT_VERSION: '6.12.0'
+  QOR_QT_VERSION: '6.12.0'
 
 jobs:
   preflight:
@@ -45,8 +45,8 @@ jobs:
     steps:
       - id: check
         env:
-          HAS_WINDOWS_KIT: ${{ vars.QTOS_WINDOWS_QT_DIR != '' }}
-          HAS_LINUX_KIT: ${{ vars.QTOS_LINUX_QT_DIR != '' }}
+          HAS_WINDOWS_KIT: ${{ vars.QOR_WINDOWS_QT_DIR != '' }}
+          HAS_LINUX_KIT: ${{ vars.QOR_LINUX_QT_DIR != '' }}
           HAS_SECRETS: ${{ secrets.QT_INSTALLER_JWT_TOKEN != '' || (secrets.QT_INSTALLER_EMAIL != '' && secrets.QT_INSTALLER_PASSWORD != '') }}
         run: |
           windows=false; linux=false
@@ -68,21 +68,21 @@ jobs:
     name: Windows · MSVC 2022
     needs: preflight
     if: needs.preflight.outputs.windows == 'true'
-    runs-on: ${{ fromJSON(vars.QTOS_WINDOWS_RUNNER || '"windows-2025"') }}
+    runs-on: ${{ fromJSON(vars.QOR_WINDOWS_RUNNER || '"windows-2025"') }}
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v7
         with:
           # Self-hosted runners keep the build tree for incremental builds.
-          clean: ${{ vars.QTOS_WINDOWS_QT_DIR == '' }}
+          clean: ${{ vars.QOR_WINDOWS_QT_DIR == '' }}
 
       - uses: actions/setup-python@v7
-        if: vars.QTOS_WINDOWS_QT_DIR == ''
+        if: vars.QOR_WINDOWS_QT_DIR == ''
         with:
           python-version: '3.12'
 
       - uses: seanmiddleditch/gha-setup-ninja@v6
-        if: vars.QTOS_WINDOWS_QT_DIR == ''
+        if: vars.QOR_WINDOWS_QT_DIR == ''
 
       - uses: ilammy/msvc-dev-cmd@v1
         with:
@@ -90,14 +90,14 @@ jobs:
 
       - name: Restore Qt
         id: qt-cache
-        if: vars.QTOS_WINDOWS_QT_DIR == ''
+        if: vars.QOR_WINDOWS_QT_DIR == ''
         uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/Qt
-          key: qt-${{ runner.os }}-${{ env.QTOS_QT_VERSION }}-${{ hashFiles('.github/qt-packages.json') }}
+          key: qt-${{ runner.os }}-${{ env.QOR_QT_VERSION }}-${{ hashFiles('.github/qt-packages.json') }}
 
       - name: Install Qt (commercial)
-        if: vars.QTOS_WINDOWS_QT_DIR == '' && steps.qt-cache.outputs.cache-hit != 'true'
+        if: vars.QOR_WINDOWS_QT_DIR == '' && steps.qt-cache.outputs.cache-hit != 'true'
         env:
           QT_INSTALLER_JWT_TOKEN: ${{ secrets.QT_INSTALLER_JWT_TOKEN }}
           QT_INSTALLER_EMAIL: ${{ secrets.QT_INSTALLER_EMAIL }}
@@ -107,8 +107,8 @@ jobs:
       - name: Select Qt kit and tools
         shell: pwsh
         run: |
-          $kit = if ('${{ vars.QTOS_WINDOWS_QT_DIR }}') { '${{ vars.QTOS_WINDOWS_QT_DIR }}' } else { "${{ runner.temp }}/Qt/$env:QTOS_QT_VERSION/msvc2022_64" }
-          "QTOS_QT_DIR=$kit" >> $env:GITHUB_ENV
+          $kit = if ('${{ vars.QOR_WINDOWS_QT_DIR }}') { '${{ vars.QOR_WINDOWS_QT_DIR }}' } else { "${{ runner.temp }}/Qt/$env:QOR_QT_VERSION/msvc2022_64" }
+          "QOR_QT_DIR=$kit" >> $env:GITHUB_ENV
           "$kit/bin" >> $env:GITHUB_PATH
           # Qt's bundled CMake and Ninja, when the kit comes from a full Qt install.
           $root = Join-Path $kit '../..'
@@ -131,7 +131,7 @@ jobs:
 
       - name: Test (GPU)
         id: gpu-tests
-        if: vars.QTOS_RUN_GPU_TESTS == 'true'
+        if: vars.QOR_RUN_GPU_TESTS == 'true'
         run: ctest --preset ci-windows -L gpu --timeout 120 --repeat until-pass:2
 
       - name: Upload golden-image differences
@@ -147,7 +147,7 @@ jobs:
       # built) changed, on tags and on manual runs.
       - name: Did the carried products change?
         id: products
-        if: vars.QTOS_RUN_GPU_TESTS == 'true'
+        if: vars.QOR_RUN_GPU_TESTS == 'true'
         shell: pwsh
         env:
           EVENT: ${{ github.event_name }}
@@ -167,7 +167,7 @@ jobs:
       - name: Products (QQ, ARQADE, QOR Media)
         if: steps.products.outputs.run == 'true'
         shell: pwsh
-        run: .\tools\dev\products.ps1 -Qt $env:QTOS_QT_DIR -BuildRoot build\ci-products
+        run: .\tools\dev\products.ps1 -Qt $env:QOR_QT_DIR -BuildRoot build\ci-products
 
       - name: Package
         if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')
@@ -184,20 +184,20 @@ jobs:
     name: Linux · GCC
     needs: preflight
     if: needs.preflight.outputs.linux == 'true'
-    runs-on: ${{ fromJSON(vars.QTOS_LINUX_RUNNER || '"ubuntu-24.04"') }}
+    runs-on: ${{ fromJSON(vars.QOR_LINUX_RUNNER || '"ubuntu-24.04"') }}
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v7
         with:
-          clean: ${{ vars.QTOS_LINUX_QT_DIR == '' }}
+          clean: ${{ vars.QOR_LINUX_QT_DIR == '' }}
 
       - uses: actions/setup-python@v7
-        if: vars.QTOS_LINUX_QT_DIR == ''
+        if: vars.QOR_LINUX_QT_DIR == ''
         with:
           python-version: '3.12'
 
       - name: System packages
-        if: vars.QTOS_LINUX_QT_DIR == ''
+        if: vars.QOR_LINUX_QT_DIR == ''
         run: |
           sudo apt-get update
           # libdbus-1-dev: the QOR core's keychain uses the Secret Service over D-Bus.
@@ -208,14 +208,14 @@ jobs:
 
       - name: Restore Qt
         id: qt-cache
-        if: vars.QTOS_LINUX_QT_DIR == ''
+        if: vars.QOR_LINUX_QT_DIR == ''
         uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/Qt
-          key: qt-${{ runner.os }}-${{ env.QTOS_QT_VERSION }}-${{ hashFiles('.github/qt-packages.json') }}
+          key: qt-${{ runner.os }}-${{ env.QOR_QT_VERSION }}-${{ hashFiles('.github/qt-packages.json') }}
 
       - name: Install Qt (commercial)
-        if: vars.QTOS_LINUX_QT_DIR == '' && steps.qt-cache.outputs.cache-hit != 'true'
+        if: vars.QOR_LINUX_QT_DIR == '' && steps.qt-cache.outputs.cache-hit != 'true'
         env:
           QT_INSTALLER_JWT_TOKEN: ${{ secrets.QT_INSTALLER_JWT_TOKEN }}
           QT_INSTALLER_EMAIL: ${{ secrets.QT_INSTALLER_EMAIL }}
@@ -224,9 +224,9 @@ jobs:
 
       - name: Select Qt kit and tools
         run: |
-          kit="${{ vars.QTOS_LINUX_QT_DIR }}"
-          [ -n "$kit" ] || kit="${{ runner.temp }}/Qt/${QTOS_QT_VERSION}/gcc_64"
-          echo "QTOS_QT_DIR=$kit" >> "$GITHUB_ENV"
+          kit="${{ vars.QOR_LINUX_QT_DIR }}"
+          [ -n "$kit" ] || kit="${{ runner.temp }}/Qt/${QOR_QT_VERSION}/gcc_64"
+          echo "QOR_QT_DIR=$kit" >> "$GITHUB_ENV"
           echo "$kit/bin" >> "$GITHUB_PATH"
           for tool in Tools/CMake/bin Tools/Ninja; do
             [ -d "$kit/../../$tool" ] && realpath "$kit/../../$tool" >> "$GITHUB_PATH"
@@ -247,7 +247,7 @@ jobs:
 
       - name: Test (GPU)
         id: gpu-tests
-        if: vars.QTOS_RUN_GPU_TESTS == 'true'
+        if: vars.QOR_RUN_GPU_TESTS == 'true'
         run: |
           # Without a reachable display the suites would wait for a window
           # forever; fail with the reason instead.
@@ -270,5 +270,5 @@ jobs:
       # Real Wayland clients against the built compositor; needs a display
       # (WSLg or a desktop session), weston and wayland-utils on the runner.
       - name: Prism protocol check
-        if: vars.QTOS_RUN_GPU_TESTS == 'true' && vars.QTOS_LINUX_QT_DIR != ''
+        if: vars.QOR_RUN_GPU_TESTS == 'true' && vars.QOR_LINUX_QT_DIR != ''
         run: tools/dev/prism-protocol-check.sh build/ci-linux

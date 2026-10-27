@@ -1,10 +1,10 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
 #include <complex>
 #include <vector>
 
-namespace qtos::audio {
+namespace qor::audio {
 
 // Iterative radix-2 FFT of a fixed power-of-two size, with precomputed
 // twiddles and bit reversal. Real-to-magnitude convenience for analysis.
@@ -30,4 +30,4 @@ private:
     std::vector<std::complex<float>> m_scratch;
 };
 
-} // namespace qtos::audio
+} // namespace qor::audio

@@ -20,14 +20,20 @@ QOR OS begins: QTOS and Demiurge's device-side products in one repository
 - **The QOR core**, built from demiurge-chain at a pinned commit through Corrosion (`core/`, `qor::core`, `QOR_BUILD_CORE`, `QOR_CORE_SOURCE_DIR`), never copied ([QOR-0003](docs/decisions/QOR-0003-the-qor-core-at-a-pinned-commit.md)). `tst_qorcore` calls it through its C bridge: the core's version, CGT's units, amounts read exactly, the largest amount never rounded, refusals as errors, and no command that reads a key.
   - The pin moved from `28d9e97` to `e99c7ce`, the merge of demiurge-chain's L13.2 (#107), with the `desktop` feature: QOR ID's and Social's clients, the chain client, the Library's index, the Mesh and Qontrol are now in the core QOR OS builds.
   - The pin (`QOR_CORE_COMMIT`) and features (`QOR_CORE_FEATURES`) are written on every configure instead of cached, so a build folder, CI's included, follows a moved pin.
-- **One rulebook and one decision log.** `AGENTS.md` (with `CLAUDE.md` pointing to it) merges Demiurge's rules on checking claims, money, language and secrets with QTOS's build and CI practice. `docs/decisions/` holds QOR-0001 to QOR-0008, and QTOS's records as QTOS-0001 to QTOS-0010.
+- **One rulebook and one decision log.** `AGENTS.md` (with `CLAUDE.md` pointing to it) merges Demiurge's rules on checking claims, money, language and secrets with QTOS's build and CI practice. `docs/decisions/` holds QOR-0001 to QOR-0009, and QTOS's records as QTOS-0001 to QTOS-0010.
 - `OWNER.md`: where QOR OS stands, on one page, rewritten every session.
 - `tools/ci/runners.ps1` moves the workstation's two CI runners to the organisation or a repository and starts them. It leaves a runner already in place alone and never stops one that is running a job. Both runners serve the organisation since 27 October.
 - `LICENSES/Apache-2.0.txt` and the carried paths in `THIRD_PARTY_NOTICES.md` and `LICENSE`.
 
 ### Changed
 
-- The product is **QOR OS**. README, VISION, ROADMAP, ARCHITECTURE, BUILDING, DEVELOPMENT, CI, PERFORMANCE, QT-MODULES, STORE, CONTRIBUTING, SECURITY, issue templates, labels and milestones are rewritten for it. The code keeps its QTOS names until the name is cleared ([QOR-0008](docs/decisions/QOR-0008-before-a-public-release.md)).
+- The product is **QOR OS**. README, VISION, ROADMAP, ARCHITECTURE, BUILDING, DEVELOPMENT, CI, PERFORMANCE, QT-MODULES, STORE, CONTRIBUTING, SECURITY, issue templates, labels and milestones are rewritten for it.
+- **The name is QOR OS in the code too** ([QOR-0009](docs/decisions/QOR-0009-the-name-is-qor-os.md), superseding QOR-0008's wait for clearance). QTOS now names only the predecessor.
+  - Code: the `qor::` namespace, `qor_*` targets, `qor.*` logging categories, `QOR.*` QML modules (`QOR.Kit`, `QOR.Shell`, `QOR.Services`, `QOR.Store`, `QOR.Input`, `QOR.Apps`, `QOR.Prism`), `QOR_*` options and environment variables, `LicenseRef-QOR-OS-Proprietary`, and `project(qor-os)`.
+  - Programs: `qor-shell`, `qorctl`, `qor-simd`, `qor-gamepads`; the SDK template `sdk/templates/qor-app`; `tools/dev/Enter-QorShell.ps1`.
+  - The interface says QOR OS, and the generated music is **QOR Sessions**. The shell and simulator carry their settings and data (installed Store items among them) over from "QTOS Shell" and "QTOS Simulator" on first run.
+  - The Store: the **QOR OS Store**, first-party items as `dev.qorsync.*` in `.qorpkg` packages, re-signed with the same store key (`store/keys/store.pub` unchanged). `build_store.py` keeps using `~/.qtos/store-signing/` until the keys move to `~/.qor-os/store-signing/`.
+  - CI variables are `QOR_*` on `qor-os`; the organisation domain is `qorsync.dev`.
 - The roadmap is QOR OS's phases 0 to 4, with release gates. QTOS's phases are kept as history, and the phase numbers cited across the documents follow the new ones.
 - The base image is **Fedora Atomic** with bootc, NVIDIA's open kernel modules and Mesa ([QOR-0004](docs/decisions/QOR-0004-the-base-image-is-fedora-atomic.md)).
 - **Displays:** every display at its own refresh rate on every GPU is the acceptance test, and Prism gets its own KMS backend. QTOS's bare-metal decision gate is **deferred, not failed**, and the gate kit becomes a diagnostic ([QOR-0005](docs/decisions/QOR-0005-every-display-at-its-own-refresh.md)).

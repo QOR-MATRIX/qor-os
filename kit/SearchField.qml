@@ -1,7 +1,7 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 import QtQuick
 import QtQuick.Templates as T
-import QTOS.Kit
+import QOR.Kit
 
 // Single-line search input with a leading symbol and a clear button.
 T.TextField {

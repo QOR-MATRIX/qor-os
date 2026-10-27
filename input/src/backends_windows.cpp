@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 //
 // Windows controller backends:
 //  - XInput: Xbox controllers and everything that speaks XInput (SteelSeries
@@ -38,9 +38,9 @@
 
 using namespace Qt::StringLiterals;
 
-Q_LOGGING_CATEGORY(lcHid, "qtos.input.hid")
+Q_LOGGING_CATEGORY(lcHid, "qor.input.hid")
 
-namespace qtos::input {
+namespace qor::input {
 
 namespace {
 
@@ -670,4 +670,4 @@ std::vector<std::unique_ptr<Backend>> createHardwareBackends()
     return backends;
 }
 
-} // namespace qtos::input
+} // namespace qor::input

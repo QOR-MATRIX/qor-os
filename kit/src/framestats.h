@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
 #include <QtCore/QElapsedTimer>
@@ -11,7 +11,7 @@
 #include <QtQuick/QQuickItem>
 #include <QtQuick/QQuickWindow>
 
-namespace qtos {
+namespace qor {
 
 // Passive frame-pacing probe for a QQuickWindow.
 //
@@ -74,4 +74,4 @@ private:
     bool m_idle = true;
 };
 
-} // namespace qtos
+} // namespace qor

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "catalog.h"
 #include "package.h"
 #include "signature.h"
@@ -15,7 +15,7 @@
 #include <QtTest/QSignalSpy>
 #include <QtTest/QTest>
 
-using namespace qtos::store;
+using namespace qor::store;
 using namespace Qt::StringLiterals;
 
 namespace {
@@ -28,9 +28,9 @@ QByteArray readFile(const QString &path)
 
 QByteArray publicKey(const QString &path) { return QByteArray::fromBase64(readFile(path).trimmed()); }
 
-const QString kCatalog = QStringLiteral(QTOS_STORE_CATALOG);
-const QString kFixtures = QStringLiteral(QTOS_STORE_FIXTURES);
-const QString kStorePub = QStringLiteral(QTOS_STORE_PUB);
+const QString kCatalog = QStringLiteral(QOR_STORE_CATALOG);
+const QString kFixtures = QStringLiteral(QOR_STORE_FIXTURES);
+const QString kStorePub = QStringLiteral(QOR_STORE_PUB);
 
 // Rewrites a package with `edit` applied to its entries.
 QByteArray rezip(const QByteArray &archive, const std::function<void(QMap<QString, QByteArray> &)> &edit)
@@ -96,8 +96,8 @@ private Q_SLOTS:
                                                   readFile(kCatalog + u"/catalog.json.sig"_s), publicKey(kStorePub));
         QVERIFY2(result.ok, qPrintable(result.error));
         const Catalog &catalog = result.catalog;
-        QCOMPARE(catalog.name, u"QTOS Store"_s);
-        QVERIFY(catalog.developers.value(u"org.qtos"_s).verified);
+        QCOMPARE(catalog.name, u"QOR OS Store"_s);
+        QVERIFY(catalog.developers.value(u"dev.qorsync"_s).verified);
         int themes = 0;
         int widgets = 0;
         for (const CatalogItem &item : catalog.items) {
@@ -136,9 +136,9 @@ private Q_SLOTS:
         const CatalogResult catalog = parseCatalog(readFile(kCatalog + u"/catalog.json"_s),
                                                    readFile(kCatalog + u"/catalog.json.sig"_s), publicKey(kStorePub));
         QVERIFY(catalog.ok);
-        const CatalogItem *clock = catalog.catalog.item(u"org.qtos.widget.clock"_s);
+        const CatalogItem *clock = catalog.catalog.item(u"dev.qorsync.widget.clock"_s);
         QVERIFY(clock);
-        const QByteArray key = catalog.catalog.developers.value(u"org.qtos"_s).key;
+        const QByteArray key = catalog.catalog.developers.value(u"dev.qorsync"_s).key;
         const QByteArray package = readFile(kCatalog + u'/' + clock->packageFile);
         QVERIFY(openPackage(package, key).ok);
 
@@ -169,9 +169,9 @@ private Q_SLOTS:
         QCOMPARE(compareVersions(u"2.0.0"_s, u"2.0.0"_s), 0);
         QVERIFY(isValidVersion(u"1.2.3"_s));
         QVERIFY(!isValidVersion(u"1.2"_s));
-        QVERIFY(isValidItemId(u"org.qtos.theme.ember"_s));
-        QVERIFY(!isValidItemId(u"Org.qtos.x"_s));
-        QVERIFY(!isValidItemId(u"org.qtos"_s));
+        QVERIFY(isValidItemId(u"dev.qorsync.theme.ember"_s));
+        QVERIFY(!isValidItemId(u"Org.qor.x"_s));
+        QVERIFY(!isValidItemId(u"dev.qorsync"_s));
     }
 
     void installsUpdatesAndRemoves()
@@ -247,28 +247,28 @@ private Q_SLOTS:
 
     void describesTheBuiltInStore()
     {
-        // The shell's view: the signed catalogue built into QTOS (qrc).
+        // The shell's view: the signed catalogue built into QOR OS (qrc).
         QTemporaryDir data;
-        qputenv("QTOS_STORE_DIR", data.path().toUtf8());
-        qunsetenv("QTOS_STORE_URL");
+        qputenv("QOR_STORE_DIR", data.path().toUtf8());
+        qunsetenv("QOR_STORE_URL");
         Store store;
         QTRY_VERIFY(store.isReady());
         QCOMPARE(store.items().size(), 14);
-        QVariantMap ember = store.item(u"org.qtos.theme.ember"_s);
+        QVariantMap ember = store.item(u"dev.qorsync.theme.ember"_s);
         QCOMPARE(ember.value(u"developerName"_s).toString(), u"QOR-MATRIX"_s);
         QVERIFY(ember.value(u"verified"_s).toBool());
         QVERIFY(!ember.value(u"installed"_s).toBool());
         QCOMPARE(ember.value(u"preview"_s).toMap().value(u"accentHue"_s).toDouble(), 38.0);
 
         QSignalSpy finished(&store, &Store::finished);
-        QVERIFY(store.install(u"org.qtos.theme.ember"_s));
-        QVERIFY(store.install(u"org.qtos.widget.clock"_s));
+        QVERIFY(store.install(u"dev.qorsync.theme.ember"_s));
+        QVERIFY(store.install(u"dev.qorsync.widget.clock"_s));
         QTRY_COMPARE(finished.count(), 2);
-        QVERIFY(store.item(u"org.qtos.theme.ember"_s).value(u"installed"_s).toBool());
-        const QVariantMap theme = store.theme(u"org.qtos.theme.ember"_s);
+        QVERIFY(store.item(u"dev.qorsync.theme.ember"_s).value(u"installed"_s).toBool());
+        const QVariantMap theme = store.theme(u"dev.qorsync.theme.ember"_s);
         QCOMPARE(theme.value(u"neutralHue"_s).toDouble(), 40.0);
         QCOMPARE(theme.value(u"appearance"_s).toString(), u"dark"_s);
-        const QVariantMap clock = store.widget(u"org.qtos.widget.clock"_s);
+        const QVariantMap clock = store.widget(u"dev.qorsync.widget.clock"_s);
         QCOMPARE(clock.value(u"size"_s).toString(), u"medium"_s);
         QVERIFY(QFile::exists(clock.value(u"source"_s).toUrl().toLocalFile()));
         QCOMPARE(store.library().size(), 2);
@@ -276,11 +276,11 @@ private Q_SLOTS:
 
         const QVariantList warm = store.search(u"warm"_s);
         QVERIFY(std::any_of(warm.cbegin(), warm.cend(), [](const QVariant &item) {
-            return item.toMap().value(u"id"_s) == u"org.qtos.theme.ember"_s;
+            return item.toMap().value(u"id"_s) == u"dev.qorsync.theme.ember"_s;
         }));
         QCOMPARE(store.search(QString(), u"widget"_s).size(), 6);
-        QVERIFY(store.remove(u"org.qtos.widget.clock"_s));
-        QVERIFY(store.widget(u"org.qtos.widget.clock"_s).isEmpty());
+        QVERIFY(store.remove(u"dev.qorsync.widget.clock"_s));
+        QVERIFY(store.widget(u"dev.qorsync.widget.clock"_s).isEmpty());
     }
 };
 

@@ -4,7 +4,7 @@
 Reads ``kit/tokens/lumen.tokens.json`` (the single source of truth for the
 Lumen design language) and generates:
 
-* ``kit/Tokens.qml``                  – a typed QML singleton consumed by QTOS.Kit
+* ``kit/Tokens.qml``                  – a typed QML singleton consumed by QOR.Kit
 * ``platform/common/lumentokens.h``  – C++ constants for the QStyle / platform theme
 * ``docs/design/tokens.md``           – the human-readable token reference
 
@@ -135,7 +135,7 @@ def qml_list(values: list[float]) -> str:
 def emit_qml(tokens: dict) -> str:
     color = tokens["color"]
     roles = color["roles"]
-    spdx = "// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary\n"
+    spdx = "// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary\n"
     out: list[str] = [HEADER + spdx, "pragma Singleton", "import QtQml", "", "QtObject {"]
 
     def line(text: str = "", indent: int = 1) -> None:
@@ -231,7 +231,7 @@ def emit_cpp(tokens: dict) -> str:
     color = tokens["color"]
     lines = [
         HEADER.rstrip("\n"),
-        "// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary",
+        "// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary",
         "#pragma once",
         "",
         "// Lumen tokens for C++ consumers (Qt Widgets style, QPA platform theme).",
@@ -239,7 +239,7 @@ def emit_cpp(tokens: dict) -> str:
         "// followAccent is true. The high-contrast values equal the standard ones",
         "// for roles that do not change under Increase Contrast; maxLuminance is 1",
         "// for roles without a luminance cap.",
-        "namespace qtos::lumen {",
+        "namespace qor::lumen {",
         "",
         "struct Oklch { double l, c, h, a; };",
         "struct ColorRole",
@@ -277,7 +277,7 @@ def emit_cpp(tokens: dict) -> str:
         const = "kType" + name[0].upper() + name[1:]
         lines.append(f"inline constexpr int {const}Size = {style['size']};")
         lines.append(f"inline constexpr int {const}Weight = {style['weight']};")
-    lines += ["", "} // namespace qtos::lumen", ""]
+    lines += ["", "} // namespace qor::lumen", ""]
     return "\n".join(lines)
 
 

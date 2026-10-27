@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
 #include "catalog.h"
@@ -16,9 +16,9 @@ class QNetworkAccessManager;
 class QNetworkReply;
 QT_END_NAMESPACE
 
-namespace qtos::store {
+namespace qor::store {
 
-// The QTOS Store client for one user: fetches the signed catalogue, and
+// The QOR OS Store client for one user: fetches the signed catalogue, and
 // downloads, verifies, installs, updates and removes packages under
 // `dataDir` (items/<id>/ and installed.json).
 //
@@ -96,4 +96,4 @@ private:
     int m_generation = 0;
 };
 
-} // namespace qtos::store
+} // namespace qor::store

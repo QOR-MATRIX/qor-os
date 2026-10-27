@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Unattended install of the commercial Qt used by QTOS CI.
+"""Unattended install of the commercial Qt used by QOR OS CI.
 
 Installs the kit and add-ons listed in .github/qt-packages.json for the
 requested platform with the Qt Online Installer (or, when the root already has
@@ -115,7 +115,7 @@ def main() -> int:
     github_env = os.environ.get("GITHUB_ENV")
     if github_env:
         with open(github_env, "a", encoding="utf-8") as handle:
-            handle.write(f"QTOS_QT_DIR={kit}\n")
+            handle.write(f"QOR_QT_DIR={kit}\n")
     return 0
 
 

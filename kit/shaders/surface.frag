@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 //
 // Lumen Surface: one pass renders a continuous-curvature ("squircle") shape
 // with a vertical fill gradient, an inner hairline stroke with a specular

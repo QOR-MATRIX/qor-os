@@ -1,6 +1,6 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 import QtQuick
-import QTOS.Kit
+import QOR.Kit
 
 // App sidebar in Lumen Frost: the desktop wallpaper, blurred and tinted,
 // showing through the window. Children stack vertically below the title bar.

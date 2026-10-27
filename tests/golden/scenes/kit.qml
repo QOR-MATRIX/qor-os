@@ -1,9 +1,9 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 import QtQuick
 import QtQuick.Layouts
-import QTOS.Kit
+import QOR.Kit
 
-// Golden scene: QTOS.Kit building blocks on an opaque background.
+// Golden scene: QOR.Kit building blocks on an opaque background.
 Rectangle {
     property bool rtl: false
 
@@ -46,7 +46,7 @@ Rectangle {
 
             RowLayout {
                 spacing: 12
-                QtosMark { size: 28 }
+                QorMark { size: 28 }
                 AppIcon { glyph: "folder"; hue: 230; size: 40 }
                 AppIcon { glyph: "music"; hue: 0; size: 40 }
                 AppIcon { glyph: "notebook-pen"; hue: 85; size: 40 }

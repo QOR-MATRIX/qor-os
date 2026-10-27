@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "oklch.h"
 
 #include <algorithm>
@@ -7,7 +7,7 @@
 
 using namespace Qt::StringLiterals;
 
-namespace qtos {
+namespace qor {
 
 namespace {
 
@@ -92,4 +92,4 @@ QColor Oklch::alpha(const QColor &c, double alpha) const
     return out;
 }
 
-} // namespace qtos
+} // namespace qor

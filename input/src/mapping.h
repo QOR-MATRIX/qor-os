@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
 #include "gamepad.h"
@@ -9,9 +9,9 @@
 #include <optional>
 
 // Translations from each platform's controller vocabulary to the standard
-// QTOS layout. Free of platform headers so every mapping is unit tested on
+// QOR OS layout. Free of platform headers so every mapping is unit tested on
 // every platform.
-namespace qtos::input {
+namespace qor::input {
 
 // ── XInput (Windows) ─────────────────────────────────────────────────────────
 
@@ -95,4 +95,4 @@ struct GenericHidReport
 // Start, sticks).
 GamepadState mapGenericHid(const GenericHidReport &report);
 
-} // namespace qtos::input
+} // namespace qor::input

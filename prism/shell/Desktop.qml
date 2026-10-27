@@ -1,13 +1,13 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Controls
-import QTOS.Kit
-import QTOS.Services
-import QTOS.Apps
-import QTOS.Input
-import QTOS.Store
+import QOR.Kit
+import QOR.Services
+import QOR.Apps
+import QOR.Input
+import QOR.Store
 
 // The Prism desktop for one output.
 //
@@ -35,20 +35,20 @@ FocusScope {
     readonly property real railHeight: 34
     readonly property rect workArea: Qt.rect(10, railHeight + 18, width - 20, height - railHeight - 18 - 96)
 
-    // ── Appearance follows qtos-settingsd ───────────────────────────────────
+    // ── Appearance follows qor-settingsd ───────────────────────────────────
     Binding { target: Theme; property: "dark"; value: Services.settings.darkMode }
     Binding { target: Theme; property: "accentHue"; value: Services.settings.accentHue }
     Binding { target: Theme; property: "reduceMotion"; value: Services.settings.reduceMotion }
     Binding { target: Theme; property: "reduceTransparency"; value: Services.settings.reduceTransparency }
     Binding { target: Theme; property: "increaseContrast"; value: Services.settings.increaseContrast }
     Binding { target: Theme; property: "livingWallpaper"; value: Services.settings.livingWallpaper }
-    // The theme's tint and wallpaper (QTOS.Store Themes).
+    // The theme's tint and wallpaper (QOR.Store Themes).
     Binding { target: Theme; property: "neutralHue"; value: Themes.active.neutralHue }
     Binding { target: Theme; property: "neutralTint"; value: Themes.active.neutralTint }
     Binding { target: Theme; property: "wallpaperSeed"; value: Themes.active.wallpaperSeed }
     Binding { target: Theme; property: "wallpaperIntensity"; value: Themes.active.wallpaperIntensity }
 
-    // ── Interface sounds follow qtos-audiod ─────────────────────────────────
+    // ── Interface sounds follow qor-audiod ─────────────────────────────────
     Binding {
         target: Sounds
         property: "enabled"
@@ -462,7 +462,7 @@ FocusScope {
         case "reactive.toggle": settings.audioReactive = !settings.audioReactive; break;
         case "notify.test":
             Services.notifications.notify("system", qsTr("Hello from Beam"),
-                                          qsTr("Notifications travel over Qt Remote Objects from qtos-notifyd."),
+                                          qsTr("Notifications travel over Qt Remote Objects from qor-notifyd."),
                                           "bell-ring");
             break;
         case "space.go": switchSpace(args.index); break;

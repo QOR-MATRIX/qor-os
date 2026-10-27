@@ -1,64 +1,64 @@
-# Prism — the QTOS shell and compositor.
+# Prism — the QOR OS shell and compositor.
 #
-#   shell/       QTOS.Shell QML module (Rail, Shelf, Beam, Spaces, windows …)
-#   host/        qtos-shell: runs the shell in a desktop window with simulated
+#   shell/       QOR.Shell QML module (Rail, Shelf, Beam, Spaces, windows …)
+#   host/        qor-shell: runs the shell in a desktop window with simulated
 #                services (Windows, macOS, Linux)
 #   compositor/  prism: the Wayland compositor that hosts the same shell on
 #                device (Linux only, Qt Wayland Compositor)
 
 add_subdirectory(shell)
 
-qt_add_executable(qtos-shell WIN32 MACOSX_BUNDLE
+qt_add_executable(qor-shell WIN32 MACOSX_BUNDLE
     host/main.cpp
     host/gpupreference.h host/gpupreference.cpp
 )
 
 if(WIN32)
-    target_link_libraries(qtos-shell PRIVATE dxgi)
+    target_link_libraries(qor-shell PRIVATE dxgi)
 endif()
 
-target_link_libraries(qtos-shell PRIVATE
+target_link_libraries(qor-shell PRIVATE
     Qt6::Gui
     Qt6::Quick
     Qt6::QuickControls2
-    qtos_kit
-    qtos_services
-    qtos_kitplugin
-    qtos_lumen_styleplugin
-    qtos_servicesplugin
-    qtos_appsplugin
-    qtos_inputplugin
-    qtos_storeplugin
-    qtos_shell
-    qtos_shellplugin
-    qtos_sim
-    qtos::compiler_settings
+    qor_kit
+    qor_services
+    qor_kitplugin
+    qor_lumen_styleplugin
+    qor_servicesplugin
+    qor_appsplugin
+    qor_inputplugin
+    qor_storeplugin
+    qor_shell
+    qor_shellplugin
+    qor_sim
+    qor::compiler_settings
 )
 
-set_target_properties(qtos-shell PROPERTIES
-    OUTPUT_NAME qtos-shell
+set_target_properties(qor-shell PROPERTIES
+    OUTPUT_NAME qor-shell
     # The QML modules are static and embedded, so tell the deployment import
     # scanner where their sources live; otherwise it only scans prism/ and
     # misses imports such as QtCore (Notes) and QtGraphs (Monitor).
     QT_QML_IMPORT_SCANNER_EXTRA_ROOT_PATHS
         "${CMAKE_SOURCE_DIR}/kit;${CMAKE_SOURCE_DIR}/apps;${CMAKE_SOURCE_DIR}/services;${CMAKE_SOURCE_DIR}/store"
-    MACOSX_BUNDLE_GUI_IDENTIFIER dev.qor-matrix.qtos.shell
+    MACOSX_BUNDLE_GUI_IDENTIFIER dev.qor-matrix.qor.shell
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
 )
 
-install(TARGETS qtos-shell
+install(TARGETS qor-shell
     BUNDLE DESTINATION .
     RUNTIME DESTINATION bin
 )
 
 qt_generate_deploy_qml_app_script(
-    TARGET qtos-shell
-    OUTPUT_SCRIPT _qtos_shell_deploy
+    TARGET qor-shell
+    OUTPUT_SCRIPT _qor_shell_deploy
     NO_UNSUPPORTED_PLATFORM_ERROR
 )
-install(SCRIPT ${_qtos_shell_deploy})
+install(SCRIPT ${_qor_shell_deploy})
 
-if(QTOS_BUILD_COMPOSITOR)
+if(QOR_BUILD_COMPOSITOR)
     add_subdirectory(compositor)
 endif()

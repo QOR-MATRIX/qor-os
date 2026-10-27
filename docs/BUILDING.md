@@ -50,8 +50,8 @@ Recommended for upcoming phases (see [QT-MODULES.md](QT-MODULES.md)): Qt Quick
 Timeline, Qt Lottie, Qt Virtual Keyboard, Qt WebEngine, Qt Positioning, Qt
 TextToSpeech.
 
-`cmake/QtosLocateQt.cmake` finds Qt automatically, in this order:
-`Qt6_DIR`/`CMAKE_PREFIX_PATH` from your IDE kit, the `QTOS_QT_DIR`
+`cmake/QorLocateQt.cmake` finds Qt automatically, in this order:
+`Qt6_DIR`/`CMAKE_PREFIX_PATH` from your IDE kit, the `QOR_QT_DIR`
 environment variable, then `C:\Qt\6.12.0\msvc2022_64`.
 
 ### Linux
@@ -102,16 +102,16 @@ ctest --test-dir ~/qor-build/linux-release        # GPU suites run on WSLg too
 ```
 
 On Linux the executables sit in their target directories, for example
-`prism/qtos-shell`, `prism/compositor/prism` and `platform/lumen-widgets-gallery`.
+`prism/qor-shell`, `prism/compositor/prism` and `platform/lumen-widgets-gallery`.
 
 ## 2. Configure and build
 
-The Ninja presets need the MSVC environment. `tools\dev\Enter-QtosShell.ps1`
+The Ninja presets need the MSVC environment. `tools\dev\Enter-QorShell.ps1`
 loads it (via `vswhere` and `vcvars64.bat`) together with Qt's `bin`, CMake and
 Ninja:
 
 ```powershell
-. .\tools\dev\Enter-QtosShell.ps1          # dot-source once per terminal
+. .\tools\dev\Enter-QorShell.ps1          # dot-source once per terminal
 cmake --preset windows-release
 cmake --build --preset windows-release
 ctest --preset windows-release
@@ -131,12 +131,12 @@ Build options (`-D<option>=ON|OFF`):
 
 | Option | Default | Effect |
 |--------|---------|--------|
-| `QTOS_BUILD_TESTS` | ON | Tests in `tests/` |
-| `QTOS_BUILD_TOOLS` | ON | `qtosctl`, `qtos-simd` |
-| `QTOS_BUILD_PLATFORM` | ON | QStyle plugin, platform theme, widgets gallery |
-| `QTOS_BUILD_COMPOSITOR` | ON on Linux | `prism` (skipped with a warning if Qt Wayland Compositor is missing) |
-| `QTOS_WARNINGS_AS_ERRORS` | OFF | `/WX` or `-Werror` |
-| `QTOS_QT_PINNED_VERSION` | 6.12.0 | Version used by Qt auto-location |
+| `QOR_BUILD_TESTS` | ON | Tests in `tests/` |
+| `QOR_BUILD_TOOLS` | ON | `qorctl`, `qor-simd` |
+| `QOR_BUILD_PLATFORM` | ON | QStyle plugin, platform theme, widgets gallery |
+| `QOR_BUILD_COMPOSITOR` | ON on Linux | `prism` (skipped with a warning if Qt Wayland Compositor is missing) |
+| `QOR_WARNINGS_AS_ERRORS` | OFF | `/WX` or `-Werror` |
+| `QOR_QT_PINNED_VERSION` | 6.12.0 | Version used by Qt auto-location |
 | `QOR_BUILD_CORE` | ON where `cargo` is found | The QOR core and `tst_qorcore` ([UPSTREAM.md](UPSTREAM.md)) |
 | `QOR_CORE_SOURCE_DIR` | empty | A local demiurge-chain checkout to build the core from instead: to change the core and QOR OS together, or to try a commit before the pin moves to it |
 
@@ -165,10 +165,10 @@ modules in `build/<preset>/qml/`, plugins in `build/<preset>/plugins/`.
 ## 3. Run
 
 ```powershell
-.\tools\dev\run.ps1 [-Preset windows-release] -- <qtos-shell options>
+.\tools\dev\run.ps1 [-Preset windows-release] -- <qor-shell options>
 ```
 
-`qtos-shell` options:
+`qor-shell` options:
 
 | Option | Description |
 |--------|-------------|
@@ -182,7 +182,7 @@ modules in `build/<preset>/qml/`, plugins in `build/<preset>/plugins/`.
 | `--contrast standard\|high` | Force Increase Contrast off or on |
 | `--size WxH` | Window size in logical pixels (clamped to the screen) |
 | `--fullscreen` | Start full screen (<kbd>F11</kbd> toggles) |
-| `--services embedded\|external` | Host the simulator in-process (default) or connect to `qtos-simd` |
+| `--services embedded\|external` | Host the simulator in-process (default) or connect to `qor-simd` |
 | `--services-url <url>` | Services endpoint |
 | `--scenario <file>` | Simulation scenario JSON (default: built-in `sim/scenarios/default.json`) |
 | `--ephemeral` | Do not persist preferences (implied by `--screenshot` and `--benchmark`) |
@@ -193,11 +193,11 @@ modules in `build/<preset>/qml/`, plugins in `build/<preset>/plugins/`.
 
 `--screenshot`, `--benchmark` and `--script` render audio silently (the
 engine's null output; see [AUDIO.md](AUDIO.md)), see only virtual game
-controllers (`QTOS_GAMEPADS=virtual`; see [CONTROLLERS.md](CONTROLLERS.md)),
-leave the touchpad alone (`QTOS_TOUCHPAD=off`; see
+controllers (`QOR_GAMEPADS=virtual`; see [CONTROLLERS.md](CONTROLLERS.md)),
+leave the touchpad alone (`QOR_TOUCHPAD=off`; see
 [SHELL.md](design/SHELL.md#gestures)), and install from the Store into a
-temporary folder (`QTOS_STORE_DIR`; see [STORE.md](STORE.md)).
-`QTOS_STORE_URL` points the Store at another signed catalogue.
+temporary folder (`QOR_STORE_DIR`; see [STORE.md](STORE.md)).
+`QOR_STORE_URL` points the Store at another signed catalogue.
 
 Persistent preferences (appearance, accent, motion, transparency, living
 wallpaper, audio and the audio-reactive interface) are stored with `QSettings`
@@ -206,9 +206,9 @@ under `QOR-MATRIX/QTOS Shell` and Notes under the `notes` category.
 ### Separate service process
 
 ```powershell
-.\build\windows-release\qtos-simd.exe --ephemeral            # terminal 1
+.\build\windows-release\qor-simd.exe --ephemeral            # terminal 1
 .\tools\dev\run.ps1 -- --services external --unlocked       # terminal 2
-.\build\windows-release\qtosctl.exe watch                    # terminal 3
+.\build\windows-release\qorctl.exe watch                    # terminal 3
 ```
 
 ### Prism, the Wayland compositor (Linux)
@@ -217,10 +217,10 @@ under `QOR-MATRIX/QTOS Shell` and Notes under the `notes` category.
 inside any Wayland or X11 session, including WSLg:
 
 ```bash
-B=~/qtos-build/linux-release
-$B/prism/compositor/prism --unlocked --socket wayland-qtos &
-WAYLAND_DISPLAY=wayland-qtos weston-terminal &                  # client-side decorations
-WAYLAND_DISPLAY=wayland-qtos QT_QPA_PLATFORM=wayland \
+B=~/qor-build/linux-release
+$B/prism/compositor/prism --unlocked --socket wayland-qor &
+WAYLAND_DISPLAY=wayland-qor weston-terminal &                  # client-side decorations
+WAYLAND_DISPLAY=wayland-qor QT_QPA_PLATFORM=wayland \
   $B/platform/lumen-widgets-gallery &                           # Qt app, Prism decorations
 ```
 
@@ -233,7 +233,7 @@ WAYLAND_DISPLAY=wayland-qtos QT_QPA_PLATFORM=wayland \
 | `--size WxH` | Output window size |
 | `--outputs N` | Drive N outputs (up to 4), side by side, each a window of `--size`. On bare metal (`QT_QPA_PLATFORM=eglfs`) every connected screen is an output instead |
 | `--spread-clients` | Open each new client on the output with the fewest windows |
-| `--services embedded\|external` | As for `qtos-shell` |
+| `--services embedded\|external` | As for `qor-shell` |
 | `--screenshot <file> [--delay ms]` | Save the output and exit (used for automated checks) |
 | `--benchmark <seconds> [--benchmark-out file]` | Shell tour plus input latency; per-output JSON report, then exit ([PERFORMANCE.md](PERFORMANCE.md)) |
 
@@ -277,8 +277,8 @@ which calls `windeployqt` on Windows) to produce a self-contained folder with
 the required Qt libraries, plugins and QML modules. The result runs on a
 machine without Qt installed (verified with an empty `PATH`).
 
-Because the QTOS QML modules are static and embedded in the executable,
-`qtos-shell` sets `QT_QML_IMPORT_SCANNER_EXTRA_ROOT_PATHS` to `kit/`, `apps/`
+Because the QOR OS QML modules are static and embedded in the executable,
+`qor-shell` sets `QT_QML_IMPORT_SCANNER_EXTRA_ROOT_PATHS` to `kit/`, `apps/`
 and `services/` so the deployment scan finds their imports (for example
 `QtCore` and `QtGraphs`). Add new module directories there.
 
@@ -314,14 +314,14 @@ running them inside Prism, are Phase 1.
 
 | Symptom | Fix |
 |---------|-----|
-| `Cannot open include file: 'rep_…_replica.h'` | Reconfigure; generated headers live in the build tree (`services/`, `tools/qtosctl/`) |
-| Configure can't find Qt | Set `QTOS_QT_DIR` to the kit (`C:\Qt\6.12.0\msvc2022_64`) or pass `-DCMAKE_PREFIX_PATH=…` |
-| `cl` not found with Ninja presets | Dot-source `tools\dev\Enter-QtosShell.ps1`, or use the `windows-vs` preset |
-| No console output from `qtos-shell` | It is a GUI-subsystem app. Set `QT_FORCE_STDERR_LOGGING=1` and redirect stderr. Use `QT_LOGGING_RULES="qtos.*=true"` for QTOS categories |
+| `Cannot open include file: 'rep_…_replica.h'` | Reconfigure; generated headers live in the build tree (`services/`, `tools/qorctl/`) |
+| Configure can't find Qt | Set `QOR_QT_DIR` to the kit (`C:\Qt\6.12.0\msvc2022_64`) or pass `-DCMAKE_PREFIX_PATH=…` |
+| `cl` not found with Ninja presets | Dot-source `tools\dev\Enter-QorShell.ps1`, or use the `windows-vs` preset |
+| No console output from `qor-shell` | It is a GUI-subsystem app. Set `QT_FORCE_STDERR_LOGGING=1` and redirect stderr. Use `QT_LOGGING_RULES="qor.*=true"` for QOR OS categories |
 | Test output missing in `ctest` | Tests set `QT_FORCE_STDERR_LOGGING=1`; run the binary with `-o -,txt` to see QtTest output directly |
 | Low frame rate on a laptop | Check the log line `GPU: …`. Use `--gpu high-performance`, or force an adapter with `QT_D3D_ADAPTER_INDEX` (`QSG_INFO=1` lists adapters) |
 | Shader or graphics issues | `QSG_INFO=1` prints the RHI backend and adapter; `QSG_RHI_BACKEND=vulkan\|opengl\|d3d12` switches backends |
-| Services did not initialise in time | Another QTOS instance holds `local:qtos-services`. The host falls back to a PID-suffixed endpoint; pass `--services-url` to `qtosctl` |
+| Services did not initialise in time | Another QOR OS instance holds `local:qor-services`. The host falls back to a PID-suffixed endpoint; pass `--services-url` to `qorctl` |
 | `QOR core: No QOR core at …` or Corrosion cannot find `cargo` | Install Rust from rustup (1.91+), open a new terminal, and reconfigure; or turn the core off with `-DQOR_BUILD_CORE=OFF` |
 | The core's configure cannot fetch demiurge-chain | It needs network access to GitHub once per build tree; or point `QOR_CORE_SOURCE_DIR` at a local checkout |
 | A carried product's suite fails on a busy desktop | Leave the desktop alone while the suites run, or run `products.ps1` again; a failure that repeats is real |

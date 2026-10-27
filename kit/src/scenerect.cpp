@@ -1,10 +1,10 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "scenerect.h"
 
 #include <QtQuick/QQuickItem>
 #include <QtQuick/QQuickWindow>
 
-namespace qtos {
+namespace qor {
 
 SceneRect::SceneRect(QObject *parent) : QObject(parent) { }
 
@@ -58,4 +58,4 @@ void SceneRect::refresh()
     Q_EMIT rectChanged();
 }
 
-} // namespace qtos
+} // namespace qor

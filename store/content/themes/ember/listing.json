@@ -1,8 +1,8 @@
 {
-  "id": "org.qtos.theme.ember",
+  "id": "dev.qorsync.theme.ember",
   "name": "Ember",
   "version": "1.0.0",
-  "developer": "org.qtos",
+  "developer": "dev.qorsync",
   "summary": "Warm charcoal and glowing coals.",
   "description": "Ember turns the neutrals a warm charcoal and the accent to the orange of a banked fire. The Aurora wallpaper burns low and amber behind your windows. Made for long evenings.",
   "whatsNew": "First release.",

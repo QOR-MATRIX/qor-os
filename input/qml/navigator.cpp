@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "navigator.h"
 
 #include "gamepadmanager.h"
@@ -14,7 +14,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace qtos::input {
+namespace qor::input {
 
 namespace {
 
@@ -481,4 +481,4 @@ void ControllerNavigator::feedback(qreal strength, int milliseconds)
         GamepadManager::instance()->rumble(float(strength), float(strength * 0.7), milliseconds);
 }
 
-} // namespace qtos::input
+} // namespace qor::input

@@ -1,6 +1,6 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 import QtQuick
-import QTOS.Kit
+import QOR.Kit
 
 // The Lumen base shape. A single shader draws the continuous-curvature fill,
 // optional vertical gradient, inner hairline with specular falloff, inner top

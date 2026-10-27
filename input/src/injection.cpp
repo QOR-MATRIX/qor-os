@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "injection.h"
 
 #include "keycodes.h"
@@ -8,7 +8,7 @@
 
 #include <iterator>
 
-namespace qtos::input {
+namespace qor::input {
 
 namespace {
 
@@ -74,4 +74,4 @@ bool sendKeyStroke(QWindow *window, ulong timestamp, int key, Qt::KeyboardModifi
     return accepted;
 }
 
-} // namespace qtos::input
+} // namespace qor::input

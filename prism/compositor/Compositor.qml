@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 pragma ComponentBehavior: Bound
 // Qt Wayland Compositor declares XdgShell, XdgDecorationManagerV1 and the
 // text-input managers through C++ templates (QWaylandShellTemplate<T>) that
@@ -9,9 +9,9 @@ import QtQuick
 import QtWayland.Compositor
 import QtWayland.Compositor.XdgShell
 import QtWayland.Compositor.PresentationTime
-import QTOS.Shell
+import QOR.Shell
 
-// Prism: the QTOS Wayland compositor. The shell and every client window share
+// Prism: the QOR OS Wayland compositor. The shell and every client window share
 // one Qt Quick scene graph — client surfaces are ShellSurfaceItems inside the
 // same AppWindow frames the simulator uses, so Lumen materials, springs and
 // Overview apply to real apps unchanged.
@@ -53,7 +53,7 @@ WaylandCompositor {
             width: prism.outputs[0].width
             height: prism.outputs[0].height
             color: "black"
-            title: qsTr("QTOS · Prism")
+            title: qsTr("QOR OS · Prism")
             Component.onCompleted: prism.show(outputWindow, prism.outputs[0])
 
             Desktop {
@@ -82,7 +82,7 @@ WaylandCompositor {
                 width: extra.spec.width
                 height: extra.spec.height
                 color: "black"
-                title: qsTr("QTOS · Prism · Display %1").arg(extra.index + 2)
+                title: qsTr("QOR OS · Prism · Display %1").arg(extra.index + 2)
                 Component.onCompleted: prism.show(displayWindow, extra.spec)
 
                 DisplayDesktop {

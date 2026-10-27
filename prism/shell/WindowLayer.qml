@@ -1,10 +1,10 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QTOS.Kit
-import QTOS.Services
-import QTOS.Apps
+import QOR.Kit
+import QOR.Services
+import QOR.Apps
 
 // Window management for one output: stacking, focus, Spaces, Overview layout
 // and magnetic snapping. Windows of every Space live on one horizontal strip

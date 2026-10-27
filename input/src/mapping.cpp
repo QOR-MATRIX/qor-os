@@ -1,9 +1,9 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "mapping.h"
 
 #include <algorithm>
 
-namespace qtos::input {
+namespace qor::input {
 
 // ── XInput ──────────────────────────────────────────────────────────────────
 
@@ -27,7 +27,7 @@ GamepadState mapXInput(const XInputPad &pad)
     state.set(Button::West, has(0x4000));
     state.set(Button::North, has(0x8000));
 
-    // XInput's Y axes point up; the QTOS layout's point down, like the screen.
+    // XInput's Y axes point up; the QOR OS layout's point down, like the screen.
     const auto thumb = [](qint16 v) { return std::max(-1.0f, float(v) / 32767.0f); };
     state.axis(Axis::LeftX) = thumb(pad.thumbLX);
     state.axis(Axis::LeftY) = -thumb(pad.thumbLY);
@@ -219,4 +219,4 @@ GamepadState mapGenericHid(const GenericHidReport &report)
     return state;
 }
 
-} // namespace qtos::input
+} // namespace qor::input

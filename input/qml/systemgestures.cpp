@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "systemgestures.h"
 
 #include <QtCore/QCoreApplication>
@@ -14,7 +14,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace qtos::input {
+namespace qor::input {
 
 namespace {
 
@@ -313,4 +313,4 @@ void SystemGestures::reset()
         Q_EMIT activeChanged();
 }
 
-} // namespace qtos::input
+} // namespace qor::input

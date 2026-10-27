@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "simdevices.h"
 
 #include "dsp.h"
@@ -13,9 +13,9 @@
 
 using namespace Qt::StringLiterals;
 
-Q_LOGGING_CATEGORY(lcSimDevices, "qtos.sim.devices")
+Q_LOGGING_CATEGORY(lcSimDevices, "qor.sim.devices")
 
-namespace qtos::sim {
+namespace qor::sim {
 
 // ── Network ──────────────────────────────────────────────────────────────────
 
@@ -386,4 +386,4 @@ void SimAudio::save()
     store.endGroup();
 }
 
-} // namespace qtos::sim
+} // namespace qor::sim

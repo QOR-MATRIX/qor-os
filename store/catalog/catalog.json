@@ -1,19 +1,19 @@
 {
   "format": 1,
-  "store": "QTOS Store",
+  "store": "QOR OS Store",
   "developers": {
-    "org.qtos": {
+    "dev.qorsync": {
       "name": "QOR-MATRIX",
       "verified": true,
-      "key": "BJrFrnnjUKfOotSjCJNrdaCWkgnWO0Mgsf5hrnjDZgIC+xrevcXrEKR7pp7OCAEr2l9F223A6sihwx6SCe0ppvE="
+      "key": "BBzrhzwaYUfZrGIu4f0QMRRQ1tqkmN3gg8BZ5A/9uORiUWL4DVaGXebeT7jr+FiwlaFQnTKkYahg5zrOW8jKxh4="
     }
   },
   "items": [
     {
-      "id": "org.qtos.theme.dusk",
+      "id": "dev.qorsync.theme.dusk",
       "kind": "theme",
       "name": "Dusk",
-      "developer": "org.qtos",
+      "developer": "dev.qorsync",
       "version": "1.0.0",
       "summary": "Violet twilight with a magenta glow.",
       "description": "Dusk is the half hour after sunset: plum surfaces, a vivid magenta accent and a wallpaper that glows a little brighter than the rest.",
@@ -35,16 +35,16 @@
         "wallpaperIntensity": 1.25
       },
       "package": {
-        "file": "packages/org.qtos.theme.dusk-1.0.0.qtospkg",
-        "size": 807,
-        "sha256": "9384685ee807b9a5e4c9e9217237dcc7fa6863359ab64d1f01806a89c4df4db2"
+        "file": "packages/dev.qorsync.theme.dusk-1.0.0.qorpkg",
+        "size": 813,
+        "sha256": "dee9d8df9d3081389f5e0d0e45e12077085b16daf1257a531a45bc8db6371bf5"
       }
     },
     {
-      "id": "org.qtos.theme.ember",
+      "id": "dev.qorsync.theme.ember",
       "kind": "theme",
       "name": "Ember",
-      "developer": "org.qtos",
+      "developer": "dev.qorsync",
       "version": "1.0.0",
       "summary": "Warm charcoal and glowing coals.",
       "description": "Ember turns the neutrals a warm charcoal and the accent to the orange of a banked fire. The Aurora wallpaper burns low and amber behind your windows. Made for long evenings.",
@@ -66,16 +66,16 @@
         "wallpaperIntensity": 1.15
       },
       "package": {
-        "file": "packages/org.qtos.theme.ember-1.0.0.qtospkg",
-        "size": 806,
-        "sha256": "6162620dbe1dc59d7689197e9c234591c0d68d650a362caa6ce5f2c5eab0004a"
+        "file": "packages/dev.qorsync.theme.ember-1.0.0.qorpkg",
+        "size": 812,
+        "sha256": "a55924ea63c7145a1586068a8a1e36fcccd34083ba4dfe08dc14ccd6ea5b76d8"
       }
     },
     {
-      "id": "org.qtos.theme.glacier",
+      "id": "dev.qorsync.theme.glacier",
       "kind": "theme",
       "name": "Glacier",
-      "developer": "org.qtos",
+      "developer": "dev.qorsync",
       "version": "1.0.0",
       "summary": "Ice blue in clear daylight.",
       "description": "Glacier is a crisp light theme: blue-white surfaces, an ice-blue accent and a wallpaper like light through ice.",
@@ -97,16 +97,16 @@
         "wallpaperIntensity": 0.8
       },
       "package": {
-        "file": "packages/org.qtos.theme.glacier-1.0.0.qtospkg",
-        "size": 813,
-        "sha256": "6e6cfce56e52d7fb8a99302f5501022e8947e87bea0d445769fc15f8c446fee9"
+        "file": "packages/dev.qorsync.theme.glacier-1.0.0.qorpkg",
+        "size": 819,
+        "sha256": "0591d4afde4d687134a3670cd50d1e5290e87c3e9a7e2a5e5d3310fe5b95e114"
       }
     },
     {
-      "id": "org.qtos.theme.graphite",
+      "id": "dev.qorsync.theme.graphite",
       "kind": "theme",
       "name": "Graphite",
-      "developer": "org.qtos",
+      "developer": "dev.qorsync",
       "version": "1.0.0",
       "summary": "Near-monochrome, for focus.",
       "description": "Graphite takes the colour out of the neutrals and quiets the wallpaper, leaving a single blue accent for what matters.",
@@ -129,16 +129,16 @@
         "wallpaperIntensity": 0.6
       },
       "package": {
-        "file": "packages/org.qtos.theme.graphite-1.0.0.qtospkg",
-        "size": 814,
-        "sha256": "bc2b3c5a6f1180075b7438c69c130c2cb789df48d4847100efbd471bfe2304b8"
+        "file": "packages/dev.qorsync.theme.graphite-1.0.0.qorpkg",
+        "size": 820,
+        "sha256": "f132eb5c8941f71358356a461820b12c3e93dbe21df7b1ab3d498c9c5de9d8a9"
       }
     },
     {
-      "id": "org.qtos.theme.moss",
+      "id": "dev.qorsync.theme.moss",
       "kind": "theme",
       "name": "Moss",
-      "developer": "org.qtos",
+      "developer": "dev.qorsync",
       "version": "1.0.0",
       "summary": "Forest-floor greens, quiet and calm.",
       "description": "Moss brings a soft green accent and neutrals with a hint of leaf. The wallpaper moves like light through a canopy.",
@@ -160,16 +160,16 @@
         "wallpaperIntensity": 0.9
       },
       "package": {
-        "file": "packages/org.qtos.theme.moss-1.0.0.qtospkg",
-        "size": 805,
-        "sha256": "52cb813b5efda44440b766fe996147ec90f491edefcbf6002898fb79425ed355"
+        "file": "packages/dev.qorsync.theme.moss-1.0.0.qorpkg",
+        "size": 811,
+        "sha256": "4775e026f601ac3dcc055a058813aeda638da5afe05dbf7e6e02b611c14018ed"
       }
     },
     {
-      "id": "org.qtos.theme.paper",
+      "id": "dev.qorsync.theme.paper",
       "kind": "theme",
       "name": "Paper",
-      "developer": "org.qtos",
+      "developer": "dev.qorsync",
       "version": "1.0.0",
       "summary": "Warm paper and vermilion ink.",
       "description": "Paper is a light theme with the warmth of uncoated stock and an ink-red accent. The wallpaper fades back so documents come first.",
@@ -192,16 +192,16 @@
         "wallpaperIntensity": 0.55
       },
       "package": {
-        "file": "packages/org.qtos.theme.paper-1.0.0.qtospkg",
-        "size": 808,
-        "sha256": "f6b486c84a2010057a231bef866c7def1d8c213975e2294a8fa0966462f1a234"
+        "file": "packages/dev.qorsync.theme.paper-1.0.0.qorpkg",
+        "size": 814,
+        "sha256": "19cdb5c0c7a2375f77651a28f90c2452cc7be619d0c02804c92d9c1c3130d8f3"
       }
     },
     {
-      "id": "org.qtos.theme.saffron",
+      "id": "dev.qorsync.theme.saffron",
       "kind": "theme",
       "name": "Saffron",
-      "developer": "org.qtos",
+      "developer": "dev.qorsync",
       "version": "1.0.0",
       "summary": "Spice gold, bright and generous.",
       "description": "Saffron sets a golden accent over neutrals with the faintest warmth. It is cheerful in light appearance and rich in dark.",
@@ -223,16 +223,16 @@
         "wallpaperIntensity": 1.05
       },
       "package": {
-        "file": "packages/org.qtos.theme.saffron-1.0.0.qtospkg",
-        "size": 810,
-        "sha256": "632787bf58c08194b5337c6e54afd0b8bca323e961189c5092df25a5d049b86a"
+        "file": "packages/dev.qorsync.theme.saffron-1.0.0.qorpkg",
+        "size": 816,
+        "sha256": "280d8f7e6efa29f5f688881b5bc7cab0b338bbf590cd954f78e3e56216d3d3a9"
       }
     },
     {
-      "id": "org.qtos.theme.tidepool",
+      "id": "dev.qorsync.theme.tidepool",
       "kind": "theme",
       "name": "Tidepool",
-      "developer": "org.qtos",
+      "developer": "dev.qorsync",
       "version": "1.0.0",
       "summary": "Deep teal water over cool slate.",
       "description": "Tidepool tints every surface with the cool grey of wet slate and sets the accent to a clear teal. Works in light and dark.",
@@ -254,16 +254,16 @@
         "wallpaperIntensity": 1.0
       },
       "package": {
-        "file": "packages/org.qtos.theme.tidepool-1.0.0.qtospkg",
-        "size": 812,
-        "sha256": "dd60c0f842e923fecf2048ebfe3309d11adcd7b01bc43d6948d859ae043f7c19"
+        "file": "packages/dev.qorsync.theme.tidepool-1.0.0.qorpkg",
+        "size": 818,
+        "sha256": "6f8824585d775b30b81c8c8662ca66c01ab1268af20ffaf2c1c12e345101468b"
       }
     },
     {
-      "id": "org.qtos.widget.calendar",
+      "id": "dev.qorsync.widget.calendar",
       "kind": "widget",
       "name": "Calendar",
-      "developer": "org.qtos",
+      "developer": "dev.qorsync",
       "version": "1.0.0",
       "summary": "This month at a glance.",
       "description": "The whole month on your desktop, with today marked in your accent colour. Weeks start on your locale's first day.",
@@ -282,16 +282,16 @@
         "hue": 25
       },
       "package": {
-        "file": "packages/org.qtos.widget.calendar-1.0.0.qtospkg",
-        "size": 3919,
-        "sha256": "31e2527e9a49c349833501e56ab6eb869117b8ff297412ddfb4b2b4e6d6aaa1a"
+        "file": "packages/dev.qorsync.widget.calendar-1.0.0.qorpkg",
+        "size": 3926,
+        "sha256": "de27eb4ce624b6d30699730a8ee12f2c272f198d422b9860c1c6d394e93ec849"
       }
     },
     {
-      "id": "org.qtos.widget.clock",
+      "id": "dev.qorsync.widget.clock",
       "kind": "widget",
       "name": "Clock",
-      "developer": "org.qtos",
+      "developer": "dev.qorsync",
       "version": "1.0.0",
       "summary": "The time, large and light, with the date.",
       "description": "A calm desktop clock: the time in light Inter at display size, today's date beneath it, and the minute passing as a hairline in your accent colour. Follows your locale's 12- or 24-hour time.",
@@ -310,16 +310,16 @@
         "hue": 228
       },
       "package": {
-        "file": "packages/org.qtos.widget.clock-1.0.0.qtospkg",
-        "size": 2727,
-        "sha256": "29dbe90d1a69b86b8cb84c378af0cc9cf28a2af3d9bb1c957d2d8d39447fd68b"
+        "file": "packages/dev.qorsync.widget.clock-1.0.0.qorpkg",
+        "size": 2734,
+        "sha256": "21aa9b84c410a23de93eefc98b5d810965ddc0da5126d28b9f1d37a573c8e796"
       }
     },
     {
-      "id": "org.qtos.widget.focus",
+      "id": "dev.qorsync.widget.focus",
       "kind": "widget",
       "name": "Focus",
-      "developer": "org.qtos",
+      "developer": "dev.qorsync",
       "version": "1.0.0",
       "summary": "A 25-minute focus timer.",
       "description": "Tap to start a 25-minute focus session, tap again to pause, and press and hold to reset. The ring empties as the session runs.",
@@ -339,19 +339,19 @@
         "hue": 30
       },
       "package": {
-        "file": "packages/org.qtos.widget.focus-1.0.0.qtospkg",
-        "size": 3604,
-        "sha256": "35ab31c23bd1ee5c371aa4675e8a0ebd2321aa652ea0833d054f7a262c9987fb"
+        "file": "packages/dev.qorsync.widget.focus-1.0.0.qorpkg",
+        "size": 3611,
+        "sha256": "edf93e20557250bd9edbc529dc6e21c68ab33c693d5750aa0b1520f71c099baa"
       }
     },
     {
-      "id": "org.qtos.widget.now-playing",
+      "id": "dev.qorsync.widget.now-playing",
       "kind": "widget",
       "name": "Now Playing",
-      "developer": "org.qtos",
+      "developer": "dev.qorsync",
       "version": "1.0.0",
       "summary": "What's playing, with the controls at hand.",
-      "description": "Artwork, title and artist from QTOS Media, with previous, play and next and the track's progress. When nothing plays, one tap starts your queue.",
+      "description": "Artwork, title and artist of what's playing, with previous, play and next and the track's progress. When nothing plays, one tap starts your queue.",
       "whatsNew": "First release.",
       "released": "2026-10-26",
       "tags": [
@@ -368,16 +368,16 @@
         "hue": 355
       },
       "package": {
-        "file": "packages/org.qtos.widget.now-playing-1.0.0.qtospkg",
-        "size": 3649,
-        "sha256": "500d10e208c39458e5f6dbe486ee6b9ff77083a9810e8a3a6ec97a96bf48b5a9"
+        "file": "packages/dev.qorsync.widget.now-playing-1.0.0.qorpkg",
+        "size": 3655,
+        "sha256": "87f9bbd45d9b0363056819380a50905f9645f73c1558afb5b89f1f56e1220523"
       }
     },
     {
-      "id": "org.qtos.widget.system",
+      "id": "dev.qorsync.widget.system",
       "kind": "widget",
       "name": "System",
-      "developer": "org.qtos",
+      "developer": "dev.qorsync",
       "version": "1.0.0",
       "summary": "Battery and network in one glance.",
       "description": "A ring for the battery that turns green while charging and warns when low, with the Wi-Fi network beneath.",
@@ -397,19 +397,19 @@
         "hue": 150
       },
       "package": {
-        "file": "packages/org.qtos.widget.system-1.0.0.qtospkg",
-        "size": 3955,
-        "sha256": "4eea40906d57fe82e33eef586c2a1b71f72323f0871229d5258b81de1b7c0a5d"
+        "file": "packages/dev.qorsync.widget.system-1.0.0.qorpkg",
+        "size": 3961,
+        "sha256": "eec7ae3dd603b6bb3cae94a23bf97ef859c5eda2226af5df2da56c9dedc8ece9"
       }
     },
     {
-      "id": "org.qtos.widget.visualizer",
+      "id": "dev.qorsync.widget.visualizer",
       "kind": "widget",
       "name": "Visualizer",
-      "developer": "org.qtos",
+      "developer": "dev.qorsync",
       "version": "1.0.0",
       "summary": "The live spectrum of your music.",
-      "description": "Thirty-two bars of live spectrum from the QTOS audio engine, in your accent colour. It rests when nothing plays.",
+      "description": "Thirty-two bars of live spectrum from the QOR OS audio engine, in your accent colour. It rests when nothing plays.",
       "whatsNew": "First release.",
       "released": "2026-10-26",
       "tags": [
@@ -426,9 +426,9 @@
         "hue": 300
       },
       "package": {
-        "file": "packages/org.qtos.widget.visualizer-1.0.0.qtospkg",
-        "size": 1891,
-        "sha256": "f703db10085cbf5dcf719a20c975ed35a5b286f56f14458426de39661fc4028c"
+        "file": "packages/dev.qorsync.widget.visualizer-1.0.0.qorpkg",
+        "size": 1897,
+        "sha256": "0d087982db8f81ed85be57fd6821398f400cb1043e26ef09ae693d93393b8cc7"
       }
     }
   ]

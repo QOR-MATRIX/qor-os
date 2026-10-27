@@ -1,13 +1,13 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 pragma ComponentBehavior: Bound
 
 import QtCore
 import QtQuick
 import QtQuick.Controls
-import QTOS.Kit
+import QOR.Kit
 
 // Notes: a calm editor with a note list. Notes persist locally with
-// QtCore.Settings (qtos-settingsd-backed storage on device).
+// QtCore.Settings (qor-settingsd-backed storage on device).
 Item {
     id: app
 

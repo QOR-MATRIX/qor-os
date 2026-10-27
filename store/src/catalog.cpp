@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "catalog.h"
 
 #include "signature.h"
@@ -10,7 +10,7 @@
 
 using namespace Qt::StringLiterals;
 
-namespace qtos::store {
+namespace qor::store {
 
 QVariantMap CatalogItem::toVariant() const
 {
@@ -134,4 +134,4 @@ CatalogResult parseCatalog(const QByteArray &json, const QByteArray &signature, 
     return result;
 }
 
-} // namespace qtos::store
+} // namespace qor::store

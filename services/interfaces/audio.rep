@@ -1,6 +1,6 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
-// qtos-audiod: output, volume, equaliser, interface sounds and live analysis
-// of what is playing (PipeWire/WirePlumber on device; the QTOS audio engine,
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
+// qor-audiod: output, volume, equaliser, interface sounds and live analysis
+// of what is playing (PipeWire/WirePlumber on device; the QOR OS audio engine,
 // audio/, in simulation).
 #include <QtCore/QStringList>
 #include <QtCore/QVariantList>

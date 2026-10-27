@@ -1,11 +1,11 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "oklchmath.h"
 
 #include <algorithm>
 #include <cmath>
 #include <numbers>
 
-namespace qtos {
+namespace qor {
 namespace color {
 
 namespace {
@@ -137,4 +137,4 @@ Lab capLuminance(const Lab &lab, double maxLuminance)
 
 } // namespace color
 
-} // namespace qtos
+} // namespace qor

@@ -1,7 +1,7 @@
-# QTOS.Apps — first-party applications.
+# QOR.Apps — first-party applications.
 #
 # Each app is a QML component the shell hosts inside a Prism window. Apps only
-# talk to the system through QTOS.Services (replicas + Intents), never to the
+# talk to the system through QOR.Services (replicas + Intents), never to the
 # shell directly, so the same code ships as standalone Qt Application Manager
 # packages on device.
 
@@ -9,10 +9,10 @@ set_source_files_properties(AppRegistry.qml PROPERTIES QT_QML_SINGLETON_TYPE TRU
 # Imported by relative path from QML; not exported as module members.
 set_source_files_properties(FileIndex.js PROPERTIES QT_QML_SKIP_QMLDIR_ENTRY TRUE)
 
-qt_add_library(qtos_apps STATIC)
+qt_add_library(qor_apps STATIC)
 
-qt_add_qml_module(qtos_apps
-    URI QTOS.Apps
+qt_add_qml_module(qor_apps
+    URI QOR.Apps
     VERSION 1.0
     RESOURCE_PREFIX /qt/qml
     QML_FILES
@@ -32,22 +32,22 @@ qt_add_qml_module(qtos_apps
         QtQuick.Shapes
         QtGraphs
         QtCore
-        QTOS.Kit
-        QTOS.Services
-        QTOS.Input
-        QTOS.Store
+        QOR.Kit
+        QOR.Services
+        QOR.Input
+        QOR.Store
 )
 
-target_link_libraries(qtos_apps
+target_link_libraries(qor_apps
     PUBLIC
         Qt6::Quick
         Qt6::QuickControls2
         Qt6::QuickShapes
         Qt6::Graphs
-        qtos_kit
-        qtos_services
-        qtos_input
-        qtos_store
+        qor_kit
+        qor_services
+        qor_input
+        qor_store
     PRIVATE
-        qtos::compiler_settings
+        qor::compiler_settings
 )

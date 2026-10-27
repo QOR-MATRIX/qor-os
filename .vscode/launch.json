@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "qtos-shell (lock screen)",
+      "name": "qor-shell (lock screen)",
       "type": "cppvsdbg",
       "request": "launch",
       "program": "${command:cmake.launchTargetPath}",
@@ -11,15 +11,15 @@
       "environment": [
         { "name": "PATH", "value": "C:/Qt/6.12.0/msvc2022_64/bin;${env:PATH}" },
         { "name": "QT_FORCE_STDERR_LOGGING", "value": "1" },
-        { "name": "QT_LOGGING_RULES", "value": "qtos.*=true" }
+        { "name": "QT_LOGGING_RULES", "value": "qor.*=true" }
       ],
       "console": "integratedTerminal"
     },
     {
-      "name": "qtos-shell (desktop, Files + Music)",
+      "name": "qor-shell (desktop, Files + Music)",
       "type": "cppvsdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/build/windows-debug/qtos-shell.exe",
+      "program": "${workspaceFolder}/build/windows-debug/qor-shell.exe",
       "args": ["--unlocked", "--open", "files,music"],
       "cwd": "${workspaceFolder}",
       "environment": [
@@ -29,10 +29,10 @@
       "console": "integratedTerminal"
     },
     {
-      "name": "qtos-shell (QML debugger)",
+      "name": "qor-shell (QML debugger)",
       "type": "cppvsdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/build/windows-debug/qtos-shell.exe",
+      "program": "${workspaceFolder}/build/windows-debug/qor-shell.exe",
       "args": ["--unlocked", "-qmljsdebugger=port:3768,block"],
       "cwd": "${workspaceFolder}",
       "environment": [

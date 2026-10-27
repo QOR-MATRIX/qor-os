@@ -1,8 +1,8 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QTOS.Kit
+import QOR.Kit
 
 // A theme in miniature: its Aurora wallpaper with a small window in its
 // tinted neutrals and accent. `theme` is a theme definition or a catalogue

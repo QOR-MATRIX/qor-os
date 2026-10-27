@@ -1,6 +1,6 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 import QtQuick
-import QTOS.Kit
+import QOR.Kit
 
 // A Lumen symbol from kit/icons, rasterised at the exact device pixel size
 // and tinted on the GPU, so one icon file serves every theme and accent.

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "oklch.h"
 
 #include <QtTest/QTest>
@@ -17,8 +17,8 @@ private:
 private Q_SLOTS:
     void whiteAndBlack()
     {
-        const QColor white = qtos::color::fromOklch(1.0, 0.0, 0.0);
-        const QColor black = qtos::color::fromOklch(0.0, 0.0, 0.0);
+        const QColor white = qor::color::fromOklch(1.0, 0.0, 0.0);
+        const QColor black = qor::color::fromOklch(0.0, 0.0, 0.0);
         QCOMPARE(white.red(), 255);
         QCOMPARE(white.green(), 255);
         QCOMPARE(white.blue(), 255);
@@ -40,7 +40,7 @@ private Q_SLOTS:
     void roundTrip()
     {
         QFETCH(QColor, color);
-        qtos::Oklch oklch;
+        qor::Oklch oklch;
         const QVariantList lch = oklch.toOklch(color);
         const QColor back = oklch.color(lch[0].toDouble(), lch[1].toDouble(), lch[2].toDouble(), 1.0);
         QVERIFY2(std::abs(back.red() - color.red()) <= 1, qPrintable(back.name()));
@@ -51,7 +51,7 @@ private Q_SLOTS:
     void knownReference()
     {
         // sRGB red is approximately OKLCH(0.628, 0.258, 29.2°).
-        qtos::Oklch oklch;
+        qor::Oklch oklch;
         const QVariantList lch = oklch.toOklch(QColor(255, 0, 0));
         QVERIFY(near(lch[0].toDouble(), 0.628, 0.002));
         QVERIFY(near(lch[1].toDouble(), 0.258, 0.002));
@@ -61,9 +61,9 @@ private Q_SLOTS:
     void outOfGamutIsMappedNotClipped()
     {
         // Very high chroma must stay in gamut while preserving hue.
-        const QColor c = qtos::color::fromOklch(0.7, 0.4, 150.0);
+        const QColor c = qor::color::fromOklch(0.7, 0.4, 150.0);
         QVERIFY(c.isValid());
-        qtos::Oklch oklch;
+        qor::Oklch oklch;
         const QVariantList lch = oklch.toOklch(c);
         QVERIFY2(near(lch[2].toDouble(), 150.0, 3.0), qPrintable(QString::number(lch[2].toDouble())));
         QVERIFY(near(lch[0].toDouble(), 0.7, 0.02));
@@ -71,7 +71,7 @@ private Q_SLOTS:
 
     void themedResolvesLightAndDark()
     {
-        qtos::Oklch oklch;
+        qor::Oklch oklch;
         const QVariantMap token { { u"light"_s, QVariantList { 0.98, 0.0, 0.0, 1.0 } },
                                   { u"dark"_s, QVariantList { 0.2, 0.0, 0.0, 0.5 } },
                                   { u"followAccent"_s, false } };
@@ -84,7 +84,7 @@ private Q_SLOTS:
 
     void themedFollowsAccent()
     {
-        qtos::Oklch oklch;
+        qor::Oklch oklch;
         const QVariantMap token { { u"light"_s, QVariantList { 0.6, 0.18, 0.0, 1.0 } },
                                   { u"dark"_s, QVariantList { 0.6, 0.18, 0.0, 1.0 } },
                                   { u"followAccent"_s, true } };
@@ -96,7 +96,7 @@ private Q_SLOTS:
 
     void themedBlendsHighContrast()
     {
-        qtos::Oklch oklch;
+        qor::Oklch oklch;
         const QVariantMap token { { u"light"_s, QVariantList { 0.45, 0.0, 0.0, 1.0 } },
                                   { u"dark"_s, QVariantList { 0.79, 0.0, 0.0, 1.0 } },
                                   { u"highContrast"_s,
@@ -121,14 +121,14 @@ private Q_SLOTS:
     {
         // A bright accent at any hue must come out dark enough for white text
         // (relative luminance <= 0.175 gives >= 4.5:1 against white).
-        qtos::Oklch oklch;
+        qor::Oklch oklch;
         for (int hue = 0; hue < 360; hue += 15) {
             const QVariantMap token { { u"light"_s, QVariantList { 0.75, 0.17, 0.0, 1.0 } },
                                       { u"dark"_s, QVariantList { 0.75, 0.17, 0.0, 1.0 } },
                                       { u"followAccent"_s, true },
                                       { u"maxLuminance"_s, 0.175 } };
             const QColor c = oklch.themed(token, 1.0, hue);
-            const double y = qtos::color::relativeLuminance(qtos::color::srgbToOklab(c));
+            const double y = qor::color::relativeLuminance(qor::color::srgbToOklab(c));
             QVERIFY2(y <= 0.175 + 0.002, qPrintable(u"hue %1: Y=%2"_s.arg(hue).arg(y)));
             QVERIFY2(y >= 0.15, qPrintable(u"hue %1 overshoots: Y=%2"_s.arg(hue).arg(y)));
             const double drift = std::remainder(oklch.toOklch(c)[2].toDouble() - hue, 360.0);
@@ -140,7 +140,7 @@ private Q_SLOTS:
     {
         // OKLab midpoint of black and white has lightness ~0.5 (sRGB ~#636363),
         // unlike the naive sRGB midpoint (#808080).
-        qtos::Oklch oklch;
+        qor::Oklch oklch;
         const QColor mid = oklch.mix(Qt::black, Qt::white, 0.5);
         QVERIFY2(std::abs(mid.red() - 99) <= 2, qPrintable(mid.name()));
     }

@@ -1,11 +1,11 @@
 {
   "format": 1,
-  "store": "QTOS Store",
+  "store": "QOR OS Store",
   "developers": {
     "org.example": {
       "name": "Example",
       "verified": true,
-      "key": "BNLQv1Mqj9BuchHBGSWSfqPpQB/9bqO1OyGLz5MW7Qtg8sXiVDzwMQ/US9/OijNVc2DPArRN2cD5Ki3+UVr2tuI="
+      "key": "BMzp86Kx1/iEOMb1xLbR3UP2uBEcNXY42UY2GzK3wPWkkJNnXpuuffO9qYEoJOnzXLd/R2mTyLCK50Cy3c5I6dQ="
     }
   },
   "items": [
@@ -31,9 +31,9 @@
         "wallpaperIntensity": 0.9
       },
       "package": {
-        "file": "packages/org.example.theme.test-1.0.0.qtospkg",
+        "file": "packages/org.example.theme.test-1.0.0.qorpkg",
         "size": 775,
-        "sha256": "def5d2dcea14a408d1cece2ebc45a90dcd20f278f3c762d9e98e038d48e78fcd"
+        "sha256": "61245d605a7364c1e816fd1305641e7b3532502519fc3650037cb81a5bb9ee03"
       }
     }
   ]

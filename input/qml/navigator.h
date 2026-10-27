@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
 #include "gamepad.h"
@@ -11,7 +11,7 @@
 #include <QtQml/qqmlregistration.h>
 #include <QtQuick/QQuickWindow>
 
-namespace qtos::input {
+namespace qor::input {
 
 // The controller interface: drives a window with a game controller as a
 // person would with a mouse and keyboard, so every surface, app and Wayland
@@ -131,4 +131,4 @@ private:
     qint64 m_flickAt = 0;
 };
 
-} // namespace qtos::input
+} // namespace qor::input

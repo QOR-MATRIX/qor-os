@@ -1,9 +1,9 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 pragma Singleton
 
 import QtQuick
 
-// The audio-reactive interface's one source of motion. qtos-audiod analyses
+// The audio-reactive interface's one source of motion. qor-audiod analyses
 // what is being heard (Services.audio's `analysis` signal, ~60 Hz); this turns
 // it into values the interface animates with, smoothed at the display's frame
 // rate:

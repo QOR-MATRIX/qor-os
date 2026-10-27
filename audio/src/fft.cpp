@@ -1,10 +1,10 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "fft.h"
 
 #include <cmath>
 #include <numbers>
 
-namespace qtos::audio {
+namespace qor::audio {
 
 Fft::Fft(int size) : m_size(size), m_twiddles(size / 2), m_reversed(size), m_window(size), m_scratch(size)
 {
@@ -53,4 +53,4 @@ void Fft::magnitudes(const float *samples, float *out)
         out[k] = std::abs(m_scratch[k]) * scale;
 }
 
-} // namespace qtos::audio
+} // namespace qor::audio

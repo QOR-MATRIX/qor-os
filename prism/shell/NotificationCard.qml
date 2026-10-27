@@ -1,7 +1,7 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 import QtQuick
-import QTOS.Kit
-import QTOS.Apps
+import QOR.Kit
+import QOR.Apps
 
 // A single notification banner. Slides in on a spring, waits (pausing while
 // hovered), then slides out and asks to be removed.

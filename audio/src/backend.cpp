@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "backend.h"
 
 #include <QtCore/QDir>
@@ -7,9 +7,9 @@
 
 using namespace Qt::StringLiterals;
 
-Q_LOGGING_CATEGORY(lcBackend, "qtos.audio.backend")
+Q_LOGGING_CATEGORY(lcBackend, "qor.audio.backend")
 
-namespace qtos::audio {
+namespace qor::audio {
 
 void configureBackend()
 {
@@ -30,4 +30,4 @@ void configureBackend()
 #endif
 }
 
-} // namespace qtos::audio
+} // namespace qor::audio

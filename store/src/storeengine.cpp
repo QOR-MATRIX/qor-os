@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "storeengine.h"
 
 #include "package.h"
@@ -19,9 +19,9 @@
 
 using namespace Qt::StringLiterals;
 
-Q_LOGGING_CATEGORY(lcStore, "qtos.store")
+Q_LOGGING_CATEGORY(lcStore, "qor.store")
 
-namespace qtos::store {
+namespace qor::store {
 
 namespace {
 
@@ -257,4 +257,4 @@ bool StoreEngine::saveInstalled() const
     return file.commit();
 }
 
-} // namespace qtos::store
+} // namespace qor::store

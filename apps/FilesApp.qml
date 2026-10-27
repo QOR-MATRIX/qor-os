@@ -1,9 +1,9 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Controls
-import QTOS.Kit
+import QOR.Kit
 import "FileIndex.js" as FileIndex
 
 // Files: sidebar locations and tags, grid and list views, live filtering and

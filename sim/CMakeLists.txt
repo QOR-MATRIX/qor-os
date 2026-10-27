@@ -1,41 +1,42 @@
-# qtos-sim — simulated implementations of every QTOS service.
+# qor-sim — simulated implementations of every QOR OS service.
 #
 # Compiles the service contracts in services/interfaces into Qt Remote Objects
 # *sources* and implements them with scenario-driven behaviour, so the whole
 # shell runs on Windows, macOS or Linux without device hardware.
 
-qt_add_library(qtos_sim STATIC
+qt_add_library(qor_sim STATIC
+    src/carryover.h src/carryover.cpp
     src/simdevices.h src/simdevices.cpp
     src/simsession.h src/simsession.cpp
     src/simservices.h src/simservices.cpp
 )
 
-qt_add_repc_sources(qtos_sim ${QTOS_SERVICE_INTERFACES} ${QTOS_SIM_CONTROL_INTERFACE})
+qt_add_repc_sources(qor_sim ${QOR_SERVICE_INTERFACES} ${QOR_SIM_CONTROL_INTERFACE})
 
-qt_add_resources(qtos_sim "qtos_sim_scenarios"
-    PREFIX "/qtos/sim"
+qt_add_resources(qor_sim "qor_sim_scenarios"
+    PREFIX "/qor/sim"
     FILES
         scenarios/default.json
 )
 
-target_include_directories(qtos_sim PUBLIC
+target_include_directories(qor_sim PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/src"
     "${CMAKE_CURRENT_BINARY_DIR}"
 )
-target_link_libraries(qtos_sim
+target_link_libraries(qor_sim
     PUBLIC
         Qt6::Core
         Qt6::Network
         Qt6::RemoteObjects
-        qtos_audio
+        qor_audio
     PRIVATE
         Qt6::Concurrent
-        qtos::compiler_settings
+        qor::compiler_settings
 )
 
-if(QTOS_BUILD_TOOLS)
-    qt_add_executable(qtos-simd simd/main.cpp)
-    target_link_libraries(qtos-simd PRIVATE qtos_sim qtos::compiler_settings)
-    set_target_properties(qtos-simd PROPERTIES WIN32_EXECUTABLE OFF)
-    install(TARGETS qtos-simd RUNTIME DESTINATION bin)
+if(QOR_BUILD_TOOLS)
+    qt_add_executable(qor-simd simd/main.cpp)
+    target_link_libraries(qor-simd PRIVATE qor_sim qor::compiler_settings)
+    set_target_properties(qor-simd PROPERTIES WIN32_EXECUTABLE OFF)
+    install(TARGETS qor-simd RUNTIME DESTINATION bin)
 endif()

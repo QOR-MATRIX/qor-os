@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 //
 // prism-test-client: a Wayland client with a known layout, for Prism's
 // end-to-end tests (tools/dev/prism-e2e.py).

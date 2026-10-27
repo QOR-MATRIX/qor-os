@@ -1,9 +1,9 @@
 # System services
 
-QTOS system services are defined as **Qt Remote Objects contracts** in
+QOR OS system services are defined as **Qt Remote Objects contracts** in
 [`services/interfaces/`](../services/interfaces/). The shell, apps,
-`qtosctl` and tests use *replicas* of these contracts. Simulated *sources*
-live in [`sim/`](../sim/); on a device, the `qtos-*d` daemons implement the
+`qorctl` and tests use *replicas* of these contracts. Simulated *sources*
+live in [`sim/`](../sim/); on a device, the `qor-*d` daemons implement the
 same contracts.
 
 Property modes used in the contracts:
@@ -15,7 +15,7 @@ Property modes used in the contracts:
 
 ## Contracts
 
-### `Network` — `network.rep` (device: qtos-netd over NetworkManagerQt)
+### `Network` — `network.rep` (device: qor-netd over NetworkManagerQt)
 
 | Member | Type | Mode / kind | Meaning |
 |--------|------|-------------|---------|
@@ -29,7 +29,7 @@ Property modes used in the contracts:
 | `disconnectNetwork()` | slot | | Leave the current network |
 | `connectionFailed(ssid, reason)` | signal | | Join failed |
 
-### `Bluetooth` — `bluetooth.rep` (device: qtos-btd over BluezQt)
+### `Bluetooth` — `bluetooth.rep` (device: qor-btd over BluezQt)
 
 | Member | Type | Mode / kind | Meaning |
 |--------|------|-------------|---------|
@@ -37,7 +37,7 @@ Property modes used in the contracts:
 | `devices` | QVariantList | source-only | `[{name, kind, connected, battery}]`. `kind`: headphones, keyboard, mouse or speaker. `battery` is -1 if unknown |
 | `toggleDevice(name)` | slot | | Connect or disconnect a paired device |
 
-### `Power` — `power.rep` (device: qtos-powerd over UPower and logind)
+### `Power` — `power.rep` (device: qor-powerd over UPower and logind)
 
 | Member | Type | Mode / kind | Meaning |
 |--------|------|-------------|---------|
@@ -49,9 +49,9 @@ Property modes used in the contracts:
 | `suspend()` | slot | | |
 | `batteryLow(level)` | signal | | At 20% and 10% |
 
-### `Audio` — `audio.rep` (device: qtos-audiod over PipeWire)
+### `Audio` — `audio.rep` (device: qor-audiod over PipeWire)
 
-In simulation this is backed by the QTOS audio engine and the machine's real
+In simulation this is backed by the QOR OS audio engine and the machine's real
 outputs; see [AUDIO.md](AUDIO.md).
 
 | Member | Type | Mode / kind | Meaning |
@@ -96,7 +96,7 @@ outputs; see [AUDIO.md](AUDIO.md).
 | `queueIndex` | int | source-only | |
 | `togglePlayback()`, `next()`, `previous()`, `seek(s)`, `playIndex(i)` | slots | | `previous()` restarts the track if more than 3 s in |
 
-### `Notifications` — `notifications.rep` (device: qtos-notifyd, also serves `org.freedesktop.Notifications`)
+### `Notifications` — `notifications.rep` (device: qor-notifyd, also serves `org.freedesktop.Notifications`)
 
 | Member | Type | Mode / kind | Meaning |
 |--------|------|-------------|---------|
@@ -107,7 +107,7 @@ outputs; see [AUDIO.md](AUDIO.md).
 | `posted(id, appId, title, body, icon)` | signal | | |
 | `dismissed(id)` | signal | | |
 
-### `Settings` — `settings.rep` (device: qtos-settingsd)
+### `Settings` — `settings.rep` (device: qor-settingsd)
 
 | Member | Type | Mode | Meaning |
 |--------|------|------|---------|
@@ -136,7 +136,7 @@ outputs; see [AUDIO.md](AUDIO.md).
 ## Using services from QML
 
 ```qml
-import QTOS.Services
+import QOR.Services
 
 Switch {
     checked: Services.network.wifiEnabled
@@ -159,10 +159,10 @@ Button { onClicked: Intents.openApp("settings", { page: "display" }) }
 
 | Platform | Default URL |
 |----------|-------------|
-| Windows, macOS | `local:qtos-services` |
-| Linux | `localabstract:qtos-services` |
+| Windows, macOS | `local:qor-services` |
+| Linux | `localabstract:qor-services` |
 
-The embedded host (`qtos-shell`) and `qtos-simd` fall back to
+The embedded host (`qor-shell`) and `qor-simd` fall back to
 `…-<pid>` if the default is taken. Override with `--services-url` /
 `--url`.
 
@@ -182,10 +182,10 @@ The simulator loads [`sim/scenarios/default.json`](../sim/scenarios/default.json
 | `media` | `{player, playing, index, position, queue: [{title, artist, album, duration, hue, kind, session \| path}]}` |
 | `notifications` | `[{atMs, app, title, body, icon}]`, posted relative to start |
 
-## qtosctl
+## qorctl
 
 ```text
-qtosctl [--url <url>] <command> [args]
+qorctl [--url <url>] <command> [args]
 
 status                         Print system state
 theme light|dark               Set the appearance

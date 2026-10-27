@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "shellbenchmark.h"
 
 #include "framestats.h"
@@ -24,7 +24,7 @@
 
 using namespace Qt::StringLiterals;
 
-namespace qtos {
+namespace qor {
 
 namespace {
 
@@ -322,4 +322,4 @@ void runShellBenchmark(const QList<QQuickWindow *> &windows, const ShellBenchmar
     QTimer::singleShot(kWarmupMs + options.seconds * 1000, primary, endTour);
 }
 
-} // namespace qtos
+} // namespace qor

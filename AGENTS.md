@@ -107,8 +107,9 @@ Makers are paid when their work is used, licensed or remixed.
   codes, sign-in links and email addresses. A new flow that handles one of
   them is checked for this in the same change, whatever the value is called.
 - **Secrets stay out of the repository:**
-  - The Store's signing keys live in `~/.qtos/store-signing/` on the owner's
-    machine.
+  - The Store's signing keys live on the owner's machine, in
+    `~/.qor-os/store-signing/` (or QTOS's `~/.qtos/store-signing/` until the
+    owner moves them; `tools/store/build_store.py` uses whichever holds them).
   - Qt Account credentials (`qtaccount.ini`) are never printed or copied into
     the tree.
   - Runner registration tokens are piped from `gh`, never printed.
@@ -145,7 +146,7 @@ QTOS's practice, which QOR OS keeps:
 - **Report failures honestly, with the output.** Never weaken a test or a
   check to make it pass. Loosening a check is the owner's decision.
 - **On the owner's Windows machine:**
-  - Never kill or relink a running `qtos-shell` from `build/windows-release`;
+  - Never kill or relink a running `qor-shell` from `build/windows-release`;
     build and test in another preset's folder (`build/ci-windows`).
   - `tools/store/build_store.py fixtures` re-signs everything and is not
     idempotent. Run it only when fixtures must change, never chained into a
@@ -158,12 +159,18 @@ QTOS's practice, which QOR OS keeps:
 - Commit messages say what changed and why, in plain words. Commits by an
   assistant end with its `Co-Authored-By` line.
 - Ask the owner before naming a new product, service or public module.
-- **Names.** The product is **QOR OS**. The code keeps its QTOS names until the
-  name is cleared
-  ([QOR-0008](docs/decisions/QOR-0008-before-a-public-release.md)):
-  - the `qtos::` namespace and `QTOS.*` QML modules;
-  - the `QTOS_*` options;
-  - programs such as `qtos-shell`, `prism`, `qtosctl` and `qtos-simd`.
+- **Names** ([QOR-0009](docs/decisions/QOR-0009-the-name-is-qor-os.md)). The product is **QOR OS**:
+  two words, capitals, one space, in prose, the interface and metadata. Where a
+  space cannot go:
+  - `qor-os` for the repository, packages, artifacts and the CMake project;
+  - `qor` in code: the `qor::` namespace, `qor_*` targets, `qor-*` programs
+    (`qor-shell`, `qorctl`, `qor-simd`), `qor.*` logging categories;
+  - `QOR.*` QML modules, beside the carried `QOR.Media`;
+  - `QOR_*` options, environment and CI variables;
+  - `dev.qorsync.*` for identifiers that need a domain (Store packages).
+
+  "QTOS" names only the predecessor: its frozen repository, its records
+  (QTOS-0001 to 0010) and its history.
 
   The parts keep their names: Prism (compositor and shell), Lumen (design
   language), Beam, Shelf and Rail.

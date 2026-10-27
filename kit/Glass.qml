@@ -1,6 +1,6 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 import QtQuick
-import QTOS.Kit
+import QOR.Kit
 
 // Lumen Glass material: a translucent panel that shows a blurred, tinted view
 // of whatever is behind it (read from a shared Backdrop), finished with grain,

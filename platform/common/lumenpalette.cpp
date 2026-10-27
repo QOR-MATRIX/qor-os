@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "lumenpalette.h"
 
 #include "oklchmath.h"
@@ -8,19 +8,19 @@
 
 using namespace Qt::StringLiterals;
 
-namespace qtos::lumen {
+namespace qor::lumen {
 
 Appearance appearanceFromEnvironment()
 {
     Appearance appearance;
-    const QString mode = qEnvironmentVariable("QTOS_APPEARANCE");
+    const QString mode = qEnvironmentVariable("QOR_APPEARANCE");
     if (mode == u"light"_s)
         appearance.dark = false;
     bool ok = false;
-    const double hue = qEnvironmentVariable("QTOS_ACCENT_HUE").toDouble(&ok);
+    const double hue = qEnvironmentVariable("QOR_ACCENT_HUE").toDouble(&ok);
     if (ok)
         appearance.accentHue = hue;
-    appearance.highContrast = qEnvironmentVariable("QTOS_CONTRAST") == u"high"_s;
+    appearance.highContrast = qEnvironmentVariable("QOR_CONTRAST") == u"high"_s;
     return appearance;
 }
 
@@ -117,4 +117,4 @@ QFont monoFont(int pixelSize)
     return font;
 }
 
-} // namespace qtos::lumen
+} // namespace qor::lumen

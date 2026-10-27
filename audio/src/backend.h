@@ -1,7 +1,7 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
-namespace qtos::audio {
+namespace qor::audio {
 
 // Chooses a Qt Multimedia audio backend that can work here. Call before
 // anything in the process uses Qt Multimedia (the engine, SoundEffect).
@@ -12,4 +12,4 @@ namespace qtos::audio {
 // the PulseAudio backend instead. An explicit QT_AUDIO_BACKEND always wins.
 void configureBackend();
 
-} // namespace qtos::audio
+} // namespace qor::audio

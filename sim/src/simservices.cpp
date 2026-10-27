@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "simservices.h"
 
 #include <QtCore/QCoreApplication>
@@ -9,24 +9,24 @@
 
 using namespace Qt::StringLiterals;
 
-Q_LOGGING_CATEGORY(lcSim, "qtos.sim")
+Q_LOGGING_CATEGORY(lcSim, "qor.sim")
 
-namespace qtos::sim {
+namespace qor::sim {
 
 namespace {
 
 QUrl platformDefaultUrl()
 {
 #if defined(Q_OS_LINUX)
-    return QUrl(u"localabstract:qtos-services"_s);
+    return QUrl(u"localabstract:qor-services"_s);
 #else
-    return QUrl(u"local:qtos-services"_s);
+    return QUrl(u"local:qor-services"_s);
 #endif
 }
 
 // True when a server already listens on `url`. A Windows named pipe can have
 // any number of servers, so hosting a busy endpoint there does not fail: a
-// second QTOS would silently share it and clients could reach either one.
+// second QOR OS would silently share it and clients could reach either one.
 bool endpointInUse(const QUrl &url)
 {
     if (url.scheme() != u"local"_s)
@@ -61,7 +61,7 @@ SimServices::~SimServices() = default;
 
 bool SimServices::loadScenario(const QString &path)
 {
-    const QString source = path.isEmpty() ? u":/qtos/sim/scenarios/default.json"_s : path;
+    const QString source = path.isEmpty() ? u":/qor/sim/scenarios/default.json"_s : path;
     QFile file(source);
     if (!file.open(QIODevice::ReadOnly)) {
         qCWarning(lcSim) << "Cannot open scenario" << source << file.errorString();
@@ -102,7 +102,7 @@ bool SimServices::start(const SimOptions &options)
     m_power->load(m_scenario.value(u"power"_s).toObject());
     m_audio->load(m_scenario.value(u"audio"_s).toObject());
     m_media->load(m_scenario.value(u"media"_s).toObject(),
-                  options.persistent || qEnvironmentVariableIsSet("QTOS_MUSIC_DIR"));
+                  options.persistent || qEnvironmentVariableIsSet("QOR_MUSIC_DIR"));
     m_settings->load(m_scenario.value(u"user"_s).toObject());
 
     // The interface reacts to the frequencies chosen in Settings.
@@ -118,8 +118,8 @@ bool SimServices::start(const SimOptions &options)
     m_host = std::make_unique<QRemoteObjectHost>();
     m_url = requested;
     if (endpointInUse(m_url) || !m_host->setHostUrl(m_url)) {
-        // Another QTOS instance owns the default endpoint: fall back to a private one.
-        m_url = QUrl(requested.scheme() + u":qtos-services-"_s + QString::number(QCoreApplication::applicationPid()));
+        // Another QOR OS instance owns the default endpoint: fall back to a private one.
+        m_url = QUrl(requested.scheme() + u":qor-services-"_s + QString::number(QCoreApplication::applicationPid()));
         qCWarning(lcSim) << requested << "is in use; hosting services at" << m_url;
         if (!m_host->setHostUrl(m_url)) {
             qCCritical(lcSim) << "Cannot host services:" << m_host->lastError();
@@ -144,4 +144,4 @@ bool SimServices::start(const SimOptions &options)
 
 void SimServices::replayScenario() { m_notifications->schedule(m_scenario.value(u"notifications"_s).toArray()); }
 
-} // namespace qtos::sim
+} // namespace qor::sim

@@ -1,12 +1,13 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 //
-// qtos-shell — runs the Prism shell in a window on any desktop OS.
+// qor-shell — runs the Prism shell in a window on any desktop OS.
 //
 // The shell is the same QML that Prism (the Wayland compositor) hosts on a
 // device; here it manages simulated app windows, and talks to the simulated
-// QTOS services over Qt Remote Objects. See docs/BUILDING.md.
+// QOR OS services over Qt Remote Objects. See docs/BUILDING.md.
 
 #include "backend.h"
+#include "carryover.h"
 #include "gpupreference.h"
 #include "kit.h"
 #include "services.h"
@@ -30,13 +31,13 @@
 
 using namespace Qt::StringLiterals;
 
-Q_IMPORT_QML_PLUGIN(QTOS_KitPlugin)
+Q_IMPORT_QML_PLUGIN(QOR_KitPlugin)
 Q_IMPORT_QML_PLUGIN(LumenPlugin)
-Q_IMPORT_QML_PLUGIN(QTOS_ServicesPlugin)
-Q_IMPORT_QML_PLUGIN(QTOS_AppsPlugin)
-Q_IMPORT_QML_PLUGIN(QTOS_ShellPlugin)
+Q_IMPORT_QML_PLUGIN(QOR_ServicesPlugin)
+Q_IMPORT_QML_PLUGIN(QOR_AppsPlugin)
+Q_IMPORT_QML_PLUGIN(QOR_ShellPlugin)
 
-Q_LOGGING_CATEGORY(lcHost, "qtos.shell.host")
+Q_LOGGING_CATEGORY(lcHost, "qor.shell.host")
 
 namespace {
 
@@ -60,7 +61,7 @@ struct HostOptions
 HostOptions parseOptions(const QGuiApplication &app)
 {
     QCommandLineParser parser;
-    parser.setApplicationDescription(u"Prism shell for QTOS, running in simulation."_s);
+    parser.setApplicationDescription(u"Prism shell for QOR OS, running in simulation."_s);
     parser.addHelpOption();
     parser.addVersionOption();
 
@@ -124,7 +125,7 @@ HostOptions parseOptions(const QGuiApplication &app)
     qml.insert(u"fullscreen"_s, parser.isSet(fullscreen));
     qml.insert(u"screenshot"_s, parser.isSet(screenshot));
     qml.insert(u"qtVersion"_s, QString::fromLatin1(qVersion()));
-    qml.insert(u"version"_s, QStringLiteral(QTOS_VERSION_STRING));
+    qml.insert(u"version"_s, QStringLiteral(QOR_VERSION_STRING));
     if (parser.isSet(size)) {
         const QStringList parts = parser.value(size).split(u'x');
         if (parts.size() == 2) {
@@ -142,14 +143,15 @@ int main(int argc, char *argv[])
     QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
     QQuickWindow::setTextRenderType(QQuickWindow::NativeTextRendering);
     // Before the audio engine or interface sounds touch Qt Multimedia.
-    qtos::audio::configureBackend();
+    qor::audio::configureBackend();
 
     QGuiApplication app(argc, argv);
     QGuiApplication::setOrganizationName(u"QOR-MATRIX"_s);
-    QGuiApplication::setOrganizationDomain(u"qor-matrix.dev"_s);
-    QGuiApplication::setApplicationName(u"QTOS Shell"_s);
-    QGuiApplication::setApplicationDisplayName(u"QTOS"_s);
-    QGuiApplication::setApplicationVersion(QStringLiteral(QTOS_VERSION_STRING));
+    QGuiApplication::setOrganizationDomain(u"qorsync.dev"_s);
+    QGuiApplication::setApplicationName(u"QOR OS Shell"_s);
+    QGuiApplication::setApplicationDisplayName(u"QOR OS"_s);
+    QGuiApplication::setApplicationVersion(QStringLiteral(QOR_VERSION_STRING));
+    qor::sim::carryOverFrom(u"QTOS Shell"_s);
 
     const HostOptions options = parseOptions(app);
     // Automated runs use virtual controllers only, so a controller on the
@@ -157,31 +159,31 @@ int main(int argc, char *argv[])
     // the touchpad alone, and install from the Store into a folder of their own.
     std::unique_ptr<QTemporaryDir> automationStore;
     if (!options.screenshotPath.isEmpty() || options.benchmarkSeconds > 0 || !options.scriptPath.isEmpty()) {
-        if (qEnvironmentVariableIsEmpty("QTOS_GAMEPADS"))
-            qputenv("QTOS_GAMEPADS", "virtual");
-        if (qEnvironmentVariableIsEmpty("QTOS_TOUCHPAD"))
-            qputenv("QTOS_TOUCHPAD", "off");
-        if (qEnvironmentVariableIsEmpty("QTOS_STORE_DIR")) {
+        if (qEnvironmentVariableIsEmpty("QOR_GAMEPADS"))
+            qputenv("QOR_GAMEPADS", "virtual");
+        if (qEnvironmentVariableIsEmpty("QOR_TOUCHPAD"))
+            qputenv("QOR_TOUCHPAD", "off");
+        if (qEnvironmentVariableIsEmpty("QOR_STORE_DIR")) {
             automationStore = std::make_unique<QTemporaryDir>();
-            qputenv("QTOS_STORE_DIR", automationStore->path().toUtf8());
+            qputenv("QOR_STORE_DIR", automationStore->path().toUtf8());
         }
     }
-    qCInfo(lcHost) << "GPU:" << qtos::host::applyGpuPreference(options.gpu);
+    qCInfo(lcHost) << "GPU:" << qor::host::applyGpuPreference(options.gpu);
 
-    qtos::Kit::initialize();
+    qor::Kit::initialize();
     QQuickStyle::setStyle(u"Lumen"_s);
 
     // ── Services ────────────────────────────────────────────────────────────
-    std::unique_ptr<qtos::sim::SimServices> simulator;
-    QUrl servicesUrl = options.servicesUrl.isEmpty() ? qtos::Services::defaultUrl() : options.servicesUrl;
+    std::unique_ptr<qor::sim::SimServices> simulator;
+    QUrl servicesUrl = options.servicesUrl.isEmpty() ? qor::Services::defaultUrl() : options.servicesUrl;
     if (options.servicesMode != u"external"_s) {
-        simulator = std::make_unique<qtos::sim::SimServices>();
-        qtos::sim::SimOptions simOptions;
+        simulator = std::make_unique<qor::sim::SimServices>();
+        qor::sim::SimOptions simOptions;
         simOptions.url = options.servicesUrl;
         // Automated runs get a private endpoint, so they never meet (or are
-        // mistaken for) a QTOS session someone is using.
+        // mistaken for) a QOR OS session someone is using.
         if (simOptions.url.isEmpty() && options.ephemeral)
-            simOptions.url = QUrl(qtos::Services::defaultUrl().scheme() + u":qtos-services-"_s
+            simOptions.url = QUrl(qor::Services::defaultUrl().scheme() + u":qor-services-"_s
                                   + QString::number(QCoreApplication::applicationPid()));
         simOptions.scenarioPath = options.scenario;
         simOptions.persistent = !options.ephemeral;
@@ -194,9 +196,9 @@ int main(int argc, char *argv[])
         }
         servicesUrl = simulator->url();
     }
-    if (!qtos::Services::instance()->connectTo(servicesUrl))
+    if (!qor::Services::instance()->connectTo(servicesUrl))
         qCWarning(lcHost) << "Continuing with partially available services.";
-    if (MediaReplica *media = qtos::Services::instance()->media()) {
+    if (MediaReplica *media = qor::Services::instance()->media()) {
         if (options.seek > 0)
             media->seek(options.seek);
         if (options.play)
@@ -209,16 +211,16 @@ int main(int argc, char *argv[])
     QObject::connect(
         &engine, &QQmlApplicationEngine::objectCreationFailed, &app, [] { QCoreApplication::exit(2); },
         Qt::QueuedConnection);
-    engine.loadFromModule("QTOS.Shell", "Main");
+    engine.loadFromModule("QOR.Shell", "Main");
 
     if (engine.rootObjects().isEmpty())
         return 2;
 
     if (options.benchmarkSeconds > 0)
-        qtos::runShellBenchmark({ qobject_cast<QQuickWindow *>(engine.rootObjects().constFirst()) },
-                                { u"qtos-shell"_s, options.benchmarkSeconds, options.benchmarkOut });
+        qor::runShellBenchmark({ qobject_cast<QQuickWindow *>(engine.rootObjects().constFirst()) },
+                               { u"qor-shell"_s, options.benchmarkSeconds, options.benchmarkOut });
     if (!options.scriptPath.isEmpty())
-        qtos::runShellScript(qobject_cast<QQuickWindow *>(engine.rootObjects().constFirst()), options.scriptPath);
+        qor::runShellScript(qobject_cast<QQuickWindow *>(engine.rootObjects().constFirst()), options.scriptPath);
 
     if (!options.screenshotPath.isEmpty()) {
         auto *window = qobject_cast<QQuickWindow *>(engine.rootObjects().constFirst());

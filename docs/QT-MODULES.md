@@ -27,7 +27,7 @@ a module. Status:
 | Qt Widgets | Lumen `QStyle` and the widgets gallery | **In use** |
 | Qt Test / Qt Quick Test | C++ and QML test suites | **In use** |
 | Qt Network | Underlies Qt Remote Objects local sockets; the products' launcher links, ARQADE's server, QQ's MCP pipe; online accounts later | **In use** |
-| Qt Concurrent | Scanning the music library in the background; the indexer (`qtos-indexd`) later | **In use** |
+| Qt Concurrent | Scanning the music library in the background; the indexer (`qor-indexd`) later | **In use** |
 | Qt Sql | SQLite FTS5 index for Beam file search | Phase 3 |
 | Qt Svg | Rasterises Lucide icons for GPU tinting | **In use** |
 | Qt OpenGL / OpenGL Widgets | Only through QRhi's OpenGL backend; no direct use | Not used directly |
@@ -44,7 +44,7 @@ a module. Status:
 | **Qt Graphs** | Monitor app charts (`GraphsView`, `AreaSeries`, `SplineSeries`) | **In use** |
 | **Qt Image Formats** | WebP screenshots and documentation images | **In use** |
 | **Qt Wayland Compositor** | `prism`: Wayland compositor hosting the shell (Linux) | **In use** (experimental) |
-| Qt Wayland (client) | Running QTOS apps inside Prism | Phase 1 |
+| Qt Wayland (client) | Running QOR OS apps inside Prism | Phase 1 |
 | **Qt Multimedia** | The [audio engine](AUDIO.md): real-time output (`QAudioSink` callback interface), music decoding (`QAudioDecoder`, FFmpeg), device tracking (`QMediaDevices`), interface sounds (`SoundEffect`); QOR Media's player; QQ's music and sound. Later: Camera, screen recording in Prism, video Quick Look | **In use** |
 | **Qt Quick 3D** (with Asset Utils, Helpers, Particles) | QQ's worlds, glTF models and particles; ARQADE's home and games in 3D. Later: Spatial Overview, 3D Quick Look, Settings hero | **In use** (QQ, ARQADE) |
 | Qt Quick 3D Xr | Spatial mode on OpenXR headsets | Phase 4 |
@@ -62,16 +62,16 @@ a module. Status:
 | Qt WebEngine | Browser app, web content in apps (not yet installed in the dev kit) | Phase 3 |
 | Qt WebView / WebChannel / WebSockets | Lightweight web views; JS↔QML bridges; companion device channels | Phase 3–4 |
 | **Qt PDF** | QOR Media's reader (with PDFium for changing a PDF); PDF Quick Look later | **In use** (QOR Media) |
-| Qt Positioning / Qt Location | `qtos-locationd`; Maps app (MapLibre plugin) | Phase 3–4 |
+| Qt Positioning / Qt Location | `qor-locationd`; Maps app (MapLibre plugin) | Phase 3–4 |
 | Qt Sensors | Auto-rotate, ambient light → auto-brightness, lid angle | Phase 3 |
-| Qt Bluetooth / Connectivity / NFC | App-level BLE and NFC (system Bluetooth uses BluezQt in `qtos-btd`) | Phase 3 |
-| Qt Network Authorization | OAuth2 for online accounts (`qtos-accountsd`) | Phase 3 |
-| Qt gRPC / Qt Protobuf | `qtos-assistd` API; companion devices | Phase 4 |
+| Qt Bluetooth / Connectivity / NFC | App-level BLE and NFC (system Bluetooth uses BluezQt in `qor-btd`) | Phase 3 |
+| Qt Network Authorization | OAuth2 for online accounts (`qor-accountsd`) | Phase 3 |
+| Qt gRPC / Qt Protobuf | `qor-assistd` API; companion devices | Phase 4 |
 | Qt HTTP Server | Local automation endpoint for Flows and developer tooling | Phase 4 |
-| Qt MCP (present in the 6.12 kit) | Exposing QTOS intents to AI assistants, under user control | Evaluate |
+| Qt MCP (present in the 6.12 kit) | Exposing QOR OS intents to AI assistants, under user control | Evaluate |
 | Qt OpenAPI | Generated clients for cloud services in apps | Evaluate |
 | Qt MQTT / CoAP / OPC UA / Serial Bus / Serial Port | Smart-home and IoT triggers for Flows | Phase 4 |
-| Qt SCXML / State Machine | Session lifecycle (boot, greeter, lock, sleep) in `qtos-sessiond` | Phase 3 |
+| Qt SCXML / State Machine | Session lifecycle (boot, greeter, lock, sleep) in `qor-sessiond` | Phase 3 |
 | Qt Task Tree | Structured async pipelines for updates and indexing | Evaluate |
 | Qt Help | In-OS documentation and tips | Phase 4 |
 | Qt VNC Server | Remote assistance on devices | Phase 4 |
@@ -122,4 +122,4 @@ licensing-reviewed before inclusion:
 | Calamares | Installer |
 | KDE Connect | Phone continuity |
 | libQuotient | Matrix messaging |
-| LibreOffice (Qt 6 VCL), Kate, Okular, Krita, Kdenlive, OBS Studio, MuseScore, FreeCAD, KeePassXC, VLC | Curated third-party apps, themed by the `qtos` platform theme and Lumen QStyle |
+| LibreOffice (Qt 6 VCL), Kate, Okular, Krita, Kdenlive, OBS Studio, MuseScore, FreeCAD, KeePassXC, VLC | Curated third-party apps, themed by the `qor` platform theme and Lumen QStyle |

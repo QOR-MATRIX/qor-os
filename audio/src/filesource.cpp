@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "filesource.h"
 
 #include <QtCore/QLoggingCategory>
@@ -9,9 +9,9 @@
 #include <algorithm>
 #include <cmath>
 
-Q_LOGGING_CATEGORY(lcFileSource, "qtos.audio.file")
+Q_LOGGING_CATEGORY(lcFileSource, "qor.audio.file")
 
-namespace qtos::audio {
+namespace qor::audio {
 
 namespace {
 
@@ -209,4 +209,4 @@ double FileSource::position() const { return double(m_position.load(std::memory_
 
 double FileSource::duration() const { return double(m_expected.load(std::memory_order_relaxed)) / m_sampleRate; }
 
-} // namespace qtos::audio
+} // namespace qor::audio

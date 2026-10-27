@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
 #include <QtCore/QElapsedTimer>
@@ -24,7 +24,7 @@ class QWaylandSurface;
 // provides. Each is a QML type declared inside the WaylandCompositor in
 // Compositor.qml and initialised when that component completes, like Qt's own
 // extensions. Protocol XML is vendored in protocols/ (wayland-protocols 1.47).
-namespace qtos::prism {
+namespace qor::prism {
 
 class FractionalScale;
 
@@ -211,4 +211,4 @@ private:
     quint64 m_sequence = 0;
 };
 
-} // namespace qtos::prism
+} // namespace qor::prism

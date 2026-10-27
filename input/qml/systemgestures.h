@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
 #include "touchpad.h"
@@ -15,7 +15,7 @@ QT_BEGIN_NAMESPACE
 class QTouchEvent;
 QT_END_NAMESPACE
 
-namespace qtos::input {
+namespace qor::input {
 
 // System gestures: swipes with three or more fingers on a touchpad or a
 // touchscreen, recognised for the whole window before any item or Wayland
@@ -120,4 +120,4 @@ private:
     bool m_touchpadInjecting = false;
 };
 
-} // namespace qtos::input
+} // namespace qor::input

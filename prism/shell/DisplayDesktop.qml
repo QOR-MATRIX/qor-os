@@ -1,8 +1,8 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QTOS.Kit
+import QOR.Kit
 
 // Another display, when Prism drives several outputs: the wallpaper and the
 // windows on it. The main display's Desktop keeps the Rail, the Shelf,

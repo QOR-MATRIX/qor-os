@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "signature.h"
 
 #include <openssl/bn.h>
@@ -6,7 +6,7 @@
 #include <openssl/evp.h>
 #include <openssl/x509.h>
 
-namespace qtos::store {
+namespace qor::store {
 
 namespace {
 
@@ -57,4 +57,4 @@ bool verifySignature(const QByteArray &publicKey, const QByteArray &message, con
     return valid;
 }
 
-} // namespace qtos::store
+} // namespace qor::store

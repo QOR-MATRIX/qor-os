@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
 #include "gamepad.h"
@@ -6,7 +6,7 @@
 #include <QtCore/QObject>
 #include <QtGui/QColor>
 
-namespace qtos::input {
+namespace qor::input {
 
 // One source of controllers: XInput, raw HID, Linux evdev, or virtual
 // (tests). Lives on the manager's thread; poll() is called about 125 times
@@ -35,10 +35,10 @@ public:
     }
 
 Q_SIGNALS:
-    void added(const qtos::input::GamepadInfo &info);
-    void infoChanged(const qtos::input::GamepadInfo &info);
+    void added(const qor::input::GamepadInfo &info);
+    void infoChanged(const qor::input::GamepadInfo &info);
     void removed(const QString &id);
-    void changed(const QString &id, const qtos::input::GamepadState &state);
+    void changed(const QString &id, const qor::input::GamepadState &state);
 };
 
-} // namespace qtos::input
+} // namespace qor::input

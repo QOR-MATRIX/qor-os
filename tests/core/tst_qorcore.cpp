@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 // The QOR core, built from demiurge-chain at the pinned commit (QOR-0003), answers QOR OS through its C bridge: a
 // request crosses as JSON and its answer comes back, an amount crosses as a decimal string of embers and is never
 // rounded, and a refusal comes back as the error an interface reads. Nothing the bridge offers answers with a key.

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
 #include "gamepad.h"
@@ -12,7 +12,7 @@
 class QQmlEngine;
 class QJSEngine;
 
-namespace qtos::input {
+namespace qor::input {
 
 // The connected game controllers, for QML: the `Gamepads` singleton.
 //
@@ -43,7 +43,7 @@ class Gamepads : public QObject
 
 public:
     enum Button {
-        South = int(qtos::input::Button::South),
+        South = int(qor::input::Button::South),
         East,
         West,
         North,
@@ -101,4 +101,4 @@ private:
     explicit Gamepads(QObject *parent = nullptr);
 };
 
-} // namespace qtos::input
+} // namespace qor::input

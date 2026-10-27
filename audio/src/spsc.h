@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
 #include <array>
@@ -6,7 +6,7 @@
 #include <cstddef>
 #include <optional>
 
-namespace qtos::audio {
+namespace qor::audio {
 
 // Wait-free single-producer, single-consumer queue of fixed capacity, for
 // talking to the audio thread without locks.
@@ -52,4 +52,4 @@ private:
     std::atomic<std::size_t> m_tail { 0 };
 };
 
-} // namespace qtos::audio
+} // namespace qor::audio

@@ -1,8 +1,8 @@
 {
-  "id": "org.qtos.theme.tidepool",
+  "id": "dev.qorsync.theme.tidepool",
   "name": "Tidepool",
   "version": "1.0.0",
-  "developer": "org.qtos",
+  "developer": "dev.qorsync",
   "summary": "Deep teal water over cool slate.",
   "description": "Tidepool tints every surface with the cool grey of wet slate and sets the accent to a clear teal. Works in light and dark.",
   "whatsNew": "First release.",

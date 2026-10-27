@@ -1,17 +1,17 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "kit.h"
 
 #include <QtQml/QQmlEngine>
 #include <QtQml/QQmlExtensionPlugin>
 #include <QtQuickTest/quicktest.h>
 
-Q_IMPORT_QML_PLUGIN(QTOS_KitPlugin)
+Q_IMPORT_QML_PLUGIN(QOR_KitPlugin)
 
 class Setup : public QObject
 {
     Q_OBJECT
 public Q_SLOTS:
-    void applicationAvailable() { qtos::Kit::initialize(); }
+    void applicationAvailable() { qor::Kit::initialize(); }
 };
 
 QUICK_TEST_MAIN_WITH_SETUP(kit, Setup)

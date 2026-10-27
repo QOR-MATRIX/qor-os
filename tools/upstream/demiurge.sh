@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+# SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #
 # Keeps the code QOR OS carries from demiurge-chain in step with upstream
 # (QOR-0002, docs/UPSTREAM.md). The carried paths are the same here as there.

@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
-// qtos-btd: Bluetooth adapter and paired devices (backed by BluezQt on device).
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
+// qor-btd: Bluetooth adapter and paired devices (backed by BluezQt on device).
 #include <QtCore/QVariantList>
 
 class Bluetooth

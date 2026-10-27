@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
 #include "source.h"
@@ -15,7 +15,7 @@ class QAudioBuffer;
 class QAudioDecoder;
 QT_END_NAMESPACE
 
-namespace qtos::audio {
+namespace qor::audio {
 
 // A music file decoded (QAudioDecoder, FFmpeg) into memory on the thread that
 // owns this object, and played from the audio thread while decoding is still
@@ -74,4 +74,4 @@ private:
     std::vector<float> m_scratch;
 };
 
-} // namespace qtos::audio
+} // namespace qor::audio

@@ -1,13 +1,13 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
 #include <algorithm>
 #include <array>
 #include <cmath>
 
-// Signal-processing building blocks for the QTOS audio engine. Everything here
+// Signal-processing building blocks for the QOR OS audio engine. Everything here
 // is allocation-free and safe to run on the audio thread.
-namespace qtos::audio {
+namespace qor::audio {
 
 inline double dbToGain(double db) { return std::pow(10.0, db / 20.0); }
 inline double gainToDb(double gain) { return 20.0 * std::log10(std::max(gain, 1e-12)); }
@@ -104,4 +104,4 @@ inline double volumeToGain(double volume)
     return volume * volume * volume;
 }
 
-} // namespace qtos::audio
+} // namespace qor::audio

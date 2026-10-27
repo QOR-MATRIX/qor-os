@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "gamepads.h"
 
 #include "gamepadmanager.h"
@@ -8,7 +8,7 @@
 
 using namespace Qt::StringLiterals;
 
-namespace qtos::input {
+namespace qor::input {
 
 Gamepads::Gamepads(QObject *parent) : QObject(parent)
 {
@@ -29,7 +29,7 @@ Gamepads::Gamepads(QObject *parent) : QObject(parent)
     connect(manager, &GamepadManager::mergedChanged, this, [this](const GamepadState &now, const GamepadState &before) {
         Q_EMIT stateChanged();
         const quint32 changed = now.buttons ^ before.buttons;
-        for (int b = 0; b < int(qtos::input::Button::Count); ++b) {
+        for (int b = 0; b < int(qor::input::Button::Count); ++b) {
             if (!(changed & (1u << b)))
                 continue;
             if (now.buttons & (1u << b))
@@ -116,8 +116,8 @@ QStringList Gamepads::backends() const { return GamepadManager::instance()->back
 
 bool Gamepads::isPressed(int button) const
 {
-    return button >= 0 && button < int(qtos::input::Button::Count)
-           && GamepadManager::instance()->merged().pressed(qtos::input::Button(button));
+    return button >= 0 && button < int(qor::input::Button::Count)
+           && GamepadManager::instance()->merged().pressed(qor::input::Button(button));
 }
 
 void Gamepads::rumble(qreal strong, qreal weak, int milliseconds)
@@ -155,4 +155,4 @@ QString Gamepads::buttonName(int button, const QString &family) const
     return {};
 }
 
-} // namespace qtos::input
+} // namespace qor::input

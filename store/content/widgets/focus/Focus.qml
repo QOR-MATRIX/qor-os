@@ -1,7 +1,7 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 import QtQuick
 import QtQuick.Shapes
-import QTOS.Kit
+import QOR.Kit
 
 // Focus: a 25-minute timer. Tap to start or pause; press and hold to reset.
 Item {

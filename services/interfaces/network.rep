@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
-// qtos-netd: Wi-Fi and connectivity state (backed by NetworkManagerQt on device).
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
+// qor-netd: Wi-Fi and connectivity state (backed by NetworkManagerQt on device).
 #include <QtCore/QVariantList>
 
 class Network

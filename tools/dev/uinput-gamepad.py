@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+# SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 """Creates a kernel game pad with uinput and plays a few inputs.
 
-Exercises QTOS's Linux controller backend (evdev) end to end without
+Exercises QOR OS's Linux controller backend (evdev) end to end without
 hardware, including hotplug. Needs write access to /dev/uinput (root):
 
     sudo python3 tools/dev/uinput-gamepad.py &
-    qtos-gamepads --seconds 6      # as root too: the node is root-only
+    qor-gamepads --seconds 6      # as root too: the node is root-only
 """
 import fcntl
 import os
@@ -36,7 +36,7 @@ for name in ('z', 'rz'):
     absmin[ABS[name]], absmax[ABS[name]] = 0, 255
 for name in ('hat0x', 'hat0y'):
     absmin[ABS[name]], absmax[ABS[name]] = -1, 1
-name = b'QTOS Test Pad'.ljust(80, b'\0')
+name = b'QOR OS Test Pad'.ljust(80, b'\0')
 dev = name + struct.pack('<HHHH', 0x03, 0x1234, 0x5678, 1) + struct.pack('<I', 0)
 dev += struct.pack('<64i', *absmax) + struct.pack('<64i', *absmin) + struct.pack('<64i', *([0] * 64)) * 2
 os.write(fd, dev)

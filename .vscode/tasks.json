@@ -2,7 +2,7 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "QTOS: build (release)",
+      "label": "QOR OS: build (release)",
       "type": "shell",
       "command": "pwsh",
       "args": ["-NoProfile", "-File", "${workspaceFolder}/tools/dev/build.ps1", "-Preset", "windows-release"],
@@ -10,7 +10,7 @@
       "problemMatcher": ["$msCompile"]
     },
     {
-      "label": "QTOS: build + test",
+      "label": "QOR OS: build + test",
       "type": "shell",
       "command": "pwsh",
       "args": ["-NoProfile", "-File", "${workspaceFolder}/tools/dev/build.ps1", "-Preset", "windows-release", "-Test"],
@@ -18,35 +18,35 @@
       "problemMatcher": ["$msCompile"]
     },
     {
-      "label": "QTOS: qmllint",
+      "label": "QOR OS: qmllint",
       "type": "shell",
       "command": "pwsh",
       "args": ["-NoProfile", "-File", "${workspaceFolder}/tools/dev/build.ps1", "-Preset", "windows-release", "-Target", "all_qmllint"],
       "problemMatcher": []
     },
     {
-      "label": "QTOS: run shell",
+      "label": "QOR OS: run shell",
       "type": "shell",
       "command": "pwsh",
       "args": ["-NoProfile", "-File", "${workspaceFolder}/tools/dev/run.ps1", "--", "--unlocked", "--open", "files,music"],
       "problemMatcher": []
     },
     {
-      "label": "QTOS: benchmark",
+      "label": "QOR OS: benchmark",
       "type": "shell",
       "command": "pwsh",
       "args": ["-NoProfile", "-File", "${workspaceFolder}/tools/dev/run.ps1", "--", "--open", "files,music,notes", "--benchmark", "10"],
       "problemMatcher": []
     },
     {
-      "label": "QTOS: capture doc screenshots",
+      "label": "QOR OS: capture doc screenshots",
       "type": "shell",
       "command": "pwsh",
       "args": ["-NoProfile", "-File", "${workspaceFolder}/tools/screenshots/capture.ps1"],
       "problemMatcher": []
     },
     {
-      "label": "QTOS: regenerate Lumen tokens",
+      "label": "QOR OS: regenerate Lumen tokens",
       "type": "shell",
       "command": "python",
       "args": ["tools/tokens/generate_tokens.py"],

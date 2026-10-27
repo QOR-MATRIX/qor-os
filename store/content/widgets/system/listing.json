@@ -1,8 +1,8 @@
 {
-  "id": "org.qtos.widget.system",
+  "id": "dev.qorsync.widget.system",
   "name": "System",
   "version": "1.0.0",
-  "developer": "org.qtos",
+  "developer": "dev.qorsync",
   "summary": "Battery and network in one glance.",
   "description": "A ring for the battery that turns green while charging and warns when low, with the Wi-Fi network beneath.",
   "whatsNew": "First release.",

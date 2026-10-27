@@ -1,8 +1,8 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 //
-// prism — the QTOS Wayland compositor (Linux).
+// prism — the QOR OS Wayland compositor (Linux).
 //
-// Hosts the QTOS.Shell desktop inside a Qt Wayland Compositor scene. Run it
+// Hosts the QOR.Shell desktop inside a Qt Wayland Compositor scene. Run it
 // nested for development:
 //
 //   prism --unlocked            # inside an existing Wayland/X11 session or WSLg
@@ -36,11 +36,11 @@
 
 using namespace Qt::StringLiterals;
 
-Q_IMPORT_QML_PLUGIN(QTOS_KitPlugin)
+Q_IMPORT_QML_PLUGIN(QOR_KitPlugin)
 Q_IMPORT_QML_PLUGIN(LumenPlugin)
-Q_IMPORT_QML_PLUGIN(QTOS_ServicesPlugin)
-Q_IMPORT_QML_PLUGIN(QTOS_AppsPlugin)
-Q_IMPORT_QML_PLUGIN(QTOS_ShellPlugin)
+Q_IMPORT_QML_PLUGIN(QOR_ServicesPlugin)
+Q_IMPORT_QML_PLUGIN(QOR_AppsPlugin)
+Q_IMPORT_QML_PLUGIN(QOR_ShellPlugin)
 
 int main(int argc, char *argv[])
 {
@@ -49,15 +49,15 @@ int main(int argc, char *argv[])
         qputenv("QT_QPA_PLATFORM", "wayland");
     qputenv("QT_WAYLAND_DISABLE_WINDOWDECORATION", "1");
     // Before the audio engine or interface sounds touch Qt Multimedia.
-    qtos::audio::configureBackend();
+    qor::audio::configureBackend();
 
     QGuiApplication app(argc, argv);
     QGuiApplication::setOrganizationName(u"QOR-MATRIX"_s);
     QGuiApplication::setApplicationName(u"Prism"_s);
-    QGuiApplication::setApplicationVersion(QStringLiteral(QTOS_VERSION_STRING));
+    QGuiApplication::setApplicationVersion(QStringLiteral(QOR_VERSION_STRING));
 
     QCommandLineParser parser;
-    parser.setApplicationDescription(u"Prism, the QTOS Wayland compositor."_s);
+    parser.setApplicationDescription(u"Prism, the QOR OS Wayland compositor."_s);
     parser.addHelpOption();
     parser.addVersionOption();
     const QCommandLineOption services(u"services"_s, u"embedded (simulated, default) or external."_s, u"mode"_s,
@@ -85,41 +85,41 @@ int main(int argc, char *argv[])
                         benchmarkOut, script });
     parser.process(app);
 
-    qtos::Kit::initialize();
+    qor::Kit::initialize();
     QQuickStyle::setStyle(u"Lumen"_s);
 
     // Automated runs install from the Store into a folder of their own, gone
     // with the run.
     std::unique_ptr<QTemporaryDir> automationStore;
     if ((parser.isSet(screenshot) || parser.isSet(benchmark) || parser.isSet(script))
-        && qEnvironmentVariableIsEmpty("QTOS_STORE_DIR")) {
+        && qEnvironmentVariableIsEmpty("QOR_STORE_DIR")) {
         automationStore = std::make_unique<QTemporaryDir>();
-        qputenv("QTOS_STORE_DIR", automationStore->path().toUtf8());
+        qputenv("QOR_STORE_DIR", automationStore->path().toUtf8());
     }
 
-    std::unique_ptr<qtos::sim::SimServices> simulator;
-    QUrl servicesUrl = qtos::Services::defaultUrl();
+    std::unique_ptr<qor::sim::SimServices> simulator;
+    QUrl servicesUrl = qor::Services::defaultUrl();
     if (parser.value(services) != u"external"_s) {
-        simulator = std::make_unique<qtos::sim::SimServices>();
-        qtos::sim::SimOptions simOptions;
+        simulator = std::make_unique<qor::sim::SimServices>();
+        qor::sim::SimOptions simOptions;
         // Automated runs never make sound, keep no preferences, and get a
         // private endpoint so they never meet a session someone is using.
         const bool automated = parser.isSet(screenshot) || parser.isSet(benchmark) || parser.isSet(script);
         simOptions.silent = automated;
-        if (automated && qEnvironmentVariableIsEmpty("QTOS_GAMEPADS"))
-            qputenv("QTOS_GAMEPADS", "virtual"); // controllers on the desk never join in
-        if (automated && qEnvironmentVariableIsEmpty("QTOS_TOUCHPAD"))
-            qputenv("QTOS_TOUCHPAD", "off");
+        if (automated && qEnvironmentVariableIsEmpty("QOR_GAMEPADS"))
+            qputenv("QOR_GAMEPADS", "virtual"); // controllers on the desk never join in
+        if (automated && qEnvironmentVariableIsEmpty("QOR_TOUCHPAD"))
+            qputenv("QOR_TOUCHPAD", "off");
         if (automated) {
             simOptions.persistent = false;
-            simOptions.url = QUrl(qtos::Services::defaultUrl().scheme() + u":qtos-services-"_s
+            simOptions.url = QUrl(qor::Services::defaultUrl().scheme() + u":qor-services-"_s
                                   + QString::number(QCoreApplication::applicationPid()));
         }
         if (!simulator->start(simOptions))
             return 1;
         servicesUrl = simulator->url();
     }
-    qtos::Services::instance()->connectTo(servicesUrl);
+    qor::Services::instance()->connectTo(servicesUrl);
 
     QQmlApplicationEngine engine;
     QVariantMap options;
@@ -158,7 +158,7 @@ int main(int argc, char *argv[])
     options.insert(u"outputs"_s, outputList);
     options.insert(u"spreadClients"_s, parser.isSet(spreadClients));
     engine.setInitialProperties({ { u"options"_s, options }, { u"socketName"_s, parser.value(socket).toUtf8() } });
-    engine.loadFromModule("QTOS.Prism", "Compositor");
+    engine.loadFromModule("QOR.Prism", "Compositor");
     if (engine.rootObjects().isEmpty())
         return 2;
 
@@ -177,10 +177,10 @@ int main(int argc, char *argv[])
     });
 
     if (benchmarkSeconds > 0)
-        qtos::runShellBenchmark(outputWindows, { u"prism"_s, benchmarkSeconds, parser.value(benchmarkOut) });
+        qor::runShellBenchmark(outputWindows, { u"prism"_s, benchmarkSeconds, parser.value(benchmarkOut) });
 
     if (parser.isSet(script))
-        qtos::runShellScript(outputWindows.value(0), parser.value(script));
+        qor::runShellScript(outputWindows.value(0), parser.value(script));
 
     if (parser.isSet(screenshot)) {
         QTimer::singleShot(parser.value(delay).toInt(), &app, [path = parser.value(screenshot), outputWindows] {

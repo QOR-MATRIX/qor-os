@@ -1,8 +1,8 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 import QtQuick
 import QtQuick.Controls
-import QTOS.Kit
-import QTOS.Input
+import QOR.Kit
+import QOR.Input
 
 // Asks, when a controller connects, whether to switch to the controller
 // interface. Answer with the controller (A switch, B not now, X or Y "always")

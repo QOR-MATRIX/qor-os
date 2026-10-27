@@ -1,8 +1,8 @@
-# The QTOS Store
+# The QOR OS Store
 
 The Store is where people get themes, widgets and, later, apps, games, tools
-and music for QTOS. Stage 1, in this repository today, is a complete,
-verifying client with QTOS's own themes and widgets. There are no payments
+and music for QOR OS. Stage 1, in this repository today, is a complete,
+verifying client with QOR OS's own themes and widgets. There are no payments
 yet. Third-party publishing arrives with the developer program in stages 2
 and 3 ([Roadmap](#roadmap)).
 
@@ -10,7 +10,7 @@ and 3 ([Roadmap](#roadmap)).
 
 - **Store app** (`apps/StoreApp.qml`): Discover, Themes, Widgets, Apps, Games,
   Tools and Music, search, item pages, and a Library with updates. Apps lists
-  what comes with QTOS. Games, Tools and Music say plainly that they arrive
+  what comes with QOR OS. Games, Tools and Music say plainly that they arrive
   with the developer program.
 - **Themes** apply from the Store, from Settings › Appearance (Aurora plus
   installed themes) or from Beam ("Theme: Ember"). A theme sets the accent, a
@@ -30,7 +30,7 @@ System, Focus, Visualizer), all by QOR-MATRIX.
 
 ## How it works
 
-`QTOS.Store` (`store/`) is the client:
+`QOR.Store` (`store/`) is the client:
 
 | Part | Role |
 |------|------|
@@ -39,13 +39,13 @@ System, Focus, Visualizer), all by QOR-MATRIX.
 | `Themes` (QML singleton) | Aurora plus installed themes; the active one; `apply(id)` |
 | `ThemePreview` | A theme in miniature: its wallpaper and a window in its colours |
 
-The catalogue comes from `QTOS_STORE_URL` (the URL of a `catalog.json`; its
+The catalogue comes from `QOR_STORE_URL` (the URL of a `catalog.json`; its
 signature is the same URL with `.sig` appended) or, by default, the signed
-first-party catalogue compiled into QTOS. `qrc:` and `file:` URLs are read
+first-party catalogue compiled into QOR OS. `qrc:` and `file:` URLs are read
 directly; anything else goes through Qt Network (redirects only to equally
 safe URLs, a 30 s transfer timeout), so a store server needs no client
 change. Stage 1 has no server, so that path has not yet met one. Packages install under
-`QTOS_STORE_DIR`, by default the app data folder's `store/`
+`QOR_STORE_DIR`, by default the app data folder's `store/`
 (`items/<id>/` and `installed.json`). Automated runs (`--script`,
 `--screenshot`, `--benchmark`) and the tests use a temporary folder.
 
@@ -59,7 +59,7 @@ colours are identical to Lumen's own, which the golden-image tests guard.
 Nothing installs unless all of these hold:
 
 1. The catalogue carries the **store's signature** over its exact bytes. The
-   store's public key is compiled into QTOS (`store/keys/store.pub`) and is the
+   store's public key is compiled into QOR OS (`store/keys/store.pub`) and is the
    root of trust. Nothing in an unsigned or altered catalogue is believed, not
    even its developer keys.
 2. The downloaded package's **SHA-256** matches the catalogue entry.
@@ -88,20 +88,20 @@ to third parties sooner.
 ```json
 {
   "format": 1,
-  "store": "QTOS Store",
-  "developers": { "org.qtos": { "name": "QOR-MATRIX", "verified": true, "key": "<base64 P-256 point>" } },
+  "store": "QOR OS Store",
+  "developers": { "dev.qorsync": { "name": "QOR-MATRIX", "verified": true, "key": "<base64 P-256 point>" } },
   "items": [{
-    "id": "org.qtos.theme.ember", "kind": "theme", "name": "Ember", "developer": "org.qtos",
+    "id": "dev.qorsync.theme.ember", "kind": "theme", "name": "Ember", "developer": "dev.qorsync",
     "version": "1.0.0", "summary": "…", "description": "…", "whatsNew": "…", "released": "2026-10-26",
     "tags": ["warm"], "featured": true, "price": 0,
     "preview": { "accentHue": 38, "appearance": "dark", "neutralHue": 40, "neutralTint": 1.5,
                  "wallpaperSeed": 11.7, "wallpaperIntensity": 1.15 },
-    "package": { "file": "packages/org.qtos.theme.ember-1.0.0.qtospkg", "size": 806, "sha256": "…" }
+    "package": { "file": "packages/dev.qorsync.theme.ember-1.0.0.qorpkg", "size": 806, "sha256": "…" }
   }]
 }
 ```
 
-**Package** (`.qtospkg`): a zip archive of `manifest.json` (`format`, `id`,
+**Package** (`.qorpkg`): a zip archive of `manifest.json` (`format`, `id`,
 `kind`, `version`, `name`, `developer`, and `files`: path → SHA-256),
 `manifest.sig` (the developer's signature over `manifest.json`) and the
 files.
@@ -124,7 +124,7 @@ files.
 ```
 
 The entry's root `Item` fills a glass card the desktop draws. It may import
-`QtQuick`, `QtQuick.Shapes`, `QTOS.Kit` and `QTOS.Services`, reads the system
+`QtQuick`, `QtQuick.Shapes`, `QOR.Kit` and `QOR.Services`, reads the system
 through `Services` and asks for actions through `Intents`. It never needs
 input while the desktop is being edited: the card disables it then.
 
@@ -145,14 +145,16 @@ Unchanged items keep their signed packages, so rebuilding changes nothing.
 bytes alone (`.gitattributes`).
 
 **Signing keys never enter the repository.** `build` keeps them in
-`~/.qtos/store-signing/`: `store.pem` signs the catalogue and
+`~/.qor-os/store-signing/`, or in QTOS's `~/.qtos/store-signing/` while the
+keys are still there, so a missing folder never creates a new store key:
+`store.pem` signs the catalogue and
 `developer-<id>.pem` signs that developer's packages. The first build creates
 them and writes the store's public key to `store/keys/store.pub`. Back these
-keys up: whoever holds `store.pem` decides what every QTOS installation
+keys up: whoever holds `store.pem` decides what every QOR OS installation
 trusts. Before the Store opens to the public, generate the production store
 key offline or in a hardware security module, sign catalogues on a machine
 that holds nothing else, and ship its public key in a release. Rotating the
-store key needs a QTOS update.
+store key needs a QOR OS update.
 
 Tests: `tst_store` (signatures, the first-party catalogue, refused tampering,
 forgery and unsigned catalogues, install, update and remove), a qmllint pass
@@ -186,7 +188,7 @@ it. Third-party themes first; widgets and apps once the Phase 3 sandbox
 exists.
 
 **Stage 3: paid items.** An 8% commission on paid purchases, made to work by
-a prepaid QTOS balance: people top up once (cards and Cash App Pay through
+a prepaid QOR OS balance: people top up once (cards and Cash App Pay through
 Stripe; Bitcoin only for top-ups and fees, through a processor that settles
 in dollars) and purchases come out of the balance, so card fees do not eat
 small sales. Stripe Connect onboards and pays developers. Stripe Tax collects

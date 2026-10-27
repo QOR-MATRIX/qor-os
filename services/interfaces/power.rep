@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
-// qtos-powerd: battery, power profiles and session power actions
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
+// qor-powerd: battery, power profiles and session power actions
 // (backed by UPower, power-profiles-daemon and logind on device).
 
 class Power

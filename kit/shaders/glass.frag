@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 //
 // Lumen Glass: samples a shared, pre-blurred backdrop texture at this item's
 // exact on-screen rectangle, tints it, adds blue-noise grain against banding,

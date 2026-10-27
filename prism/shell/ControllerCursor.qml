@@ -1,7 +1,7 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 import QtQuick
-import QTOS.Kit
-import QTOS.Input
+import QOR.Kit
+import QOR.Input
 
 // The controller interface's pointer: a soft accent ring around a bright
 // centre (the hot spot), drawn above everything. It shrinks while pressed.

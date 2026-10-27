@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
 #include <QtCore/QList>
@@ -11,7 +11,7 @@ QT_BEGIN_NAMESPACE
 class QPointingDevice;
 QT_END_NAMESPACE
 
-namespace qtos::input {
+namespace qor::input {
 
 // One finger on a touchpad, in millimetres from the pad's top-left corner.
 struct TouchpadContact
@@ -77,16 +77,16 @@ class TouchpadSource : public QObject
     Q_OBJECT
 
 public:
-    // nullptr where the platform needs no source, or with QTOS_TOUCHPAD=off.
+    // nullptr where the platform needs no source, or with QOR_TOUCHPAD=off.
     static TouchpadSource *instance();
     // The touchpad device the gesture events carry.
     virtual const QPointingDevice *device() const = 0;
 
 Q_SIGNALS:
-    void swipe(qtos::input::TouchpadSwipe::Phase phase, QPointF delta, int fingers);
+    void swipe(qor::input::TouchpadSwipe::Phase phase, QPointF delta, int fingers);
 
 protected:
     using QObject::QObject;
 };
 
-} // namespace qtos::input
+} // namespace qor::input

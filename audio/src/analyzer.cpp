@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "analyzer.h"
 
 #include "dsp.h"
@@ -7,7 +7,7 @@
 #include <cmath>
 #include <numeric>
 
-namespace qtos::audio {
+namespace qor::audio {
 
 namespace {
 
@@ -164,4 +164,4 @@ AnalysisFrame Analyzer::silence(double dt)
     return m_frame;
 }
 
-} // namespace qtos::audio
+} // namespace qor::audio

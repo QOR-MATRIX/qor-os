@@ -242,7 +242,7 @@ grep '^Output ' "$out/prism.log" || true
 # One animating client per output (--spread-clients places them).
 for i in $(seq 1 "$outputs"); do
     WAYLAND_DISPLAY="$socket" QT_QPA_PLATFORM=wayland "$client" --title "Gate client $i" \
-        --app-id org.qtos.GateClient --size 900x560 --animate > "$out/client-$i.log" 2>&1 < /dev/null &
+        --app-id dev.qorsync.GateClient --size 900x560 --animate > "$out/client-$i.log" 2>&1 < /dev/null &
     pids+=($!)
     sleep 0.5
 done

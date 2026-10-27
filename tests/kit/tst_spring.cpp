@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "kit.h"
 #include "spring.h"
 
@@ -8,7 +8,7 @@
 #include <cmath>
 
 using namespace Qt::StringLiterals;
-using qtos::Spring;
+using qor::Spring;
 
 class tst_Spring : public QObject
 {
@@ -27,7 +27,7 @@ private:
     }
 
 private Q_SLOTS:
-    void init() { qtos::Kit::instance()->setReducedMotion(false); }
+    void init() { qor::Kit::instance()->setReducedMotion(false); }
 
     void startsAtRestOnTarget()
     {
@@ -168,7 +168,7 @@ private Q_SLOTS:
 
     void reducedMotionSnaps()
     {
-        qtos::Kit::instance()->setReducedMotion(true);
+        qor::Kit::instance()->setReducedMotion(true);
         Spring spring;
         spring.snap(0);
         spring.setTarget(10);

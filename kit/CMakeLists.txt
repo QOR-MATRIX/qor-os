@@ -1,20 +1,20 @@
-# QTOS.Kit — Lumen design tokens, theme, motion and material primitives.
+# QOR.Kit — Lumen design tokens, theme, motion and material primitives.
 
 set_source_files_properties(Tokens.qml Theme.qml Motion.qml Materials.qml Sounds.qml
     PROPERTIES QT_QML_SINGLETON_TYPE TRUE
 )
 
 # The icon set is defined once, in icons/icons.txt.
-file(STRINGS icons/icons.txt _qtos_icon_names REGEX "^[a-z0-9-]+$")
-set(QTOS_KIT_ICONS "")
-foreach(_name IN LISTS _qtos_icon_names)
-    list(APPEND QTOS_KIT_ICONS "icons/${_name}.svg")
+file(STRINGS icons/icons.txt _qor_icon_names REGEX "^[a-z0-9-]+$")
+set(QOR_KIT_ICONS "")
+foreach(_name IN LISTS _qor_icon_names)
+    list(APPEND QOR_KIT_ICONS "icons/${_name}.svg")
 endforeach()
 
-qt_add_library(qtos_kit STATIC)
+qt_add_library(qor_kit STATIC)
 
-qt_add_qml_module(qtos_kit
-    URI QTOS.Kit
+qt_add_qml_module(qor_kit
+    URI QOR.Kit
     VERSION 1.0
     RESOURCE_PREFIX /qt/qml
     QML_FILES
@@ -30,7 +30,7 @@ qt_add_qml_module(qtos_kit
         Icon.qml
         AppIcon.qml
         Artwork.qml
-        QtosMark.qml
+        QorMark.qml
         IconButton.qml
         SidebarItem.qml
         SectionHeader.qml
@@ -52,7 +52,7 @@ qt_add_qml_module(qtos_kit
         fonts/InterVariable.ttf
         fonts/InterVariable-Italic.ttf
         fonts/JetBrainsMono-Variable.ttf
-        ${QTOS_KIT_ICONS}
+        ${QOR_KIT_ICONS}
         sounds/notification.wav
         sounds/lock.wav
         sounds/unlock.wav
@@ -64,8 +64,8 @@ qt_add_qml_module(qtos_kit
         QtMultimedia
 )
 
-qt_add_shaders(qtos_kit "qtos_kit_shaders"
-    PREFIX "/qt/qml/QTOS/Kit"
+qt_add_shaders(qor_kit "qor_kit_shaders"
+    PREFIX "/qt/qml/QOR/Kit"
     FILES
         shaders/surface.frag
         shaders/glass.frag
@@ -75,14 +75,14 @@ qt_add_shaders(qtos_kit "qtos_kit_shaders"
         shaders/glow.frag
 )
 
-target_include_directories(qtos_kit PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
-target_link_libraries(qtos_kit
+target_include_directories(qor_kit PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
+target_link_libraries(qor_kit
     PUBLIC
         Qt6::Quick
         Qt6::QuickEffects
         Qt6::Svg
     PRIVATE
-        qtos::compiler_settings
+        qor::compiler_settings
 )
 
 add_subdirectory(style)

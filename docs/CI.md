@@ -25,7 +25,7 @@ Pull-request runs cancel superseded runs. Each OS job runs only when that OS has
 
 ### The carried products
 
-On Windows, with `QTOS_RUN_GPU_TESTS`, the job also builds and tests QQ,
+On Windows, with `QOR_RUN_GPU_TESTS`, the job also builds and tests QQ,
 ARQADE and QOR Media through `tools/dev/products.ps1`. Each product's own
 script runs every suite, and QOR Media's needs PDFium, which its script fetches
 and checks by SHA-256. The suites take about ten minutes and drive real windows
@@ -106,14 +106,14 @@ variables, so each repository sets its own:
 
 | Variable | Value | Effect |
 |----------|-------|--------|
-| `QTOS_WINDOWS_RUNNER` | `["self-hosted","windows","qt"]` | Windows job runs on the workstation |
-| `QTOS_WINDOWS_QT_DIR` | `C:/Qt/6.12.0/msvc2022_64` | Use the installed kit; skip the installer |
-| `QTOS_RUN_GPU_TESTS` | `true` (optional) | Also run GPU-labelled suites and the carried products (opens brief test windows on the runner's desktop) |
-| `QTOS_LINUX_RUNNER` | `["self-hosted","linux","qt"]` | Linux job runs in WSL on the workstation |
-| `QTOS_LINUX_QT_DIR` | `/home/<user>/Qt/6.12.0/gcc_64` | Use the installed kit |
+| `QOR_WINDOWS_RUNNER` | `["self-hosted","windows","qt"]` | Windows job runs on the workstation |
+| `QOR_WINDOWS_QT_DIR` | `C:/Qt/6.12.0/msvc2022_64` | Use the installed kit; skip the installer |
+| `QOR_RUN_GPU_TESTS` | `true` (optional) | Also run GPU-labelled suites and the carried products (opens brief test windows on the runner's desktop) |
+| `QOR_LINUX_RUNNER` | `["self-hosted","linux","qt"]` | Linux job runs in WSL on the workstation |
+| `QOR_LINUX_QT_DIR` | `/home/<user>/Qt/6.12.0/gcc_64` | Use the installed kit |
 
-The variables keep their QTOS names until the product name is cleared
-([QOR-0008](decisions/QOR-0008-before-a-public-release.md)). Until they are set,
+The variables took their `QOR_` names on 27 October 2026
+([QOR-0009](decisions/QOR-0009-the-name-is-qor-os.md)); the frozen QTOS keeps its own `QTOS_` set. Until they are set,
 a job is skipped; once they are set, jobs wait in the queue whenever the runner
 is not running.
 
@@ -121,9 +121,9 @@ is not running.
 the owner adds once. Assistants do not write Startup entries.
 
 ```powershell
-Set-Content "$([Environment]::GetFolderPath('Startup'))\qtos-github-runner.cmd" `
+Set-Content "$([Environment]::GetFolderPath('Startup'))\qor-github-runner.cmd" `
   "@start `"QOR OS Windows runner`" /min cmd /c `"%USERPROFILE%\ghr\qtos\run.cmd`""
-Set-Content "$([Environment]::GetFolderPath('Startup'))\qtos-github-runner-linux.cmd" `
+Set-Content "$([Environment]::GetFolderPath('Startup'))\qor-github-runner-linux.cmd" `
   "@start `"QOR OS Linux runner`" /min wsl.exe -d Ubuntu --cd ~ --exec /home/$($env:USERNAME.ToLower())/ghr/qtos-linux/run.sh"
 ```
 
@@ -150,7 +150,7 @@ The Linux job runs inside WSL2 Ubuntu, using the commercial kit in `~/Qt`
 ([BUILDING.md](BUILDING.md#linux-on-wsl2-windows-workstation)) and Rust from
 rustup in `~/.cargo` (1.98.1).
 
-With `QTOS_RUN_GPU_TESTS`, the Linux job also runs two things on WSLg's
+With `QOR_RUN_GPU_TESTS`, the Linux job also runs two things on WSLg's
 display: the GPU suites, and `tools/dev/prism-protocol-check.sh`, which
 connects real clients to the built compositor.
 
@@ -177,7 +177,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profil
 sudo apt-get install libdbus-1-dev pkg-config
 # Download the actions-runner-linux-x64 tarball, check its SHA-256, extract it to ~/ghr/qtos-linux, then:
 ./config.sh --unattended --url https://github.com/QOR-MATRIX/qor-os --token <registration token> \
-  --name "$(hostname)-qtos-linux" --labels qt,gcc,wsl,gpu --work _work --replace
+  --name "$(hostname)-qor-linux" --labels qt,gcc,wsl,gpu --work _work --replace
 printf '%s\n' "$HOME/.cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/lib/wsl/lib" > .path
 printf '%s\n' LANG=C.UTF-8 DISPLAY=:0 WAYLAND_DISPLAY=/mnt/wslg/runtime-dir/wayland-0 XDG_RUNTIME_DIR=/run/user/$(id -u) > .env
 ```

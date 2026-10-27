@@ -1,5 +1,5 @@
 QOR OS — Proprietary License
-SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 
 Copyright (c) 2026 QOR-MATRIX. All rights reserved.
 
@@ -34,5 +34,5 @@ QOR OS is developed with Qt, used under a commercial Qt license held by
 QOR-MATRIX. Distribution of QOR OS binaries is subject to the terms of that
 license (see docs/decisions/QOR-0008-before-a-public-release.md).
 
-The SPDX identifier keeps its QTOS name until the product name is cleared
-(QOR-0008).
+Source files carry SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
+(QOR-0009).

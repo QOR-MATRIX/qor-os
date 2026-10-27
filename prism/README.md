@@ -2,8 +2,8 @@
 
 | Path | Contents |
 |------|----------|
-| `shell/` | **QTOS.Shell**: `Main` (simulator window), `Desktop` (orchestration, layering, shortcuts, actions), `WindowLayer` + `AppWindow` (window management), `Rail`, `LiveActivity`, `MediaPopover`, `Shelf` + `ShelfButton`, `Beam` + `search.js`, `ControlCenter`, `NotificationStack` + `NotificationCard`, `LockScreen`, `SpaceSwitcher` |
-| `host/` | **qtos-shell**: CLI options, embedded simulator, screenshot, `--benchmark`, GPU preference (`gpupreference.cpp`) |
+| `shell/` | **QOR.Shell**: `Main` (simulator window), `Desktop` (orchestration, layering, shortcuts, actions), `WindowLayer` + `AppWindow` (window management), `Rail`, `LiveActivity`, `MediaPopover`, `Shelf` + `ShelfButton`, `Beam` + `search.js`, `ControlCenter`, `NotificationStack` + `NotificationCard`, `LockScreen`, `SpaceSwitcher` |
+| `host/` | **qor-shell**: CLI options, embedded simulator, screenshot, `--benchmark`, GPU preference (`gpupreference.cpp`) |
 | `compositor/` | **prism** (Linux, experimental): `Compositor.qml` hosts the same `Desktop` in a Qt Wayland Compositor scene; xdg-shell, server- and client-side decorations, text input |
 
 Behaviour spec: [docs/design/SHELL.md](../docs/design/SHELL.md). Compositor
@@ -14,8 +14,8 @@ Run the compositor nested on Linux:
 
 ```bash
 cmake --preset linux-release && cmake --build --preset linux-release
-./build/linux-release/prism/compositor/prism --unlocked --socket wayland-qtos &
-WAYLAND_DISPLAY=wayland-qtos QT_QPA_PLATFORM=wayland some-qt-app
+./build/linux-release/prism/compositor/prism --unlocked --socket wayland-qor &
+WAYLAND_DISPLAY=wayland-qor QT_QPA_PLATFORM=wayland some-qt-app
 ```
 
 Without `--socket`, Prism takes the first free socket in `$XDG_RUNTIME_DIR`
@@ -47,7 +47,7 @@ Prism's own protocols are generated from the XML in `compositor/protocols/`
 (wayland-protocols 1.47). To verify them on the wire, run:
 
 ```bash
-tools/dev/prism-protocol-check.sh ~/qtos-build/linux-release
+tools/dev/prism-protocol-check.sh ~/qor-build/linux-release
 ```
 
 The script starts a nested Prism with real clients and checks three things:

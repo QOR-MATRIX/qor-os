@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "signature.h"
 
 #ifndef WIN32_LEAN_AND_MEAN
@@ -15,7 +15,7 @@
 
 #include <cstring>
 
-namespace qtos::store {
+namespace qor::store {
 
 bool verifySignature(const QByteArray &publicKey, const QByteArray &message, const QByteArray &signature)
 {
@@ -46,4 +46,4 @@ bool verifySignature(const QByteArray &publicKey, const QByteArray &message, con
     return valid;
 }
 
-} // namespace qtos::store
+} // namespace qor::store

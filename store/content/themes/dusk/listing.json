@@ -1,8 +1,8 @@
 {
-  "id": "org.qtos.theme.dusk",
+  "id": "dev.qorsync.theme.dusk",
   "name": "Dusk",
   "version": "1.0.0",
-  "developer": "org.qtos",
+  "developer": "dev.qorsync",
   "summary": "Violet twilight with a magenta glow.",
   "description": "Dusk is the half hour after sunset: plum surfaces, a vivid magenta accent and a wallpaper that glows a little brighter than the rest.",
   "whatsNew": "First release.",

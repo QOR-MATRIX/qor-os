@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-    Captures the canonical QTOS screenshots used in the docs (docs/images).
+    Captures the canonical QOR OS screenshots used in the docs (docs/images).
 
 .DESCRIPTION
-    Runs qtos-shell once per scene with deterministic options (ephemeral
+    Runs qor-shell once per scene with deterministic options (ephemeral
     preferences, fixed size) and saves each frame with QQuickWindow::grabWindow.
 
 .EXAMPLE
@@ -23,10 +23,10 @@ $ErrorActionPreference = 'Stop'
 $repo = Resolve-Path (Join-Path $PSScriptRoot '..\..')
 if (-not $OutDir) { $OutDir = Join-Path $repo 'docs\images' }
 New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
-. (Join-Path $repo 'tools\dev\Enter-QtosShell.ps1')
+. (Join-Path $repo 'tools\dev\Enter-QorShell.ps1')
 
-$exe = Join-Path $repo "build\$Preset\qtos-shell.exe"
-if (-not (Test-Path $exe)) { throw "qtos-shell not built for preset '$Preset'." }
+$exe = Join-Path $repo "build\$Preset\qor-shell.exe"
+if (-not (Test-Path $exe)) { throw "qor-shell not built for preset '$Preset'." }
 
 $catalog = [ordered]@{
     'lock'           = @('--delay', '2500')

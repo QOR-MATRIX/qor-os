@@ -1,6 +1,6 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 import QtQuick
-import QTOS.Kit
+import QOR.Kit
 
 // Golden scene: the Aurora wallpaper, the shared Backdrop blur and Glass.
 // With Increase Contrast the glass falls back to solid material.

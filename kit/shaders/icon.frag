@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 //
 // Tints a white vector icon rendered by Qt SVG: the source alpha becomes the
 // coverage of a solid color, so one rasterised icon serves every theme.

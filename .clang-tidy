@@ -1,4 +1,4 @@
-# QTOS clang-tidy profile. Run with tools/dev/tidy.ps1 or your IDE (clangd
+# QOR OS clang-tidy profile. Run with tools/dev/tidy.ps1 or your IDE (clangd
 # reads this file). Uses compile_commands.json from any configured preset.
 Checks: >
   -*,

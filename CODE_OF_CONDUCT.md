@@ -1,6 +1,6 @@
 # Code of conduct
 
-QTOS adopts the [Contributor Covenant, version 2.1](https://www.contributor-covenant.org/version/2/1/code_of_conduct/)
+QOR OS adopts the [Contributor Covenant, version 2.1](https://www.contributor-covenant.org/version/2/1/code_of_conduct/)
 as its code of conduct.
 
 In short: be respectful, assume good intent, give and accept constructive
@@ -12,7 +12,7 @@ or chat.
 ## Reporting
 
 Report unacceptable behaviour privately to the repository maintainers through
-[GitHub](https://github.com/QOR-MATRIX/QTOS/security/advisories/new) (mark the
+[GitHub](https://github.com/QOR-MATRIX/qor-os/security/advisories/new) (mark the
 report as a conduct issue), or directly to an organisation owner of
 QOR-MATRIX. All reports are handled confidentially.
 

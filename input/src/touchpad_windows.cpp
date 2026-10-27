@@ -1,7 +1,7 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 //
 // Precision touchpads on Windows, read through Raw Input. Windows keeps
-// multi-finger touchpad gestures for itself and Qt reports none, so QTOS reads
+// multi-finger touchpad gestures for itself and Qt reports none, so QOR OS reads
 // the contacts (HID usage page 0x0D, usage 0x05) and finds its own swipes.
 
 #ifndef WIN32_LEAN_AND_MEAN
@@ -32,9 +32,9 @@
 #include <memory>
 #include <vector>
 
-Q_LOGGING_CATEGORY(lcTouchpad, "qtos.input.touchpad")
+Q_LOGGING_CATEGORY(lcTouchpad, "qor.input.touchpad")
 
-namespace qtos::input {
+namespace qor::input {
 
 namespace {
 
@@ -113,7 +113,7 @@ public:
         windowClass.cbSize = sizeof(windowClass);
         windowClass.lpfnWndProc = &PrecisionTouchpad::windowProc;
         windowClass.hInstance = GetModuleHandleW(nullptr);
-        windowClass.lpszClassName = L"QtosPrecisionTouchpad";
+        windowClass.lpszClassName = L"QorPrecisionTouchpad";
         RegisterClassExW(&windowClass);
         m_window = CreateWindowExW(0, windowClass.lpszClassName, L"", 0, 0, 0, 0, 0, HWND_MESSAGE, nullptr,
                                    windowClass.hInstance, nullptr);
@@ -123,7 +123,7 @@ public:
         }
         SetWindowLongPtrW(m_window, GWLP_USERDATA, LONG_PTR(this));
         // INPUTSINK: contacts arrive whichever window has focus; SystemGestures
-        // acts on them only while a QTOS window does.
+        // acts on them only while a QOR OS window does.
         RAWINPUTDEVICE device { kDigitizer, kTouchPad, RIDEV_INPUTSINK | RIDEV_DEVNOTIFY, m_window };
         if (!RegisterRawInputDevices(&device, 1, sizeof(device)))
             qCWarning(lcTouchpad) << "Cannot register for touchpad input:" << GetLastError();
@@ -327,9 +327,8 @@ private:
 
 TouchpadSource *TouchpadSource::instance()
 {
-    static PrecisionTouchpad *source =
-        qEnvironmentVariable("QTOS_TOUCHPAD") == u"off" ? nullptr : new PrecisionTouchpad;
+    static PrecisionTouchpad *source = qEnvironmentVariable("QOR_TOUCHPAD") == u"off" ? nullptr : new PrecisionTouchpad;
     return source;
 }
 
-} // namespace qtos::input
+} // namespace qor::input

@@ -1,11 +1,11 @@
-// SPDX-License-Identifier: LicenseRef-QTOS-Proprietary
+// SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "renderer.h"
 
 #include <QtCore/QThread>
 
 #include <algorithm>
 
-namespace qtos::audio {
+namespace qor::audio {
 
 Renderer::Renderer(double sampleRate) : m_sampleRate(sampleRate), m_monitor(new std::atomic<float>[kMonitorSize])
 {
@@ -167,4 +167,4 @@ void Renderer::processBlock(float *out, int frames)
         out[i] = softLimit(out[i]);
 }
 
-} // namespace qtos::audio
+} // namespace qor::audio
