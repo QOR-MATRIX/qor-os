@@ -1,0 +1,205 @@
+// SceneIO: QQ scenes to and from their files (ADR-083 decision 3, DIRECTION P3.1).
+//
+// A scene file is QML, `scenes/<name>.qml` in a Qontrol project, in one canonical layout: an import line, the Scene with
+// its fields one per line, then each entity as a block with its fields one per line, all in the order each type
+// declares. The same scene is always the same bytes, and changing one value changes one line, so Projects shows a
+// creator's change as what it is.
+//
+// The writer knows no type: every entity declares `kind` (its QML type's name) and `fields` (what a file keeps). A value
+// is written by its type: numbers to four decimal places with trailing zeros dropped, colours as "#rrggbb", vectors as
+// Qt.vector3d(x, y, z), URLs relative to the scene file.
+
+#pragma once
+
+#include <QJSValue>
+#include <QObject>
+#include <QSize>
+#include <QString>
+#include <QUrl>
+#include <QVariantMap>
+#include <QtQml/qqmlregistration.h>
+
+class QQmlEngine;
+class QJSEngine;
+
+namespace qq {
+
+class SceneIO : public QObject
+{
+    Q_OBJECT
+    QML_ELEMENT
+    QML_SINGLETON
+
+public:
+    explicit SceneIO(QObject *parent = nullptr);
+
+    static SceneIO *create(QQmlEngine *qml, QJSEngine *js);
+
+    /// The canonical text of `scene`. With `file`, URLs are written relative to the file's folder.
+    Q_INVOKABLE QString write(QObject *scene, const QUrl &file = {}) const;
+
+    /// Write `scene` to `file`, whole or not at all. An empty string, or what went wrong.
+    Q_INVOKABLE QString save(QObject *scene, const QUrl &file) const;
+
+    /// Build the scene in `file` (on this computer, or bundled in qrc:) under `parent` (a 3D node). The new scene, or
+    /// null with `lastError` set.
+    Q_INVOKABLE QObject *load(const QUrl &file, QObject *parent);
+
+    /// Build a scene from its text, as if read from `file` (which relative URLs resolve against).
+    Q_INVOKABLE QObject *loadText(const QString &text, const QUrl &file, QObject *parent);
+
+    /// Play `scene`: a copy built from its text under `parent`, with `playing` set. The scene itself is not touched, so
+    /// stopping is discarding the copy. The copy, or null with `lastError` set.
+    Q_INVOKABLE QObject *play(QObject *scene, const QUrl &file, QObject *parent);
+
+    /// A URL an entity holds, made whole against the file the entity was read from (Qt 6 keeps URL properties as
+    /// written, so a model's "../assets/x.glb" stays relative until something resolves it). Confined (confineTo), an
+    /// empty URL for one outside the game's package: every model, sound, picture, sky, map and logic file a scene names
+    /// is found through this before it is loaded.
+    Q_INVOKABLE QUrl resolvedUrl(QObject *entity, const QUrl &url) const;
+
+    /// The type of one of an object's properties, as the inspector edits it: "real", "int", "bool", "string", "url",
+    /// "color" or "vector3d"; "" for anything else.
+    Q_INVOKABLE QString fieldType(QObject *object, const QString &name) const;
+
+    /// Copy a file an entity uses into the project: a model (and every file it refers to) or a sound into `assets/`, a
+    /// logic file into `logic/`. Its new URL, or an empty URL with `lastError` set. A file already inside the project is
+    /// left where it is.
+    Q_INVOKABLE QUrl adopt(const QUrl &model, const QUrl &project);
+
+    /// Write a logic file, `logic/<name>.qml` in the project, whole or not at all: how the Studio starts a new behaviour,
+    /// and how the agent writes one (P3.3). `name` is made safe for a file name. Its URL, or an empty URL with
+    /// `lastError` set.
+    Q_INVOKABLE QUrl writeLogic(const QUrl &project, const QString &name, const QString &text);
+
+    /// A 2D QQ scene of format 1 (`.qq.json`, ADR-082's preview) as a canonical QQ scene: { "qml": text, "imported":
+    /// how many entities it became, "skipped": [what has no 3D form yet], "error": "" or why it could not be read }.
+    Q_INVOKABLE QVariantMap importQqJson(const QUrl &file);
+
+    // ── Editing: what the Studio's panels do, and what the agent's tools will do (P3.3) ──
+
+    /// The kinds an entity can be: "Shape", "Lamp", "Prop", "Sun", "Ground", "Player", "Emitter", "Sound", "Behaviour",
+    /// "Trigger", the screen kinds "ScreenText", "ScreenBar", "ScreenButton", "ScreenImage", "ScreenPanel",
+    /// "InputAction", the 2D kinds "Sprite", "TileMap" and "Player2D", "Music" (P3.13), "Spotlight" (P3.14), and
+    /// "Group" and "Prefab" (P3.15).
+    Q_INVOKABLE QStringList kinds() const;
+
+    /// The scene's entities, in file order, those in groups among them (after their group): what the file holds. Not
+    /// a prefab's parts, which come from its own file.
+    Q_INVOKABLE QVariantList entities(QObject *scene) const;
+    /// Every entity that plays in the scene: its entities and, after each prefab, the parts it is made of.
+    Q_INVOKABLE QVariantList everyEntity(QObject *scene) const;
+    /// The scene an entity is in (up through its groups and prefabs), or null.
+    Q_INVOKABLE QObject *sceneOf(QObject *entity) const;
+    /// Whether an entity of `kind` can be in a group (P3.15): anything placed, but a player, the ground, the sun, a tile
+    /// map, and what has no place in the world (logic, music, actions, the interface).
+    Q_INVOKABLE bool nestable(const QString &kind) const;
+
+    /// Add an entity of `kind` to the scene, with `properties` set, or to a group of it (`into`); it, or null with
+    /// `lastError` set.
+    Q_INVOKABLE QObject *add(QObject *scene, const QString &kind, const QVariantMap &properties = {},
+                             QObject *into = nullptr);
+
+    /// Take an entity out of its scene and delete it, with what is in it, and the bodies play made for them (their
+    /// `physics`), which sit at the scene's top. False if it is not an entity of a scene.
+    Q_INVOKABLE bool remove(QObject *entity);
+
+    /// Put an entity in a group of its scene, or back at the scene's top (`into` the scene), where it is in the world
+    /// staying where it is. False, with `lastError`, if it cannot be: its kind is not nestable, or the group is in it.
+    Q_INVOKABLE bool reparent(QObject *entity, QObject *into);
+
+    // ── Prefabs (P3.15): a group kept in a file of its own, prefabs/<name>.qml, and placed as often as wanted ──
+
+    /// Build the prefab file `file` (whose root is a Group) as `prefab`'s parts: the root, or null with `lastError` set.
+    Q_INVOKABLE QObject *instantiate(QObject *prefab, const QUrl &file);
+    /// Write `group` as prefabs/<name>.qml in `project`, at the origin, whole or not at all: its URL, or an empty URL with
+    /// `lastError` set. Never over a file that is there unless `replace`.
+    Q_INVOKABLE QUrl writePrefab(QObject *group, const QUrl &project, const QString &name, bool replace = false);
+
+    // ── Play: what logic asks of the world (P3.7) ──
+
+    /// The View3D a scene is shown in, or null: what a ray is cast through (Logic.ray). A World names itself on the node it
+    /// puts scenes under (World.qml).
+    Q_INVOKABLE QObject *viewOf(QObject *scene) const;
+
+    /// The entity of `scene` that `object` belongs to: a model drawn for it, a body play made for it, or the entity
+    /// itself; the innermost, so a shape in a group is the shape and a part of a prefab the part. Null for anything else.
+    Q_INVOKABLE QObject *entityOf(QObject *scene, QObject *object) const;
+
+    /// An image's size in pixels, read from its header (a Sprite sizes itself by it, P3.10), or 0 by 0 if it cannot be
+    /// read or is outside a confined game's package.
+    Q_INVOKABLE QSize imageSize(const QUrl &image) const;
+
+    /// A map drawn in Tiled (a TileMap reads it, P3.10): readTiledMap() in tilemap.h, held to a confined game's package.
+    Q_INVOKABLE QVariantMap readTiledMap(const QUrl &file, const QString &layer = {}) const;
+
+    // ── QQ's own kinematics and the run (P3.11): the same on every machine, and never PhysX ──
+
+    /// Move a box `halfWidth` by `halfHeight` about (x, y), at depth z, by (dx, dy) among what stands in `scene`: solid
+    /// tile maps, static and kinematic shapes and sprites, and the ground; `mover` itself is not in its own way. Across
+    /// first, then up or down: { x, y, left, right, down, up }, each side true where it met something (kinematics.h).
+    Q_INVOKABLE QVariantMap move2D(QObject *scene, QObject *mover, double x, double y, double z, double halfWidth,
+                                   double halfHeight, double dx, double dy) const;
+    /// Whether two entities' boxes overlap, as QQ measures them (not PhysX): a Player2D its figure, a sprite its frame, a
+    /// shape or a trigger its scale, the player its capsule's box. Touching is not overlapping.
+    Q_INVOKABLE bool overlaps(QObject *a, QObject *b) const;
+    /// A seed for a run that names none: never 0.
+    Q_INVOKABLE int freshSeed() const;
+    /// `logic`'s told(message), the message handed on as the JavaScript value it is (ADR-117): a QML signal's var
+    /// argument, sent from QML, turns a JavaScript array into a Qt list, which Array.isArray does not know as one.
+    Q_INVOKABLE void tellLogic(QObject *logic, const QJSValue &message) const;
+
+    /// Put a whole scene away (the Studio, opening another or stopping play). Its physics bodies are destroyed at once,
+    /// before their world; everything else when control returns to the event loop.
+    Q_INVOKABLE void discard(QObject *scene);
+
+    /// A project folder as the Studio shows it: { "name", "repository": whether it is a Qontrol (git) repository,
+    /// "scenes": the names of scenes/<name>.qml, sorted, "logic": the names of logic/<name>.qml, sorted, "prefabs": the
+    /// names of prefabs/<name>.qml, sorted, "assets": what is in assets/ (and its folders) that a scene can use, each
+    /// { "path": "assets/x.png", "kind": "model", "picture", "sound", "sky" or "map", "url" }, sorted by path }.
+    Q_INVOKABLE QVariantMap project(const QUrl &folder) const;
+
+    /// A text file's text (a logic file the Studio's editor opens, P3.15), or undefined with `lastError` set: one that
+    /// cannot be read, or, confined, is outside the game's package.
+    Q_INVOKABLE QVariant readText(const QUrl &file);
+
+    /// Whether `text` builds as QML where `file` would be (a logic file being written, P3.15): every error, as
+    /// { "line", "column", "message" }, in order; none if it builds. Nothing is made and nothing is run.
+    Q_INVOKABLE QVariantList checkLogic(const QString &text, const QUrl &file);
+
+    /// The store of the game `entity` plays in (P3.16, store.h): the game's own, kept from one play to the next, or,
+    /// while its scene replays, a copy in memory of the store as the run found it, which the replay leaves behind. Null
+    /// for a scene that is in no folder. Confined, it is always the store of the package the engine is confined to, so a
+    /// game reaches no other's.
+    Q_INVOKABLE QObject *storeOf(QObject *entity);
+
+    Q_PROPERTY(QString lastError READ lastError NOTIFY lastErrorChanged)
+    QString lastError() const { return m_lastError; }
+
+    /// Confine this engine's SceneIO to one game's package (ADR-087): it reads scenes only from inside `package` (a
+    /// folder, on this computer or bundled in qrc:), and writes and copies nothing at all. Called by the QQ Player before
+    /// a game loads, from C++ only, so a game cannot lift it; there is no way back.
+    void confineTo(const QUrl &package);
+    bool confined() const { return m_confined; }
+
+signals:
+    void lastErrorChanged();
+
+private:
+    void fail(const QString &why);
+    /// Whether `url` is out of bounds for a confined SceneIO: anything not under the package, other than the
+    /// executable's own resources. Always false when not confined.
+    bool outside(const QUrl &url) const;
+    QQmlEngine *engine() const;
+
+    QQmlEngine *m_engine = nullptr;
+    QString m_lastError;
+    bool m_confined = false;
+    QString m_package;
+    QUrl m_packageUrl;
+};
+
+/// A number as a scene file writes it: four decimal places at most, no trailing zeros, never "-0".
+QString formatNumber(double value);
+
+}  // namespace qq
