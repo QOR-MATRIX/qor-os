@@ -113,6 +113,7 @@ with `QOR_CORE_SOURCE_DIR` at #107's branch (`48e9bfa`) and
 and linked on Windows in 3 min 22 s, and `tst_qorcore` passed 9 of 9.
 
 Two of the owner's decisions come first:
+
 - **ADR-121, proposed in that PR.** It extends the launcher's guarded audit
   ignore of RUSTSEC-2026-0344 (`ruzstd`, reached only through subxt's light
   client, which nothing builds) to the core's lockfile. The PR must not merge
