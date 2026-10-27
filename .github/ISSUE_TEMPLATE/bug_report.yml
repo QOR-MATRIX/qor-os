@@ -1,11 +1,11 @@
 name: Bug report
-description: Something in QTOS behaves incorrectly, crashes, or regresses.
+description: Something in QOR OS behaves incorrectly, crashes, or regresses.
 title: "[Bug] "
 labels: ["type: bug", "status: needs-triage"]
 body:
   - type: markdown
     attributes:
-      value: Thanks for helping make QTOS better. Please include enough detail to reproduce the problem.
+      value: Thanks for helping make QOR OS better. Please include enough detail to reproduce the problem.
   - type: dropdown
     id: area
     attributes:
@@ -18,7 +18,14 @@ body:
         - Services / simulator / qtosctl
         - Apps
         - Platform theme / QStyle
-        - Image (Yocto)
+        - Controllers and input
+        - QQ (engine, Studio, Player)
+        - ARQADE
+        - QOR Media
+        - QOR core / vault
+        - Games (Steam, Proton, gamescope)
+        - Displays (KMS backend, refresh rates, GPUs)
+        - Image (Fedora Atomic, drivers, updates)
         - Build / CI / tooling
     validations:
       required: true
@@ -41,7 +48,7 @@ body:
   - type: input
     id: version
     attributes:
-      label: QTOS commit or version
+      label: QOR OS commit or version
       placeholder: e.g. 0.1.0 or a commit SHA
     validations:
       required: true

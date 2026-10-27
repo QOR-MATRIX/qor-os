@@ -161,8 +161,21 @@ over every widget (`store_widgets_qmllint`) and the Store section of
 
 ## Roadmap
 
+**QOR OS 1.0 moves no money**
+([QOR-0006](decisions/QOR-0006-qor-os-1-0-moves-no-money.md)). The Store
+ships free items only.
+- Stage 2 may proceed without its fee, which is a payment.
+- Stage 3 below is QTOS's proposal, kept as the starting point. It is not
+  decided. It waits for:
+  - Demiurge's U-15 decided in writing;
+  - a QOR record choosing the model: dollars, CGT, or both kept apart, and
+    the platform's share;
+  - the legal list and The Qt Company's confirmation.
+
+  Until then no price, balance, commission or payout code reaches a build.
+
 **Stage 2: the developer program.** A developer portal and an SDK preview
-(Phase 5's installable SDK). Developers register once (the recommendation is
+(Phase 4's installable SDK). Developers register once (the recommendation is
 a one-time $13 per developer account rather than per item, with free items
 always free to publish, waived for a founding group), sign their packages
 with their own keys, and see privacy-preserving analytics: aggregated,
@@ -180,8 +193,9 @@ sales tax and VAT. Refunds follow local law (the EU's 14-day right on digital
 content included).
 
 **Before either stage.** Confirm with The Qt Company how Qt's commercial
-licence applies to shipping QTOS on devices and to an SDK that third parties
-build on (ADR-0004). Write the developer agreement, terms, privacy policy and
+licence applies to shipping QOR OS on devices and to an SDK that third parties
+build on ([QTOS-0004](decisions/qtos/QTOS-0004-commercial-qt-and-proprietary-repository.md),
+[QOR-0008](decisions/QOR-0008-before-a-public-release.md)). Write the developer agreement, terms, privacy policy and
 content policy, including age ratings for games. Keep installs from outside
 the Store (Flatpak, sideloading) open: that is what lets people trust the
 Store.

@@ -23,7 +23,7 @@ import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_REPO = "QOR-MATRIX/QTOS"
+DEFAULT_REPO = "QOR-MATRIX/qor-os"
 
 
 def gh(*args: str, payload: dict | None = None, check: bool = True) -> subprocess.CompletedProcess:
@@ -59,8 +59,8 @@ def sync_milestones(repo: str) -> None:
 
 def apply_settings(repo: str) -> None:
     settings = {
-        "description": "QTOS — a next-generation operating system experience built entirely with Qt 6: "
-                       "Prism compositor, Lumen design language, Qt Remote Objects services.",
+        "description": "QOR OS: the operating system for players, game makers and creators. "
+                       "Qt 6.12, Prism, QQ, ARQADE and the QOR network.",
         "has_issues": True,
         "has_projects": True,
         "has_wiki": False,
@@ -74,7 +74,8 @@ def apply_settings(repo: str) -> None:
     }
     gh("api", "-X", "PATCH", f"repos/{repo}", payload=settings)
     topics = {"names": ["qt", "qt6", "qml", "qtquick", "operating-system", "wayland-compositor", "design-system",
-                        "cpp20", "linux", "desktop-environment", "qt-remote-objects", "yocto"]}
+                        "cpp20", "linux", "desktop-environment", "qt-remote-objects", "gaming", "game-engine",
+                        "fedora-atomic"]}
     gh("api", "-X", "PUT", f"repos/{repo}/topics", payload=topics)
     # Dependabot vulnerability alerts and automatic security fixes.
     gh("api", "-X", "PUT", f"repos/{repo}/vulnerability-alerts", check=False)

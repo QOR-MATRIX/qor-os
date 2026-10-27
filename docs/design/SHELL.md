@@ -234,7 +234,7 @@ Where swipes come from:
 - **Touchscreens, everywhere**: three fingers moving together past 16 px. The
   apps under them get a touch cancel.
 - **Bare metal**: Qt's libinput backend reports no gestures. Prism's KMS
-  backend will read them from libinput (Phase 2).
+  backend will read them from libinput (Phase 3).
 
 ## Keyboard reference
 

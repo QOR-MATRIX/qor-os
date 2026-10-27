@@ -1,4 +1,12 @@
-# Building and running QTOS
+# Building and running QOR OS
+
+QOR OS has two kinds of build:
+
+- **The OS**: the CMake presets below. They build the Kit, services, shell,
+  apps, compositor, tools, and the QOR core from demiurge-chain at its pinned
+  commit.
+- **The carried products**: QQ, ARQADE and QOR Media, each built by its own
+  script, exactly as upstream ([§6](#6-the-carried-products-qq-arqade-qor-media)).
 
 ## 1. Prerequisites
 
@@ -12,6 +20,7 @@
 | Ninja | any recent | Bundled with Qt: `C:\Qt\Tools\Ninja` |
 | Python | 3.10+ | Token generator, tests, tooling |
 | Git | 2.40+ | |
+| Rust | 1.91+ (1.98.1 in CI), from [rustup](https://rustup.rs) | The QOR core (`core/`), built by `cargo` through Corrosion |
 
 ### Required Qt modules
 
@@ -28,9 +37,17 @@ Install these for the `MSVC 2022 64-bit` kit in the Qt Maintenance Tool
 | Qt Quick Compiler extensions | `qt.qt6.6120.addons.qtqmlscriptcompiler` | `qmlsc` ahead-of-time QML compilation (commercial) |
 | Qt Task Tree (TP) | `qt.qt6.6120.addons.qttasktree` | Dependency of Qt's own QML asset-downloader plugin; without it CMake prints a warning at configure time |
 
-Recommended for upcoming phases (see [QT-MODULES.md](QT-MODULES.md)): Qt
-Multimedia, Qt Quick 3D, Qt Quick Timeline, Qt Lottie, Qt Virtual Keyboard,
-Qt WebEngine, Qt Spatial Audio, Qt Positioning, Qt TextToSpeech.
+The carried products also need these, from the same kit:
+- **Qt Multimedia**;
+- **Qt Quick 3D**, with **Qt Quick 3D Physics**;
+- **Qt Spatial Audio**;
+- **Qt PDF**;
+- **Qt Network**.
+
+The QQ Player's browser build needs Qt for WebAssembly (multithreaded).
+Recommended for upcoming phases (see [QT-MODULES.md](QT-MODULES.md)): Qt Quick
+Timeline, Qt Lottie, Qt Virtual Keyboard, Qt WebEngine, Qt Positioning, Qt
+TextToSpeech.
 
 `cmake/QtosLocateQt.cmake` finds Qt automatically, in this order:
 `Qt6_DIR`/`CMAKE_PREFIX_PATH` from your IDE kit, the `QTOS_QT_DIR`
@@ -44,12 +61,14 @@ OpenGL/EGL/xkbcommon development packages:
 
 ```bash
 sudo apt-get install ninja-build libgl1-mesa-dev libegl1-mesa-dev libxkbcommon-dev \
-  libfontconfig1-dev libfreetype-dev libwayland-dev libpulse0 libssl-dev
+  libfontconfig1-dev libfreetype-dev libwayland-dev libpulse0 libssl-dev libdbus-1-dev pkg-config
 ```
 
 `libpulse0` is needed by Qt Multimedia (the audio engine); desktops running
 PipeWire are used through it automatically. `libssl-dev` (OpenSSL 3's
 libcrypto) verifies Store signatures; Windows uses CNG instead.
+`libdbus-1-dev` is for the QOR core, whose keychain uses the Secret Service.
+Rust comes from rustup.
 
 ### Linux on WSL2 (Windows workstation)
 
@@ -62,19 +81,23 @@ with GCC 15 and CMake 4.2.
 sudo apt-get install build-essential cmake ninja-build git python3 pkg-config \
   libgl1-mesa-dev libegl1-mesa-dev libgles-dev libdrm-dev libgbm-dev libvulkan-dev \
   libxkbcommon-dev libxkbcommon-x11-dev libfontconfig1-dev libfreetype-dev libdbus-1-3 \
-  libwayland-dev wayland-protocols libinput-dev libxcb-cursor0 libpulse0 libssl-dev weston
+  libwayland-dev wayland-protocols libinput-dev libxcb-cursor0 libpulse0 libssl-dev weston \
+  libdbus-1-dev
+#    and Rust, for the QOR core:
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain 1.98.1
 
 # 2. The commercial Qt kit, unattended. This reuses the Qt Account sign-in
 #    from Windows. Copy it once and keep it private:
 install -D -m 600 "/mnt/c/Users/<you>/AppData/Roaming/Qt/qtaccount.ini" ~/.local/share/Qt/qtaccount.ini
-python3 /mnt/c/path/to/QTOS/tools/ci/install_qt.py --platform linux --root ~/Qt
+python3 /mnt/x/path/to/qor-os/tools/ci/install_qt.py --platform linux --root ~/Qt
 
 # 3. Build the Windows checkout from WSL into the Linux filesystem (fast I/O).
 #    Turn .qmlls.ini generation off so the Windows editor setup is untouched:
-cmake -S /mnt/c/path/to/QTOS -B ~/qtos-build/linux-release --preset linux-release \
+export PATH=$HOME/.cargo/bin:$PATH
+cmake -S /mnt/x/path/to/qor-os -B ~/qor-build/linux-release --preset linux-release \
   -DQT_QML_GENERATE_QMLLS_INI=OFF
-cmake --build ~/qtos-build/linux-release
-ctest --test-dir ~/qtos-build/linux-release        # GPU suites run on WSLg too
+cmake --build ~/qor-build/linux-release
+ctest --test-dir ~/qor-build/linux-release        # GPU suites run on WSLg too
 ```
 
 On Linux the executables sit in their target directories, for example
@@ -101,7 +124,7 @@ Or in one step: `.\tools\dev\build.ps1 [-Preset windows-debug] [-Test] [-Target 
 | `windows-debug` | Ninja | Debug | Debugging (Qt debug DLLs) |
 | `windows-vs` | Visual Studio 17 2022 | multi-config | Works without a developer shell |
 | `linux-release`, `linux-debug` | Ninja | | Linux |
-| `ci-windows`, `ci-linux` | Ninja | RelWithDebInfo | CI. Both treat warnings as errors |
+| `ci-windows`, `ci-linux` | Ninja | RelWithDebInfo | CI. Both treat warnings as errors and require the QOR core |
 
 Build options (`-D<option>=ON|OFF`):
 
@@ -113,6 +136,14 @@ Build options (`-D<option>=ON|OFF`):
 | `QTOS_BUILD_COMPOSITOR` | ON on Linux | `prism` (skipped with a warning if Qt Wayland Compositor is missing) |
 | `QTOS_WARNINGS_AS_ERRORS` | OFF | `/WX` or `-Werror` |
 | `QTOS_QT_PINNED_VERSION` | 6.12.0 | Version used by Qt auto-location |
+| `QOR_BUILD_CORE` | ON where `cargo` is found | The QOR core and `tst_qorcore` ([UPSTREAM.md](UPSTREAM.md)) |
+| `QOR_CORE_COMMIT` | the pin in `core/CMakeLists.txt` | The demiurge-chain commit the core is built from |
+| `QOR_CORE_SOURCE_DIR` | empty | A local demiurge-chain checkout to build the core from instead, to change the core and QOR OS together |
+
+The first configure with the core clones demiurge-chain at the pin and
+Corrosion v0.6.1 into the build tree, and the first build compiles the core's
+Rust dependencies. Both need network access and take a few minutes. Later
+builds are incremental.
 
 Outputs (Windows): executables and test binaries in `build/<preset>/`, QML
 modules in `build/<preset>/qml/`, plugins in `build/<preset>/plugins/`.
@@ -216,7 +247,7 @@ How clients are handled:
 
 Under WSLg, Mesa's `libEGL` warnings and "no EGL_WL_bind_wayland_display" are
 expected. Clients fall back to shared-memory buffers, which is fine for
-development; on device, GPU buffer sharing is part of Phase 2.
+development; on device, GPU buffer sharing is part of Phase 3.
 
 ## 4. Tests and lint
 
@@ -232,7 +263,7 @@ python tools\ci\check_headers.py
 ## 5. Install and deploy
 
 ```powershell
-cmake --install build\windows-release --prefix dist\qtos
+cmake --install build\windows-release --prefix dist\qor-os
 ```
 
 The install step runs Qt's deployment script (`qt_generate_deploy_qml_app_script`,
@@ -245,7 +276,35 @@ Because the QTOS QML modules are static and embedded in the executable,
 and `services/` so the deployment scan finds their imports (for example
 `QtCore` and `QtGraphs`). Add new module directories there.
 
-## 6. Troubleshooting
+## 6. The carried products (QQ, ARQADE, QOR Media)
+
+QQ, ARQADE and QOR Media come from demiurge-chain at the same paths as
+upstream ([UPSTREAM.md](UPSTREAM.md)). Each keeps its own CMake project and
+`build.ps1`, which configures with MSVC 2022 and Ninja, builds, and runs every
+suite. `tools/dev/products.ps1` runs them all:
+
+```powershell
+.\tools\dev\products.ps1                          # build\products\{qq,arqade,media}
+.\tools\dev\products.ps1 -Product qq -Attempts 1  # one product, no retry
+```
+
+| Product | Script | Programs | Notes |
+|---------|--------|----------|-------|
+| QQ | `products/qq/build.ps1` | `qq-studio.exe`, `qq-player.exe`, `qq-mcp.exe` | `-Run` opens QQ Studio; `-Web` builds the Player for the browser (Qt for WebAssembly and Emscripten) |
+| ARQADE | `products/arqade/qt/build.ps1` | `arqade.exe` | Builds QQ's runtime from `products/qq/runtime`; carries the games from `products/arqade/games` |
+| QOR Media | `tools/qor-media/build.ps1` | `qor-media.exe` | Fetches the pinned PDFium release once (checked by SHA-256) into `%LOCALAPPDATA%\qor-media-pdfium` |
+
+Their suites open real windows on the GPU and drive them with the keyboard
+and mouse. Run them in a desktop session, and leave the desktop alone while
+they run: a window that loses the keyboard to another application fails a
+test. `products.ps1` tries a failing product once more. The look tests read
+`docs/design/tokens.json`.
+
+The samples are QQ scenes you can open in QQ Studio, for example
+`products\qq\samples\orb-run`. Today the products build on Windows. Linux, and
+running them inside Prism, are Phase 1.
+
+## 7. Troubleshooting
 
 | Symptom | Fix |
 |---------|-----|
@@ -257,3 +316,6 @@ and `services/` so the deployment scan finds their imports (for example
 | Low frame rate on a laptop | Check the log line `GPU: …`. Use `--gpu high-performance`, or force an adapter with `QT_D3D_ADAPTER_INDEX` (`QSG_INFO=1` lists adapters) |
 | Shader or graphics issues | `QSG_INFO=1` prints the RHI backend and adapter; `QSG_RHI_BACKEND=vulkan\|opengl\|d3d12` switches backends |
 | Services did not initialise in time | Another QTOS instance holds `local:qtos-services`. The host falls back to a PID-suffixed endpoint; pass `--services-url` to `qtosctl` |
+| `QOR core: No QOR core at …` or Corrosion cannot find `cargo` | Install Rust from rustup (1.91+), open a new terminal, and reconfigure; or turn the core off with `-DQOR_BUILD_CORE=OFF` |
+| The core's configure cannot fetch demiurge-chain | It needs network access to GitHub once per build tree; or point `QOR_CORE_SOURCE_DIR` at a local checkout |
+| A carried product's suite fails on a busy desktop | Leave the desktop alone while the suites run, or run `products.ps1` again; a failure that repeats is real |

@@ -1,5 +1,5 @@
 name: Feature proposal
-description: Propose a capability for QTOS (shell, apps, services, platform).
+description: Propose a capability for QOR OS (shell, games, QQ, apps, services, platform).
 title: "[Feature] "
 labels: ["type: feature", "status: needs-triage"]
 body:
@@ -27,11 +27,10 @@ body:
     attributes:
       label: Roadmap phase
       options:
-        - "Phase 1 · Nested Prism"
-        - "Phase 2 · Bootable alpha"
-        - "Phase 3 · Platform"
-        - "Phase 4 · Premium"
-        - "Phase 5 · Ecosystem"
+        - "Phase 1 · One stack"
+        - "Phase 2 · Identity and keys"
+        - "Phase 3 · Boots and plays PC games"
+        - "Phase 4 · The ecosystem"
         - Not sure
   - type: checkboxes
     id: principles
@@ -41,4 +40,4 @@ body:
       options:
         - label: Works with Reduce Motion and Reduce Transparency
         - label: Renders on demand (no constant frames when idle)
-        - label: Keyboard and screen-reader accessible
+        - label: Keyboard, controller and screen-reader accessible

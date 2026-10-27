@@ -11,7 +11,8 @@
 // Prism prints the socket name it listens on (the first free wayland-N, or
 // --socket).
 //
-// Status: experimental, see docs/adr/0003-compositor-strategy.md.
+// Status: experimental, see docs/decisions/qtos/QTOS-0003-compositor-strategy.md and
+// docs/decisions/QOR-0005-every-display-at-its-own-refresh.md.
 
 #include "backend.h"
 #include "kit.h"

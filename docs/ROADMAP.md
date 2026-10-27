@@ -1,91 +1,134 @@
 # Roadmap
 
-Phases from [VISION.md §16](../VISION.md#16-roadmap-phases-with-exit-criteria),
-tracked as GitHub milestones. Each phase ends at its **exit criteria**, not a
-date.
+The only roadmap for QOR OS. Each phase ends at its **exit**, shown working,
+not on a date; durations are rough guides for one founder working with agents.
+What 1.0 contains is [QOR-0007](decisions/QOR-0007-what-1-0-ships.md). The
+phases are tracked as GitHub milestones.
 
-## Phase 0 · Foundations: complete (v0.1.0)
+QOR OS began on 26 October 2026 from QTOS's Phase 0 and most of its Phase 1
+([history below](#history-qtos-phases)) and from Demiurge's device-side
+products ([UPSTREAM.md](UPSTREAM.md)).
 
-Exit: shell runs on Windows with simulated services; tests and qmllint green.
+## Phase 0 · Clear the ground
 
-- [x] Lumen tokens as a single OKLCH source → QML, C++ and docs
-- [x] `Theme` with OKLab-interpolated appearance and accent springs
-- [x] `Spring` (closed-form), SDF `Surface`, `Glass` + shared `Backdrop`, `RoundMask`
-- [x] Aurora wallpaper (cached layer; transforms for zoom and parallax)
-- [x] Lumen Qt Quick Controls style (23 controls)
-- [x] Service contracts (QtRO), simulator, `qtos-simd`, `qtosctl`
-- [x] Shell: lock, Rail, Live Activity, Shelf, Beam, Control Center, notifications, windows, snapping, Spaces, Overview
-- [x] Apps: Files, Music, Notes, Terminal, Monitor, Settings
-- [x] Lumen `QStyle` + `qtos` platform theme + gallery
-- [x] Benchmark mode, passive frame stats, GPU preference
-- [x] Tests (6 suites), zero-warning qmllint, clang-format, SPDX, pre-commit, CI workflows
-- [x] Documentation set and ADRs
+*A few days.* Exit: `qor-os` builds and tests in CI on Windows and Linux, the carried
+products included on Windows.
 
-## Phase 1 · Nested Prism
+- [x] Disk space for the work: 204.7 GB free on the build drive (was 9.6 GB), by cleaning Demiurge's Rust build output
+- [x] `QOR-MATRIX/qor-os`, private, seeded with QTOS's full history; QTOS frozen at `37b621e`, with a note pointing here (`3ecdded`) ([QOR-0002](decisions/QOR-0002-one-repository-from-qtos-and-demiurge.md))
+- [x] QQ, ARQADE's app, games and fixtures, and QOR Media carried from demiurge-chain with their history, at upstream paths; `tools/upstream/demiurge.sh` pulls and patches ([UPSTREAM.md](UPSTREAM.md))
+- [x] The QOR core built from demiurge-chain at a pinned commit and tested through its C bridge (`core/`, `tst_qorcore`; [QOR-0003](decisions/QOR-0003-the-qor-core-at-a-pinned-commit.md))
+- [x] One rulebook ([AGENTS.md](../AGENTS.md)) and one decision log, QOR-0001 to QOR-0008 ([decisions/](decisions/README.md))
+- [x] The carried products build and pass their suites here (`tools/dev/products.ps1`)
+- [ ] The CI runners serve both QTOS and QOR OS from the organisation ([CI.md](CI.md#runners-for-the-organisation))
+- [ ] CI green on Windows (with the products) and Linux
+- [ ] Demiurge's L13.2 merged upstream (QOR ID's client, the chain client, Social's client, the Library's index, the Mesh and Qontrol in the core), and the core's pin moved to it
 
-Exit: a daily-drivable *nested* session for an hour with real Qt apps at
-display refresh; compositor backend decision gate
-([ADR-0003](adr/0003-compositor-strategy.md)).
+## Phase 1 · One stack
 
-- [x] Build and run `prism` nested on Linux and under WSLg; launch Qt apps into it
-- [x] Client windows: configure with all states, server- and client-side decorations, client moves and resizes, resizing from every edge, maximize and minimize requests, popups, size limits, app identity, and XDG activation with focus-stealing prevention. All are covered by `prism_e2e` (31 checks).
-- [x] Spaces for client windows: every window rides its Space, moves by keyboard, window menu, Beam or Overview drag, and clients on Spaces out of view get no frame callbacks. Covered by `prism_e2e` and `shell_e2e`.
-- [x] Controller interface: Xbox, PlayStation, Stratus and other game pads drive the whole shell, with a prompt on connect, an on-screen keyboard and native XInput, HID and evdev backends ([CONTROLLERS.md](CONTROLLERS.md))
-- [x] Real audio: the QTOS audio engine (Qt Multimedia's real-time output), generated QTOS Sessions and music files, a five-band equaliser, interface sounds, and an audio-reactive interface with adjustable intensity and frequency range ([AUDIO.md](AUDIO.md))
-- [x] Wayland extensions: fractional-scale, cursor-shape, presentation-time, idle-inhibit (`tools/dev/prism-protocol-check.sh`)
-- [x] Three-finger gestures for Overview and Spaces that follow the fingers: touchpads (the host's pointer gestures in nested Prism; precision touchpads through Raw Input on Windows) and touchscreens ([SHELL.md](design/SHELL.md#gestures))
-- [x] Several displays in Prism: one output per display, windows move between them, Spaces and Overview span them all; `--outputs N` nested, every screen on eglfs
-- [ ] Decision-gate benchmark on the reference hardware: multi-output frame pacing and input latency. The kit is ready: `tools/dev/prism-gate.sh` and a bundle that runs from an Ubuntu live USB session ([PERFORMANCE.md](PERFORMANCE.md#running-the-decision-gate)); the run and ADR-0011 remain
-- [ ] Evaluate Qt Interface Framework for service codegen and simulation (ADR)
-- [ ] Qt Design Studio project for Lumen components
+*About 2–4 weeks.* Exit: Orb Run plays inside Prism on Linux with a DualSense, and Linux CI runs
+QQ's, ARQADE's and QOR Media's suites.
 
-## Phase 2 · Bootable alpha
+- [ ] QQ, ARQADE and QOR Media build and pass their suites on Linux. Their Windows-only parts get platform seams:
+  - XInput becomes QTOS.Input;
+  - the DXGI GPU choice is handled per platform;
+  - the agent's key moves from Credential Manager to the Secret Service;
+  - window docking moves out.
+- [ ] Each runs as a Wayland client of Prism, and Prism places it (the launcher's `place` request becomes a Prism layout request)
+- [ ] QTOS's controller service drives QQ through `Input`'s gamepad seam; ARQADE and QOR Media gain controller focus navigation
+- [ ] Lumen's tokens theme every app: Demiurge's one look (`docs/design/tokens.json`) mapped onto Lumen roles, with one source
+- [ ] A controller-first **Home** and **Library** in the shell: QQ games, ARQADE, media
+- [ ] From QTOS's Phase 1: evaluate Qt Interface Framework for service code generation and simulation (a QOR record)
+- [ ] From QTOS's Phase 1: a Qt Design Studio project for Lumen components
 
-Exit: boots on QEMU and the reference laptop; flicker-free boot; Widgets apps
-themed.
+## Phase 2 · Identity and keys
 
-- [ ] `meta-qtos` image builds (pin layer SHAs); Boot2Qt evaluation
-- [ ] KMS backend (atomic, per-output scheduling, overlay planes) or Waylib fallback
-- [ ] Touchpad gestures from libinput for the KMS backend (Qt's libinput backend reports none)
-- [ ] greetd + Prism greeter; flicker-free handoff
-- [ ] `qtos` platform theme and Lumen QStyle installed system-wide
-- [ ] Browser app (Qt WebEngine)
-- [ ] Qt Sensors: auto-rotate and ambient light
+*About 3–6 weeks.* Exit: sign in once, chat in World, and publish Orb Run on the devnet from QQ
+Studio running inside Prism.
 
-## Phase 3 · Platform
+- [ ] The vault as a system service built from the QOR core, outside Prism and every app; Prism draws its approvals in the trusted layer
+- [ ] The core's bridge grows (upstream, with tests) from four commands to what the shell needs, with events
+- [ ] One QOR ID sign-in at the shell, with offline login
+- [ ] Social in the shell: chat, friends and World
+- [ ] The Library's index as a system service (the role QTOS planned for `qtos-indexd`)
+- [ ] Publishing from QQ Studio through the vault service, to the devnet, in test CGT only ([QOR-0006](decisions/QOR-0006-qor-os-1-0-moves-no-money.md))
 
-Exit: an unattended update and a forced rollback both succeed; third-party
-Flatpaks run sandboxed.
+## Phase 3 · Boots and plays PC games
 
-- [ ] Real daemons for every contract (`qtos-netd`, `-btd`, `-powerd`, `-audiod`, `-notifyd`, `-settingsd`)
-- [ ] xdg-desktop-portal backend (`qtos-portald`) with trusted-UI prompts
-- [x] Store, stage 1: the Store app, a signed catalogue with developer-signed packages verified by platform crypto, first-party themes and desktop widgets ([STORE.md](STORE.md))
-- [ ] Qt Application Manager packages; Flatpak; third-party widgets and apps in the Store, out of process
-- [ ] RAUC A/B updates with rollback; fwupd
-- [ ] `qtos-indexd` (SQLite FTS5) for Beam file search
-- [ ] Translations (Qt Linguist)
+*About 2–4 months.* Exit: the reference laptop boots QOR OS with its panel at 360 Hz and the
+television at 60 Hz, and plays a Steam game and Orb Run from the
+controller-first Home.
 
-## Phase 4 · Premium
+- [ ] The image on Fedora Atomic with bootc: NVIDIA's open kernel modules for every RTX card, Mesa, the QOR OS layer ([QOR-0004](decisions/QOR-0004-the-base-image-is-fedora-atomic.md), [image/](../image/README.md))
+- [ ] Secure Boot with QOR OS's own key; image updates with rollback (`bootc upgrade`, a forced rollback tested)
+- [ ] **Prism's own KMS backend** ([QOR-0005](decisions/QOR-0005-every-display-at-its-own-refresh.md)):
+  - atomic modesetting and scheduling per output;
+  - several GPUs: rendering on one and scanning out on another;
+  - each display at its own refresh rate from 60 to 360 Hz;
+  - VRR, hotplug and direct scan-out.
 
-Exit: all performance budgets met in CI; screen-reader walkthrough of every
-shell surface.
+  This backend also fixes both outputs appearing on one display.
+- [ ] The display acceptance test on the reference laptop and on RTX and Intel desktops: under 1% missed frames per output at its own rate, and input to swap within two refresh periods at p95
+- [ ] Steam and Proton inside gamescope, as a Wayland client of Prism; a game mode
+- [ ] greetd with a Prism greeter, flicker-free from the firmware logo
+- [ ] Touchpad gestures from libinput for the KMS backend
+- [ ] Real daemons for every service contract (`qtos-netd`, `-btd`, `-powerd`, `-audiod`, `-notifyd`, `-settingsd`) and an xdg-desktop-portal backend with prompts in the trusted layer
+- [ ] Games and apps sandboxed (bubblewrap, seccomp, Landlock): the operating-system half of Demiurge's ADR-087
 
-- [ ] HDR, VRR, fractional scaling
-- [ ] Spatial Audio UI sounds (interface sounds exist; positional rendering is the Phase 4 step), Lottie symbols, VectorImage icons
-- [ ] Quick Look (Qt PDF, Qt Multimedia, Qt Quick 3D)
-- [ ] Window Stacks, Projects, Stash, hero transitions (`qtos_hero`)
-- [ ] Qt-native screen reader (TextToSpeech), Increase Contrast, larger text
-- [ ] Radial appearance sweep; Increase Contrast tokens
-- [ ] Region-limited backdrop capture (integrated GPU p95 < 8 ms)
+## Phase 4 · The ecosystem
 
-## Phase 5 · Ecosystem
+*Ongoing.* Exit: an outside developer ships a QQ game to QOR OS using only the public
+SDK.
 
-Exit: an external developer ships an app using only the public SDK.
+- [ ] The public SDK: QTOS.Kit, Lumen, the service interfaces and QQ, with a Qt Creator wizard and the simulator
+- [ ] The Store and the Market as one catalogue in the shell: the Store's signature decides what installs; the chain records who made a work and who holds a licence
+- [ ] Store stage 2: the developer program and portal, review, privacy-preserving analytics, with no payments ([STORE.md](STORE.md#roadmap))
+- [ ] QQ's engine work continues, upstream until the cut-over (Demiurge's P3 track)
+- [ ] The Mesh for distributing games and creations, off until turned on
+- [ ] From QTOS's Phases 2 and 4: a browser (Qt WebEngine), HDR, fractional scaling, Quick Look, Stacks and Projects, hero transitions, a Qt-native screen reader, Increase Contrast, translations
+- [ ] Paid items, only once [QOR-0006](decisions/QOR-0006-qor-os-1-0-moves-no-money.md)'s conditions are met and a record chooses the model
+- [ ] Later than 1.0 ([QOR-0007](decisions/QOR-0007-what-1-0-ships.md)): GNOSIS, Stream, Spatial mode (Qt Quick 3D Xr), on-device intelligence, Continuity
 
-- [ ] Installable SDK (Kit + Lumen + Services) and Qt Creator wizard
-- [ ] Store stage 2: developer program and portal, review, privacy-preserving analytics ([STORE.md](STORE.md#roadmap))
-- [ ] Store stage 3: paid items (prepaid balance, Stripe Connect payouts, sales tax), once Qt licensing for the SDK is confirmed
-- [ ] Intents → Flows automation; HTTP and MCP surfaces for automation
-- [ ] Continuity (KDE Connect protocol)
-- [ ] Optional on-device intelligence (`qtos-assistd`, Qt gRPC)
-- [ ] Spatial mode (Qt Quick 3D Xr)
+## Release gates
+
+Nothing is published until all of these hold
+([QOR-0008](decisions/QOR-0008-before-a-public-release.md)). They are the
+owner's to obtain:
+
+- [ ] The Qt Company's written confirmation of the licence to distribute Qt in a QOR OS image and SDK
+- [ ] Trademark clearance for "QOR OS", QQ and ARQADE
+- [ ] Terms of Service, a privacy policy, and a legal opinion on rewards, prizes, identity checks, sanctions and age limits
+- [ ] Code-signing certificates and the Secure Boot key
+- [ ] An external security review of the QOR core and the vault service
+- [ ] QOR ID in a second region with offline login; the key exposed on 5 October 2026 replaced
+
+## History: QTOS phases
+
+QOR OS carries QTOS's work. QTOS's own phases ended where QOR OS began:
+
+- **Phase 0 · Foundations: complete (v0.1.0, 23 October 2026).**
+  - Lumen tokens, `Theme`, `Spring`, SDF `Surface`, `Glass` and `Backdrop`.
+  - The Lumen controls style and `QStyle`, and the platform theme.
+  - Service contracts, the simulator, `qtos-simd` and `qtosctl`.
+  - The whole shell in simulation, and six apps.
+  - The benchmark, the tests and CI.
+- **Phase 1 · Nested Prism: complete except three items.**
+  - **Done:**
+    - Prism nested on Linux and WSLg with real clients;
+    - client windows (configure, decorations, moves and resizes, popups,
+      activation) and Spaces for client windows;
+    - the controller interface and real audio;
+    - Wayland extensions (fractional-scale, cursor-shape, presentation-time,
+      idle-inhibit);
+    - three-finger gestures and several displays;
+    - the Store's stage 1.
+  - **Carried into QOR OS:**
+    - the decision gate, deferred by QOR-0005;
+    - the Qt Interface Framework evaluation and the Design Studio project,
+      now in Phase 1 above.
+- **Phases 2 to 5** are folded into the phases above:
+  - the bootable image and the KMS backend into Phase 3;
+  - the platform daemons and sandbox into Phase 3;
+  - the premium and ecosystem items into Phase 4.
+
+  The Yocto plan was replaced by QOR-0004.

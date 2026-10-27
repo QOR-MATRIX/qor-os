@@ -1,7 +1,10 @@
 # Development guide
 
-Conventions, recipes and debugging techniques for working on QTOS. Read
-[ARCHITECTURE.md](ARCHITECTURE.md) first.
+Conventions, recipes and debugging techniques for working on QOR OS. Read
+[ARCHITECTURE.md](ARCHITECTURE.md) first, and [`AGENTS.md`](../AGENTS.md) for
+the rules that bind every change. The carried products (QQ, ARQADE, QOR Media)
+keep their own conventions upstream; see [UPSTREAM.md](UPSTREAM.md) before
+changing them.
 
 ## 1. Daily loop
 
@@ -307,6 +310,38 @@ Create `kit/style/<Control>.qml` deriving from `QtQuick.Templates`
 Add a `case` in `Desktop.runAction()`, an entry in `Beam.catalog()`, and if it
 is useful from outside, a `qtosctl` command or an `Intents` action.
 
+### Pull the carried products from upstream
+
+```bash
+tools/upstream/demiurge.sh status          # what each carried path was last split at, and the core's pin
+tools/upstream/demiurge.sh pull            # merge demiurge-chain main into every carried path
+pwsh tools/dev/products.ps1                # build and test what came in
+```
+
+Update the state tables in [UPSTREAM.md](UPSTREAM.md) in the same change.
+
+### Change a carried product for QOR OS only
+
+Make the change here, mark the file with a `Changed for QOR OS:` comment near
+its top (Apache-2.0 §4(b)), keep its upstream formatting, and run
+`tools/dev/products.ps1`. If the change is general, make it upstream instead,
+or send it there with `tools/upstream/demiurge.sh patch <commit>`.
+
+### Use the QOR core
+
+Link `qor::core` and call the bridge (`qor_core.h`): one JSON request in, one
+JSON answer out, freed with `qor_core_free`. Amounts are decimal strings of
+embers. `tests/core/tst_qorcore.cpp` shows the pattern. A new command is added
+upstream in demiurge-chain with its tests, then the pin moves
+([UPSTREAM.md](UPSTREAM.md#moving-the-cores-pin)). To work on both at once,
+configure with `-DQOR_CORE_SOURCE_DIR=<a demiurge-chain checkout>`.
+
+### Add a decision
+
+Copy [`decisions/TEMPLATE.md`](decisions/TEMPLATE.md) to the next
+`QOR-NNNN-<title>.md`, index it in [`decisions/README.md`](decisions/README.md),
+and mark any record it supersedes or amends.
+
 ## 6. Debugging
 
 | Need | How |
@@ -334,4 +369,7 @@ is useful from outside, a `qtosctl` command or an `Intents` action.
 | `tools/ci/check_headers.py` | SPDX header check |
 | `tools/ci/install_qt.py` | Unattended commercial Qt install for CI |
 | `tools/github/bootstrap.py` | Apply labels, milestones, repository settings and ruleset |
+| `tools/dev/products.ps1` | Build and test QQ, ARQADE and QOR Media with their own scripts |
+| `tools/upstream/demiurge.sh` | Pull carried code from demiurge-chain, show its state, write patches for upstream |
+| `tools/ci/runners.ps1` | Move the workstation's two CI runners to the organisation or a repository, and start them |
 | `qtosctl` | Drive services from the command line ([SERVICES.md](SERVICES.md#qtosctl)) |

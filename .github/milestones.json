@@ -1,27 +1,22 @@
 [
   {
-    "title": "Phase 0 · Foundations",
-    "description": "Lumen tokens, SDF Surface, Glass, Spring, Kit basics; shell in simulation mode. Exit: shell runs on Windows with simulated services; tests and qmllint green.",
-    "state": "closed"
+    "title": "Phase 0 · Clear the ground",
+    "description": "One repository from QTOS's history; QQ, ARQADE and QOR Media carried with theirs; the QOR core at a pinned commit; one rulebook and decision log; shared CI runners. Exit: qor-os builds and tests in CI on Windows and Linux, the carried products included on Windows."
   },
   {
-    "title": "Phase 1 · Nested Prism",
-    "description": "Real compositor nested in WSLg/Linux: Spaces, Shelf, Rail, Beam, Overview, decorations with real Wayland clients. Exit: daily-drivable nested session for an hour at display refresh; compositor backend decision gate (ADR-0003)."
+    "title": "Phase 1 · One stack",
+    "description": "QQ, ARQADE and QOR Media on Linux as Wayland clients of Prism; QTOS.Input drives QQ; Lumen tokens theme every app; a controller-first Home and Library. Exit: Orb Run plays inside Prism on Linux with a DualSense, and Linux CI runs the products' suites."
   },
   {
-    "title": "Phase 2 · Bootable alpha",
-    "description": "Yocto image, KMS backend, greeter, lock, Settings/Files/Terminal/Browser, platform theme on device. Exit: boots on QEMU and the reference laptop; flicker-free boot; Widgets apps themed."
+    "title": "Phase 2 · Identity and keys",
+    "description": "The vault as a system service from the QOR core, with approvals drawn by Prism; one QOR ID sign-in; Social and the Library index in the shell. Exit: sign in once, chat in World, and publish Orb Run on the devnet from QQ Studio inside Prism."
   },
   {
-    "title": "Phase 3 · Platform",
-    "description": "Real qtos-*d daemons, portals, sandbox, Flatpak + Qt Application Manager packages, Store, A/B updates with rollback. Exit: unattended update and forced rollback both succeed; third-party Flatpaks run sandboxed."
+    "title": "Phase 3 · Boots and plays PC games",
+    "description": "The Fedora Atomic image (bootc, NVIDIA open modules, Mesa); Prism's own KMS backend (every display at its own refresh on every GPU, VRR, direct scan-out); Steam and Proton in gamescope; greeter; updates with rollback; real daemons and sandbox. Exit: the reference laptop boots QOR OS at 360 Hz on its panel and 60 Hz on a television, and plays a Steam game and Orb Run."
   },
   {
-    "title": "Phase 4 · Premium",
-    "description": "HDR, VRR, fractional scaling, gestures, sound, Quick Look, Stacks, Projects, hero transitions, accessibility pass. Exit: all performance budgets met in CI; screen-reader walkthrough of every shell surface."
-  },
-  {
-    "title": "Phase 5 · Ecosystem",
-    "description": "SDK + simulator, intents/Flows, Continuity, optional on-device intelligence, Spatial preview. Exit: an external developer ships an app using only the public SDK."
+    "title": "Phase 4 · The ecosystem",
+    "description": "The public SDK, one catalogue for the Store and the Market, the Store's developer program, the premium shell features. Exit: an outside developer ships a QQ game to QOR OS using only the public SDK."
   }
 ]

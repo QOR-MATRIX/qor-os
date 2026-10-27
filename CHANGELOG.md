@@ -1,10 +1,46 @@
 # Changelog
 
-All notable changes to QTOS are recorded here. The format follows
-[Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
-[Semantic Versioning](https://semver.org/) from 1.0 onward.
+All notable changes to QOR OS, and before it QTOS, are recorded here. The
+format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
+project uses [Semantic Versioning](https://semver.org/) from 1.0 onward. The
+carried products (QQ, ARQADE, QOR Media) keep their own history upstream in
+demiurge-chain; pulls from it are recorded here.
 
 ## [Unreleased]
+
+QOR OS begins: QTOS and Demiurge's device-side products in one repository
+([QOR-0002](docs/decisions/QOR-0002-one-repository-from-qtos-and-demiurge.md)).
+
+### Added
+
+- **QOR OS**, the private repository `QOR-MATRIX/qor-os`, seeded with QTOS's full history (36 commits and its tags). QTOS is frozen: its code at `37b621e`, with a note pointing here (`3ecdded`).
+- **QQ, ARQADE and QOR Media**, carried from demiurge-chain (`28d9e97`) with their history by `git subtree`, at the same paths as upstream: `products/qq/`, `products/arqade/qt/`, `products/arqade/games/`, `products/arqade/tests/fixtures/` and `tools/qor-media/`, with `docs/design/tokens.json` copied at the same commit. All three build here and pass their suites: QQ 8 suites, ARQADE 4, QOR Media 9.
+  - `tools/dev/products.ps1` builds and tests them with their own scripts, and tries a failing product once more.
+  - `tools/upstream/demiurge.sh` shows their upstream state, pulls from demiurge-chain, and writes patches for upstream ([docs/UPSTREAM.md](docs/UPSTREAM.md)).
+- **The QOR core**, built from demiurge-chain at a pinned commit through Corrosion (`core/`, `qor::core`, `QOR_BUILD_CORE`, `QOR_CORE_COMMIT`, `QOR_CORE_SOURCE_DIR`), never copied ([QOR-0003](docs/decisions/QOR-0003-the-qor-core-at-a-pinned-commit.md)). `tst_qorcore` calls it through its C bridge: the core's version, CGT's units, amounts read exactly, the largest amount never rounded, refusals as errors, and no command that reads a key.
+- **One rulebook and one decision log.** `AGENTS.md` (with `CLAUDE.md` pointing to it) merges Demiurge's rules on checking claims, money, language and secrets with QTOS's build and CI practice. `docs/decisions/` holds QOR-0001 to QOR-0008, and QTOS's records as QTOS-0001 to QTOS-0010.
+- `OWNER.md`: where QOR OS stands, on one page, rewritten every session.
+- `tools/ci/runners.ps1` moves the workstation's two CI runners to the organisation or a repository and starts them.
+- `LICENSES/Apache-2.0.txt` and the carried paths in `THIRD_PARTY_NOTICES.md` and `LICENSE`.
+
+### Changed
+
+- The product is **QOR OS**. README, VISION, ROADMAP, ARCHITECTURE, BUILDING, DEVELOPMENT, CI, PERFORMANCE, QT-MODULES, STORE, CONTRIBUTING, SECURITY, issue templates, labels and milestones are rewritten for it. The code keeps its QTOS names until the name is cleared ([QOR-0008](docs/decisions/QOR-0008-before-a-public-release.md)).
+- The roadmap is QOR OS's phases 0 to 4, with release gates. QTOS's phases are kept as history, and the phase numbers cited across the documents follow the new ones.
+- The base image is **Fedora Atomic** with bootc, NVIDIA's open kernel modules and Mesa ([QOR-0004](docs/decisions/QOR-0004-the-base-image-is-fedora-atomic.md)).
+- **Displays:** every display at its own refresh rate on every GPU is the acceptance test, and Prism gets its own KMS backend. QTOS's bare-metal decision gate is **deferred, not failed**, and the gate kit becomes a diagnostic ([QOR-0005](docs/decisions/QOR-0005-every-display-at-its-own-refresh.md)).
+- **Money:** QOR OS 1.0 moves no money. It has free items and test CGT only, and the Store's paid stage waits for written decisions ([QOR-0006](docs/decisions/QOR-0006-qor-os-1-0-moves-no-money.md)).
+- CI:
+  - the presets require the QOR core;
+  - the Windows job builds and tests the carried products when they change;
+  - Lint skips the carried code's headers and formatting;
+  - Linux CI installs `libdbus-1-dev`.
+
+### Removed
+
+- QTOS's Yocto skeleton (`image/meta-qtos`, `image/kas`), replaced by the Fedora Atomic plan in `image/README.md`.
+
+## QTOS after 0.1.0 (unreleased, carried into QOR OS on 26 October 2026)
 
 ### Added
 

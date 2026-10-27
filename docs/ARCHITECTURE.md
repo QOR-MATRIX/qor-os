@@ -2,12 +2,15 @@
 
 This document describes the code as it exists today and how it maps onto the
 device architecture in [`VISION.md`](../VISION.md). Decisions and their
-rationale are recorded in [`adr/`](adr/).
+rationale are recorded in [`decisions/`](decisions/README.md).
 
 ## 1. Layers
 
 ```text
 ┌───────────────────────────────────────────────────────────────────────┐
+│ Products       QQ (Studio, Player, runtime) · ARQADE · QOR Media      │  carried from
+│                each its own process and CMake project                 │  demiurge-chain
+├───────────────────────────────────────────────────────────────────────┤
 │ Apps           QTOS.Apps        Files · Music · Notes · Terminal · …  │
 │ Shell          QTOS.Shell       Desktop · Rail · Shelf · Beam · …     │
 │ Platform API   QTOS.Services    typed replicas + Intents              │
@@ -17,8 +20,15 @@ rationale are recorded in [`adr/`](adr/).
 ├───────────────────────────────────────────────────────────────────────┤
 │ Services       qtos-sim / qtos-simd (simulation)  │  qtos-*d (device) │
 │                ── Qt Remote Objects contracts: services/interfaces ── │
+│ QOR core       qor::core (Rust, demiurge-chain at a pinned commit)    │
+│                ── C bridge: one JSON request, one JSON answer ──      │
 └───────────────────────────────────────────────────────────────────────┘
 ```
+
+The carried products are separate programs today. Phase 1 runs them as
+Wayland clients of Prism and moves their theming and controller input onto
+QTOS.Kit and QTOS.Input. The QOR core is linked into a test today. Phase 2
+makes it the vault service, a process of its own.
 
 **Simulation and device share all QML.** The shell and the apps never talk to
 a service implementation directly. They bind to Qt Remote Objects *replicas*.
@@ -45,7 +55,12 @@ In simulation the *sources* are the classes in `sim/`; on a device they are the
 | `qtos_lumen_widgets_style` | plugin (`styles`) | — | `platform/style/` | Lumen `QStyle` for Qt Widgets |
 | `qtos_platformtheme` | plugin (`platformthemes`) | — | `platform/theme/` | `qtos` QPA platform theme |
 | `lumen-widgets-gallery` | executable | — | `platform/gallery/` | QStyle preview |
+| `qor_core` (`qor::core`) | static lib (Rust) + header | — | `core/` | The QOR core from demiurge-chain at `QOR_CORE_COMMIT`, built by Corrosion; `qor_core.h` is its C bridge ([§10](#10-the-qor-core)) |
 | `tst_*` | tests | — | `tests/` | See [§9](#9-testing) |
+
+The carried products are not targets of this build. Each is its own CMake
+project, built by its own script (`tools/dev/products.ps1`), exactly as
+upstream ([§11](#11-carried-products)).
 
 All QML modules are static libraries linked into the executables and loaded
 with `Q_IMPORT_QML_PLUGIN`. Their QML is compiled ahead of time by the QML
@@ -204,8 +219,11 @@ and `adopt()` wraps each xdg-toplevel in the same `AppWindow`.
 `Compositor.qml` creates a `WaylandCompositor` with one `WaylandOutput` whose
 window hosts the same `Desktop`. It plugs a `ShellSurfaceItem` delegate into
 the window layer and implements xdg-shell, xdg-decoration (server-side),
-text-input and Qt's text-input-method. It runs nested today. The bare-metal
-KMS path is a Phase 2 item ([ADR-0003](adr/0003-compositor-strategy.md)).
+text-input and Qt's text-input-method. It drives one output per display
+(`--outputs N` nested; every screen under eglfs). It runs nested today. Prism's
+own KMS backend is Phase 3
+([QOR-0005](decisions/QOR-0005-every-display-at-its-own-refresh.md),
+[QTOS-0003](decisions/qtos/QTOS-0003-compositor-strategy.md)).
 
 ## 9. Testing
 
@@ -214,17 +232,69 @@ KMS path is a Phase 2 item ([ADR-0003](adr/0003-compositor-strategy.md)).
 | `tst_spring` | Qt Test | spring physics: damping regimes, settling, velocity preservation, presets, reduced motion, stability |
 | `tst_oklch` | Qt Test | OKLCH/OKLab conversions, gamut mapping, themed tokens, perceptual mixing |
 | `tst_services` | Qt Test | end-to-end QtRO: state replication, replica→source writes, remote slots and signals, Wi-Fi and media behaviour |
+| `tst_audio` | Qt Test | the audio engine: rendering, sessions, decoding, EQ, limiter, analysis |
+| `tst_input` | Qt Test | controller reports, CRCs, mappings, dead zones, the manager and the navigator |
+| `tst_store` | Qt Test | catalogue and package signatures, installation, tampering refused |
+| `tst_qorcore` | Qt Test | the QOR core through its C bridge: version, units, exact amounts, refusals ([§10](#10-the-qor-core)) |
+| `store_widgets_qmllint` | qmllint | the Store's widgets against the built modules |
 | `tst_shell` | Qt Quick Test | Beam fuzzy ranking, calculator (including injection rejection), section grouping |
 | `tst_kit_qml` | Qt Quick Test (GPU) | tokens, theme roles, typography, springs in QML, Oklch singleton |
+| `tst_golden` | Qt Test (GPU) | every Kit component in every variant against reference images |
+| `shell_e2e` | scripted shell (GPU) | whole flows with synthetic input, controllers included |
+| `prism_e2e` | Python + real clients (GPU, Linux) | the compositor with real Wayland clients: windows, Spaces, displays |
 | `tools_generate_tokens` | Python unittest | color math, generated outputs current |
 
-`all_qmllint` must report zero warnings. CI excludes the `gpu` label on hosted runners.
+`all_qmllint` must report zero warnings. CI excludes the `gpu` label on hosted
+runners. The carried products' suites are listed in [§11](#11-carried-products).
 
-## 10. Repository conventions
+## 10. The QOR core
+
+The QOR core is the Rust library that holds the keys and talks to the QOR
+network. Its source is `tools/qor-launcher/core/` in demiurge-chain, and
+QOR OS never copies it
+([QOR-0003](decisions/QOR-0003-the-qor-core-at-a-pinned-commit.md)).
+
+- `core/CMakeLists.txt` fetches demiurge-chain at `QOR_CORE_COMMIT` (or uses
+  `QOR_CORE_SOURCE_DIR`), and Corrosion builds the `qor-launcher-core` crate as
+  a static library from its `Cargo.lock`.
+- The bridge is three C functions:
+  - `qor_core_version()`;
+  - `qor_core_call(request)`, which takes `{"command": …, "args": {…}}` and
+    returns `{"ok": …}` or `{"error": {"kind", "message"}}`;
+  - `qor_core_free(answer)`.
+
+  Amounts cross as decimal strings of embers, and no command answers with a key.
+- At the current pin the bridge answers `core_version`, `token_info`,
+  `parse_amount` and `format_sparks`. It grows upstream as Phase 2 needs it.
+- `QOR_BUILD_CORE` is on where `cargo` is found, and the CI presets require it.
+
+## 11. Carried products
+
+QQ, ARQADE and QOR Media come from demiurge-chain with their history, at the
+same paths as upstream ([UPSTREAM.md](UPSTREAM.md)). Each is its own CMake
+project, built and tested by its own `build.ps1`, which
+`tools/dev/products.ps1` calls.
+
+| Product | Path | Targets | Suites |
+|---------|------|---------|--------|
+| **QQ** | `products/qq/` | `qqruntime` (QML module `QQ`), `qq-studio` (`QQ.Studio`), `qq-player` (`QQ.Player`), `qq-mcp`, `qqagent` | `tst_world`, `tst_scene`, `tst_studio`, `tst_play`, `tst_player`, `tst_agent`, `tst_lockdown`, `tst_publish` |
+| **ARQADE** | `products/arqade/qt/` (+ `games/`, `tests/fixtures/`) | `arqade` (QML module `ARQADE`), built on QQ's runtime from `../../qq/runtime` | `tst_arqadelink`, `tst_arqadeserver`, `tst_interface`, `tst_games` |
+| **QOR Media** | `tools/qor-media/` | `qor-media` (QML module `QOR.Media`), with PDFium | `tst_medialink`, `tst_files`, `tst_textfile`, `tst_playback`, `tst_look`, `tst_reader`, `tst_pdfpages`, `tst_pdfmarks`, `tst_pdfforms` |
+
+Their suites render on the GPU in real windows and drive them with input. The
+look tests read `docs/design/tokens.json`, Demiurge's one look. Today they
+build on Windows. The Linux build, running under Prism, Lumen theming and
+QTOS.Input are Phase 1.
+
+## 12. Repository conventions
 
 - Generated files are committed and checked for staleness: `kit/Tokens.qml`,
   `platform/common/lumentokens.h` and `docs/design/tokens.md` (from
   `tools/tokens/generate_tokens.py`).
-- Every source file carries `SPDX-License-Identifier: LicenseRef-QTOS-Proprietary`.
+- Every source file carries `SPDX-License-Identifier: LicenseRef-QTOS-Proprietary`,
+  except the carried code, which keeps its Apache-2.0 notices and its own
+  formatting.
 - Naming: C++ in namespace `qtos` (`qtos::sim`, `qtos::lumen`, `qtos::host`),
-  QML modules under `QTOS.*` except the style module `Lumen`.
+  QML modules under `QTOS.*` except the style module `Lumen`. The code keeps
+  these names until the product name is cleared
+  ([QOR-0008](decisions/QOR-0008-before-a-public-release.md)).

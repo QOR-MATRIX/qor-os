@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: Security vulnerability
-    url: https://github.com/QOR-MATRIX/QTOS/security/advisories/new
+    url: https://github.com/QOR-MATRIX/qor-os/security/advisories/new
     about: Report security issues privately. Do not open a public issue.
   - name: Vision & architecture
-    url: https://github.com/QOR-MATRIX/QTOS/blob/main/VISION.md
-    about: Read the vision and ADRs before proposing large changes.
+    url: https://github.com/QOR-MATRIX/qor-os/blob/main/VISION.md
+    about: Read the vision and the decision records (docs/decisions) before proposing large changes.

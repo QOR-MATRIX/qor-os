@@ -7,7 +7,8 @@
 | `compositor/` | **prism** (Linux, experimental): `Compositor.qml` hosts the same `Desktop` in a Qt Wayland Compositor scene; xdg-shell, server- and client-side decorations, text input |
 
 Behaviour spec: [docs/design/SHELL.md](../docs/design/SHELL.md). Compositor
-strategy: [ADR-0003](../docs/adr/0003-compositor-strategy.md).
+strategy: [QTOS-0003](../docs/decisions/qtos/QTOS-0003-compositor-strategy.md),
+amended by [QOR-0005](../docs/decisions/QOR-0005-every-display-at-its-own-refresh.md) (Prism's own KMS backend).
 
 Run the compositor nested on Linux:
 

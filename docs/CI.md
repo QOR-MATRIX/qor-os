@@ -4,93 +4,153 @@ Workflows live in [`.github/workflows/`](../.github/workflows/).
 
 | Workflow | Runs on | Needs Qt | Checks |
 |----------|---------|----------|--------|
-| **Lint** (`lint.yml`) | `ubuntu-24.04` | No | Generated tokens are current, token generator tests, SPDX headers, clang-format 20.1.8, JSON validity |
-| **Build** (`build.yml`) | Windows (`windows-2025` or self-hosted), Linux (`ubuntu-24.04` or self-hosted) | Yes (commercial) | Configure (`ci-windows`/`ci-linux`), build, `all_qmllint`, `ctest -LE gpu` (plus `-L gpu` when enabled). Tags and manual runs also upload an installable Windows artifact (kept 7 days) |
+| **Lint** (`lint.yml`) | `ubuntu-24.04` | No | Generated tokens are current, token generator tests, the Store's signed catalogue, SPDX headers, clang-format 20.1.8, JSON validity. Carried code ([UPSTREAM.md](UPSTREAM.md)) is skipped by the header and format checks |
+| **Build** (`build.yml`) | Windows and Linux, self-hosted (or hosted with the online installer) | Yes (commercial) | Configure (`ci-windows`/`ci-linux`, warnings as errors, the QOR core required), build, `all_qmllint`, `ctest -LE gpu` (plus `-L gpu` when enabled). On Windows, the carried products (QQ, ARQADE, QOR Media) when they changed. Tags and manual runs also upload an installable Windows artifact (kept 7 days) |
 
 Both run on pushes to `main`, on pull requests and on demand; Build also runs on `v*` tags.
 Pull-request runs cancel superseded runs. Each OS job runs only when that OS has a Qt source.
 
+## What the Build job needs on a runner
+
+- **The commercial Qt 6.12 kit** (below).
+- **Rust 1.91 or later** (`cargo`) for the QOR core, which `core/` builds from
+  demiurge-chain at a pinned commit through Corrosion
+  ([QOR-0003](decisions/QOR-0003-the-qor-core-at-a-pinned-commit.md)). The CI
+  presets set `QOR_BUILD_CORE=ON`, so a runner without Rust fails at configure
+  instead of skipping the core. The workstation's runners use Rust 1.98.1.
+  Linux also needs `libdbus-1-dev` and `pkg-config`, because the core's
+  keychain uses the Secret Service.
+- **Network access to GitHub** at configure time. It fetches demiurge-chain at
+  the pin, and Corrosion v0.6.1.
+
+### The carried products
+
+On Windows, with `QTOS_RUN_GPU_TESTS`, the job also builds and tests QQ,
+ARQADE and QOR Media through `tools/dev/products.ps1`. Each product's own
+script runs every suite, and QOR Media's needs PDFium, which its script fetches
+and checks by SHA-256. The suites take about ten minutes and drive real windows
+on the runner's desktop, so they run only when:
+- the push or pull request changes `products/`, `tools/qor-media/`,
+  `docs/design/tokens.json`, `tools/dev/products.ps1` or `build.yml`;
+- the run is for a tag;
+- the run was started by hand.
+
+A product whose suites fail is run once more. On a desktop someone is using, a
+test window can lose the keyboard to another application, and a genuine
+failure fails both attempts. The step summary says whether the products ran.
+
 ## Providing Qt to CI
 
-QTOS uses the commercial Qt 6.12 kit, which CI cannot download
+QOR OS uses the commercial Qt 6.12 kit, which CI cannot download
 anonymously. Configure **one** of the following in
 *Settings → Secrets and variables → Actions*.
 
-### Option A: self-hosted runner (recommended)
+### Option A: self-hosted runners (current)
 
 Hosted Windows minutes are billed at 2× on private repositories, and a cold
 Qt install takes several minutes. A self-hosted runner on a machine that
 already has Qt is faster, free, builds incrementally and has a real GPU.
 
-**Current setup:** the QTOS workstation has a repository runner registered as
-`<COMPUTERNAME>-qtos` (labels `self-hosted, Windows, X64, qt, msvc, gpu`),
-installed in `%USERPROFILE%\ghr\qtos`.
+**Current setup.** The owner's workstation (the reference laptop) runs two
+runners:
 
-- `QTOS_WINDOWS_RUNNER`, `QTOS_WINDOWS_QT_DIR` and `QTOS_RUN_GPU_TESTS` are set.
-- A full Windows build with tests takes about 2½ minutes.
-- The runner runs as the signed-in user, so no admin rights are needed.
-- It starts minimised at every sign-in through a Startup-folder entry. To set
-  it up on another machine, or to start it by hand:
+| Runner | Where | Labels |
+|--------|-------|--------|
+| `<COMPUTERNAME>-qtos` | `%USERPROFILE%\ghr\qtos`, work folder `w` | `self-hosted, Windows, X64, qt, msvc, gpu` |
+| `<COMPUTERNAME>-qtos-linux` | WSL2 Ubuntu, `~/ghr/qtos-linux` | `self-hosted, Linux, X64, qt, gcc, wsl, gpu` |
+
+- Both run as the signed-in user, so no admin rights are needed.
+- A full Windows build of the OS with its tests takes about 2½ minutes once
+  incremental. The first build with the QOR core compiles its Rust
+  dependencies, which takes several more minutes.
+
+### Runners for the organisation
+
+A runner serves either one repository or the organisation. Registered to the
+organisation (`QOR-MATRIX`), in its Default runner group, the same two runners
+serve QOR OS and the frozen QTOS. That is the intended setup
+([ROADMAP](ROADMAP.md) Phase 0).
+
+`tools/ci/runners.ps1` moves both runners in one command:
+1. It removes each from where it is registered now.
+2. It registers it at the new scope, with the same names and labels.
+3. It pins the Linux runner's PATH (with `~/.cargo/bin`) and display
+   variables.
+4. It starts both, minimised.
+
+Tokens are piped from `gh`, never printed.
 
 ```powershell
-# Start it for this session (keep the window open while CI runs):
-& "$env:USERPROFILE\ghr\qtos\run.cmd"
-
-# Optional: start it automatically at every logon.
-Set-Content "$([Environment]::GetFolderPath('Startup'))\qtos-github-runner.cmd" `
-  "@start `"QTOS GitHub runner`" /min cmd /c `"%USERPROFILE%\ghr\qtos\run.cmd`""
+gh auth refresh -h github.com -s admin:org   # once: organisation runners need the admin:org scope
+.\tools\ci\runners.ps1 -Scope org            # both runners, for every repository in QOR-MATRIX
+.\tools\ci\runners.ps1 -Scope repo -Repo qor-os   # or one repository, with the repo scope only
+.\tools\ci\runners.ps1 -StartOnly            # just start them (after a reboot, without Startup entries)
 ```
 
-Then point the Windows job at it with the repository variables below.
-Until the variables are set, the Windows job is skipped; once they are set,
-Windows jobs wait in the queue whenever the runner is not running.
+Until the token has `admin:org`, the runners are registered to `qor-os` alone.
+QTOS is frozen, so its CI does not run.
 
 Repository variables (*Settings → Secrets and variables → Actions → Variables*,
-or `gh variable set <NAME> --body <VALUE> --repo QOR-MATRIX/QTOS`):
+or `gh variable set <NAME> --body <VALUE> --repo QOR-MATRIX/qor-os`). The
+private repositories of a Free organisation cannot read organisation
+variables, so each repository sets its own:
 
 | Variable | Value | Effect |
 |----------|-------|--------|
 | `QTOS_WINDOWS_RUNNER` | `["self-hosted","windows","qt"]` | Windows job runs on the workstation |
 | `QTOS_WINDOWS_QT_DIR` | `C:/Qt/6.12.0/msvc2022_64` | Use the installed kit; skip the installer |
-| `QTOS_RUN_GPU_TESTS` | `true` (optional) | Also run GPU-labelled suites (opens a brief test window on the runner's desktop) |
-| `QTOS_LINUX_RUNNER`, `QTOS_LINUX_QT_DIR` | runner label JSON, kit path | Same for a Linux runner (for example in WSL2) |
+| `QTOS_RUN_GPU_TESTS` | `true` (optional) | Also run GPU-labelled suites and the carried products (opens brief test windows on the runner's desktop) |
+| `QTOS_LINUX_RUNNER` | `["self-hosted","linux","qt"]` | Linux job runs in WSL on the workstation |
+| `QTOS_LINUX_QT_DIR` | `/home/<user>/Qt/6.12.0/gcc_64` | Use the installed kit |
 
-To set up another runner:
+The variables keep their QTOS names until the product name is cleared
+([QOR-0008](decisions/QOR-0008-before-a-public-release.md)). Until they are set,
+a job is skipped; once they are set, jobs wait in the queue whenever the runner
+is not running.
+
+**Starting the runners at sign-in** is a Startup-folder entry for each, which
+the owner adds once. Assistants do not write Startup entries.
 
 ```powershell
-$token = gh api -X POST repos/QOR-MATRIX/QTOS/actions/runners/registration-token --jq .token
-# In an empty folder containing the extracted actions-runner-win-x64 zip:
-.\config.cmd --unattended --url https://github.com/QOR-MATRIX/QTOS --token $token `
+Set-Content "$([Environment]::GetFolderPath('Startup'))\qtos-github-runner.cmd" `
+  "@start `"QOR OS Windows runner`" /min cmd /c `"%USERPROFILE%\ghr\qtos\run.cmd`""
+Set-Content "$([Environment]::GetFolderPath('Startup'))\qtos-github-runner-linux.cmd" `
+  "@start `"QOR OS Linux runner`" /min wsl.exe -d Ubuntu --cd ~ --exec /home/$($env:USERNAME.ToLower())/ghr/qtos-linux/run.sh"
+```
+
+If CI does not run, first check that both runners are online:
+`gh api repos/QOR-MATRIX/qor-os/actions/runners` (or
+`orgs/QOR-MATRIX/actions/runners` once they belong to the organisation).
+
+#### Setting up a runner from scratch
+
+```powershell
+# Windows, in an empty folder holding the extracted actions-runner-win-x64 zip:
+$token = gh api -X POST repos/QOR-MATRIX/qor-os/actions/runners/registration-token --jq .token
+.\config.cmd --unattended --url https://github.com/QOR-MATRIX/qor-os --token $token `
   --name "$env:COMPUTERNAME-qtos" --labels qt,msvc,gpu --work w --replace
 .\run.cmd
 ```
 
-To remove the workstation runner: stop `run.cmd`, run
-`.\config.cmd remove --token (gh api -X POST repos/QOR-MATRIX/QTOS/actions/runners/remove-token --jq .token)`
-in its folder, delete the Startup entry if you created one, and delete the
-`QTOS_WINDOWS_*` variables.
+For the organisation, use `orgs/QOR-MATRIX/actions/runners/registration-token`
+and `--url https://github.com/QOR-MATRIX`.
 
 #### Linux runner in WSL2
 
-The same workstation also runs the Linux job inside WSL2 Ubuntu, using the
-commercial kit in `~/Qt` ([BUILDING.md](BUILDING.md#linux-on-wsl2-windows-workstation)).
-The runner is `<COMPUTERNAME>-qtos-linux`, with labels
-`self-hosted, Linux, X64, qt, gcc, wsl, gpu`, installed in `~/ghr/qtos-linux`.
-
-| Variable | Value |
-|----------|-------|
-| `QTOS_LINUX_RUNNER` | `["self-hosted","linux","qt"]` |
-| `QTOS_LINUX_QT_DIR` | `/home/<user>/Qt/6.12.0/gcc_64` |
+The Linux job runs inside WSL2 Ubuntu, using the commercial kit in `~/Qt`
+([BUILDING.md](BUILDING.md#linux-on-wsl2-windows-workstation)) and Rust from
+rustup in `~/.cargo` (1.98.1).
 
 With `QTOS_RUN_GPU_TESTS`, the Linux job also runs two things on WSLg's
 display: the GPU suites, and `tools/dev/prism-protocol-check.sh`, which
 connects real clients to the built compositor.
 
 Two runner files are pinned rather than captured from the shell that
-configured the runner:
+configured the runner. `tools/ci/runners.ps1` writes both:
 
-- **`.path`** holds a Linux-only PATH. WSL appends the whole Windows PATH, so
-  a job could otherwise run a Windows `.exe` for a tool missing on Linux.
+- **`.path`** holds a Linux-only PATH, starting with `~/.cargo/bin`. WSL
+  appends the whole Windows PATH, so a job could otherwise run a Windows
+  `.exe` for a tool missing on Linux.
 - **`.env`** holds WSLg's display variables. `WAYLAND_DISPLAY` is the absolute
   path of WSLg's socket, `/mnt/wslg/runtime-dir/wayland-0`. With systemd
   enabled, `/run/user/<uid>` is recreated whenever the distribution starts,
@@ -100,27 +160,22 @@ configured the runner:
 
 GPU suites run with a 120-second timeout and one retry
 (`ctest --repeat until-pass:2`). Under WSLg a window is occasionally never
-reported as exposed. It happened once, right after a full rebuild, and could
-not be reproduced in 24 runs. A genuine failure still fails both attempts.
+reported as exposed. A genuine failure still fails both attempts.
 
 ```bash
-# Set up (in WSL). Download the actions-runner-linux-x64 tarball, check its SHA-256, extract it to ~/ghr/qtos-linux.
-./config.sh --unattended --url https://github.com/QOR-MATRIX/QTOS --token <registration token> \
+# Set up (in WSL). Rust and the core's system package first:
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain 1.98.1
+sudo apt-get install libdbus-1-dev pkg-config
+# Download the actions-runner-linux-x64 tarball, check its SHA-256, extract it to ~/ghr/qtos-linux, then:
+./config.sh --unattended --url https://github.com/QOR-MATRIX/qor-os --token <registration token> \
   --name "$(hostname)-qtos-linux" --labels qt,gcc,wsl,gpu --work _work --replace
-printf '%s\n' /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/lib/wsl/lib > .path
+printf '%s\n' "$HOME/.cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/lib/wsl/lib" > .path
 printf '%s\n' LANG=C.UTF-8 DISPLAY=:0 WAYLAND_DISPLAY=/mnt/wslg/runtime-dir/wayland-0 XDG_RUNTIME_DIR=/run/user/$(id -u) > .env
 ```
 
 WSL keeps the distribution running while the runner's `wsl.exe` process is
-alive, so start the runner from Windows:
-
-```powershell
-# For this session:
-Start-Process wsl.exe '-d','Ubuntu','--cd','~','--exec',"/home/$env:USERNAME/ghr/qtos-linux/run.sh" -WindowStyle Minimized
-# At every sign-in (Startup folder, next to the Windows runner's entry):
-Set-Content "$([Environment]::GetFolderPath('Startup'))\qtos-github-runner-linux.cmd" `
-  "@start `"QTOS Linux runner`" /min wsl.exe -d Ubuntu --cd ~ --exec /home/$($env:USERNAME.ToLower())/ghr/qtos-linux/run.sh"
-```
+alive, so start the runner from Windows (`tools/ci/runners.ps1 -StartOnly`, or
+the Startup entry above).
 
 ### Option B: hosted runners with the Qt Online Installer
 
@@ -135,7 +190,7 @@ in unattended mode. It then checks that the CMake packages listed under
 `cmake` exist, because the installer exits successfully even when it skips a
 package it cannot resolve. The result is cached with `actions/cache` (keyed on
 OS, Qt version and the package list). Credentials are passed through the
-environment and are redacted from logs.
+environment and are redacted from logs. Hosted images include Rust.
 
 The same script sets up a workstation or a self-hosted runner. Without
 credential variables it uses an existing Qt Account sign-in (`qtaccount.ini`,
@@ -184,8 +239,10 @@ Everything CI runs can be run locally:
 ```powershell
 python tools/tokens/generate_tokens.py --check
 python -m unittest discover -s tests/tools -v
+python tools/store/build_store.py check
 python tools/ci/check_headers.py
 .\.venv\Scripts\pre-commit run --all-files
 .\tools\dev\build.ps1 -Preset ci-windows -Test
 .\tools\dev\build.ps1 -Preset ci-windows -Target all_qmllint
+.\tools\dev\products.ps1
 ```

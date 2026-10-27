@@ -1,7 +1,7 @@
 # sdk — building apps for QTOS
 
 > **Status:** template and guidance. An installable SDK (QTOS.Kit, Lumen and
-> QTOS.Services as an exported CMake package plus a simulator) is a Phase 5
+> QTOS.Services as an exported CMake package plus a simulator) is a Phase 4
 > deliverable.
 
 ## Template

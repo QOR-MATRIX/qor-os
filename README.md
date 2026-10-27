@@ -1,24 +1,45 @@
 <div align="center">
 
-# QTOS
+# QOR OS
 
-**A next-generation operating system experience, built entirely with Qt 6.**
+**The operating system for players, game makers and creators.**
 
-Prism compositor · Lumen design language · Qt Remote Objects services · Qt 6.12
+Prism compositor · Lumen design · QQ engine · ARQADE · the QOR network · Qt 6.12
 
-![The QTOS desktop: Files and Music windows, the Rail, a notification and the Shelf over the Aurora wallpaper](docs/images/desktop.webp)
+![The QOR OS desktop (Prism and Lumen): Files and Music windows, the Rail, a notification and the Shelf over the Aurora wallpaper](docs/images/desktop.webp)
 
 </div>
 
-QTOS is an operating system whose entire user-facing stack — compositor,
-shell, system services, design system, apps and SDK — is built with Qt. It
-runs on a Linux kernel with a small verified base; everything above the
-"Qt Line" is Qt. See [**VISION.md**](VISION.md) for the full concept.
+QOR OS is a Linux operating system whose whole experience is drawn by Qt. The
+compositor and shell, the design system, the system services, the game engine
+and its studio, the arcade, the media player and the account system are all
+QOR OS's own. It joins two projects
+([QOR-0002](docs/decisions/QOR-0002-one-repository-from-qtos-and-demiurge.md)):
 
-This repository contains **Phase 0: the complete Prism shell running in
-simulation**, on Windows today and on any Qt 6.12 desktop, plus the
-experimental Wayland compositor, platform integration for every Qt app, and
-the image skeleton.
+- **QTOS** is the operating system. It brings Prism, a Wayland compositor whose
+  shell and windows share one Qt Quick scene, plus the Lumen design language,
+  system services, controllers, audio and a signed Store.
+- **Demiurge** is the QOR ecosystem. It brings the QQ game engine and QQ
+  Studio, ARQADE, QOR Media, QOR ID, Social and the Rust core that holds the
+  keys.
+
+See [**VISION.md**](VISION.md) for the whole concept, and [OWNER.md](OWNER.md)
+for where it stands today.
+
+## Who it is for
+
+What each kind of person gets in QOR OS 1.0
+([QOR-0007](docs/decisions/QOR-0007-what-1-0-ships.md)).
+[The roadmap](docs/ROADMAP.md) says which parts are built and which are
+still to come.
+
+| | |
+|---|---|
+| **Players** | A controller-first Home with every game in one Library: QQ games, ARQADE, and Steam through Proton. Each display runs at its own refresh rate, up to 360 Hz. Friends and chat sit over any game. |
+| **Game designers** | QQ Studio builds lit 3D and pixel-perfect 2D worlds with physics, logic, sound and animation. An agent can help over MCP, using the designer's own key. |
+| **Game developers** | QQ's runtime plays natively and in a browser. Games are published from the Studio, with a provenance record on the QOR network. |
+| **App developers** | QTOS.Kit, the Lumen controls, typed system services and a simulator that runs the whole shell on Windows. |
+| **Creators** | Themes and widgets in the Store, versioning with Qontrol, and royalties that follow a remix once real value exists. |
 
 ## Highlights
 
@@ -26,97 +47,98 @@ the image skeleton.
 |---|---|
 | ![Beam](docs/images/beam.webp) | **Beam**: one command bar for apps, actions, settings, files and arithmetic, with fuzzy ranking, a live preview pane and staggered spring entry. The glass refracts the windows behind it. |
 | ![Control Center](docs/images/control-center.webp) | **Control Center**: every control is a live Qt Remote Objects binding to a system service: Wi-Fi, Bluetooth, Focus, appearance, Night Light, brightness, volume, media and accent. |
-| ![Overview](docs/images/overview.webp) | **Overview and Spaces**: windows are live items in one Qt Quick scene, so they spring into an exposé grid at full frame rate while the wallpaper pulls focus. |
-| ![Light appearance](docs/images/light.webp) | **Lumen**: OKLCH tokens, so light/dark and the accent hue morph continuously through OKLab. Pictured: light appearance with a teal accent. |
-| ![Lock screen](docs/images/lock.webp) | **Lock screen**: drawn by Prism above every client, with a variable-weight Inter clock and a focus-pull unlock. |
-| ![Apps](docs/images/apps.webp) | **Apps**: Files, Music, Notes, Terminal, Monitor (Qt Graphs, passive frame-time probe) and Settings, built on QTOS.Kit and the Lumen Qt Quick Controls style. |
-| ![Sound](docs/images/sound.webp) | **Sound and an audio-reactive interface**: a real-time audio engine plays generated QTOS Sessions and your own music with a five-band equaliser. The wallpaper, Now Playing and the Rail move with the music, at the intensity and in the frequency range you choose. |
+| ![Overview](docs/images/overview.webp) | **Overview and Spaces**: windows are live items in one Qt Quick scene, so they spring into a grid at full frame rate while the wallpaper pulls focus. |
+| ![Light appearance](docs/images/light.webp) | **Lumen**: OKLCH tokens, so light and dark and the accent hue morph continuously through OKLab. |
+| ![Sound](docs/images/sound.webp) | **Sound and an audio-reactive interface**: a real-time engine with a five-band equaliser; the wallpaper and the Rail move with the music. |
+| ![Prism nested](docs/images/prism-nested.webp) | **Prism**: the real Wayland compositor, with several displays, controllers and three-finger gestures, running real clients. |
 
-**Performance** (8 s scripted tour of Overview, Beam, Control Center and Space
-switches, 1539×844 logical at 125%, Direct3D 11):
+**Performance:** an 8-second scripted tour of Overview, Beam, Control Center
+and Space switches, at 1539×844 logical and 125% scaling, on Direct3D 11.
 
 | GPU | Average | p50 | p95 | p99 |
 |-----|---------|-----|-----|-----|
 | NVIDIA RTX 4060 Laptop, 360 Hz | **2.79 ms (358 fps)** | 2.77 ms | 3.07 ms | 3.57 ms |
 | Intel UHD (integrated) | 7.30 ms (137 fps) | 8.20 ms | 9.11 ms | 11.36 ms |
 
-When nothing changes, the shell renders nothing at all. See [docs/PERFORMANCE.md](docs/PERFORMANCE.md).
+When nothing changes, the shell renders nothing at all. See
+[docs/PERFORMANCE.md](docs/PERFORMANCE.md).
 
 ## Quick start (Windows)
 
-Requirements: **Qt 6.12.0 for MSVC 2022 64-bit** (commercial; module list in
-[docs/BUILDING.md](docs/BUILDING.md)), **Visual Studio 2022 Build Tools**
-(C++ workload), **Python 3.10+**. CMake and Ninja come with Qt's tools.
+Requirements:
+- **Qt 6.12.0 for MSVC 2022 64-bit**, commercial; the module list is in
+  [docs/BUILDING.md](docs/BUILDING.md);
+- **Visual Studio 2022 Build Tools**, with the C++ workload;
+- **Python 3.10+**;
+- **Rust 1.91+**, for the QOR core.
+
+CMake and Ninja come with Qt's tools.
 
 ```powershell
-git clone https://github.com/QOR-MATRIX/QTOS.git
-cd QTOS
-.\tools\dev\build.ps1 -Test                 # configure + build + test (windows-release)
-.\tools\dev\run.ps1                         # start on the lock screen (any password unlocks)
+git clone https://github.com/QOR-MATRIX/qor-os.git
+cd qor-os
+.\tools\dev\build.ps1 -Test                 # the OS and the QOR core: configure, build, test
+.\tools\dev\run.ps1                         # the shell in simulation, on the lock screen (any password unlocks)
 .\tools\dev\run.ps1 -- --unlocked --open files,music
+.\tools\dev\products.ps1                    # QQ, ARQADE and QOR Media: build and test
 ```
 
 Then try:
 
 - <kbd>Ctrl</kbd>+<kbd>Space</kbd> to open Beam. Type `set`, `dark`, `12*12` or `glass`.
 - <kbd>Ctrl</kbd>+<kbd>↑</kbd> for Overview, and <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>←</kbd> / <kbd>→</kbd> to switch Spaces.
-- Drag a window to a screen edge to snap it, or double-click a title bar to maximise.
-- Click the clock for Control Center, or the song in the Rail for Now Playing.
 - Plug in a game controller (Xbox, PlayStation, Stratus and others) and accept the prompt to drive everything with it.
-- Press play in Music, then open Settings › Sound to shape the equaliser and choose what the interface reacts to. Your own music (the Music folder, or `QTOS_MUSIC_DIR`) is queued after the generated sessions.
+- Open QQ Studio (`build\products\qq\qq-studio.exe`) and play the Orb Run sample (`products\qq\samples\orb-run`).
 
-Drive the running system from another terminal:
-
-```powershell
-.\build\windows-release\qtosctl.exe status
-.\build\windows-release\qtosctl.exe theme light
-.\build\windows-release\qtosctl.exe accent 152
-.\build\windows-release\qtosctl.exe notify "Build finished" "All tests passed"
-.\build\windows-release\qtosctl.exe media play
-.\build\windows-release\qtosctl.exe spectrum 10
-```
+On Linux, Prism runs as a real Wayland compositor nested in your session; see
+[docs/BUILDING.md](docs/BUILDING.md#prism-the-wayland-compositor-linux).
 
 ## Repository map
 
 | Path | What it is |
 |------|------------|
-| [`kit/`](kit/) | **QTOS.Kit**: Lumen tokens, `Theme`, `Spring`, OKLCH, SDF `Surface`, `Glass`, `Backdrop`, Aurora wallpaper, `Spectrum`, interface sounds, icons, fonts. [`kit/style/`](kit/style/): the **Lumen** Qt Quick Controls style |
-| [`input/`](input/) | **QTOS.Input**: game controllers (XInput, HID, evdev) and the controller interface |
-| [`audio/`](audio/) | The QTOS audio engine: real-time output, the QTOS Sessions synthesiser, music decoding, equaliser, limiter and analysis |
-| [`services/`](services/) | System service contracts (`interfaces/*.rep`) and **QTOS.Services**, the typed replicas plus `Intents` that the shell and apps use |
-| [`sim/`](sim/) | Simulated service implementations, scenarios, and the `qtos-simd` daemon |
-| [`prism/`](prism/) | **QTOS.Shell** (`shell/`), the `qtos-shell` simulation host (`host/`), and the `prism` Wayland compositor (`compositor/`) |
-| [`apps/`](apps/) | **QTOS.Apps**: Files, Music, Notes, Terminal, Monitor and Settings |
-| [`platform/`](platform/) | Lumen `QStyle` for Qt Widgets, the `qtos` QPA platform theme, and a widgets gallery |
-| [`image/`](image/) | `meta-qtos` Yocto layer and kas configuration (Phase 2) |
-| [`sdk/`](sdk/) | App template and SDK notes |
-| [`tools/`](tools/) | `qtosctl`, token generator, icon importer, screenshot capture, dev and CI scripts |
-| [`tests/`](tests/) | C++ (Qt Test), QML (Qt Quick Test) and Python tests |
-| [`docs/`](docs/) | Architecture, building, development, CI, performance, roadmap, design specs, ADRs |
+| [`prism/`](prism/) | **Prism**: the shell (`shell/`, QTOS.Shell), the `qtos-shell` simulation host (`host/`) and the `prism` Wayland compositor (`compositor/`) |
+| [`kit/`](kit/) | **QTOS.Kit**: Lumen tokens, `Theme`, `Spring`, OKLCH, SDF `Surface`, `Glass`, `Backdrop`, Aurora wallpaper, icons and fonts. [`kit/style/`](kit/style/) is the **Lumen** Qt Quick Controls style |
+| [`input/`](input/), [`audio/`](audio/) | Game controllers (XInput, HID, evdev) and the controller interface; the real-time audio engine |
+| [`services/`](services/), [`sim/`](sim/) | System service contracts and **QTOS.Services**; the simulated services and `qtos-simd` |
+| [`store/`](store/), [`apps/`](apps/) | The signed Store; first-party apps (Files, Music, Notes, Terminal, Monitor, Settings, Store) |
+| [`platform/`](platform/) | Lumen `QStyle` for Qt Widgets, the `qtos` platform theme, a widgets gallery |
+| [`core/`](core/) | The **QOR core**, built from demiurge-chain at a pinned commit ([QOR-0003](docs/decisions/QOR-0003-the-qor-core-at-a-pinned-commit.md)) |
+| [`products/qq/`](products/qq/) | **QQ**, the QOR Engine: runtime, QQ Studio, QQ Player, the agent's tools (carried, Apache-2.0) |
+| [`products/arqade/`](products/arqade/) | **ARQADE**: the Qt app, its games and their replay fixtures (carried, Apache-2.0) |
+| [`tools/qor-media/`](tools/qor-media/) | **QOR Media**: player, viewer, editor and PDF reader (carried, Apache-2.0) |
+| [`image/`](image/) | The QOR OS image on Fedora Atomic (Phase 3) |
+| [`sdk/`](sdk/), [`tools/`](tools/), [`tests/`](tests/) | App template; `qtosctl`, generators, dev, CI and upstream scripts; tests |
+| [`docs/`](docs/) | Architecture, building, development, CI, performance, roadmap, design, decisions |
 
 ## Documentation
 
 - [VISION.md](VISION.md): the concept and long-term architecture
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): how the code fits together
-- [docs/BUILDING.md](docs/BUILDING.md): toolchain, presets, running, troubleshooting
-- [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md): conventions, recipes, debugging
-- [docs/design/LUMEN.md](docs/design/LUMEN.md) and [docs/design/SHELL.md](docs/design/SHELL.md): design specifications
-- [docs/SERVICES.md](docs/SERVICES.md): service contracts, scenarios, `qtosctl`
-- [docs/AUDIO.md](docs/AUDIO.md): the audio engine, analysis and the audio-reactive interface
-- [docs/CONTROLLERS.md](docs/CONTROLLERS.md): game controllers and the controller interface
-- [docs/QT-MODULES.md](docs/QT-MODULES.md): every Qt module and tool and its role in QTOS
-- [docs/PERFORMANCE.md](docs/PERFORMANCE.md), [docs/CI.md](docs/CI.md), [docs/ROADMAP.md](docs/ROADMAP.md)
-- [docs/adr/](docs/adr/): architecture decision records
+- [OWNER.md](OWNER.md): where QOR OS stands, on one page
+- [AGENTS.md](AGENTS.md): the rules for everyone working here
+- [docs/ROADMAP.md](docs/ROADMAP.md): phases, exits and release gates
+- [docs/decisions/](docs/decisions/README.md): every decision (QOR, QTOS and Demiurge records)
+- [docs/UPSTREAM.md](docs/UPSTREAM.md): what is carried from demiurge-chain and how it moves
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/BUILDING.md](docs/BUILDING.md), [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md), [docs/CI.md](docs/CI.md)
+- [docs/design/LUMEN.md](docs/design/LUMEN.md), [docs/design/SHELL.md](docs/design/SHELL.md): design specifications
+- [docs/SERVICES.md](docs/SERVICES.md), [docs/AUDIO.md](docs/AUDIO.md), [docs/CONTROLLERS.md](docs/CONTROLLERS.md), [docs/STORE.md](docs/STORE.md), [docs/QT-MODULES.md](docs/QT-MODULES.md), [docs/PERFORMANCE.md](docs/PERFORMANCE.md)
 - [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), [CHANGELOG.md](CHANGELOG.md)
 
 ## Status
 
-**Phase 0 · Foundations: complete.** Next: **Phase 1 · Nested Prism**, which
-runs the compositor with real Wayland clients under WSLg and Linux. See
-[docs/ROADMAP.md](docs/ROADMAP.md).
+**Phase 0 · Clear the ground**, under way. This repository holds:
+- QTOS's complete shell, which runs in simulation on Windows and as a nested
+  Wayland compositor on Linux;
+- Demiurge's QQ, ARQADE and QOR Media, which build and pass their suites here;
+- the QOR core at a pinned commit.
+
+Next is **Phase 1 · One stack**: the products running inside Prism on Linux,
+driven by a controller. See [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## License
 
 Proprietary. Copyright © 2026 QOR-MATRIX. All rights reserved. See
-[LICENSE](LICENSE). Built with Qt under a commercial license. Third-party
-fonts and icons are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+[LICENSE](LICENSE). The code carried from demiurge-chain remains under
+Apache-2.0 ([LICENSES/Apache-2.0.txt](LICENSES/Apache-2.0.txt)). Built with Qt
+under a commercial license. Third-party material is listed in
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

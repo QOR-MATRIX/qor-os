@@ -1,23 +1,24 @@
 # Performance
 
-QTOS treats frame pacing as a feature. This document records the budgets,
+QOR OS treats frame pacing as a feature. This document records the budgets,
 the measured baseline, how to measure, and the techniques that keep the
-shell fast.
+shell fast. The measurements below were taken on QTOS's shell, which QOR OS
+carries unchanged.
 
 ## Budgets
 
 From [VISION.md §12](../VISION.md#12-performance-budgets-targets-on-the-reference-laptop).
-Phase 0 measures what the simulator can measure: frame pacing and idle
+QTOS's Phase 0 measured what the simulator can measure: frame pacing and idle
 behaviour.
 
-| Metric | Target | Phase 0 status |
+| Metric | Target | Status (measured in simulation) |
 |--------|--------|----------------|
 | Compositor frame, shell animating | GPU ≤ 3 ms, CPU ≤ 2 ms | **2.79 ms average frame interval at 360 Hz** on the RTX 4060 (the frame interval includes vsync wait, so render cost is lower) |
 | Idle wakeups with nothing animating | ~0 | Met by design: springs stop on settle, clock wakes once a minute, no continuous animations |
 | First-party app launch → first frame | ≤ 300 ms | Apps are in-process QML in simulation; measured in Phase 3 with Qt Application Manager |
 | Beam keystroke → results | ≤ 16 ms | Search is synchronous JS over about 60 entries; not yet instrumented |
-| Pointer input → photon | ≤ 1 frame + scanout | Input to swap: 5.9 ms p50 on the RTX 4060 at 360 Hz (about 2.1 frames, measured through the Windows compositor); 9.2 ms on Intel UHD. Measured on device in Phase 2 |
-| Boot / login budgets | ≤ 5 s / ≤ 700 ms | Phase 2 (image) |
+| Pointer input → photon | ≤ 1 frame + scanout | Input to swap: 5.9 ms p50 on the RTX 4060 at 360 Hz (about 2.1 frames, measured through the Windows compositor); 9.2 ms on Intel UHD. Measured on device in Phase 3 |
+| Boot / login budgets | ≤ 5 s / ≤ 700 ms | Phase 3 (image) |
 
 ## Baseline (2026-10-23)
 
@@ -108,16 +109,28 @@ RTX 4060).
 
 ### Compositor decision gate
 
-[ADR-0003](adr/0003-compositor-strategy.md) keeps Qt Wayland Compositor
-unless the bare-metal path misses multi-output frame-pacing or latency
-targets. The gate's data is `prism --benchmark` on the reference hardware:
+**Deferred, not failed**
+([QOR-0005](decisions/QOR-0005-every-display-at-its-own-refresh.md), amending
+[QTOS-0003](decisions/qtos/QTOS-0003-compositor-strategy.md)).
 
-- DRM/KMS (`QT_QPA_PLATFORM=eglfs` with the KMS integration, later Prism's
-  own backend);
-- two outputs at different refresh rates;
-- Wayland clients running.
+The gate was meant to confirm Qt Wayland Compositor with a bare-metal run of
+`prism --benchmark` on Qt's KMS integration, with two outputs at different
+refresh rates and Wayland clients running.
 
-Proposed pass criteria, to be ratified with the measurement in ADR-0011:
+The owner ran it on 26 October 2026 from an Ubuntu live USB, with the G15's
+360 Hz panel and a 1080p 60 Hz television. Both outputs appeared on the
+television, the runs did not pass, and the results were lost to GitHub's
+refusal of `.tgz` files. QTOS's ADR-0011 was never written.
+
+The question is now answered by building Prism's own KMS backend (Phase 3)
+against the owner's requirement:
+- every display at its own native mode and refresh rate, 60 Hz and 360 Hz
+  together;
+- VRR where supported;
+- NVIDIA RTX, Intel and AMD, including laptops whose displays sit on different
+  GPUs.
+
+Its acceptance targets are the gate's proposed criteria:
 
 - under 1% missed frames on each output at its own refresh rate;
 - input to swap within two refresh periods at p95.
@@ -127,8 +140,11 @@ numbers above validate the tooling only.
 
 #### Running the decision gate
 
-Prism drives several outputs (`--outputs` nested, every screen on eglfs), and
-`tools/dev/prism-gate.sh` runs the whole gate in one command. The machine
+The gate kit stays as a diagnostic for probing a machine's GPUs and displays,
+and for comparing runs. The backend's acceptance runs will come from an
+installed QOR OS image rather than a live USB. Prism drives several outputs
+(`--outputs` nested, every screen on eglfs), and `tools/dev/prism-gate.sh`
+runs the whole procedure in one command. The machine
 under test needs neither a Qt kit nor a build: `tools/dev/prism-gate-bundle.sh`
 packs Prism, the test client, the Qt runtime they use and the gate script
 into one archive (about 100 MB) that runs on a stock Ubuntu desktop, a live
@@ -170,7 +186,8 @@ watchdog ends one that hangs.
 from raw GPU throughput on a very fast panel; `--no-atomic` falls back to
 legacy modesetting if a driver rejects atomic commits. With a Qt kit and a
 `linux-release` build on the machine, `--build-dir` runs without a bundle.
-`summary.md` is the data ADR-0011 records.
+Note that Qt's eglfs KMS integration drives one GPU, so it cannot test the
+split-GPU laptops the backend must support.
 
 The **Monitor** app shows the same probe live: frame time and fps while the
 shell animates, and **Idle · Rendering on demand** when nothing changes.
@@ -210,5 +227,5 @@ on a QTOS device, Prism owns the KMS device.
   backdrop while windows move. Planned work: capture only the region under
   visible glass, and skip the capture when no glass overlaps changed content.
 - `Reduce Transparency` removes the glass sampling cost entirely.
-- Phase 2 adds direct scanout for full-screen clients and overlay planes for
+- Phase 3 adds direct scanout for full-screen clients and overlay planes for
   video and cursor in the KMS backend.
