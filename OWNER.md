@@ -23,7 +23,9 @@ Demiurge's QQ engine, ARQADE and QOR Media, on a Linux base. Code:
    because a test window lost the keyboard; CI retries a failure once.
 4. **The QOR core** — *the Rust code that holds keys* — is built from
    demiurge-chain at a pinned commit and never copied. Its test passes on
-   Windows and Linux.
+   Windows and Linux. Moving the rest of the launcher's Rust into it (QOR ID,
+   chain, Social, Library, Mesh, Qontrol) is done in demiurge-chain #107,
+   waiting for you.
 5. **Eight decisions** written down (`docs/decisions/`):
    - one rulebook;
    - the repository layout;
@@ -41,12 +43,22 @@ Demiurge's QQ engine, ARQADE and QOR Media, on a Linux base. Code:
 
 ## Needs you
 
-1. **Share the runners with QTOS too:** run
+1. **demiurge-chain #107** — *the rest of the launcher's Rust moved into the
+   core* (L13.2). It also records ADR-120, QOR OS from Demiurge's side.
+   - First decide **ADR-121** in it. Option A, recommended, ignores one
+     advisory in a crate that is listed but never built, guarded by CI exactly
+     as the launcher already does.
+   - Then review and merge #107. Merging to that public `main` is yours; I
+     was not allowed to.
+   - After the merge I move QOR OS's pin, with the `desktop` feature.
+   - ADR-120 also asks which licence the core's crates carry: MIT, as their
+     manifests say, or Apache-2.0, as the repository is.
+2. **Share the runners with QTOS too:** run
    `gh auth refresh -h github.com -s admin:org`, then
    `.\tools\ci\runners.ps1 -Scope org` in `X:\Repoz\QOR-OS`.
-2. **Close QTOS's phase issues #2–#6** with a note pointing to QOR OS. I was
+3. **Close QTOS's phase issues #2–#6** with a note pointing to QOR OS. I was
    not allowed to.
-3. **The release gates**, before anything is public:
+4. **The release gates**, before anything is public:
    - The Qt Company's written OK to ship Qt in an OS image;
    - a trademark attorney for "QOR OS";
    - the legal list in Demiurge's `OWNER.md`.

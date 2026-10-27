@@ -5,6 +5,8 @@
 #
 #   QOR_CORE_COMMIT      the demiurge-chain commit the core is built from; docs/UPSTREAM.md says how to move it
 #   QOR_CORE_SOURCE_DIR  a local demiurge-chain checkout to build instead, to change the core and QOR OS together
+#   QOR_CORE_FEATURES    the crate's Cargo features: none at the current pin; "desktop" once the pin includes
+#                        demiurge-chain's L13.2, which puts the modules it moved behind that feature (ADR-120 there)
 #
 # The target is qor::core: the static library and the bridge's header.
 
@@ -13,6 +15,7 @@ set(QOR_CORE_REPOSITORY "https://github.com/QOR-MATRIX/demiurge-chain.git"
 set(QOR_CORE_COMMIT "28d9e970fef3bcedb0d0cfbdcf71c74949fed5ec"
     CACHE STRING "The demiurge-chain commit the QOR core is built from (QOR-0003)")
 set(QOR_CORE_SOURCE_DIR "" CACHE PATH "A local demiurge-chain checkout to build the core from instead of the pinned commit")
+set(QOR_CORE_FEATURES "" CACHE STRING "The QOR core's Cargo features (\"desktop\" once the pin includes L13.2)")
 
 include(FetchContent)
 
@@ -45,10 +48,15 @@ FetchContent_Declare(Corrosion
 FetchContent_MakeAvailable(Corrosion)
 
 # LOCKED: exactly the dependency versions in the core's Cargo.lock at the pinned commit.
+set(qor_core_features)
+if(QOR_CORE_FEATURES)
+    set(qor_core_features FEATURES ${QOR_CORE_FEATURES})
+endif()
 corrosion_import_crate(MANIFEST_PATH "${qor_core_crate}/Cargo.toml"
     CRATES qor-launcher-core
     CRATE_TYPES staticlib
     LOCKED
+    ${qor_core_features}
 )
 
 add_library(qor_core INTERFACE)

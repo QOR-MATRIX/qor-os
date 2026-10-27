@@ -100,9 +100,25 @@ QOR OS only is split before it lands.
    demiurge-chain `<short hash>`", saying what changed in the core.
 4. CI must pass, including `tst_qorcore`.
 
-**Next move:** to the merge commit of demiurge-chain's L13.2 change, once it
-is merged. That change moves QOR ID's client, the chain client, Social's
-client, the Library's index, the Mesh and Qontrol into the core.
+**Next move:** to the merge commit of
+[demiurge-chain #107](https://github.com/QOR-MATRIX/demiurge-chain/pull/107)
+(L13.2), once the owner merges it. That change moves QOR ID's client, the
+chain client, Social's client, the Library's index, the Mesh and Qontrol into
+the core, each behind a Cargo feature. `desktop` turns on all of them, and the
+Windows launcher and QOR OS build with it (demiurge-chain's ADR-120). So the
+same commit that moves the pin sets `QOR_CORE_FEATURES` to `desktop` in
+`core/CMakeLists.txt`. Checked ahead on 26 October 2026: QOR OS configured
+with `QOR_CORE_SOURCE_DIR` at #107's branch (`48e9bfa`) and
+`QOR_CORE_FEATURES=desktop`, with warnings as errors. The whole core compiled
+and linked on Windows in 3 min 22 s, and `tst_qorcore` passed 9 of 9.
+
+Two of the owner's decisions come first:
+- **ADR-121, proposed in that PR.** It extends the launcher's guarded audit
+  ignore of RUSTSEC-2026-0344 (`ruzstd`, reached only through subxt's light
+  client, which nothing builds) to the core's lockfile. The PR must not merge
+  until it is accepted.
+- **The crates' licence.** The manifests say MIT while the repository is
+  Apache-2.0. ADR-120 there notes this as the owner's question.
 
 ## Cutting over
 
