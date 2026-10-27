@@ -1,6 +1,6 @@
 # ADR-0004: Commercial Qt (Enterprise) and a proprietary repository
 
-- **Status:** Accepted
+- **Status:** Accepted; amended by [QOR-0002](../QOR-0002-one-repository-from-qtos-and-demiurge.md) (carried Apache-2.0 code) and [QOR-0008](../QOR-0008-before-a-public-release.md) (distribution) on 2026-10-26
 - **Date:** 2026-10-23
 
 ## Context
@@ -27,6 +27,6 @@ commercial-only tooling such as the Qt Quick Compiler extensions (`qmlsc`).
 ## Consequences
 
 - Full access to the Enterprise module set and commercial tooling.
-- CI needs credentials or a self-hosted runner ([CI.md](../CI.md)).
+- CI needs credentials or a self-hosted runner ([CI.md](../../CI.md)).
 - Branch protection on a private repository requires a paid GitHub plan.
 - Open-sourcing later would be a new decision, revisiting module licensing.

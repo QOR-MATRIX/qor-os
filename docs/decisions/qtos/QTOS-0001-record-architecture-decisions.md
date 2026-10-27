@@ -1,6 +1,6 @@
 # ADR-0001: Record architecture decisions
 
-- **Status:** Accepted
+- **Status:** Accepted; superseded by [QOR-0001](../QOR-0001-one-rulebook-and-one-decision-log.md) on 2026-10-26
 - **Date:** 2026-10-23
 
 ## Context
@@ -12,10 +12,10 @@ behind them are easily lost.
 ## Decision
 
 Record significant decisions as Architecture Decision Records in `docs/adr/`,
-numbered sequentially, using [`0000-template.md`](0000-template.md). An ADR is
+numbered sequentially, using [`TEMPLATE.md`](../TEMPLATE.md). An ADR is
 required for changes to module boundaries, service contracts, the rendering
 model, licensing, toolchain baselines and anything listed in
-[ROADMAP.md](../ROADMAP.md) as a decision gate.
+[ROADMAP.md](../../ROADMAP.md) as a decision gate.
 
 ## Consequences
 

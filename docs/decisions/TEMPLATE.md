@@ -1,13 +1,15 @@
-# ADR-NNNN: Title
+# QOR-NNNN: Title
 
-- **Status:** Proposed | Accepted | Superseded by ADR-XXXX
+- **Status:** Proposed | Accepted | Superseded by QOR-XXXX
 - **Date:** YYYY-MM-DD
 - **Deciders:** names or roles
+- **Relates to:** QTOS-NNNN, Demiurge ADR-NNN (cite by number, with a link)
 
 ## Context
 
 What problem or force makes a decision necessary? Include constraints,
-measurements and alternatives considered.
+measurements and alternatives considered. Facts are checked against the code
+in the same change.
 
 ## Decision
 

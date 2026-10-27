@@ -1,6 +1,6 @@
 # ADR-0003: Compositor strategy — Qt Wayland Compositor with a decision gate
 
-- **Status:** Accepted
+- **Status:** Accepted; amended by [QOR-0005](../QOR-0005-every-display-at-its-own-refresh.md) on 2026-10-26 (the gate is deferred; Prism gets its own KMS backend)
 - **Date:** 2026-10-23
 
 ## Context
@@ -38,7 +38,7 @@ X11 apps run in a rootful Xwayland window until a full XWM is justified.
 - **Tooling is ready.** `prism --benchmark` reports frame pacing per output,
   with missed frames judged at each output's own refresh rate, and
   input-to-swap latency. See
-  [PERFORMANCE.md](../PERFORMANCE.md#compositor-decision-gate).
+  [PERFORMANCE.md](../../PERFORMANCE.md#compositor-decision-gate).
 - **Nested data exists.** Prism runs nested under WSLg with real Wayland
   clients, at 60 Hz with 0.2–1.1% missed frames.
 - **The decision needs bare metal.** That means a DRM/KMS run with two
@@ -49,5 +49,5 @@ X11 apps run in a rootful Xwayland window until a full XWM is justified.
 Update (2026-10-26): Prism now drives several outputs: one WaylandOutput and
 window per display, every screen under eglfs. `tools/dev/prism-gate.sh` runs
 the gate on hardware in one command and writes the summary for ADR-0011
-(see [PERFORMANCE.md](../PERFORMANCE.md#running-the-decision-gate)). The run
+(see [PERFORMANCE.md](../../PERFORMANCE.md#running-the-decision-gate)). The run
 itself remains.

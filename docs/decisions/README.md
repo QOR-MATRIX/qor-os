@@ -1,0 +1,59 @@
+# Decisions
+
+The only decision log for QOR OS ([QOR-0001](QOR-0001-one-rulebook-and-one-decision-log.md)).
+Every decision is cited by its prefix and number. New records copy
+[`TEMPLATE.md`](TEMPLATE.md), take the next QOR number, and are added here in
+the same change. A record is never edited to change its decision; a later
+record supersedes it, and both say so.
+
+## QOR OS
+
+| Record | Decision | Status |
+|--------|----------|--------|
+| [QOR-0001](QOR-0001-one-rulebook-and-one-decision-log.md) | One rulebook (`AGENTS.md`) and this one log; three series: QOR, QTOS, Demiurge ADR | Accepted 2026-10-26 |
+| [QOR-0002](QOR-0002-one-repository-from-qtos-and-demiurge.md) | One private repository from QTOS's history; QQ, ARQADE and QOR Media carried with theirs at upstream paths; the network stays in demiurge-chain | Accepted 2026-10-26 |
+| [QOR-0003](QOR-0003-the-qor-core-at-a-pinned-commit.md) | The QOR core is built from demiurge-chain at a pinned commit, never copied; reached only through its bridge; a service of its own on the device | Accepted 2026-10-26 |
+| [QOR-0004](QOR-0004-the-base-image-is-fedora-atomic.md) | The image is built on Fedora Atomic with bootc: NVIDIA open modules, Mesa, whole-image updates with rollback; Yocto retired | Accepted 2026-10-26 |
+| [QOR-0005](QOR-0005-every-display-at-its-own-refresh.md) | Every display at its own refresh rate on every GPU is the acceptance test; Prism's own KMS backend; the bare-metal gate deferred, not failed | Accepted 2026-10-26 |
+| [QOR-0006](QOR-0006-qor-os-1-0-moves-no-money.md) | 1.0 moves no money: free items and test CGT only; Demiurge's money rules apply everywhere | Accepted 2026-10-26 |
+| [QOR-0007](QOR-0007-what-1-0-ships.md) | What 1.0 ships, and what waits | Accepted 2026-10-26 |
+| [QOR-0008](QOR-0008-before-a-public-release.md) | Release gates the owner holds (Qt distribution licence, name clearance, legal list, keys, sign-in redundancy); the code keeps QTOS names until the name clears | Accepted 2026-10-26 |
+
+## QTOS (inherited)
+
+QTOS's records, moved unchanged from `docs/adr/` (where they were numbered
+ADR-0001 to ADR-0010) into [`qtos/`](qtos/). They stand unless a QOR record
+says otherwise.
+
+| Record | Decision | Status in QOR OS |
+|--------|----------|------------------|
+| [QTOS-0001](qtos/QTOS-0001-record-architecture-decisions.md) | Record decisions as ADRs in `docs/adr/` | Superseded by QOR-0001 |
+| [QTOS-0002](qtos/QTOS-0002-linux-kernel-and-the-qt-line.md) | Linux kernel underneath, Qt above "the Qt Line" | Stands; extended by QOR-0004 |
+| [QTOS-0003](qtos/QTOS-0003-compositor-strategy.md) | Prism on Qt Wayland Compositor, with a decision gate | Stands; gate deferred by QOR-0005 |
+| [QTOS-0004](qtos/QTOS-0004-commercial-qt-and-proprietary-repository.md) | Commercial Qt; a private, proprietary repository | Stands; amended by QOR-0002 (carried Apache-2.0 code) and QOR-0008 |
+| [QTOS-0005](qtos/QTOS-0005-qt-6-12-baseline.md) | Qt 6.12 baseline | Stands |
+| [QTOS-0006](qtos/QTOS-0006-service-ipc-qt-remote-objects.md) | Service IPC over Qt Remote Objects | Stands |
+| [QTOS-0007](qtos/QTOS-0007-lumen-style-on-quick-templates.md) | Lumen style on Qt Quick Templates | Stands |
+| [QTOS-0008](qtos/QTOS-0008-simulation-first-development.md) | Simulation-first development | Stands |
+| [QTOS-0009](qtos/QTOS-0009-oklch-tokens-single-source.md) | OKLCH tokens from a single source | Stands |
+| [QTOS-0010](qtos/QTOS-0010-materials-and-render-on-demand.md) | Shared materials and render on demand | Stands |
+
+## Demiurge records QOR OS depends on
+
+Demiurge's records live in
+[demiurge-chain](https://github.com/QOR-MATRIX/demiurge-chain/blob/main/docs/DECISIONS.md)
+and are never copied here. These are the ones QOR OS builds on:
+
+| Record | What it settles for QOR OS |
+|--------|----------------------------|
+| [ADR-002](https://github.com/QOR-MATRIX/demiurge-chain/blob/main/docs/decisions/ADR-002-value-from-spending.md), [ADR-006](https://github.com/QOR-MATRIX/demiurge-chain/blob/main/docs/decisions/ADR-006-demand-sinks.md) | Every mechanic that touches CGT passes the spend test and names its demand sink |
+| [ADR-008](https://github.com/QOR-MATRIX/demiurge-chain/blob/main/docs/decisions/ADR-008-language-discipline.md) | No investment language, anywhere |
+| [ADR-035](https://github.com/QOR-MATRIX/demiurge-chain/blob/main/docs/decisions/ADR-035-eighteen-decimals.md), [ADR-101](https://github.com/QOR-MATRIX/demiurge-chain/blob/main/docs/decisions/ADR-101-the-spark-is-a-thousandth-of-a-cgt.md) | CGT has 18 decimals; amounts are integer embers; a Spark is 10^15 embers |
+| [ADR-081](https://github.com/QOR-MATRIX/demiurge-chain/blob/main/docs/decisions/ADR-081-qq-is-qor-engine.md), [ADR-083](https://github.com/QOR-MATRIX/demiurge-chain/blob/main/docs/decisions/ADR-083-qq-on-qt.md), [ADR-105](https://github.com/QOR-MATRIX/demiurge-chain/blob/main/docs/decisions/ADR-105-qq-makes-real-games-in-3d-and-2d.md) | QQ is the QOR Engine, on Qt 6, for 3D and 2D games |
+| [ADR-087](https://github.com/QOR-MATRIX/demiurge-chain/blob/main/docs/decisions/ADR-087-strangers-games-are-confined.md) | A stranger's game is confined; QOR OS's sandbox delivers the operating-system half |
+| [ADR-091](https://github.com/QOR-MATRIX/demiurge-chain/blob/main/docs/decisions/ADR-091-social.md) | Social |
+| [ADR-094](https://github.com/QOR-MATRIX/demiurge-chain/blob/main/docs/decisions/ADR-094-the-library-and-qor-media.md) | The Library and QOR Media |
+| [ADR-102](https://github.com/QOR-MATRIX/demiurge-chain/blob/main/docs/decisions/ADR-102-arqade-in-the-launcher-on-qt.md) | ARQADE on Qt |
+| [ADR-103](https://github.com/QOR-MATRIX/demiurge-chain/blob/main/docs/decisions/ADR-103-the-launcher-moves-to-qt-in-stages.md), [ADR-104](https://github.com/QOR-MATRIX/demiurge-chain/blob/main/docs/decisions/ADR-104-the-launcher-on-android-on-qt.md) | Every QOR surface moves to Qt over the Rust core and its C bridge |
+| [ADR-108](https://github.com/QOR-MATRIX/demiurge-chain/blob/main/docs/decisions/ADR-108-one-look-obsidian-and-gilt-in-two-registers.md) | Demiurge's one look (`docs/design/tokens.json`), which Phase 1 maps onto Lumen |
+| [ADR-112](https://github.com/QOR-MATRIX/demiurge-chain/blob/main/docs/decisions/ADR-112-the-controllers-own-key-signs-every-agent-authorisation.md) | The controller's own key signs every agent authorisation |

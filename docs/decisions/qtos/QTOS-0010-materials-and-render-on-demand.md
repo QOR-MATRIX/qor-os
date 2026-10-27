@@ -21,7 +21,7 @@ quiet when idle, for battery life and thermal headroom.
   and animated with transforms (the Aurora wallpaper). Frame statistics are
   measured passively (`FrameStats`).
 - Performance is verified with `qtos-shell --benchmark`
-  ([PERFORMANCE.md](../PERFORMANCE.md)).
+  ([PERFORMANCE.md](../../PERFORMANCE.md)).
 
 ## Consequences
 

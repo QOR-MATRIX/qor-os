@@ -1,6 +1,6 @@
 # ADR-0002: Linux kernel underneath, Qt above "the Qt Line"
 
-- **Status:** Accepted
+- **Status:** Accepted; extended by [QOR-0004](../QOR-0004-the-base-image-is-fedora-atomic.md) on 2026-10-26 (the base is Fedora Atomic)
 - **Date:** 2026-10-23
 
 ## Context
