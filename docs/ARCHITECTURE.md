@@ -287,9 +287,25 @@ project, built and tested by its own `build.ps1`, which
 | **QOR Media** | `tools/qor-media/` | `qor-media` (QML module `QOR.Media`), with PDFium | `tst_medialink`, `tst_files`, `tst_textfile`, `tst_playback`, `tst_look`, `tst_reader`, `tst_pdfpages`, `tst_pdfmarks`, `tst_pdfforms` |
 
 Their suites render on the GPU in real windows and drive them with input. The
-look tests read `docs/design/tokens.json`, Demiurge's one look. Today they
-build on Windows. The Linux build, running under Prism, Lumen theming and
-QOR.Input are Phase 1.
+look tests read `docs/design/tokens.json`, Demiurge's one look. They build on
+Windows with their own scripts and on Linux with `tools/dev/products.sh`
+([BUILDING.md](BUILDING.md#on-linux)). Running under Prism, Lumen theming and
+QOR.Input are the rest of Phase 1.
+
+What ties them to Windows today, and where Phase 1 changes it:
+
+| Seam | Today | On QOR OS |
+|------|-------|-----------|
+| Placement | The launcher's `place` command parents the product's window into its own by native handle (`Dock`, `products/arqade/qt/src/dock.cpp`, `tools/qor-media/src/dock.cpp`), which Wayland cannot do | Prism speaks the launcher's side of the host protocol and places the product's toplevel itself |
+| Controllers | XInput, polled by QQ's `Input` (`products/qq/runtime/input.cpp`) | QOR.Input feeds `Input`'s gamepad state, with the same button names |
+| The agent's key | Windows Credential Manager (`products/qq/agent/keychain.cpp`); elsewhere a stub that stores nothing | Not decided: the roadmap names the Secret Service, and `AGENTS.md` §6 keeps code that handles keys in the QOR core, so a QOR record chooses |
+| GPU choice | DXGI's high-performance adapter (`products/qq/runtime/gpu.cpp`, ARQADE's `main.cpp`) | Mesa and Prism's own outputs; nothing to do in the products |
+
+The host protocol (ADR-046, ADR-102) is what the products already speak to a
+launcher: a `--launcher-channel` local socket, a one-time token on standard
+input, 4-byte length-prefixed JSON frames, and one long-poll request
+(`arqade.next`, `media.next`) answered with a command: `place`, `hide`,
+`theme`, `player`, `prefs`, `play`, `open` or `quit`.
 
 ## 12. Repository conventions
 

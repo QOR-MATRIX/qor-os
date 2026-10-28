@@ -19,6 +19,8 @@
 // Every game plays locked down (confinement.h, ADR-087): it loads only its own package and allowed modules, makes no
 // network request, writes no file and opens nothing outside. A stranger's game plays only in the browser. A run is
 // written by the Player itself, never by the game.
+//
+// Changed for QOR OS: on Linux the process's creation is read from /proc, so the start is measured there too.
 
 #include <QCommandLineParser>
 #include <QDateTime>
@@ -46,6 +48,10 @@
 #ifdef Q_OS_WASM
 #include <emscripten.h>
 #endif
+#ifdef Q_OS_LINUX
+#include <time.h>
+#include <unistd.h>
+#endif
 
 Q_IMPORT_QML_PLUGIN(QQPlugin)
 
@@ -68,6 +74,23 @@ double sinceStart()
         // FILETIME counts 100 ns from 1601; the Unix epoch is 11644473600 s later.
         const double createdMs = double(t.QuadPart) / 10000.0 - 11644473600000.0;
         return double(QDateTime::currentMSecsSinceEpoch()) - createdMs;
+    }
+    return -1;
+#elif defined(Q_OS_LINUX)
+    // The process's creation in clock ticks since boot, the 22nd field of /proc/self/stat, against the clock since boot.
+    // The fields are counted after the program's name, which is in brackets and may hold spaces.
+    QFile stat(QStringLiteral("/proc/self/stat"));
+    timespec now{};
+    if (stat.open(QIODevice::ReadOnly) && clock_gettime(CLOCK_BOOTTIME, &now) == 0) {
+        const QByteArray line = stat.readAll();
+        const QList<QByteArray> fields = line.mid(line.lastIndexOf(')') + 2).split(' ');
+        bool ok = false;
+        const double createdTicks = fields.value(19).toDouble(&ok);
+        const long ticksPerSecond = sysconf(_SC_CLK_TCK);
+        if (ok && ticksPerSecond > 0) {
+            const double nowMs = double(now.tv_sec) * 1000.0 + double(now.tv_nsec) / 1e6;
+            return nowMs - createdTicks * 1000.0 / double(ticksPerSecond);
+        }
     }
     return -1;
 #else

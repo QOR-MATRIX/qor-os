@@ -272,3 +272,29 @@ jobs:
       - name: Prism protocol check
         if: vars.QOR_RUN_GPU_TESTS == 'true' && vars.QOR_LINUX_QT_DIR != ''
         run: tools/dev/prism-protocol-check.sh build/ci-linux
+
+      # The carried products on Linux, as on Windows: when the carried code (or
+      # how it is built) changed, on tags and on manual runs. Only where
+      # QOR_RUN_LINUX_PRODUCTS says so: on 28 October their GPU suites under
+      # WSL froze the PC the runner shares (docs/CI.md#the-carried-products).
+      - name: Did the carried products change?
+        id: products
+        if: vars.QOR_RUN_GPU_TESTS == 'true' && vars.QOR_RUN_LINUX_PRODUCTS == 'true'
+        env:
+          EVENT: ${{ github.event_name }}
+          BEFORE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          run=true
+          if { [ "$EVENT" = push ] || [ "$EVENT" = pull_request ]; } && [ -n "$BEFORE" ] \
+              && ! echo "$BEFORE" | grep -qE '^0+$' && [ "${GITHUB_REF#refs/tags/}" = "$GITHUB_REF" ]; then
+            git fetch --quiet --no-tags --depth=1 origin "$BEFORE"
+            git diff --name-only "$BEFORE" HEAD \
+              | grep -qE '^(products/|tools/qor-media/|docs/design/tokens\.json$|tools/dev/products(\.sh|-display\.qml)$|\.github/workflows/build\.yml$|\.github/qt-packages\.json$)' \
+              || run=false
+          fi
+          echo "run=$run" >> "$GITHUB_OUTPUT"
+          echo "Carried products: $([ "$run" = true ] && echo 'built and tested' || echo 'unchanged, skipped')" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Products (QQ, ARQADE, QOR Media)
+        if: steps.products.outputs.run == 'true'
+        run: tools/dev/products.sh --qt "$QOR_QT_DIR" --build-root build/ci-products

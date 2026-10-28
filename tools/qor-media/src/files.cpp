@@ -1,9 +1,13 @@
+// Changed for QOR OS: siblings are put in the order people read numbers in the C locale too, which Linux often runs in
+// (WSL, containers, a system before its language is chosen).
+
 #include "files.h"
 
 #include <QCollator>
 #include <QDesktopServices>
 #include <QDir>
 #include <QFileInfo>
+#include <QLocale>
 #include <QSet>
 
 #include <algorithm>
@@ -98,7 +102,8 @@ QStringList Files::siblings(const QString &path)
         // The file asked about keeps the spelling it was asked with, so what is reported about it matches.
         found << (e == info ? path : QDir::toNativeSeparators(e.filePath()));
     }
-    QCollator collator;
+    // The C locale compares by code point and has no numeric mode, so there the order is English's.
+    QCollator collator(QLocale().language() == QLocale::C ? QLocale(QLocale::English) : QLocale());
     collator.setNumericMode(true);
     collator.setCaseSensitivity(Qt::CaseInsensitive);
     std::sort(found.begin(), found.end(), [&](const QString &a, const QString &b) {

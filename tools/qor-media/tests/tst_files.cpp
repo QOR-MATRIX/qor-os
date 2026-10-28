@@ -1,4 +1,6 @@
 // Files (ADR-094): a file's kind by its extension, as the launcher's index shelves it, and the files beside it.
+//
+// Changed for QOR OS: a URL's file is an absolute path of the system the test runs on, since C:/ is not one on Linux.
 
 #include <QDir>
 #include <QFile>
@@ -69,9 +71,14 @@ private slots:
 
     void urls_are_local_files()
     {
-        const QUrl url = Files::urlOf("C:/My Films/a #1.mkv");
+#ifdef Q_OS_WIN
+        const QString path = QStringLiteral("C:/My Films/a #1.mkv");
+#else
+        const QString path = QStringLiteral("/home/me/My Films/a #1.mkv");
+#endif
+        const QUrl url = Files::urlOf(path);
         QVERIFY(url.isLocalFile());
-        QCOMPARE(url.toLocalFile(), QStringLiteral("C:/My Films/a #1.mkv"));
+        QCOMPARE(url.toLocalFile(), path);
     }
 };
 

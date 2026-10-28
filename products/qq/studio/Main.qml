@@ -21,6 +21,9 @@
 // Play (F5) runs the scene (DIRECTION P3.2): a copy is built from the scene's canonical text and played in its place,
 // with physics, the player under the keyboard, mouse and gamepad, particles, sound and logic that reloads when its file
 // is saved. Stop (Esc) discards the copy, so the scene comes back exactly as it was; nothing play does can reach it.
+//
+// Changed for QOR OS: on Linux, Qt's keys for Delete include Ctrl+D (Duplicate's) and its keys for Redo leave out
+// Ctrl+Y, so there Delete is the Delete key alone and Redo adds Ctrl+Y, the keys this window promises on every system.
 
 import QtQuick
 // Before the Material style: Qt Quick 3D has a type called Material too, and the import that comes later wins.
@@ -669,11 +672,19 @@ ApplicationWindow {
     // Ctrl+S saves what has the keys: the logic open in the editor, or the scene.
     Shortcut { sequences: [StandardKey.Save]; onActivated: logicEditor.typing ? logicEditor.save() : window.saveScene() }
     Shortcut { sequence: "F3"; onActivated: window.showStats = !window.showStats }
-    Shortcut { sequences: [StandardKey.Delete]; enabled: !window.playing; onActivated: window.removeSelection() }
+    Shortcut {
+        sequences: Qt.platform.os === "linux" ? ["Del"] : [StandardKey.Delete]
+        enabled: !window.playing
+        onActivated: window.removeSelection()
+    }
     Shortcut { sequences: [StandardKey.Undo]; enabled: !window.playing; onActivated: window.undo() }
     // The platform's redo keys: Ctrl+Y and Ctrl+Shift+Z on Windows. Naming one again would make it ambiguous, and an
-    // ambiguous shortcut does nothing.
-    Shortcut { sequences: [StandardKey.Redo]; enabled: !window.playing; onActivated: window.redo() }
+    // ambiguous shortcut does nothing; Linux's have no Ctrl+Y, so it is named there.
+    Shortcut {
+        sequences: Qt.platform.os === "linux" ? [StandardKey.Redo, "Ctrl+Y"] : [StandardKey.Redo]
+        enabled: !window.playing
+        onActivated: window.redo()
+    }
     Shortcut { sequence: "Ctrl+D"; enabled: !window.playing; onActivated: window.duplicateSelection() }
     Shortcut { sequence: "Ctrl+G"; enabled: !window.playing; onActivated: window.groupSelection() }
     Shortcut { sequence: "Ctrl+Shift+G"; enabled: !window.playing; onActivated: window.ungroupSelection() }

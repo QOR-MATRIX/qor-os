@@ -10,16 +10,18 @@
     "qt.qt6.6120.addons.qtmultimedia",
     "qt.qt6.6120.addons.qtimageformats",
     "qt.qt6.6120.addons.qtqmlscriptcompiler",
-    "qt.qt6.6120.addons.qttasktree"
+    "qt.qt6.6120.addons.qttasktree",
+    "qt.qt6.6120.addons.qtquick3dphysics"
   ],
-  "cmake": ["Qt6Quick", "Qt6QuickControls2", "Qt6ShaderTools", "Qt6RemoteObjects", "Qt6Graphs", "Qt6Svg", "Qt6Multimedia"],
+  "productsComment": "The carried products also need Quick 3D Physics (QQ's runtime) and Qt PDF (QOR Media). Qt PDF is one of the installer's per-kit 'extensions', listed under each platform's packages.",
+  "cmake": ["Qt6Quick", "Qt6QuickControls2", "Qt6ShaderTools", "Qt6RemoteObjects", "Qt6Graphs", "Qt6Svg", "Qt6Multimedia", "Qt6Quick3DPhysics", "Qt6Pdf", "Qt6PdfQuick"],
   "windows": {
     "kit": "msvc2022_64",
-    "packages": ["qt.qt6.6120.win64_msvc2022_64"]
+    "packages": ["qt.qt6.6120.win64_msvc2022_64", "extensions.qtpdf.6120.61400.win64_msvc2022_64"]
   },
   "linux": {
     "kit": "gcc_64",
-    "packages": ["qt.qt6.6120.linux_gcc_64"],
+    "packages": ["qt.qt6.6120.linux_gcc_64", "extensions.qtpdf.6120.61400.linux_gcc_64"],
     "optional": ["qt.qt6.6120.addons.qtwaylandcompositor"],
     "optionalCmake": ["Qt6WaylandCompositor"]
   }

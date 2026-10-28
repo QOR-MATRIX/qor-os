@@ -40,10 +40,14 @@ Install these for the `MSVC 2022 64-bit` kit in the Qt Maintenance Tool
 The carried products also need these, from the same kit:
 
 - **Qt Multimedia**;
-- **Qt Quick 3D**, with **Qt Quick 3D Physics**;
+- **Qt Quick 3D**, with **Qt Quick 3D Physics** (`qt.qt6.6120.addons.qtquick3dphysics`), which every QQ scene imports;
 - **Qt Spatial Audio**;
-- **Qt PDF**;
+- **Qt PDF**, one of the installer's per-kit extensions
+  (`extensions.qtpdf.6120.61400.win64_msvc2022_64`, or `…linux_gcc_64` on Linux);
 - **Qt Network**.
+
+Both are in [`.github/qt-packages.json`](../.github/qt-packages.json), so
+`tools/ci/install_qt.py` installs them.
 
 The QQ Player's browser build needs Qt for WebAssembly (multithreaded).
 Recommended for upcoming phases (see [QT-MODULES.md](QT-MODULES.md)): Qt Quick
@@ -306,9 +310,57 @@ they run: a window that loses the keyboard to another application fails a
 test. `products.ps1` tries a failing product once more. The look tests read
 `docs/design/tokens.json`.
 
+### On Linux
+
+Upstream builds the products on Windows only. QOR OS builds them on Linux with
+its own script, outside the carried paths: `tools/dev/products.sh` configures
+each with CMake and Ninja against the `gcc_64` kit, builds it, and runs the
+suites it registers with CTest. A product whose suites fail has its failed
+suites run once more.
+
+```bash
+tools/dev/products.sh                                 # build/products-linux/{qq,arqade,media}
+tools/dev/products.sh --product qq --attempts 1
+tools/dev/products.sh --qt ~/Qt/6.12.0/gcc_64 --build-root ~/qor-build/products
+tools/dev/products.sh --display session               # on this desktop, to watch them
+tools/dev/products.sh --display prism                 # inside Prism, as hidden as the default
+```
+
+- **Display:** the suites open real windows and type into them. By default
+  the script runs them on a display of the run's own,
+  `tools/dev/products-display.qml`: a compositor that Qt's `qml` tool runs on
+  the offscreen platform, which keeps each window at the size it asks for and
+  gives the newest the keyboard, as a desktop does. There is no X display and
+  the sound goes nowhere, so nothing reaches the screen or the speakers, and
+  nothing on the desktop can take a test window's keyboard. It needs the
+  kit's Qt Wayland Compositor, as Prism does. The display's log is in the
+  build root.
+  - `--display prism` runs them inside Prism, just as hidden, from
+    `build/ci-linux` or `build/linux-*` or the one `--prism` names, with
+    settings thrown away after the run. Prism sizes and places windows itself
+    (a new one opens 960 wide), so the suites that expect a size of their
+    own fail there until Prism hosts the products.
+  - `--display session` uses the session's own display and sound.
+- **PDFium:** the script fetches the release QOR Media's `build.ps1` pins
+  (`chromium/8111`), for Linux, once into `~/.cache/qor-media-pdfium`, and
+  checks it by SHA-256.
+- **Graphics:** the suites need the GPU, and the products draw on it in
+  either mode. Under WSL the script sets `GALLIUM_DRIVER=d3d12` (unless it is
+  already set), since Mesa there draws in software otherwise, too slowly for
+  QQ's 3D suites. **On 28 October one run under WSL froze the Windows PC it
+  ran on** during QQ's Player suite, after Mesa's Direct3D 12 driver had
+  failed to make a context, and the cause is not known
+  ([CI.md](CI.md#the-carried-products)). Under WSL, save your work first.
+- **Sound:** with `--display session` and no PipeWire daemon (WSLg), it sets
+  `QT_AUDIO_BACKEND=pulseaudio`, as the shell's audio engine does.
+- **Programs:** on Linux QQ's programs sit in their target folders
+  (`studio/qq-studio`, `player/qq-player`, `agent/qq-mcp`, `tests/tst_*`);
+  ARQADE's and QOR Media's sit in the build folder.
+
 The samples are QQ scenes you can open in QQ Studio, for example
-`products\qq\samples\orb-run`. Today the products build on Windows. Linux, and
-running them inside Prism, are Phase 1.
+`products/qq/samples/orb-run`. Running them inside Prism, with Prism placing
+their windows and speaking their launcher's protocol, is the next part of
+Phase 1.
 
 ## 7. Troubleshooting
 

@@ -33,6 +33,8 @@ import QOR.Media
 // from under it. Tab goes from field to field, on to the next page's, and into the first on the page in view. A tap on a
 // signature field places a picture of the person's signature in it, which certifies nothing. What is filled shows at once
 // in the page's image, drawn by PDFium as it will be saved, and is undone, redone and saved with the rest.
+//
+// Changed for QOR OS: Qt's keys for Redo on Linux leave out Ctrl+Y, so there it is named as well.
 FocusScope {
     id: reader
     objectName: "reader"
@@ -1791,7 +1793,12 @@ FocusScope {
     Shortcut { sequences: [StandardKey.Copy]; enabled: reader.ready; onActivated: reader.copy() }
     Shortcut { sequences: [StandardKey.SelectAll]; enabled: reader.ready && !asking.visible && !signing.visible; onActivated: reader.selectPage() }
     Shortcut { sequences: [StandardKey.Undo]; enabled: reader.ready && !asking.visible && !signing.visible; onActivated: reader.undo() }
-    Shortcut { sequences: [StandardKey.Redo]; enabled: reader.ready && !asking.visible && !signing.visible; onActivated: reader.redo() }
+    Shortcut {
+        // Naming a key the platform's Redo has already would make it ambiguous, and an ambiguous shortcut does nothing.
+        sequences: Qt.platform.os === "linux" ? [StandardKey.Redo, "Ctrl+Y"] : [StandardKey.Redo]
+        enabled: reader.ready && !asking.visible && !signing.visible
+        onActivated: reader.redo()
+    }
     Shortcut { sequences: [StandardKey.Save]; enabled: reader.ready && !signing.visible; onActivated: asking.visible ? reader.answered("save") : reader.save() }
     Shortcut {
         // Only when there is something to close first; otherwise the window's Esc goes back.

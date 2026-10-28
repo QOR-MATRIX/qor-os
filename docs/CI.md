@@ -5,7 +5,7 @@ Workflows live in [`.github/workflows/`](../.github/workflows/).
 | Workflow | Runs on | Needs Qt | Checks |
 |----------|---------|----------|--------|
 | **Lint** (`lint.yml`) | `ubuntu-24.04` | No | Generated tokens are current, token generator tests, the Store's signed catalogue, SPDX headers, clang-format 20.1.8, JSON validity. Carried code ([UPSTREAM.md](UPSTREAM.md)) is skipped by the header and format checks |
-| **Build** (`build.yml`) | Windows and Linux, self-hosted (or hosted with the online installer) | Yes (commercial) | Configure (`ci-windows`/`ci-linux`, warnings as errors, the QOR core required), build, `all_qmllint`, `ctest -LE gpu` (plus `-L gpu` when enabled). On Windows, the carried products (QQ, ARQADE, QOR Media) when they changed. Tags and manual runs also upload an installable Windows artifact (kept 7 days) |
+| **Build** (`build.yml`) | Windows and Linux, self-hosted (or hosted with the online installer) | Yes (commercial) | Configure (`ci-windows`/`ci-linux`, warnings as errors, the QOR core required), build, `all_qmllint`, `ctest -LE gpu` (plus `-L gpu` when enabled). On both, the carried products (QQ, ARQADE, QOR Media) when they changed. Tags and manual runs also upload an installable Windows artifact (kept 7 days) |
 
 Both run on pushes to `main`, on pull requests and on demand; Build also runs on `v*` tags.
 Pull-request runs cancel superseded runs. Each OS job runs only when that OS has a Qt source.
@@ -25,20 +25,37 @@ Pull-request runs cancel superseded runs. Each OS job runs only when that OS has
 
 ### The carried products
 
-On Windows, with `QOR_RUN_GPU_TESTS`, the job also builds and tests QQ,
-ARQADE and QOR Media through `tools/dev/products.ps1`. Each product's own
-script runs every suite, and QOR Media's needs PDFium, which its script fetches
-and checks by SHA-256. The suites take about ten minutes and drive real windows
-on the runner's desktop, so they run only when:
+With `QOR_RUN_GPU_TESTS`, both jobs also build and test QQ, ARQADE and QOR
+Media: Windows through `tools/dev/products.ps1`, which calls each product's
+own script, and Linux through `tools/dev/products.sh`, QOR OS's Linux build of
+them. On Linux the suites run on a display of the script's own, a compositor
+on Qt's offscreen platform, so nothing reaches the runner's desktop
+([BUILDING.md](BUILDING.md#on-linux)); under WSL the products draw on the GPU
+through `GALLIUM_DRIVER=d3d12`. QOR Media needs PDFium, which both scripts
+fetch at a pinned release and check by SHA-256.
+
+**Linux runs them only with `QOR_RUN_LINUX_PRODUCTS` as well**, which is not
+set. On 28 October a run of them under WSL froze the workstation the Linux
+runner shares, during QQ's Player suite, minutes after Mesa's Direct3D 12
+driver failed to make a context (`EGL_BAD_ALLOC`) in QQ's play suite; it took
+the power button. Windows logged no GPU reset. Earlier that day the same
+suite had finished five times under WSL, in three runs. Set the variable on a
+runner whose machine can take that, or once the cause is known.
+
+The suites take about ten minutes, and on Windows they drive real windows on
+the runner's desktop, so they run only when:
 
 - the push or pull request changes `products/`, `tools/qor-media/`,
-  `docs/design/tokens.json`, `tools/dev/products.ps1` or `build.yml`;
+  `docs/design/tokens.json`, `tools/dev/products.ps1` (`products.sh`,
+  `products-display.qml` and `.github/qt-packages.json` on Linux) or
+  `build.yml`;
 - the run is for a tag;
 - the run was started by hand.
 
-A product whose suites fail is run once more. On a desktop someone is using, a
-test window can lose the keyboard to another application, and a genuine
-failure fails both attempts. The step summary says whether the products ran.
+A product whose suites fail is run once more (on Linux, its failed suites).
+On a Windows desktop someone is using, a test window can lose the keyboard to
+another application, and a genuine failure fails both attempts. The step
+summary says whether the products ran.
 
 ## Providing Qt to CI
 
@@ -109,6 +126,7 @@ variables, so each repository sets its own:
 | `QOR_WINDOWS_RUNNER` | `["self-hosted","windows","qt"]` | Windows job runs on the workstation |
 | `QOR_WINDOWS_QT_DIR` | `C:/Qt/6.12.0/msvc2022_64` | Use the installed kit; skip the installer |
 | `QOR_RUN_GPU_TESTS` | `true` (optional) | Also run GPU-labelled suites and the carried products (opens brief test windows on the runner's desktop) |
+| `QOR_RUN_LINUX_PRODUCTS` | `true` (optional, unset) | With `QOR_RUN_GPU_TESTS`, also run the carried products on Linux ([why it is off](#the-carried-products)) |
 | `QOR_LINUX_RUNNER` | `["self-hosted","linux","qt"]` | Linux job runs in WSL on the workstation |
 | `QOR_LINUX_QT_DIR` | `/home/<user>/Qt/6.12.0/gcc_64` | Use the installed kit |
 

@@ -316,6 +316,7 @@ is useful from outside, a `qorctl` command or an `Intents` action.
 tools/upstream/demiurge.sh status          # what each carried path was last split at, and the core's pin
 tools/upstream/demiurge.sh pull            # merge demiurge-chain main into every carried path
 pwsh tools/dev/products.ps1                # build and test what came in
+tools/dev/products.sh                      # and on Linux
 ```
 
 Update the state tables in [UPSTREAM.md](UPSTREAM.md) in the same change.
@@ -324,7 +325,8 @@ Update the state tables in [UPSTREAM.md](UPSTREAM.md) in the same change.
 
 Make the change here, mark the file with a `Changed for QOR OS:` comment near
 its top (Apache-2.0 §4(b)), keep its upstream formatting, and run
-`tools/dev/products.ps1`. If the change is general, make it upstream instead,
+`tools/dev/products.ps1` and `tools/dev/products.sh`, since a change for Linux
+must keep Windows as it was. If the change is general, make it upstream instead,
 or send it there with `tools/upstream/demiurge.sh patch <commit>`.
 
 ### Use the QOR core
@@ -370,6 +372,8 @@ and mark any record it supersedes or amends.
 | `tools/ci/install_qt.py` | Unattended commercial Qt install for CI |
 | `tools/github/bootstrap.py` | Apply labels, milestones, repository settings and ruleset |
 | `tools/dev/products.ps1` | Build and test QQ, ARQADE and QOR Media with their own scripts |
+| `tools/dev/products.sh` | Build and test QQ, ARQADE and QOR Media on Linux, on a display nobody sees ([BUILDING.md](BUILDING.md#on-linux)) |
+| `tools/dev/products-display.qml` | That display: a compositor on Qt's offscreen platform, for the products' suites |
 | `tools/upstream/demiurge.sh` | Pull carried code from demiurge-chain, show its state, write patches for upstream |
 | `tools/ci/runners.ps1` | Move the workstation's two CI runners to the organisation or a repository, and start them |
 | `qorctl` | Drive services from the command line ([SERVICES.md](SERVICES.md#qorctl)) |

@@ -35,6 +35,16 @@ QQ's, ARQADE's and QOR Media's suites.
   - the DXGI GPU choice is handled per platform;
   - the agent's key moves from Credential Manager to the Secret Service;
   - window docking moves out.
+
+  **Begun 28 October:** all three build on Linux with `tools/dev/products.sh`, on a display nobody sees, and the Linux
+  kit has Qt Quick 3D Physics and Qt PDF. Under WSL:
+  - ARQADE passes every suite;
+  - QOR Media passes every suite but docking (Wayland has no window handles to dock by), and its video case skips,
+    needing a Windows sample file;
+  - QQ fails its agent's key cases (no keychain on Linux), QQ Studio's F3 overlay, and the QQ Player's floor of 20
+    frames a second (13 to 15 under WSL); in some runs QQ Studio's Group and Duplicate keys fail too.
+
+  Linux CI does not run them yet: one run froze the workstation its runner shares ([CI.md](CI.md#the-carried-products)).
 - [ ] Each runs as a Wayland client of Prism, and Prism places it (the launcher's `place` request becomes a Prism layout request)
 - [ ] The controller service drives QQ through `Input`'s gamepad seam; ARQADE and QOR Media gain controller focus navigation
 - [ ] Lumen's tokens theme every app: Demiurge's one look (`docs/design/tokens.json`) mapped onto Lumen roles, with one source
