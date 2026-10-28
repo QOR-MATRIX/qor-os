@@ -63,7 +63,7 @@ commit before work starts.
 
 | # | Component | Path | Language | Live? | Notes |
 |---|-----------|------|----------|-------|-------|
-| 1 | **The QOR core** | `tools/qor-launcher/core/` with the `desktop` feature (`identity`, `social`, `chain`, `library`, `mesh`, `qontrol`); `chain/primitives/mesh-proof/` | Rust | In the Windows launcher; in QOR OS (private) at this pin | Holds keys. `src/vault/`, `profiles.rs`, `confirm.rs`, `pay.rs`, `agents.rs`, `bridge.rs` and the C bridge header `include/qor_core.h`; the chain client (subxt), QOR ID's and Social's clients, the Library index, the Mesh (iroh) |
+| 1 | **The QOR core** | `tools/qor-launcher/core/` with the `desktop` feature (`identity`, `social`, `chain`, `library`, `mesh`, `qontrol`); `chain/primitives/mesh-proof/` | Rust | In the Windows launcher; in QOR OS (private) at `6a4822d`, with this pin's core code | Holds keys. `src/vault/`, `profiles.rs`, `confirm.rs`, `pay.rs`, `agents.rs`, `bridge.rs` and the C bridge header `include/qor_core.h`; the chain client (subxt), QOR ID's and Social's clients, the Library index, the Mesh (iroh) |
 | 2 | **The Windows launcher host** | `tools/qor-launcher/src-tauri/` | Rust (Tauri 2) | Tester pre-releases; latest `launcher-v0.1.17` (`5db8349cc1e9f5c968c65174f98df27977abadeb`) | Draws the host dialogs before signing; keychain use (ADR-056); the update channel (ADR-111); `qor://pay` handling (ADR-076, ADR-077) |
 | 3 | **The chain runtime and pallets** | `chain/runtime/`, `chain/node/`, `chain/pallets/arq-wallet`, `drc369`, `drc369-royalties`, `mesh`, `validator-set`, `chain/primitives/` | Rust (Polkadot SDK `polkadot-stable2606-1`) | The devnet at `wss://rpc.qorsync.dev`, runtime `spec_version` 11 [confirm the deployed commit] | Money paths in integer embers (`u128`); ADR-035's arithmetic rules |
 | 4 | **QOR ID** | `services/qor-auth/` | Rust, Postgres, Redis | `https://id.qorsync.dev` [confirm the deployed commit] | Password and key sign-in, sessions, backup codes, email flows (Resend), OAuth 2.1 with PKCE (ADR-073), agents (ADR-014, ADR-112), avatars (ADR-079) |
@@ -224,7 +224,7 @@ Doing these first saves paid days and keeps the report about real issues.
 | What | Where |
 |------|-------|
 | QOR OS's gate; vault service plan | [ROADMAP.md](../ROADMAP.md); [QOR-0003](../decisions/QOR-0003-the-qor-core-at-a-pinned-commit.md); [QOR-0008](../decisions/QOR-0008-before-a-public-release.md); [VISION.md](../../VISION.md) §3; [UPSTREAM.md](../UPSTREAM.md) (the pin) |
-| The pin | [`core/CMakeLists.txt`](../../core/CMakeLists.txt): `QOR_CORE_COMMIT e99c7ce62045da08701a2ad6f7769a1a1d87afe6`, features `desktop` |
+| The pin | [`core/CMakeLists.txt`](../../core/CMakeLists.txt): `QOR_CORE_COMMIT 6a4822d10c93694d6d12abf33a75b4df6cac918a`, features `desktop`; the core's code as at `e99c7ce`, its manifest's licence and two comments aside |
 | Gate criteria | demiurge-chain origin/main `e99c7ce`: `docs/GATES.toml` (`beta.external-review`, `public-release.review-closed`) |
 | Unaudited status, known issues, advisories, live surfaces | `SECURITY.md` |
 | Roadmap item M7.3 | `docs/DIRECTION.md` |

@@ -133,7 +133,7 @@ holds:
 - the complete Prism shell, carried from QTOS, which runs in simulation on
   Windows and as a nested Wayland compositor on Linux;
 - Demiurge's QQ, ARQADE and QOR Media, which build and pass their suites here;
-- the QOR core at demiurge-chain `e99c7ce`, with every module the Windows
+- the QOR core at demiurge-chain `6a4822d`, with every module the Windows
   launcher has (`desktop`);
 - one name throughout: QOR OS
   ([QOR-0009](docs/decisions/QOR-0009-the-name-is-qor-os.md)).

@@ -31,10 +31,11 @@ The paths match upstream so that ARQADE's build still finds QQ's runtime at
 
 | Carried path | Upstream commit it was last split at |
 |--------------|---------------------------------------|
-| All five | demiurge-chain `28d9e97` (`main`, 26 October 2026). Unchanged upstream as of `694e5d8` (27 October, the merge of #108), so no pull was needed |
+| All five | demiurge-chain `28d9e97` (`main`, 26 October 2026). Unchanged upstream as of `6a4822d` (28 October, the merge of #109), so no pull was needed |
 
 | QOR core pin | Features | What that core has |
 |--------------|----------|---------------------|
+| `6a4822d10c93694d6d12abf33a75b4df6cac918a` (28 October 2026, the merge of #109) | `desktop` | The same code as `e99c7ce`. Its manifest declares Apache-2.0 instead of MIT (demiurge-chain's ADR-122) |
 | `e99c7ce62045da08701a2ad6f7769a1a1d87afe6` (27 October 2026, the merge of #107) | `desktop` | Everything below, plus the modules L13.2 moved in from the Windows launcher: QOR ID's and Social's clients, the chain client, the Library's index, the Mesh and Qontrol. The bridge's commands are unchanged |
 | `28d9e970fef3bcedb0d0cfbdcf71c74949fed5ec` (26 October 2026, the first pin) | none | Sparks and errors, the vault, profiles and their confirmations; bridge commands `core_version`, `token_info`, `parse_amount`, `format_sparks` |
 
@@ -104,6 +105,15 @@ QOR OS only is split before it lands.
 
 ### Moves so far
 
+- **28 October 2026, to `6a4822d`:** the merge of
+  [demiurge-chain #109](https://github.com/QOR-MATRIX/demiurge-chain/pull/109), which the owner merged
+  that day. The core's code did not change: its manifest declares Apache-2.0
+  instead of MIT (demiurge-chain's ADR-122, accepted by the owner on 27
+  October), and two comments, in the manifest and in `.cargo/audit.toml`, now
+  record ADR-121 as accepted. At the merge the core built into QOR OS from the
+  `ci-windows` preset and `tst_qorcore` passed 9 of 9.
+  [`THIRD_PARTY_NOTICES.md`](../THIRD_PARTY_NOTICES.md) changed in the same
+  commit.
 - **27 October 2026, to `e99c7ce`:** the merge of
   [demiurge-chain #107](https://github.com/QOR-MATRIX/demiurge-chain/pull/107)
   (L13.2), with the `desktop` feature. That change moved QOR ID's client, the
@@ -119,22 +129,15 @@ QOR OS only is split before it lands.
 
 ### Open upstream
 
-[demiurge-chain #108](https://github.com/QOR-MATRIX/demiurge-chain/pull/108)
-merged on 27 October 2026 at `694e5d8`. It held records only, so the pin did
-not move for it.
+Nothing. [demiurge-chain #109](https://github.com/QOR-MATRIX/demiurge-chain/pull/109) merged on 28 October 2026 at
+`6a4822d`, and the pin moved to it (above). Both records QOR OS was waiting on
+are accepted and on demiurge-chain's `main`:
 
-- **ADR-121, accepted, on `main`.** #107 carried the record's option A (the
-  core's audit ignores RUSTSEC-2026-0344 in `ruzstd`, which only subxt's light
-  client reaches and nothing builds, as the launcher's audit already does).
-  The owner then answered "proceed with" to marking it accepted, and #108
-  recorded that, with GATES' approval logged as retroactive.
-- **ADR-122, accepted: the crates' licence.** The owner accepted it on 27
-  October 2026, after #108 merged. Its change, the six active crates' manifests
-  declaring Apache-2.0 instead of MIT, is in [demiurge-chain #109](https://github.com/QOR-MATRIX/demiurge-chain/pull/109)
-  (branch `session/after-108`), for the owner to merge. The pin then moves to
-  that merge, and the same QOR OS commit updates
-  [`THIRD_PARTY_NOTICES.md`](../THIRD_PARTY_NOTICES.md): from it, the core QOR
-  OS builds declares Apache-2.0. The core's code does not change.
+- **ADR-121:** the core's audit ignores RUSTSEC-2026-0344 in `ruzstd`, which
+  only subxt's light client reaches and nothing builds, as the launcher's audit
+  already does. #107 carried it, and #108 recorded it accepted.
+- **ADR-122:** the six active crates, the core among them, declare Apache-2.0,
+  the repository's licence, instead of MIT. #109 carried it.
 
 ## Cutting over
 

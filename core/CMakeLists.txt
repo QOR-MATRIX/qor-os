@@ -17,7 +17,7 @@
 set(QOR_CORE_REPOSITORY "https://github.com/QOR-MATRIX/demiurge-chain.git"
     CACHE STRING "The repository the QOR core comes from")
 set(qor_core_cached "$CACHE{QOR_CORE_COMMIT}")
-set(QOR_CORE_COMMIT "e99c7ce62045da08701a2ad6f7769a1a1d87afe6" CACHE INTERNAL "The pin (QOR-0003)")
+set(QOR_CORE_COMMIT "6a4822d10c93694d6d12abf33a75b4df6cac918a" CACHE INTERNAL "The pin (QOR-0003)")
 set(QOR_CORE_FEATURES "desktop" CACHE INTERNAL "The QOR core's Cargo features")
 set(QOR_CORE_SOURCE_DIR "" CACHE PATH "A local demiurge-chain checkout to build the core from instead of the pin")
 if(qor_core_cached AND NOT qor_core_cached STREQUAL QOR_CORE_COMMIT)

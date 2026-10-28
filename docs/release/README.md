@@ -189,10 +189,10 @@ the owner answers, every file here writes **[Legal entity]**.
 
 These are public today. Several gates touch them.
 
-- **demiurge-chain** is public under Apache-2.0 (the repository's licence; at
-  `e99c7ce` six active crates, the core, the launcher, QOR ID and Social among
-  them, still declare MIT in their manifests; ADR-122, accepted by the owner on
-  27 October 2026, moves them to Apache-2.0 when pull request #109 merges),
+- **demiurge-chain** is public under Apache-2.0 (the repository's licence,
+  which its six active crates, the core, the launcher, QOR ID and Social among
+  them, also declare from `6a4822d`, 28 October 2026, under ADR-122; earlier
+  commits, the launcher's releases among them, declared MIT),
   with QQ, ARQADE and QOR Media in it, and names QQ and ARQADE throughout.
 - **Demiurge's Windows launcher**: tester pre-releases `launcher-v0.1.10` (17
   October 2026) to `launcher-v0.1.17` (25 October 2026) on GitHub (there is
