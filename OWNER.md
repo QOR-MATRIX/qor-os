@@ -30,9 +30,10 @@ here at `X:\Repoz\QOR-OS`. Phase 1: the three products on Linux, in Prism.
 5. **Entire** (*a new Git host from GitHub's former chief executive*): you
    chose to mirror, with GitHub the source of truth (ADR-124 there, QOR-0012
    here), because CI runs on your licensed Qt kit through GitHub.
-6. **CI's runners** (*the PCs that run the checks*) **had gone deaf** at
-   3:36 AM: online, taking no jobs. The Windows one was restarted; restarting
-   the WSL one was blocked.
+6. **CI's runners** (*the PCs that run the checks*) **have gone deaf**:
+   online, taking no jobs since 3:36 AM. Restarted, the Windows one reconnected
+   but still got no jobs; restarting the WSL one was blocked. GitHub changed
+   both runners' settings at 10:48 PM on 28 October, the likely cause.
 
 ## Needs you
 
@@ -41,8 +42,8 @@ here at `X:\Repoz\QOR-OS`. Phase 1: the three products on Linux, in Prism.
 2. **Entire's app can read QOR OS.** It was installed on 28 October for every
    QOR-MATRIX repository. To keep QOR-0012, limit it to demiurge-chain: the
    organisation's settings, GitHub Apps, Entire, Configure, Repository access.
-3. **Restart the WSL runner** (`tools/ci/runners.ps1`; CI.md says how), or
-   let me: QOR OS's Linux CI waits on it.
+3. **Re-register both runners**, or let me (CI.md says what was tried). QOR
+   OS's Build has not run since; Lint ran and passed.
 4. **A real graphics card for Linux testing:** a Linux boot (recommended), or
    a careful WSL trial on the NVIDIA card, which might freeze the PC again.
 5. **Trademark advice for "QOR OS"** is still open, and the site uses the name

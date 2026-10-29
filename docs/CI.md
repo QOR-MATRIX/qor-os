@@ -155,18 +155,20 @@ If CI does not run, first check that both runners are online:
 `gh api repos/QOR-MATRIX/qor-os/actions/runners` (or
 `orgs/QOR-MATRIX/actions/runners` once they belong to the organisation).
 
-**Online and idle while jobs wait queued** means a runner has lost its
-connection to GitHub's job queue and stopped asking for work, though it still
-renews its token, so GitHub shows it online. On 29 October 2026 both did so at
-the same second, after a network drop, and stayed so for hours. The runner's
-log (`_diag\Runner_*.log`, `~/ghr/qtos-linux/_diag/` in WSL) then ends in
-`BrokerServer` errors followed only by token requests. Stop its
-`Runner.Listener` (only while GitHub reports it idle) and start it with
-`tools/ci/runners.ps1 -StartOnly`. For a minute or two it reports "A session
-for this runner already exists", until GitHub drops the old session. Jobs
-queued while it was deaf can stay queued after it reconnects (they did for ten
-minutes and more on 29 October); a newer run of the workflow supersedes them
-(`concurrency` in `build.yml`), so push, or start one by hand.
+**Online and idle while jobs wait queued** means GitHub is giving a runner no
+work, though it shows it online. On 29 October 2026 both runners lost their
+connection to GitHub's job queue at the same second (10:36 UTC). Their logs
+(`_diag\Runner_*.log`, `~/ghr/qtos-linux/_diag/` in WSL) end in `BrokerServer`
+errors followed only by token requests. Restarting the Windows runner (its
+`Runner.Listener` stopped while GitHub reported it idle, then
+`tools/ci/runners.ps1 -StartOnly`) reconnected it: for two minutes it reported
+"A session for this runner already exists", then "Listening for Jobs". Yet
+neither the jobs queued before nor a new run's reached it in ten minutes. Both
+runners have run on "migrated settings" (`.runner_migrated`) since GitHub
+refreshed their configuration at 05:48 UTC that day, which points to a change
+on GitHub's side. Re-registering the runners is the next step to try. A newer
+run supersedes queued ones (`concurrency` in `build.yml`), so a push, or a run
+started by hand, tries again.
 
 #### Setting up a runner from scratch
 
