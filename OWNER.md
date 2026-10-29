@@ -11,53 +11,45 @@ here at `X:\Repoz\QOR-OS`. Phase 1: the three products on Linux, in Prism.
 
 ## This session
 
-1. **Why the PC froze.** It froze three times on 28 October (1:04, 3:08 and
-   7:20 PM), each during a Linux test run in WSL (*Windows' built-in Linux*)
-   that drew on the graphics card through Direct3D 12. Each run's log stops
-   as a QQ suite starts, and two stayed silent far past the 15-minute limit
-   that stops a stuck test. So a test was stuck inside WSL's graphics driver,
-   where nothing can stop it, and Windows hung later. The 7:20 run was one
-   the previous session started in the background and left.
-2. **Linux runs can no longer reach the graphics card.** Under WSL,
-   `tools/dev/products.sh` now runs itself in a *namespace*, a private view
-   of the system, where WSL's graphics device is replaced by an empty one.
-   Everything draws in software, on the processor. It also uses at most half
-   the processors and three quarters of WSL's memory. A watcher checked every
-   2 seconds through 45 minutes of runs, and no test reached the card. The PC
-   stayed up through every run today. `--gpu` brings back the old way.
-3. **Results in software:**
-   - QOR Media passes everything.
-   - ARQADE passes 3 suites of 4. One Orbital game case draws a frame that
-     software could not finish in 30 minutes, so the 35 game cases after it
-     cannot run.
-   - QQ's agent key now lives in Linux's keyring (*the Secret Service*), and
-     every key test passes. QQ Studio's F3 overlay, Group and Duplicate fail,
-     as before. In software QQ runs slower than real time, so the tests that
-     time movement fail. That is expected, and the tests were left as they are.
-4. **A crash fixed in the hidden test display:** it died whenever a window
-   closed while another was open.
-5. **QQ on Windows passes every suite** after the keyring change. That run
-   opened windows on your desktop without warning. That was my mistake: QQ's
-   build script runs its tests too.
-6. Your two choices of yesterday are records QOR-0010 and QOR-0011.
+1. **The freezes are stopped.** Three on 28 October each came from a Linux
+   test run in WSL (*Windows' built-in Linux*) using the graphics card, and a
+   test stuck in its driver. Under WSL, `products.sh` now hides the card from
+   the run, draws on the processor, and uses at most half the PC. 45 minutes
+   of watched runs: nothing reached the card, and the PC stayed up.
+2. **Results without the card:** QOR Media passes everything; ARQADE three
+   suites of four (one Orbital case cannot finish a frame in software); QQ
+   four of eight, with every agent-key test passing in Linux's keyring. QQ's
+   timing tests fail because software runs slower than real time. A crash in
+   the hidden test display was fixed.
+3. **Committed and pushed** (`86dad74`). QQ on Windows passed every suite.
+4. **The website now leads with QOR OS**, as you chose: pull request **#110**
+   in demiurge-chain (ADR-123, *its decision record*), with QOR OS's mark, an
+   aurora and the lens.
+   It says only what ADR-123 lists: what QOR OS is, where it stands, and that
+   there is no download yet. **It goes live when you merge #110.**
+5. **Entire** (*a new Git host from GitHub's former chief executive*): you
+   chose to mirror, with GitHub the source of truth (ADR-124 there, QOR-0012
+   here), because CI runs on your licensed Qt kit through GitHub.
+6. **CI's runners** (*the PCs that run the checks*) **had gone deaf** at
+   3:36 AM: online, taking no jobs. The Windows one was restarted; restarting
+   the WSL one was blocked.
 
 ## Needs you
 
-1. **A graphics card for Linux testing that does not hang.** Software can't
-   pass ARQADE's Orbital case or QQ's timing tests, and Linux CI stays off
-   (`QOR_RUN_LINUX_PRODUCTS`). Options:
-   - a real Linux boot on this PC or another one (recommended: Phase 1's exit,
-     Orb Run in Prism with a DualSense, needs real Linux anyway);
-   - a careful WSL trial on the NVIDIA card, which might freeze the PC again.
-2. **Windows check of ARQADE and QOR Media** (`products.ps1`, about ten
-   minutes, with windows on your desktop). It completes this change. Say when.
-3. **Still open from before:** which legal entity; trademarks for QQ, ARQADE
-   and "QOR OS"; the Qt letter ([docs/release/](docs/release/README.md));
-   replacing the key exposed on 5 October; moving the Store keys' backup off
-   this PC (it is still in `~/.qor-os`).
+1. **Merge #110** to publish the site. Its failing security check was a new
+   advisory (*a published library flaw*), now fixed on the branch.
+2. **Entire's app can read QOR OS.** It was installed on 28 October for every
+   QOR-MATRIX repository. To keep QOR-0012, limit it to demiurge-chain: the
+   organisation's settings, GitHub Apps, Entire, Configure, Repository access.
+3. **Restart the WSL runner** (`tools/ci/runners.ps1`; CI.md says how), or
+   let me: QOR OS's Linux CI waits on it.
+4. **A real graphics card for Linux testing:** a Linux boot (recommended), or
+   a careful WSL trial on the NVIDIA card, which might freeze the PC again.
+5. **Trademark advice for "QOR OS"** is still open, and the site uses the name
+   publicly once #110 merges. Also open: the legal entity, the Qt letter, replacing the
+   5 October key, moving the Store keys' backup off this PC.
 
 ## Next
 
-Phase 1, in order: Prism hosts the products (it speaks their launcher protocol
-and places their windows); QOR.Input drives QQ's controls; Lumen themes them;
-then a controller-first Home and Library. Find out why F3 fails on Linux.
+Phase 1: Prism hosts the products and places their windows; QOR.Input drives
+QQ; Lumen themes them; then a controller-first Home and Library.

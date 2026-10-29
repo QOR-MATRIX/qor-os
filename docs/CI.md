@@ -155,6 +155,19 @@ If CI does not run, first check that both runners are online:
 `gh api repos/QOR-MATRIX/qor-os/actions/runners` (or
 `orgs/QOR-MATRIX/actions/runners` once they belong to the organisation).
 
+**Online and idle while jobs wait queued** means a runner has lost its
+connection to GitHub's job queue and stopped asking for work, though it still
+renews its token, so GitHub shows it online. On 29 October 2026 both did so at
+the same second, after a network drop, and stayed so for hours. The runner's
+log (`_diag\Runner_*.log`, `~/ghr/qtos-linux/_diag/` in WSL) then ends in
+`BrokerServer` errors followed only by token requests. Stop its
+`Runner.Listener` (only while GitHub reports it idle) and start it with
+`tools/ci/runners.ps1 -StartOnly`. For a minute or two it reports "A session
+for this runner already exists", until GitHub drops the old session. Jobs
+queued while it was deaf can stay queued after it reconnects (they did for ten
+minutes and more on 29 October); a newer run of the workflow supersedes them
+(`concurrency` in `build.yml`), so push, or start one by hand.
+
 #### Setting up a runner from scratch
 
 ```powershell

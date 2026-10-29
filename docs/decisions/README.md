@@ -21,6 +21,7 @@ record supersedes it, and both say so.
 | [QOR-0009](QOR-0009-the-name-is-qor-os.md) | The name is QOR OS, in the code too: `qor-os`, `qor`, `QOR.*`, `QOR_*`, `dev.qorsync.*` where a space cannot go; QTOS names only the predecessor | Accepted 2026-10-27 |
 | [QOR-0010](QOR-0010-on-wayland-prism-places-the-products-windows.md) | On Wayland the products' windows stay toplevels and Prism places them; QOR Media's docking case is skipped there | Accepted 2026-10-28 |
 | [QOR-0011](QOR-0011-the-creators-provider-key-in-the-secret-service.md) | A creator's own provider key is not a QOR key: it stays in the platform's keychain, the Secret Service on Linux | Accepted 2026-10-28 |
+| [QOR-0012](QOR-0012-github-stays-the-source-of-truth-entire-mirrors-it.md) | GitHub stays the source of truth; Entire mirrors QOR OS once it hosts private repositories | Accepted 2026-10-29 |
 
 ## QTOS (inherited)
 
