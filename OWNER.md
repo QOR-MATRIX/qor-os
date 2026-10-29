@@ -28,7 +28,7 @@ here at `X:\Repoz\QOR-OS`. Phase 1: the three products on Linux, in Prism.
 5. **Entire is not used** (QOR-0014), on my recommendation, which you asked
    for: it duplicated GitHub, had no CI for your licensed Qt kit, and its app
    could write to this private repository. You removed the app; GitHub alone,
-   as before. You also merged demiurge-chain #111, its records.
+   as before. You also merged demiurge-chain #111 and #112, its records.
 6. **CI works again.** Its runners (*the PCs that run the checks*) had taken
    no jobs since 3:36 AM, even re-registered: GitHub had stopped giving jobs
    to organisation-wide runners. Registered to `qor-os` instead, they took the
