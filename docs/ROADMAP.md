@@ -33,18 +33,22 @@ QQ's, ARQADE's and QOR Media's suites.
 - [ ] QQ, ARQADE and QOR Media build and pass their suites on Linux. Their Windows-only parts get platform seams:
   - XInput becomes QOR.Input;
   - the DXGI GPU choice is handled per platform;
-  - the agent's key moves from Credential Manager to the Secret Service;
-  - window docking moves out.
+  - the agent's key is kept in the Secret Service on Linux ([QOR-0011](decisions/QOR-0011-the-creators-provider-key-in-the-secret-service.md));
+  - on Wayland Prism places the windows the Windows launcher docks ([QOR-0010](decisions/QOR-0010-on-wayland-prism-places-the-products-windows.md)).
 
   **Begun 28 October:** all three build on Linux with `tools/dev/products.sh`, on a display nobody sees, and the Linux
-  kit has Qt Quick 3D Physics and Qt PDF. Under WSL:
-  - ARQADE passes every suite;
-  - QOR Media passes every suite but docking (Wayland has no window handles to dock by), and its video case skips,
-    needing a Windows sample file;
-  - QQ fails its agent's key cases (no keychain on Linux), QQ Studio's F3 overlay, and the QQ Player's floor of 20
-    frames a second (13 to 15 under WSL); in some runs QQ Studio's Group and Duplicate keys fail too.
+  kit has Qt Quick 3D Physics and Qt PDF. Under WSL, runs on the GPU hung the workstation three times on 28 October,
+  so since 29 October the script fences them from it and they draw in software. Fenced, on 29 October:
+  - QOR Media passes every suite; docking is skipped on Wayland, and the video case skips, needing a Windows sample file;
+  - ARQADE passes three suites of four. Its games suite stops at Orbital's ten locks: in software one of the game's
+    frames did not finish drawing in 30 minutes, so the 35 cases after it do not run. On the GPU, on 28 October, it
+    passed;
+  - QQ passes its world, scene, lockdown and publish suites, and its agent's key cases, now kept in the Secret Service.
+    QQ Studio's F3 overlay, Group and Duplicate fail, as they did on the GPU. In software QQ plays slower than real time
+    (the Player caps a frame's step at 0.05 s), so the cases that time movement fail: four in the play suite, one each
+    in Studio's and the agent's, and the QQ Player's floor of 20 frames a second (5.8 there; 13 to 15 on the GPU).
 
-  Linux CI does not run them yet: one run froze the workstation its runner shares ([CI.md](CI.md#the-carried-products)).
+  Linux CI does not run them yet ([CI.md](CI.md#the-carried-products)).
 - [ ] Each runs as a Wayland client of Prism, and Prism places it (the launcher's `place` request becomes a Prism layout request)
 - [ ] The controller service drives QQ through `Input`'s gamepad seam; ARQADE and QOR Media gain controller focus navigation
 - [ ] Lumen's tokens theme every app: Demiurge's one look (`docs/design/tokens.json`) mapped onto Lumen roles, with one source

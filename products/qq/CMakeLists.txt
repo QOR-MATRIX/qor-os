@@ -13,6 +13,8 @@
 #   ctest --test-dir <build> --output-on-failure
 #
 # products/qq/README.md has the whole procedure. Build outside the repository's drive if it is short of space.
+#
+# Changed for QOR OS: Qt D-Bus on Linux, for the Studio's key in the Secret Service (QOR OS's QOR-0011).
 
 cmake_minimum_required(VERSION 3.22)
 
@@ -31,6 +33,9 @@ if(QQ_PLAYER_ONLY)
     find_package(Qt6 6.12 REQUIRED COMPONENTS Core Gui Multimedia Network Qml Quick Quick3D)
 else()
     find_package(Qt6 6.12 REQUIRED COMPONENTS Core Gui Multimedia Network Qml Quick Quick3D QuickControls2 Test)
+    if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        find_package(Qt6 6.12 REQUIRED COMPONENTS DBus)
+    endif()
 endif()
 
 qt_standard_project_setup(REQUIRES 6.12)

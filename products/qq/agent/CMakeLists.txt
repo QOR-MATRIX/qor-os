@@ -14,6 +14,9 @@ target_link_libraries(qqagent PUBLIC qqmcp Qt6::Gui Qt6::Network Qt6::Qml Qt6::Q
 if(WIN32)
     # Windows Credential Manager (CredWriteW, CredReadW, CredDeleteW).
     target_link_libraries(qqagent PRIVATE advapi32)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    # Changed for QOR OS: the Secret Service, over D-Bus (QOR OS's QOR-0011).
+    target_link_libraries(qqagent PRIVATE Qt6::DBus)
 endif()
 
 # A console program: an MCP client reads its standard output.

@@ -2,6 +2,9 @@
 // through Qt Multimedia's FFmpeg backend, shows pictures, edits text, and tells the launcher what it learned, where it
 // stopped and that it closed. Every file here is made by the test or is a sample that ships with Windows; none is the
 // person's.
+//
+// Changed for QOR OS: docking is not tested on Wayland, which has no window handles to dock by; there Prism places the
+// window (QOR OS's QOR-0010).
 
 #include <QDir>
 #include <QFile>
@@ -254,6 +257,8 @@ private slots:
 
     void it_docks_inside_the_launchers_window_and_lifts_out_to_full_screen()
     {
+        if (QGuiApplication::platformName().startsWith(QLatin1String("wayland")))
+            QSKIP("Wayland has no window handles to dock by; there Prism places the window (QOR-0010).");
         // A stand-in for the launcher's window, known to QOR Media only by its native handle, as the launcher's is.
         QWindow launcher;
         launcher.setGeometry(100, 100, 900, 600);

@@ -19,6 +19,8 @@ record supersedes it, and both say so.
 | [QOR-0007](QOR-0007-what-1-0-ships.md) | What 1.0 ships, and what waits | Accepted 2026-10-26 |
 | [QOR-0008](QOR-0008-before-a-public-release.md) | Release gates the owner holds (Qt distribution licence, name clearance, legal list, keys, sign-in redundancy); the code keeps QTOS names until the name clears | Accepted 2026-10-26; decision 2 superseded by QOR-0009 |
 | [QOR-0009](QOR-0009-the-name-is-qor-os.md) | The name is QOR OS, in the code too: `qor-os`, `qor`, `QOR.*`, `QOR_*`, `dev.qorsync.*` where a space cannot go; QTOS names only the predecessor | Accepted 2026-10-27 |
+| [QOR-0010](QOR-0010-on-wayland-prism-places-the-products-windows.md) | On Wayland the products' windows stay toplevels and Prism places them; QOR Media's docking case is skipped there | Accepted 2026-10-28 |
+| [QOR-0011](QOR-0011-the-creators-provider-key-in-the-secret-service.md) | A creator's own provider key is not a QOR key: it stays in the platform's keychain, the Secret Service on Linux | Accepted 2026-10-28 |
 
 ## QTOS (inherited)
 

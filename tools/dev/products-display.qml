@@ -26,6 +26,13 @@ WaylandCompositor {
 
     function closed(index: int) {
         windows.remove(index);
+        // Not while the closed window's surface is being destroyed: until that
+        // is over the keyboard still has it as its focus, and moving the focus
+        // then tells a surface that is gone, which crashes Qt Wayland Compositor.
+        Qt.callLater(display.focusNewest);
+    }
+
+    function focusNewest() {
         if (windows.count > 0)
             (stack.itemAt(windows.count - 1) as ShellSurfaceItem)?.takeFocus();
     }

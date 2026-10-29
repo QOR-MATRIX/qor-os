@@ -102,6 +102,11 @@ Makers are paid when their work is used, licensed or remixed.
   through the bridge, and no command answers with a key. On the device the
   vault is a service of its own, outside Prism and every app, and its
   approvals are drawn by Prism in the trusted layer.
+- **A creator's own key for an outside provider is not a QOR key.** QQ
+  Studio's agent key, for example, stays in the platform's keychain: the
+  Credential Manager on Windows, the Secret Service on Linux
+  ([QOR-0011](docs/decisions/QOR-0011-the-creators-provider-key-in-the-secret-service.md)).
+  It is never written to a file, a setting or a log.
 - **Nothing secret reaches a log**, test output, CI output, screenshot or
   commit. That covers tokens, keys, passwords, recovery phrases, backup
   codes, sign-in links and email addresses. A new flow that handles one of

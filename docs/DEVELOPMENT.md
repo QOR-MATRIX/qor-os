@@ -372,8 +372,9 @@ and mark any record it supersedes or amends.
 | `tools/ci/install_qt.py` | Unattended commercial Qt install for CI |
 | `tools/github/bootstrap.py` | Apply labels, milestones, repository settings and ruleset |
 | `tools/dev/products.ps1` | Build and test QQ, ARQADE and QOR Media with their own scripts |
-| `tools/dev/products.sh` | Build and test QQ, ARQADE and QOR Media on Linux, on a display nobody sees ([BUILDING.md](BUILDING.md#on-linux)) |
+| `tools/dev/products.sh` | Build and test QQ, ARQADE and QOR Media on Linux, on a display nobody sees and, under WSL, fenced from the GPU ([BUILDING.md](BUILDING.md#on-linux)) |
 | `tools/dev/products-display.qml` | That display: a compositor on Qt's offscreen platform, for the products' suites |
+| `tools/dev/secret-service.py` | That run's keyring: an in-memory Secret Service on the run's own session bus ([QOR-0011](decisions/QOR-0011-the-creators-provider-key-in-the-secret-service.md)) |
 | `tools/upstream/demiurge.sh` | Pull carried code from demiurge-chain, show its state, write patches for upstream |
 | `tools/ci/runners.ps1` | Move the workstation's two CI runners to the organisation or a repository, and start them |
 | `qorctl` | Drive services from the command line ([SERVICES.md](SERVICES.md#qorctl)) |

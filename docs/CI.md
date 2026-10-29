@@ -30,17 +30,23 @@ Media: Windows through `tools/dev/products.ps1`, which calls each product's
 own script, and Linux through `tools/dev/products.sh`, QOR OS's Linux build of
 them. On Linux the suites run on a display of the script's own, a compositor
 on Qt's offscreen platform, so nothing reaches the runner's desktop
-([BUILDING.md](BUILDING.md#on-linux)); under WSL the products draw on the GPU
-through `GALLIUM_DRIVER=d3d12`. QOR Media needs PDFium, which both scripts
+([BUILDING.md](BUILDING.md#on-linux)); under WSL the script fences them from
+the GPU and draws in software. QOR Media needs PDFium, which both scripts
 fetch at a pinned release and check by SHA-256.
 
 **Linux runs them only with `QOR_RUN_LINUX_PRODUCTS` as well**, which is not
-set. On 28 October a run of them under WSL froze the workstation the Linux
-runner shares, during QQ's Player suite, minutes after Mesa's Direct3D 12
-driver failed to make a context (`EGL_BAD_ALLOC`) in QQ's play suite; it took
-the power button. Windows logged no GPU reset. Earlier that day the same
-suite had finished five times under WSL, in three runs. Set the variable on a
-runner whose machine can take that, or once the cause is known.
+set. On 28 October, three runs under WSL that drew on the GPU through Mesa's
+Direct3D 12 driver hung the workstation the Linux runner shares, at 1:04, 3:08
+and 7:20 PM; each took the power button, and Windows logged no GPU reset and
+no crash. Each run's log stops where a QQ suite starts: tst_agent at 12:24,
+the Player's suite at 3:05, tst_world at 3:51. ctest stops a suite after 900
+seconds and says so, yet the first and third logs stayed silent for 40
+minutes and three and a half hours before Windows hung, which fits a suite
+stuck inside the GPU driver, where no signal reaches it. Before the second,
+QQ's play suite had crashed after Direct3D 12 removed its device and Mesa
+failed to make a context (`EGL_BAD_ALLOC`). The script now fences runs under
+WSL from the GPU ([BUILDING.md](BUILDING.md#on-linux)). The owner decides when
+to set the variable.
 
 The suites take about ten minutes, and on Windows they drive real windows on
 the runner's desktop, so they run only when:

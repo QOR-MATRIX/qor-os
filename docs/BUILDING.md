@@ -324,6 +324,8 @@ tools/dev/products.sh --product qq --attempts 1
 tools/dev/products.sh --qt ~/Qt/6.12.0/gcc_64 --build-root ~/qor-build/products
 tools/dev/products.sh --display session               # on this desktop, to watch them
 tools/dev/products.sh --display prism                 # inside Prism, as hidden as the default
+tools/dev/products.sh --product qq --tests tst_agent  # the suites whose names match
+tools/dev/products.sh --gpu                           # under WSL, on the GPU, which has frozen the PC
 ```
 
 - **Display:** the suites open real windows and type into them. By default
@@ -341,16 +343,30 @@ tools/dev/products.sh --display prism                 # inside Prism, as hidden 
     (a new one opens 960 wide), so the suites that expect a size of their
     own fail there until Prism hosts the products.
   - `--display session` uses the session's own display and sound.
+- **Keyring:** in the hidden modes the session bus is the run's own too, with
+  `tools/dev/secret-service.py` on it: an in-memory Secret Service where QQ
+  Studio's agent suite keeps its test key
+  ([QOR-0011](decisions/QOR-0011-the-creators-provider-key-in-the-secret-service.md)),
+  never touching your keyring. It needs `dbus-daemon`, `python3-dbus` and
+  `python3-gi`; without them the script says so and the agent suite fails.
+  With `--display session` the session's own keyring is used, and under WSL
+  there is none.
 - **PDFium:** the script fetches the release QOR Media's `build.ps1` pins
   (`chromium/8111`), for Linux, once into `~/.cache/qor-media-pdfium`, and
   checks it by SHA-256.
-- **Graphics:** the suites need the GPU, and the products draw on it in
-  either mode. Under WSL the script sets `GALLIUM_DRIVER=d3d12` (unless it is
-  already set), since Mesa there draws in software otherwise, too slowly for
-  QQ's 3D suites. **On 28 October one run under WSL froze the Windows PC it
-  ran on** during QQ's Player suite, after Mesa's Direct3D 12 driver had
-  failed to make a context, and the cause is not known
-  ([CI.md](CI.md#the-carried-products)). Under WSL, save your work first.
+- **Graphics:** on a Linux machine the products draw on its GPU. **Under WSL
+  the run is fenced from the GPU**, because on 28 October three runs that drew
+  on it through Mesa's Direct3D 12 driver hung the Windows PC
+  ([CI.md](CI.md#the-carried-products)). The script runs itself again in a
+  mount namespace of its own where `/dev/dxg`, WSL's GPU device, is
+  `/dev/null`. Mesa draws in software (llvmpipe) there, and nothing else
+  (Vulkan, CUDA, video decoding) can reach the GPU either. Where systemd's
+  user manager runs (`systemd=true` in `/etc/wsl.conf`), the run is also
+  held to half the processors and three quarters of WSL's memory, so the PC
+  stays usable. It needs unprivileged user namespaces, which WSL's kernel
+  allows. In software, QQ's walk and the QQ Player's floor of 20 frames a
+  second fail. `--gpu` draws on the GPU through Direct3D 12 as before, and
+  can freeze the PC.
 - **Sound:** with `--display session` and no PipeWire daemon (WSLg), it sets
   `QT_AUDIO_BACKEND=pulseaudio`, as the shell's audio engine does.
 - **Programs:** on Linux QQ's programs sit in their target folders

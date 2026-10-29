@@ -1,8 +1,10 @@
 // The provider's API key, kept in the operating system's keychain (DIRECTION P3.3, ADR-083 decision 4).
 //
-// On Windows that is the Credential Manager, a generic credential for this user that only this user can read. The key
-// is never written to a file, a setting or a log, and is held in memory only while a request is being made. Elsewhere
-// there is no keychain yet, and every call says so.
+// On Windows that is the Credential Manager, a generic credential for this user that only this user can read. On Linux
+// it is the Secret Service, the desktop's keyring. The key is never written to a file, a setting or a log, and is held
+// in memory only while a request is being made. Elsewhere there is no keychain yet, and every call says so.
+//
+// Changed for QOR OS: the Secret Service on Linux (QOR OS's QOR-0011).
 //
 // QQ_KEYCHAIN_TARGET names another credential: how a test keeps clear of the creator's own key.
 

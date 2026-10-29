@@ -296,9 +296,9 @@ What ties them to Windows today, and where Phase 1 changes it:
 
 | Seam | Today | On QOR OS |
 |------|-------|-----------|
-| Placement | The launcher's `place` command parents the product's window into its own by native handle (`Dock`, `products/arqade/qt/src/dock.cpp`, `tools/qor-media/src/dock.cpp`), which Wayland cannot do | Prism speaks the launcher's side of the host protocol and places the product's toplevel itself |
+| Placement | The launcher's `place` command parents the product's window into its own by native handle (`Dock`, `products/arqade/qt/src/dock.cpp`, `tools/qor-media/src/dock.cpp`), which Wayland cannot do | On Wayland the product's window stays a toplevel and Prism places it, speaking the launcher's side of the host protocol ([QOR-0010](decisions/QOR-0010-on-wayland-prism-places-the-products-windows.md)); `Dock` stays for Windows |
 | Controllers | XInput, polled by QQ's `Input` (`products/qq/runtime/input.cpp`) | QOR.Input feeds `Input`'s gamepad state, with the same button names |
-| The agent's key | Windows Credential Manager (`products/qq/agent/keychain.cpp`); elsewhere a stub that stores nothing | Not decided: the roadmap names the Secret Service, and `AGENTS.md` §6 keeps code that handles keys in the QOR core, so a QOR record chooses |
+| The agent's key | Windows Credential Manager (`products/qq/agent/keychain.cpp`) | The Secret Service, over Qt D-Bus, in the same file: the creator's own provider key, not a QOR key ([QOR-0011](decisions/QOR-0011-the-creators-provider-key-in-the-secret-service.md)). The image must ship a provider (Phase 3) |
 | GPU choice | DXGI's high-performance adapter (`products/qq/runtime/gpu.cpp`, ARQADE's `main.cpp`) | Mesa and Prism's own outputs; nothing to do in the products |
 
 The host protocol (ADR-046, ADR-102) is what the products already speak to a

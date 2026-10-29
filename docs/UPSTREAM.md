@@ -67,7 +67,9 @@ minutes.
   QOR OS with the next pull.
 - **Work that only QOR OS needs** is made here. That covers the Linux build,
   running as a Wayland client of Prism, Lumen theming, the controller service,
-  and removing the Windows window docking. A carried file changed here
+  and placing windows on Wayland, where Prism does what the Windows docking
+  does ([QOR-0010](decisions/QOR-0010-on-wayland-prism-places-the-products-windows.md)).
+  A carried file changed here
   gets a line near its top saying so, as Apache-2.0 §4(b) requires:
 
   ```cpp
