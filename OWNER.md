@@ -22,32 +22,28 @@ here at `X:\Repoz\QOR-OS`. Phase 1: the three products on Linux, in Prism.
    timing tests fail because software runs slower than real time. A crash in
    the hidden test display was fixed.
 3. **Committed and pushed** (`86dad74`). QQ on Windows passed every suite.
-4. **The website now leads with QOR OS**, as you chose: pull request **#110**
-   in demiurge-chain (ADR-123, *its decision record*), with QOR OS's mark, an
-   aurora and the lens.
-   It says only what ADR-123 lists: what QOR OS is, where it stands, and that
-   there is no download yet. **It goes live when you merge #110.**
-5. **Entire** (*a new Git host from GitHub's former chief executive*): you
-   chose to mirror, with GitHub the source of truth (ADR-124 there, QOR-0012
-   here), because CI runs on your licensed Qt kit through GitHub.
-6. **CI's runners** (*the PCs that run the checks*) **have gone deaf**:
-   online, taking no jobs since 3:36 AM. Restarted, the Windows one reconnected
-   but still got no jobs; restarting the WSL one was blocked. GitHub changed
-   both runners' settings at 10:48 PM on 28 October, the likely cause.
+4. **qorsync.dev now leads with QOR OS** (*demiurge-chain's ADR-123*): you
+   merged #110, it was read live from outside, and search engines were told
+   (IndexNow). It says only what ADR-123 lists, including "no download yet".
+5. **Entire** (*a new Git host from GitHub's former chief executive*): its
+   app stays on every repository, QOR OS included, as you allowed (QOR-0013);
+   GitHub stays the source of truth.
+6. **CI's runners** (*the PCs that run the checks*) **take no jobs** since
+   3:36 AM, though online. Re-registered at your word (`runners.ps1
+   -Reregister`), they connected and still got none in 45 minutes. Labels,
+   group, permissions, billing and GitHub's status are all in order.
 
 ## Needs you
 
-1. **Merge #110** to publish the site. Its failing security check was a new
-   advisory (*a published library flaw*), now fixed on the branch.
-2. **Entire's app can read QOR OS.** It was installed on 28 October for every
-   QOR-MATRIX repository. To keep QOR-0012, limit it to demiurge-chain: the
-   organisation's settings, GitHub Apps, Entire, Configure, Repository access.
-3. **Re-register both runners**, or let me (CI.md says what was tried). QOR
-   OS's Build has not run since; Lint ran and passed.
+1. **Ask GitHub Support why the runners get no jobs** (CI.md lists what was
+   ruled out). QOR OS's Build has not run since 28 October; Lint passes.
+2. **Merge demiurge-chain #111**, records of #110 only.
+3. **Entire's session recording** (*saving AI transcripts beside commits*) is
+   still undecided: say if "in full" includes it.
 4. **A real graphics card for Linux testing:** a Linux boot (recommended), or
    a careful WSL trial on the NVIDIA card, which might freeze the PC again.
-5. **Trademark advice for "QOR OS"** is still open, and the site uses the name
-   publicly once #110 merges. Also open: the legal entity, the Qt letter, replacing the
+5. **Trademark advice for "QOR OS"** is still open, and the site now uses the
+   name publicly. Also open: the legal entity, the Qt letter, replacing the
    5 October key, moving the Store keys' backup off this PC.
 
 ## Next

@@ -166,9 +166,16 @@ errors followed only by token requests. Restarting the Windows runner (its
 neither the jobs queued before nor a new run's reached it in ten minutes. Both
 runners have run on "migrated settings" (`.runner_migrated`) since GitHub
 refreshed their configuration at 05:48 UTC that day, which points to a change
-on GitHub's side. Re-registering the runners is the next step to try. A newer
-run supersedes queued ones (`concurrency` in `build.yml`), so a push, or a run
-started by hand, tries again.
+on GitHub's side. At the owner's word, `tools/ci/runners.ps1 -Reregister`
+removed both and registered them again at 17:41 UTC, as runners 236 and 237,
+their migrated settings deleted. Both connected and listened, and no job
+reached them in 45 minutes. The labels, the runner group (open to every
+repository in the organisation), the Actions permissions, the bill (the private
+repositories had used 112 of their 2,000 free minutes in October, with no charge
+for self-hosted runners) and GitHub's status page (Actions operational) were all
+in order. The cause is not known; the next step is GitHub Support, naming
+a queued run. A newer run supersedes queued ones (`concurrency` in
+`build.yml`), so a push, or a run started by hand, tries again.
 
 #### Setting up a runner from scratch
 

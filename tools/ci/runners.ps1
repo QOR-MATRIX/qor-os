@@ -16,9 +16,12 @@
     core) and display variables, and starts both, minimised. Registration and removal tokens are piped from gh to the
     runners and never printed.
 
-    A runner already registered at -Scope is left as it is, so running the script twice is harmless. A runner GitHub
-    reports busy is never stopped: stopping it would orphan its job, and GitHub then refuses to remove it until that
-    job times out. Wait for the job, or cancel it, and run the script again.
+    A runner already registered at -Scope is left as it is, so running the script twice is harmless. -Reregister
+    removes and registers each runner again even there: for a runner GitHub shows online that takes no jobs (docs/CI.md).
+    Removing a registration also deletes the settings GitHub migrated for it (.runner_migrated, .credentials_migrated),
+    which a runner loads before its own. A runner GitHub reports busy is never stopped: stopping it would orphan its
+    job, and GitHub then refuses to remove it until that job times out. Wait for the job, or cancel it, and run the
+    script again.
 
     Starting the runners at sign-in is a Startup-folder entry the owner adds once (docs/CI.md); this script does not
     write one.
@@ -27,6 +30,7 @@
     .\tools\ci\runners.ps1 -Scope org
     .\tools\ci\runners.ps1 -Scope repo -Repo qor-os
     .\tools\ci\runners.ps1 -StartOnly
+    .\tools\ci\runners.ps1 -Reregister
 #>
 [CmdletBinding()]
 param(
@@ -35,7 +39,8 @@ param(
     [string] $Org = 'QOR-MATRIX',
     [string] $Repo = 'qor-os',
     [string] $Distro = 'Ubuntu',
-    [switch] $StartOnly
+    [switch] $StartOnly,
+    [switch] $Reregister
 )
 
 $ErrorActionPreference = 'Stop'
@@ -71,7 +76,7 @@ if (-not $StartOnly) {
     # ── Windows runner ──────────────────────────────────────────────────────
     $state = Read-Runner (Get-Content (Join-Path $windowsRunner '.runner') -Raw -ErrorAction SilentlyContinue)
     $name = if ($state) { $state.agentName } else { "$env:COMPUTERNAME-qtos" }
-    if ($state -and $state.gitHubUrl -eq $target) {
+    if ($state -and $state.gitHubUrl -eq $target -and -not $Reregister) {
         Write-Host "Windows runner '$name': already registered at $target"
     }
     else {
@@ -86,6 +91,7 @@ if (-not $StartOnly) {
                 $remove = Get-Token $state.gitHubUrl 'remove'
                 & .\config.cmd remove --token $remove | Out-Null
                 if ($LASTEXITCODE) { throw "config.cmd remove failed ($LASTEXITCODE)" }
+                Remove-Item .runner_migrated, .credentials_migrated -Force -ErrorAction SilentlyContinue
             }
             Write-Host "Windows runner '$name': registering at $target"
             $register = Get-Token $target 'registration'
@@ -102,7 +108,7 @@ if (-not $StartOnly) {
     $url = & $field 'gitHubUrl'
     $name = & $field 'agentName'
     if (-not $name) { $name = "$((wsl.exe -d $Distro --exec hostname).Trim())-qor-linux" }
-    if ($url -eq $target) {
+    if ($url -eq $target -and -not $Reregister) {
         Write-Host "Linux runner '$name': already registered at $target"
     }
     else {
@@ -114,7 +120,7 @@ if (-not $StartOnly) {
             Write-Host "Linux runner '$name': removing from $url"
             # The token reaches Linux with Windows' line ending, which a token in an HTTP header must not carry.
             Get-Token $url 'remove' |
-                wsl.exe -d $Distro --cd '~' --exec bash -c "t=`$(tr -d '\r\n'); cd $linuxRunner && ./config.sh remove --token `$t >/dev/null"
+                wsl.exe -d $Distro --cd '~' --exec bash -c "t=`$(tr -d '\r\n'); cd $linuxRunner && ./config.sh remove --token `$t >/dev/null && rm -f .runner_migrated .credentials_migrated"
             if ($LASTEXITCODE) { throw "config.sh remove failed ($LASTEXITCODE)" }
         }
         Write-Host "Linux runner '$name': registering at $target"
