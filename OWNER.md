@@ -27,7 +27,8 @@ here at `X:\Repoz\QOR-OS`. Phase 1: the three products on Linux, in Prism.
    (IndexNow). It says only what ADR-123 lists, including "no download yet".
 5. **Entire is not used** (QOR-0014), on my recommendation, which you asked
    for: it duplicated GitHub, had no CI for your licensed Qt kit, and its app
-   could write to this private repository. GitHub alone, as before.
+   could write to this private repository. You removed the app; GitHub alone,
+   as before. You also merged demiurge-chain #111, its records.
 6. **CI works again.** Its runners (*the PCs that run the checks*) had taken
    no jobs since 3:36 AM, even re-registered: GitHub had stopped giving jobs
    to organisation-wide runners. Registered to `qor-os` instead, they took the
@@ -36,13 +37,9 @@ here at `X:\Repoz\QOR-OS`. Phase 1: the three products on Linux, in Prism.
 
 ## Needs you
 
-1. **Remove Entire's GitHub app**: one click, Uninstall, at
-   `github.com/organizations/QOR-MATRIX/settings/installations/176288713`.
-   GitHub lets only you do that; until then it can read this repository.
-2. **Merge demiurge-chain #111**: records of #110, and ADR-125 (no Entire).
-3. **A real graphics card for Linux testing:** a Linux boot (recommended), or
+1. **A real graphics card for Linux testing:** a Linux boot (recommended), or
    a careful WSL trial on the NVIDIA card, which might freeze the PC again.
-4. **Trademark advice for "QOR OS"** is still open, and the site now uses the
+2. **Trademark advice for "QOR OS"** is still open, and the site now uses the
    name publicly. Also open: the legal entity, the Qt letter, replacing the
    5 October key, moving the Store keys' backup off this PC.
 
