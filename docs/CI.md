@@ -88,15 +88,16 @@ runners:
   incremental. The first build with the QOR core compiles its Rust
   dependencies, which takes several more minutes.
 
-### Runners for the organisation
+### Where the runners are registered
 
-A runner serves either one repository or the organisation. Both runners are
-registered to the organisation (`QOR-MATRIX`, since 27 October 2026), in its
-Default runner group, so the same two serve QOR OS and the frozen QTOS. The
-Default group does not allow public repositories, so the public
-demiurge-chain never runs on this workstation, and it must stay that way: a
-self-hosted runner on a public repository runs code from anyone's pull
-request.
+A runner serves either one repository or the organisation. **Both runners are
+registered to `QOR-MATRIX/qor-os`, since 29 October 2026.** From 27 October they
+served the organisation, in its Default runner group, which does not allow
+public repositories. On 29 October GitHub stopped giving jobs to the
+organisation's runners (below); moved to the repository, they took the waiting
+jobs within 15 seconds. The frozen QTOS needs none. The public demiurge-chain
+must never run on this workstation: a self-hosted runner on a public
+repository runs code from anyone's pull request.
 
 `tools/ci/runners.ps1` moves both runners in one command:
 
@@ -114,10 +115,10 @@ request.
 Tokens are piped from `gh`, never printed.
 
 ```powershell
-gh auth refresh -h github.com -s admin:org   # once: organisation runners need the admin:org scope
-.\tools\ci\runners.ps1 -Scope org            # both runners, for every repository in QOR-MATRIX
-.\tools\ci\runners.ps1 -Scope repo -Repo qor-os   # or one repository, with the repo scope only
+.\tools\ci\runners.ps1                       # both runners, for qor-os (the default, -Scope repo -Repo qor-os)
 .\tools\ci\runners.ps1 -StartOnly            # just start them (after a reboot, without Startup entries)
+.\tools\ci\runners.ps1 -Reregister           # remove and register both again where they are
+gh auth refresh -h github.com -s admin:org   # only for -Scope org, which took no jobs on 29 October
 ```
 
 QTOS is frozen, so its CI runs only if someone pushes to it.
@@ -173,8 +174,11 @@ reached them in 45 minutes. The labels, the runner group (open to every
 repository in the organisation), the Actions permissions, the bill (the private
 repositories had used 112 of their 2,000 free minutes in October, with no charge
 for self-hosted runners) and GitHub's status page (Actions operational) were all
-in order. The cause is not known; the next step is GitHub Support, naming
-a queued run. A newer run supersedes queued ones (`concurrency` in
+in order. **Registered to the repository instead
+(`tools/ci/runners.ps1 -Scope repo -Repo qor-os`), both took the waiting
+Build's jobs within 15 seconds**, so GitHub's routing to the organisation's
+runners was what failed. They stay registered to the repository, which is now
+the script's default. A newer run supersedes queued ones (`concurrency` in
 `build.yml`), so a push, or a run started by hand, tries again.
 
 #### Setting up a runner from scratch

@@ -8,9 +8,10 @@
     organisation's Default runner group allows can use it. This script removes each runner from wherever it is
     registered now and registers it again at -Scope:
 
-        org    QOR-MATRIX, so QOR OS and QOR OS share the runners (needs the gh token's admin:org scope:
-               gh auth refresh -h github.com -s admin:org)
-        repo   one repository (-Repo), with the token's repo scope
+        repo   one repository (-Repo, qor-os by default), with the token's repo scope. The default: on 29 October
+               2026 GitHub stopped giving jobs to the organisation's runners, and moved here they took them at once.
+        org    QOR-MATRIX, for every repository its Default runner group allows (needs the gh token's admin:org
+               scope: gh auth refresh -h github.com -s admin:org)
 
     It keeps each runner's name, labels and work folder, pins the Linux runner's PATH (with ~/.cargo/bin for the QOR
     core) and display variables, and starts both, minimised. Registration and removal tokens are piped from gh to the
@@ -27,15 +28,15 @@
     write one.
 
 .EXAMPLE
+    .\tools\ci\runners.ps1
     .\tools\ci\runners.ps1 -Scope org
-    .\tools\ci\runners.ps1 -Scope repo -Repo qor-os
     .\tools\ci\runners.ps1 -StartOnly
     .\tools\ci\runners.ps1 -Reregister
 #>
 [CmdletBinding()]
 param(
     [ValidateSet('org', 'repo')]
-    [string] $Scope = 'org',
+    [string] $Scope = 'repo',
     [string] $Org = 'QOR-MATRIX',
     [string] $Repo = 'qor-os',
     [string] $Distro = 'Ubuntu',

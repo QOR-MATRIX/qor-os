@@ -1,7 +1,7 @@
 # QOR-0012: GitHub stays the source of truth; Entire mirrors QOR OS once it hosts private repositories
 
-- **Status:** Accepted; decision 2 superseded by
-  [QOR-0013](QOR-0013-entire-may-reach-every-repository.md) the same day
+- **Status:** Superseded by [QOR-0014](QOR-0014-qor-os-does-not-use-entire.md)
+  (decision 2 first by [QOR-0013](QOR-0013-entire-may-reach-every-repository.md)), all on 2026-10-29
 - **Date:** 2026-10-29
 - **Deciders:** the owner
 - **Relates to:** Demiurge ADR-124 (the same choice for demiurge-chain);

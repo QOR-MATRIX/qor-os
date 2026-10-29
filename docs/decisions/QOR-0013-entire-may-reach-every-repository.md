@@ -1,6 +1,6 @@
 # QOR-0013: Entire may reach every QOR-MATRIX repository, QOR OS included
 
-- **Status:** Accepted
+- **Status:** Superseded by [QOR-0014](QOR-0014-qor-os-does-not-use-entire.md) the same day
 - **Date:** 2026-10-29
 - **Deciders:** the owner
 - **Supersedes:** [QOR-0012](QOR-0012-github-stays-the-source-of-truth-entire-mirrors-it.md)
