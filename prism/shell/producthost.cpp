@@ -418,6 +418,9 @@ QList<ProductRecord> ProductHost::defaultRecords()
     arqade.glyph = u"gamepad-2"_s;
     arqade.size = QSize(1360, 860);
     arqade.launchable = true;
+    // Its games read the controller themselves, and its home answers it as well: the shell's would press their keys
+    // a second time, and its East would be Esc, which puts a game away.
+    arqade.takesController = true;
     arqade.keywords = u"arcade games play orbital void runner synapse rift survivor flux reversi arenas"_s;
     arqade.description = u"Demiurge's arcade: its games, rebuilt in QQ."_s;
     arqade.hue = 300;

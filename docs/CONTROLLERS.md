@@ -111,9 +111,9 @@ and Guide is never a game's. A controller is heard only by the application
 in front: one pressed in the shell or another window moves nothing in a game
 behind it.
 
-Under Prism, a product whose record says it plays with the controller (the
-QQ Player) has it while its window has the focus and nothing of the shell is
-open:
+Under Prism, a product whose record says it plays with the controller
+(ARQADE and the QQ Player) has it while its window has the focus and nothing
+of the shell is open:
 
 - the controller interface steps aside, with its cursor and hints, so a press
   is the game's alone;
@@ -122,6 +122,38 @@ open:
 
 QQ Studio is not such a product, since it is mostly edited with keyboard and
 mouse: while it plays with the controller interface on, both answer.
+
+**ARQADE** takes the controller because its games read it themselves. Were
+the controller interface to answer as well, each d-pad press would also
+arrive as an arrow key, and East as Esc, which puts a game away. Its home
+answers the controller through QQ's `Input` too, with actions it defines
+only while the home shows: a game hears every action pressed while it plays
+and keeps it in its run.
+
+| Input | On ARQADE's home |
+|-------|------------------|
+| D-pad, arrow keys | The keyboard's focus to the nearest card, button or tab that way, its ring showing; held, it repeats. The page scrolls to keep the focus in view |
+| South (A, ✕), Return | Plays the card focused, or presses the button, as the button comes up: the game it starts never finds it held, or takes it as its own first press. Space presses too |
+| Back (View, Share) in a game | Puts the game away, as Esc does; the focus is on its card again. ARQADE reads it from the controller service itself (`src/controllerback.h`), so the game never hears it |
+
+### Applications
+
+Every other application keeps the controller interface. Prism gives its
+window the d-pad as the arrow keys, South (once the d-pad has moved) as
+Return, and East as Esc, so an application answers the controller by
+answering the keyboard. QOR Media does:
+
+- on what is open (the picture, the player, the pages), the arrows keep their
+  own meaning: next picture, seeking, scrolling;
+- Return takes the keyboard to the controls: the player's Play, or the top
+  bar's way back;
+- on a control, the arrows go to the next control, or back with Up and Left,
+  as Tab and Shift+Tab do, and Return or Space presses it. The volume keeps
+  its own Left and Right;
+- Esc from a control the keys reached comes back to what is open. A second Esc
+  goes back to the Library.
+
+In the editor, Return types a new line, so its bar is reached by Tab.
 
 ### Preferences
 

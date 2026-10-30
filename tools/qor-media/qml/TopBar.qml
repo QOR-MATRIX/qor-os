@@ -3,12 +3,19 @@ import QtQuick.Controls.Basic
 import QtQuick.Layouts
 
 // The bar across the top: back to the Library, what is open, and the actions of whatever shows it.
+//
+// Changed for QOR OS: enter() gives it the keyboard, on its way back, ring showing: what is open does on Return, so a
+// controller's A (Return, under Prism) reaches the actions, and its d-pad goes along them.
 Rectangle {
     id: bar
     property string title
     property string subtitle
     default property alias actions: tools.data
     signal back()
+
+    function enter() {
+        backButton.forceActiveFocus(Qt.TabFocusReason)
+    }
     height: 64
     gradient: Gradient {
         GradientStop { position: 0; color: Qt.alpha(Theme.void_, 0.92) }
@@ -20,6 +27,7 @@ Rectangle {
         anchors.rightMargin: 14
         spacing: 12
         IconButton {
+            id: backButton
             iconName: "back"
             ToolTip.text: qsTr("Back to the Library (Esc)")
             onClicked: bar.back()

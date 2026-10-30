@@ -21,6 +21,9 @@
 // products/arqade/tests/fixtures/, which the game's rules replay in Node (tests/<game>.test.mjs). The launcher's reduced
 // motion reaches the game, and Esc and Back return to the home.
 //
+// Changed for QOR OS: the home is chosen from by the d-pad and the arrows, a game played by the pad's A or Return, and
+// put away by the pad's Back, the focus coming back to its card.
+//
 // It opens a real window, so it needs a desktop session. With ARQADE_SHOT set to a folder, it saves what it drew there;
 // with ARQADE_RUN set to a folder, it writes each run it played there, as <game>-run.json (how the fixtures were made).
 
@@ -47,6 +50,7 @@
 #include "arqadeserver.h"
 #include "fakes.h"
 #include "fonts.h"
+#include "gamepadmanager.h"
 #include "input.h"
 #include "run.h"
 
@@ -813,6 +817,8 @@ class TestGames : public QObject
 private slots:
     void initTestCase()
     {
+        // Only virtual controllers in QOR OS's controller service, which the way back from a game reads.
+        qputenv("QOR_GAMEPADS", "virtual");
         arqade::loadFonts();
         link = new ArqadeLink(this);
         // ARQADE's server and the launcher stood in for here: nothing here reaches the network. Until the arenas' tests
@@ -868,6 +874,74 @@ private slots:
         QTest::keyClick(window, Qt::Key_Escape);
         QTRY_VERIFY(!game());
         QVERIFY(home()->isVisible());
+        QVERIFY2(warnings.isEmpty(), qPrintable(warnings.join('\n')));
+    }
+
+    // The home by a controller and the arrows: the first press puts the keyboard's focus, its ring showing, on the first
+    // game; each after it, on the nearest card or control that way, and the page follows. The pad's A or Return plays the
+    // game focused, the pad's Back or Esc puts it away, and the focus is on its card again.
+    void the_dpad_and_the_arrows_choose_a_game_and_a_press_plays_it()
+    {
+        const auto focusedOn = [this](const char *name) {
+            const QQuickItem *item = window->activeFocusItem();
+            return item && item->property("name").toString() == QLatin1String(name)
+                   && item->property("visualFocus").toBool();
+        };
+        QTest::keyClick(window, Qt::Key_Down);
+        QTRY_VERIFY(focusedOn("Void Runner"));
+        pad(QStringLiteral("Right"));
+        QTRY_VERIFY(focusedOn("Synapse"));
+        QTest::keyClick(window, Qt::Key_Right);
+        QTRY_VERIFY(focusedOn("Orbital"));
+        QTest::keyClick(window, Qt::Key_Left);
+        QTRY_VERIFY(focusedOn("Synapse"));
+
+        // Down, to an arena under the games, which the page brings into view; and up again, to a game.
+        pad(QStringLiteral("Down"));
+        QTRY_VERIFY(focusedOn("Flux Four") || focusedOn("Rift Reversi"));
+        auto *page = window->findChild<QQuickItem *>(QStringLiteral("page"));
+        QVERIFY(page);
+        const auto inView = [&] {
+            const QQuickItem *card = window->activeFocusItem();
+            const QRectF r = card->mapRectToItem(page, QRectF(0, 0, card->width(), card->height()));
+            return r.top() >= 0 && r.bottom() <= page->height();
+        };
+        QTRY_VERIFY(page->property("contentY").toReal() > 0);
+        QTRY_VERIFY(inView());
+        pad(QStringLiteral("Up"));
+        QTRY_VERIFY(focusedOn("Void Runner") || focusedOn("Synapse") || focusedOn("Orbital") || focusedOn("Rift Survivor"));
+        for (int i = 0; i < 3; ++i)
+            pad(QStringLiteral("Left"));
+        QTRY_VERIFY(focusedOn("Void Runner"));
+        pad(QStringLiteral("Right"));
+        QTRY_VERIFY(focusedOn("Synapse"));
+
+        // The pad's A plays it, as it comes up, so the game never takes it as its own first press. A controller's Back
+        // puts it away: read from QOR OS's controller service, not one of the actions the game hears.
+        pad(QStringLiteral("A"));
+        QTRY_COMPARE(window->property("playing").toString(), QStringLiteral("synapse"));
+        QTRY_VERIFY_WITH_TIMEOUT(game() && game()->property("settled").toBool(), 15000);
+        auto *pads = qor::input::GamepadManager::instance();
+        const QString controller = pads->addVirtual(qor::input::Family::PlayStation, QStringLiteral("DualSense"));
+        qor::input::GamepadState back;
+        back.set(qor::input::Button::Back, true);
+        pads->setVirtualState(controller, back);
+        pads->setVirtualState(controller, {});
+        pads->removeVirtual(controller);
+        QTRY_VERIFY(!game());
+        QVERIFY(home()->isVisible());
+        QTRY_VERIFY(focusedOn("Synapse"));
+
+        // Return plays it as well, and Esc puts it away.
+        QTest::keyClick(window, Qt::Key_Return);
+        QTRY_COMPARE(window->property("playing").toString(), QStringLiteral("synapse"));
+        QTRY_VERIFY_WITH_TIMEOUT(game() && game()->property("settled").toBool(), 15000);
+        QTest::keyClick(window, Qt::Key_Escape);
+        QTRY_VERIFY(!game());
+        QTRY_VERIFY(focusedOn("Synapse"));
+
+        window->activeFocusItem()->setFocus(false);
+        page->setProperty("contentY", 0);
         QVERIFY2(warnings.isEmpty(), qPrintable(warnings.join('\n')));
     }
 

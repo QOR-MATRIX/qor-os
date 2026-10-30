@@ -4,6 +4,9 @@ import QtQuick.Controls.Basic
 // A button with words, in the tool register (ADR-108): Barlow Semi Condensed in tracked capitals, a control's corners,
 // every colour from Theme. `primary` is the one action a moment is for: ember, with dark ink on it. Otherwise it is quiet,
 // a hairline that lights under the pointer. Tab reaches it, and Return or Space presses it.
+//
+// Changed for QOR OS: the arrows go on to the next control, or back (Up, Left), as Tab does, so a controller's d-pad,
+// which Prism gives a window as the arrows, goes from control to control.
 Button {
     id: control
     property bool primary: false
@@ -44,4 +47,11 @@ Button {
 
     Keys.onReturnPressed: clicked()
     Keys.onEnterPressed: clicked()
+    Keys.onPressed: (event) => {
+        const forward = event.key === Qt.Key_Down || event.key === Qt.Key_Right
+        if (event.modifiers !== Qt.NoModifier || !(forward || event.key === Qt.Key_Up || event.key === Qt.Key_Left))
+            return
+        control.nextItemInFocusChain(forward).forceActiveFocus(forward ? Qt.TabFocusReason : Qt.BacktabFocusReason)
+        event.accepted = true
+    }
 }

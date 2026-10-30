@@ -3,6 +3,9 @@ import QtQuick.Controls.Basic
 
 // A round, quiet button with a line icon, lit by the accent when hovered or held. Tab reaches it, and Return or Space
 // presses it; a click leaves the keyboard where it was, so the player's and viewer's keys keep working.
+//
+// Changed for QOR OS: the arrows go on to the next control, or back (Up, Left), as Tab does. Prism gives a window a
+// controller's d-pad as the arrows and its A as Return, so the d-pad goes from control to control.
 Button {
     id: control
     property string iconName
@@ -30,4 +33,11 @@ Button {
     }
     Keys.onReturnPressed: clicked()
     Keys.onEnterPressed: clicked()
+    Keys.onPressed: (event) => {
+        const forward = event.key === Qt.Key_Down || event.key === Qt.Key_Right
+        if (event.modifiers !== Qt.NoModifier || !(forward || event.key === Qt.Key_Up || event.key === Qt.Key_Left))
+            return
+        control.nextItemInFocusChain(forward).forceActiveFocus(forward ? Qt.TabFocusReason : Qt.BacktabFocusReason)
+        event.accepted = true
+    }
 }

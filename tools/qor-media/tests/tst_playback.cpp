@@ -4,7 +4,8 @@
 // person's.
 //
 // Changed for QOR OS: docking is not tested on Wayland, which has no window handles to dock by; there Prism places the
-// window (QOR OS's QOR-0010).
+// window (QOR OS's QOR-0010). And the player's controls are reached by Return and gone along by the arrows, as a
+// controller does them under Prism, and Esc comes back from them.
 
 #include <QDir>
 #include <QFile>
@@ -242,9 +243,48 @@ private slots:
         QTest::qWait(3200);
         QVERIFY(player->property("chrome").toBool());
         // As a click on the picture does: the keyboard back to the player.
-        QMetaObject::invokeMethod(player, "release");
+        QMetaObject::invokeMethod(player, "rest");
         QCOMPARE(window->activeFocusItem(), player);
         QTRY_VERIFY_WITH_TIMEOUT(!player->property("chrome").toBool(), 5000);
+        QTest::keyClick(window, Qt::Key_Escape);
+        QTRY_VERIFY(!window->isVisible());
+    }
+
+    // As a controller under Prism does them (the d-pad as the arrows, A as Return, East as Esc), or the keyboard: Return
+    // takes the keyboard to the controls, at Play; the arrows go from control to control, as Tab does, and seek nothing
+    // there; Esc comes back to the player, and Esc again goes back to the Library.
+    void return_reaches_the_controls_the_arrows_go_along_them_and_esc_comes_back()
+    {
+        const QString tone = dir.filePath("long.wav");
+        open(tone, "audio");
+        QTRY_VERIFY(window->isVisible());
+        QVERIFY(activewindow::activate(window));
+        QQuickItem *player = nullptr;
+        QTRY_VERIFY((player = window->findChild<QQuickItem *>(QStringLiteral("player"))) != nullptr);
+        QTRY_VERIFY_WITH_TIMEOUT(player->property("playing").toBool(), 10000);
+
+        QTest::keyClick(window, Qt::Key_Return);
+        QQuickItem *play = window->findChild<QQuickItem *>(QStringLiteral("playButton"));
+        QVERIFY(play);
+        QCOMPARE(window->activeFocusItem(), play);
+        QVERIFY(play->property("visualFocus").toBool());
+
+        const double at = player->property("seconds").toDouble();
+        QTest::keyClick(window, Qt::Key_Right);
+        QQuickItem *next = window->activeFocusItem();
+        QCOMPARE(next, play->nextItemInFocusChain(true));
+        QVERIFY(next->property("visualFocus").toBool());
+        QTest::keyClick(window, Qt::Key_Down);
+        QCOMPARE(window->activeFocusItem(), next->nextItemInFocusChain(true));
+        QTest::keyClick(window, Qt::Key_Up);
+        QTest::keyClick(window, Qt::Key_Left);
+        QCOMPARE(window->activeFocusItem(), play);
+        QVERIFY2(player->property("seconds").toDouble() - at < 2, "an arrow on the controls seeked");
+        QVERIFY(player->property("chrome").toBool());
+
+        QTest::keyClick(window, Qt::Key_Escape);
+        QCOMPARE(window->activeFocusItem(), player);
+        QVERIFY(window->isVisible());
         QTest::keyClick(window, Qt::Key_Escape);
         QTRY_VERIFY(!window->isVisible());
     }

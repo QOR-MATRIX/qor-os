@@ -22,6 +22,9 @@ import ARQADE
 // follows, asked after every 1.2 seconds as the website asks; it tells the game only what changed, so the run keeps
 // each answer once. What it asks for, the server
 // checks: this view decides nothing of a match.
+//
+// Changed for QOR OS: a controller's Back (View, Share) puts the game away too, since ARQADE has the controller to
+// itself in Prism and no Esc comes from it there. No game binds Back, and the game never hears it (ControllerBack).
 Item {
     id: view
 
@@ -70,6 +73,12 @@ Item {
         id: run
     }
 
+    // The way back by the controller: not one of QQ's actions, which the game would hear and keep in its run.
+    Connections {
+        target: ControllerBack
+        function onPressed() { Qt.callLater(view.leave) }
+    }
+
     Rectangle {
         id: bar
         anchors.left: parent.left
@@ -115,7 +124,8 @@ Item {
             anchors.right: parent.right
             anchors.rightMargin: 20
             anchors.verticalCenter: parent.verticalCenter
-            text: qsTr("Esc returns to ARQADE  ·  F11 fills the screen")
+            text: Input.gamepad ? qsTr("Esc or the controller's View or Share returns to ARQADE  ·  F11 fills the screen")
+                                : qsTr("Esc returns to ARQADE  ·  F11 fills the screen")
             font.family: Theme.ui
             font.pixelSize: Theme.sizeUi
             font.letterSpacing: Theme.sizeUi * Theme.trackingLabel

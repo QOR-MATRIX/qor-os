@@ -34,7 +34,9 @@ import QOR.Media
 // signature field places a picture of the person's signature in it, which certifies nothing. What is filled shows at once
 // in the page's image, drawn by PDFium as it will be saved, and is undone, redone and saved with the rest.
 //
-// Changed for QOR OS: Qt's keys for Redo on Linux leave out Ctrl+Y, so there it is named as well.
+// Changed for QOR OS: Qt's keys for Redo on Linux leave out Ctrl+Y, so there it is named as well. And Return takes the
+// keyboard from the pages to the bar's actions, where the arrows go from one to the next and Esc comes back: under
+// Prism, a controller's d-pad is the arrows, its A Return and its East Esc.
 FocusScope {
     id: reader
     objectName: "reader"
@@ -294,7 +296,19 @@ FocusScope {
         fieldFocus = null
         resting.forceActiveFocus()
     }
-    Item { id: resting; focus: true }
+    Item {
+        id: resting
+        focus: true
+        // Return on the pages, and only there: a text field passes on the Return it took.
+        Keys.onReturnPressed: bar.enter()
+        Keys.onEnterPressed: bar.enter()
+    }
+    // Whether the keyboard is on one of the bars' actions, reached by the keys, which Esc leaves for the pages. A button,
+    // whatever its kind: QML's instanceof does not know the controls' C++ types.
+    function steering() {
+        const item = reader.Window.activeFocusItem
+        return reader.fieldFocus === null && item !== null && typeof item.animateClick === "function" && item.visualFocus
+    }
     function closeFinder() {
         finder.visible = false
         reader.rest()
@@ -1813,6 +1827,7 @@ FocusScope {
             else if (reader.fieldFocus !== null && reader.fieldFocus.mode === "listing") reader.closeOptions()
             else if (reader.fieldFocus !== null && reader.fieldFocus.mode === "typing") reader.leaveTyping()
             else if (reader.fieldFocus !== null) reader.rest()
+            else if (reader.steering()) reader.rest()
             else if (reader.tool.length) reader.tool = ""
             else if (reader.chosen !== null) reader.chosen = null
             else if (reader.marking) reader.toggleMarking()

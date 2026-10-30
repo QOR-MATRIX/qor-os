@@ -373,10 +373,12 @@ Launcher's (demiurge-chain's `tools/qor-launcher/src-tauri/src/host/`):
   newer place, theme, player, prefs or play replaces one not yet sent. What
   QOR Media reports on its poll is for the Library, and is passed over until
   it exists.
-- **The controller.** A product whose record `takesController` (the QQ
-  Player) plays with it: while its window has the focus and nothing of the
+- **The controller.** A product whose record `takesController` (ARQADE, the
+  QQ Player) plays with it: while its window has the focus and nothing of the
   shell is open, the controller interface steps aside and Guide brings
-  Overview ([CONTROLLERS.md](CONTROLLERS.md#games)).
+  Overview ([CONTROLLERS.md](CONTROLLERS.md#games)). Any other product, QOR
+  Media among them, gets the d-pad as the arrow keys, South as Return and
+  East as Esc ([CONTROLLERS.md](CONTROLLERS.md#applications)).
 - **Windows.** When a toplevel arrives, `productOf()` names its product by the
   client's process id. The window of a product Prism places opens at the
   planned frame; any other at the size it asks for ([§7](#7-window-management)).

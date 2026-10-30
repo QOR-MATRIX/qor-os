@@ -11,41 +11,39 @@ here at `X:\Repoz\QOR-OS`. Phase 1: the three products on Linux, in Prism.
 
 ## This session
 
-1. **QQ runs inside Prism**, as ARQADE and QOR Media do: the Studio from Beam
-   (*the search bar*), the Player with the game the shell hands it. Every
-   window now opens at the size its app asks for. Speed is unchanged: 2.78
-   and 2.79 ms a frame, before and after, on this PC.
-2. **QQ Studio's errors are fixed:** a missing import that broke the Agent
-   panel's colours, and Linux tests that pressed keys before the window had
-   the keyboard. QQ's tests now fail on any such error.
-3. **QQ plays with QOR OS's controllers.** QQ reads controllers through
-   QOR.Input (*QOR OS's own controller code*) instead of Windows-only XInput.
-   So DualSense and DualShock 4 work in QQ on Windows too, and on Linux any
-   controller the kernel knows. ARQADE's games get the same. Only the app in
-   front hears the controller.
-   - In Prism, while the QQ Player has the focus, the shell's controller
-     mode steps aside so a press is the game's alone; Guide brings
-     Overview back.
-   - Tested with virtual controllers, on Windows and Linux. A real DualSense
-     in Prism needs a Linux machine: WSL (*Windows' built-in Linux*) sees no
-     controllers at all.
-4. **Checked:** QOR OS builds clean with every suite passing on Windows and
-   Linux; QQ and ARQADE compile on both; on Linux without a graphics card
-   QQ fails only its 7 known timing tests. Pushing runs the products' tests
-   on Windows, which open windows on your desktop for about 10 minutes.
+1. **qorsync.dev, redone** (in demiurge-chain, pull request #114, not yet
+   merged): everything current about QOR OS, both downloads, a phone-first
+   page and a new background. It needs QOR Mobile's release published first;
+   that pull request says how.
+2. **ARQADE answers the controller.** In Prism it now takes the controller as
+   the QQ Player does. Before, the shell answered too, so a d-pad press arrived
+   twice and the ○ / B button (*East*) closed the game. On its home the d-pad
+   moves a visible focus between games, A plays one, and View / Share leaves a
+   game.
+3. **QOR Media answers the controller** through the shell, which turns the
+   d-pad into arrow keys: A (*Return*) takes you to the player's or reader's
+   buttons, the d-pad moves along them, ○ / B comes back.
+4. **Checked:** QOR OS and both products build without warnings on Windows.
+   On Linux, hidden and without the graphics card, Prism's tests of the
+   products and every suite of QOR Media and ARQADE pass, except ARQADE's
+   known stall at Orbital in software drawing, which comes after the new
+   cases.
+
+## Your DualShock 4
+
+QOR OS saw it at first (45%, charging). By the time I tested, Windows listed
+no Sony controller at all, so it was unplugged or the cable lost contact.
+Plug it in again to try ARQADE or QQ with it on Windows.
 
 ## Needs you
 
-1. **A real Linux machine with a graphics card** (a Linux boot is best): it
-   is now what stands between QOR OS and Phase 1's goal, Orb Run played in
-   Prism with a DualSense (*the PlayStation 5 controller*).
-2. **Legal, still open:** trademark advice for "QOR OS", which the site now
-   uses publicly; the legal entity; the Qt letter. When a lawyer reads the
-   list, add the new paragraph in `LICENSE` that makes the products' new work
-   proprietary. Also open: replacing the 5 October key, and moving the Store
-   keys' backup off this PC.
+1. **Publish QOR Mobile's release, then merge #114** (the command is in it).
+2. **A real Linux machine with a graphics card**: what stands between QOR OS
+   and Phase 1's goal, Orb Run played in Prism with a DualSense (*the
+   PlayStation 5 controller*). WSL (*Windows' built-in Linux*) sees none.
+3. **Legal, still open:** trademark advice for "QOR OS", the legal entity, the
+   Qt letter; replacing the 5 October key; the Store keys' backup off this PC.
 
 ## Next
 
-Phase 1: ARQADE and QOR Media answer the controller's D-pad with visible
-focus; Lumen themes the products; then a controller-first Home and Library.
+Phase 1: Lumen themes the products; then a controller-first Home and Library.

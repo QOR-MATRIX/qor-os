@@ -9,6 +9,10 @@ import QOR.Media
 // arrows seek five seconds and change the volume, J and L ten seconds, M mutes, F fills the screen, [ and ] change speed,
 // C and A cycle subtitles and audio tracks, Esc goes back. It resumes where the Library says it stopped, and tells the
 // Library where it stopped and how long the file is.
+//
+// Changed for QOR OS: Return takes the keyboard to the controls, at Play; there the arrows go from control to control
+// (the volume's own Left and Right excepted), and Esc comes back. Under Prism, a controller's d-pad is the arrows, its A
+// Return and its East Esc.
 FocusScope {
     id: player
     objectName: "player"
@@ -51,7 +55,7 @@ FocusScope {
     }
     // The keyboard back from a control to the player, so its keys work and the controls rest again. Focusing the scope
     // alone would hand it back to the control that had it last.
-    function release() {
+    function rest() {
         const item = player.Window.activeFocusItem
         if (item && item !== player && steering())
             item.focus = false
@@ -195,7 +199,7 @@ FocusScope {
         hoverEnabled: true
         cursorShape: player.chrome ? Qt.ArrowCursor : Qt.BlankCursor
         onPositionChanged: player.wake()
-        onClicked: { player.release(); player.playing ? media.pause() : media.play(); player.wake() }
+        onClicked: { player.rest(); player.playing ? media.pause() : media.play(); player.wake() }
         onDoubleClicked: player.fullScreenToggled()
     }
 
@@ -290,6 +294,8 @@ FocusScope {
             anchors { left: parent.left; right: parent.right; bottom: parent.bottom; leftMargin: 18; rightMargin: 18; bottomMargin: 14 }
             spacing: 6
             IconButton {
+                id: playButton
+                objectName: "playButton"
                 iconName: player.playing ? "pause" : "play"
                 size: 48
                 ToolTip.text: player.playing ? qsTr("Pause (Space)") : qsTr("Play (Space)")
@@ -310,6 +316,9 @@ FocusScope {
                 onMoved: { settings.volume = value; settings.muted = false }
                 focusPolicy: Qt.TabFocus
                 Accessible.name: qsTr("Volume")
+                // Left and Right are the volume's; Up and Down go on as Tab does.
+                Keys.onUpPressed: volume.nextItemInFocusChain(false).forceActiveFocus(Qt.BacktabFocusReason)
+                Keys.onDownPressed: volume.nextItemInFocusChain(true).forceActiveFocus(Qt.TabFocusReason)
                 background: Rectangle {
                     x: volume.leftPadding; y: volume.topPadding + volume.availableHeight / 2 - height / 2
                     width: volume.availableWidth; height: 4; radius: 2
@@ -347,6 +356,13 @@ FocusScope {
                 }
                 Keys.onReturnPressed: clicked()
                 Keys.onEnterPressed: clicked()
+                Keys.onPressed: (event) => {
+                    const forward = event.key === Qt.Key_Down || event.key === Qt.Key_Right
+                    if (event.modifiers !== Qt.NoModifier || !(forward || event.key === Qt.Key_Up || event.key === Qt.Key_Left))
+                        return
+                    speed.nextItemInFocusChain(forward).forceActiveFocus(forward ? Qt.TabFocusReason : Qt.BacktabFocusReason)
+                    event.accepted = true
+                }
                 onClicked: { const i = player.rates.indexOf(media.playbackRate); media.playbackRate = player.rates[(i + 1) % player.rates.length] }
             }
             IconButton {
@@ -381,6 +397,7 @@ FocusScope {
         case Qt.Key_BracketRight: { const i = player.rates.indexOf(media.playbackRate); media.playbackRate = player.rates[Math.min(player.rates.length - 1, i + 1)]; break }
         case Qt.Key_C: player.nextSubtitle(); break
         case Qt.Key_A: player.nextAudio(); break
+        case Qt.Key_Return: case Qt.Key_Enter: playButton.forceActiveFocus(Qt.TabFocusReason); break
         default: return
         }
         player.wake()

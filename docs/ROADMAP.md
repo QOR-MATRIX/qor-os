@@ -78,8 +78,19 @@ QQ's, ARQADE's and QOR Media's suites.
   application in front ([CONTROLLERS.md](CONTROLLERS.md#games)). ARQADE's games, on QQ's runtime, get it too. In
   Prism the controller interface steps aside while the QQ Player has the focus, and Guide brings Overview. `tst_play`
   plays a virtual controller through QOR.Input; `prism_products` checks the shell's side.
-  **Left:** ARQADE's and QOR Media's focus navigation; and Orb Run with a real DualSense on a Linux machine, since
-  WSL has no controllers.
+
+  **ARQADE and QOR Media, 30 October** ([CONTROLLERS.md](CONTROLLERS.md#games)):
+  - **ARQADE takes the controller in Prism**, as the QQ Player does. Its games read it themselves, and the shell
+    answering as well turned each d-pad press into a second, arrow-key press, and East into Esc, which put the game
+    away. Its home answers the d-pad and the arrows with the focus ring on the nearest card, button or tab, the page
+    following; A or Return presses as it comes up; and a controller's Back puts a game away, the focus back on its card.
+  - **QOR Media keeps the controller interface**, which gives it the d-pad as the arrows, A as Return and East as Esc.
+    Return takes the keyboard from what is open to the controls, where the arrows go from one to the next as Tab does,
+    and Esc comes back.
+  - `tst_games`, `tst_playback` and `tst_reader` drive them by the keys and a virtual controller; `prism_products`
+    checks that ARQADE in front takes the controller and QOR Media does not.
+
+  **Left:** Orb Run with a real DualSense on a Linux machine, since WSL has no controllers.
 - [ ] Lumen's tokens theme every app: Demiurge's one look (`docs/design/tokens.json`) mapped onto Lumen roles, with one source
 - [ ] A controller-first **Home** and **Library** in the shell: QQ games, ARQADE, media
 - [ ] From QTOS's Phase 1: evaluate Qt Interface Framework for service code generation and simulation (a QOR record)

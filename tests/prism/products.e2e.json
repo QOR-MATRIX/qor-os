@@ -19,6 +19,9 @@
     { "expect": { "window": { "appId": "arqade" }, "path": "configuredSize", "near": [1360, 860], "tolerance": 1 } },
     { "expect": { "window": { "appId": "arqade" }, "path": "clientGeometry", "near": [0, 0, 1360, 860], "tolerance": 1 } },
 
+    { "log": "ARQADE in front plays with the controller: its games and its home answer it themselves" },
+    { "expect": { "path": "controller.game", "equals": true } },
+
     { "log": "The person's Motion setting reaches it while it runs" },
     { "call": "runAction", "args": ["motion.toggle", {}] },
     { "wait": 1000 },
@@ -47,6 +50,8 @@
     { "expect": { "window": { "appId": "qor-media" }, "path": "title", "equals": "clip.mkv — Test QOR Media" } },
     { "expect": { "window": { "appId": "qor-media" }, "path": "frameRect", "near": [260, 130, 1280, 800], "tolerance": 1 } },
     { "expect": { "window": { "appId": "qor-media" }, "path": "configuredSize", "near": [1280, 760], "tolerance": 1 } },
+    { "log": "QOR Media keeps the shell's controller interface: its d-pad comes as the arrow keys" },
+    { "expect": { "path": "controller.game", "equals": false } },
     { "close": { "appId": "qor-media" } },
     { "waitFor": { "gone": { "appId": "qor-media" }, "timeout": 10000 } },
     { "wait": 1500 },

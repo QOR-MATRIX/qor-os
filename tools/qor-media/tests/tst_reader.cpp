@@ -8,6 +8,9 @@
 // them, each drawn at once, undone and saved; a signature field signed with a picture; a locked PDF's form read, not
 // filled; and words half typed asked about before going. Every PDF here is written by the test, byte by byte, so what
 // each holds is known exactly.
+//
+// Changed for QOR OS: the bar is reached by Return and gone along by the arrows, as a controller does them under Prism,
+// and Esc comes back from it.
 
 #include <QClipboard>
 #include <QDir>
@@ -1216,6 +1219,11 @@ private slots:
         QVERIFY(focusOf(reader).isEmpty());
         QVERIFY(!reader->property("dirty").toBool());
         QVERIFY(fillsOf(reader).isEmpty());
+        // Tab went on to the bar: Esc comes back to the pages first, then goes back.
+        QVERIFY(window->activeFocusItem()->inherits("QQuickAbstractButton"));
+        QTest::keyClick(window, Qt::Key_Escape);
+        QVERIFY(window->isVisible());
+        QVERIFY(!window->activeFocusItem()->inherits("QQuickAbstractButton"));
         QTest::keyClick(window, Qt::Key_Escape);
         QTRY_VERIFY(!window->isVisible());
     }
@@ -1242,6 +1250,11 @@ private slots:
         QTest::keyClick(window, Qt::Key_Tab);
         QVERIFY(focusOf(reader).isEmpty());
         QVERIFY(!reader->property("dirty").toBool());
+        // Tab went on to the bar: Esc comes back to the pages first, then goes back.
+        QVERIFY(window->activeFocusItem()->inherits("QQuickAbstractButton"));
+        QTest::keyClick(window, Qt::Key_Escape);
+        QVERIFY(window->isVisible());
+        QVERIFY(!window->activeFocusItem()->inherits("QQuickAbstractButton"));
         QTest::keyClick(window, Qt::Key_Escape);
         QTRY_VERIFY(!window->isVisible());
     }
@@ -1324,6 +1337,50 @@ private slots:
         }
         QVERIFY2(reached.contains(QStringLiteral("pageField")), qPrintable(reached.join(", ")));
         QTest::keyClick(window, Qt::Key_Escape);  // out of the page's number
+        QTest::keyClick(window, Qt::Key_Escape);
+        QTRY_VERIFY(!window->isVisible());
+    }
+
+    // As a controller under Prism does them (the d-pad as the arrows, A as Return, East as Esc), or the keyboard: Return
+    // on the pages takes the keyboard to the bar, at its way back; the arrows go along it as Tab does, and turn no page;
+    // Esc comes back to the pages, and Esc again goes back. A page's number kept by Return leaves it on the pages.
+    void return_reaches_the_bar_the_arrows_go_along_it_and_esc_comes_back()
+    {
+        QQuickItem *reader = read(dir.filePath("three.pdf"));
+        QVERIFY(reader);
+        QTRY_COMPARE(reader->property("pageCount").toInt(), 3);
+        const auto onAButton = [this] {
+            const QQuickItem *focused = window->activeFocusItem();
+            return focused && focused->inherits("QQuickAbstractButton") && focused->property("visualFocus").toBool();
+        };
+        QTest::keyClick(window, Qt::Key_Return);
+        QTRY_VERIFY(onAButton());
+        QQuickItem *back = window->activeFocusItem();
+        QCOMPARE(back->property("iconName").toString(), QStringLiteral("back"));
+
+        QTest::keyClick(window, Qt::Key_Right);
+        QVERIFY(onAButton());
+        QCOMPARE(window->activeFocusItem()->property("iconName").toString(), QStringLiteral("pages"));
+        QTest::keyClick(window, Qt::Key_Down);
+        QCOMPARE(window->activeFocusItem()->property("iconName").toString(), QStringLiteral("find"));
+        QTest::keyClick(window, Qt::Key_Up);
+        QTest::keyClick(window, Qt::Key_Left);
+        QCOMPARE(window->activeFocusItem(), back);
+        QCOMPARE(reader->property("page").toInt(), 0);
+
+        QTest::keyClick(window, Qt::Key_Escape);
+        QVERIFY(window->isVisible());
+        QVERIFY(!onAButton());
+        QVERIFY(reader->hasActiveFocus());
+        QTest::keyClick(window, Qt::Key_End);
+        QTRY_COMPARE(reader->property("page").toInt(), 2);
+
+        QTest::keyClick(window, Qt::Key_G, Qt::ControlModifier);
+        QTRY_VERIFY(named("pageField")->hasActiveFocus());
+        type(QStringLiteral("1"));
+        QTest::keyClick(window, Qt::Key_Return);
+        QTRY_COMPARE(reader->property("page").toInt(), 0);
+        QVERIFY(!window->activeFocusItem()->inherits("QQuickAbstractButton"));
         QTest::keyClick(window, Qt::Key_Escape);
         QTRY_VERIFY(!window->isVisible());
     }

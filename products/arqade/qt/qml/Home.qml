@@ -2,11 +2,17 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls.Basic
 import QtQuick.Layouts
+import QQ
 import ARQADE
 
 // ARQADE's home (DIRECTION P7.19): the portal behind everything, the name and the player's Sparks over it, then the
 // games, the arenas and their rankings. The four games and the two arenas are rebuilt in 3D (P7.20, P7.24), and each
 // card plays its game here (playRequested): an arena against another person, on ARQADE's server.
+//
+// Changed for QOR OS: a controller's d-pad and the arrow keys take the keyboard's focus to the nearest card, button or
+// tab that way, its ring showing, and the pad's A or Return presses it as it comes up. The page follows the focus, and
+// back from a game the focus is on the card that started it. ARQADE has the controller to itself in Prism (its record
+// takes it), so the home answers it here, through QQ's Input, as the games do.
 Item {
     id: home
     required property var link
@@ -20,6 +26,189 @@ Item {
 
     /// A rebuilt game's card was pressed: play it, by its kind.
     signal playRequested(string kind)
+
+    /// The card a game was started from by the keyboard or a controller, focused again when the home comes back.
+    property Item returnTo: null
+    /// The way the d-pad or an arrow is held ("arqade.left"), or "": held, the focus goes on that way again and again.
+    property string held: ""
+    readonly property var ways: ({ "arqade.up": [0, -1], "arqade.down": [0, 1], "arqade.left": [-1, 0], "arqade.right": [1, 0] })
+    /// A or Return went down on the home: it presses as it comes up.
+    property bool pressing: false
+    /// The home's hands are being defined: what is held already was not pressed here.
+    property bool defining: false
+
+    function play(card) {
+        home.webError = ""
+        home.returnTo = card.visualFocus ? card : null
+        home.playRequested(card.kind)
+    }
+
+    // The home's hands, QQ's Input actions, defined only while it shows: a game's run keeps every action held in it.
+    // A button held as they are defined (on the way back from a game) presses nothing.
+    function hands(on) {
+        if (on) {
+            home.defining = true
+            Input.define("arqade.up", ["Up"], ["Up"])
+            Input.define("arqade.down", ["Down"], ["Down"])
+            Input.define("arqade.left", ["Left"], ["Left"])
+            Input.define("arqade.right", ["Right"], ["Right"])
+            Input.define("arqade.press", ["Enter"], ["A"])
+            home.defining = false
+        } else {
+            home.held = ""
+            home.pressing = false
+            again.stop()
+            for (const name of ["arqade.up", "arqade.down", "arqade.left", "arqade.right", "arqade.press"])
+                Input.forget(name)
+        }
+    }
+
+    function holds(item) {
+        for (let i = item; i; i = i.parent)
+            if (i === home)
+                return true
+        return false
+    }
+
+    // The first game, where the focus starts.
+    function first() {
+        const card = soloCards.itemAt(0)
+        if (card)
+            card.forceActiveFocus(Qt.TabFocusReason)
+    }
+
+    function step(way) {
+        const from = home.Window.activeFocusItem
+        if (!from || !from.activeFocusOnTab || !home.holds(from)) {
+            home.first()
+            return
+        }
+        const to = home.nearest(from, way[0], way[1])
+        if (to)
+            to.forceActiveFocus(Qt.TabFocusReason)
+    }
+
+    function press() {
+        const item = home.Window.activeFocusItem
+        // A button, whatever its kind: QML's instanceof does not know the controls' C++ types.
+        if (item && home.holds(item) && typeof item.animateClick === "function")
+            item.animateClick()
+        else
+            home.first()
+    }
+
+    // The control nearest `from` that way: one Tab reaches on the home, both of whose edges across the way lie further
+    // that way than `from`'s. One level with it (overlapping it across the way) comes before one that is not; then the
+    // nearest along the way, then across it, as a television's remote moves.
+    function nearest(from, dx, dy) {
+        const a = from.mapToItem(null, 0, 0, from.width, from.height)
+        let best = null
+        let bestScore = Infinity
+        for (let item = from.nextItemInFocusChain(true), n = 0; item && item !== from && n < 100;
+             item = item.nextItemInFocusChain(true), n++) {
+            if (!home.holds(item))
+                continue
+            const b = item.mapToItem(null, 0, 0, item.width, item.height)
+            const ahead = dx > 0 ? b.x > a.x && b.x + b.width > a.x + a.width
+                        : dx < 0 ? b.x < a.x && b.x + b.width < a.x + a.width
+                        : dy > 0 ? b.y > a.y && b.y + b.height > a.y + a.height
+                                 : b.y < a.y && b.y + b.height < a.y + a.height
+            if (!ahead)
+                continue
+            const gap = Math.max(0, dx > 0 ? b.x - (a.x + a.width) : dx < 0 ? a.x - (b.x + b.width)
+                                  : dy > 0 ? b.y - (a.y + a.height) : a.y - (b.y + b.height))
+            const across = dx !== 0 ? Math.abs(b.y + b.height / 2 - (a.y + a.height / 2))
+                                    : Math.abs(b.x + b.width / 2 - (a.x + a.width / 2))
+            const level = dx !== 0 ? b.y < a.y + a.height && b.y + b.height > a.y
+                                   : b.x < a.x + a.width && b.x + b.width > a.x
+            const score = (level ? 0 : 1e9) + 13 * gap * gap + across * across
+            if (score < bestScore) {
+                best = item
+                bestScore = score
+            }
+        }
+        return best
+    }
+
+    // The page scrolls to show what has the focus, with a margin around it.
+    function reveal(item) {
+        const r = item.mapToItem(page.contentItem, 0, 0, item.width, item.height)
+        const margin = 40
+        let y = page.contentY
+        if (r.y - margin < y)
+            y = r.y - margin
+        else if (r.y + r.height + margin > y + page.height)
+            y = r.y + r.height + margin - page.height
+        y = Math.max(0, Math.min(Math.max(0, page.contentHeight - page.height), y))
+        if (Math.abs(y - page.contentY) < 1)
+            return
+        scroll.to = y
+        scroll.restart()
+    }
+
+    onVisibleChanged: {
+        home.hands(visible)
+        if (visible && home.returnTo)
+            home.returnTo.forceActiveFocus(Qt.TabFocusReason)
+    }
+    Component.onDestruction: home.hands(false)
+
+    Connections {
+        target: Input
+        enabled: home.visible
+        function onPressed(action) {
+            if (home.defining)
+                return
+            if (action === "arqade.press") {
+                home.pressing = true
+            } else if (home.ways[action]) {
+                home.held = action
+                home.step(home.ways[action])
+                again.interval = 380
+                again.restart()
+            }
+        }
+        // A press as A or Return comes up, as a console's does: a game it starts never has it held, and never takes it
+        // as its own first press.
+        function onReleased(action) {
+            if (action === "arqade.press" && home.pressing) {
+                home.pressing = false
+                home.press()
+            } else if (action === home.held) {
+                home.held = ""
+                again.stop()
+            }
+        }
+    }
+
+    // Held, the d-pad or an arrow goes on, after a moment, a few times a second.
+    Timer {
+        id: again
+        repeat: true
+        onTriggered: {
+            interval = 120
+            if (home.held !== "")
+                home.step(home.ways[home.held])
+        }
+    }
+
+    Connections {
+        target: home.Window
+        function onActiveFocusItemChanged() {
+            const item = home.Window.activeFocusItem
+            if (item && home.visible && item !== home && home.holds(item))
+                home.reveal(item)
+        }
+    }
+
+    NumberAnimation {
+        id: scroll
+        target: page
+        property: "contentY"
+        duration: Theme.enter
+        easing.type: Easing.BezierSpline
+        easing.bezierCurve: Theme.ease
+    }
 
     Portal {
         anchors.fill: parent
@@ -66,6 +255,7 @@ Item {
         // Started by hand there is no launcher to sign in with: the rankings say so rather than wait.
         if (!home.launched)
             home.server.signIn()
+        home.hands(home.visible)
     }
 
     Flickable {
@@ -169,6 +359,7 @@ Item {
                     rowSpacing: 20
                     Layout.fillWidth: true
                     Repeater {
+                        id: soloCards
                         model: [
                             { kind: "void", number: "01", name: "Void Runner", tag: qsTr("Reflex / survival"), line: qsTr("Outrun the collapse."), here: true },
                             { kind: "synapse", number: "02", name: "Synapse", tag: qsTr("Memory / pattern"), line: qsTr("Trust the signal. Question your mind."), here: true },
@@ -189,7 +380,7 @@ Item {
                             onClicked: {
                                 home.webError = ""
                                 if (solo.here)
-                                    home.playRequested(solo.kind)
+                                    home.play(solo)
                                 else
                                     home.link.openWeb()
                             }
@@ -216,6 +407,7 @@ Item {
                     Layout.fillWidth: true
 
                     GameCard {
+                        id: flux
                         kind: "flux"
                         number: "I"
                         name: "Flux Four"
@@ -225,9 +417,10 @@ Item {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 360
                         Layout.alignment: Qt.AlignTop
-                        onClicked: { home.webError = ""; home.playRequested("flux") }
+                        onClicked: home.play(flux)
                     }
                     GameCard {
+                        id: reversi
                         kind: "reversi"
                         number: "II"
                         name: "Rift Reversi"
@@ -237,7 +430,7 @@ Item {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 360
                         Layout.alignment: Qt.AlignTop
-                        onClicked: { home.webError = ""; home.playRequested("reversi") }
+                        onClicked: home.play(reversi)
                     }
                     Rankings {
                         server: home.server

@@ -15,6 +15,8 @@
 #
 #   pwsh products/arqade/qt/build.ps1            # build and test
 #   pwsh products/arqade/qt/build.ps1 -Deploy    # and make the self-contained copy the launcher opens
+#
+# Changed for QOR OS: src/controllerback, a controller's Back as the way back from a game.
 
 cmake_minimum_required(VERSION 3.22)
 
@@ -43,6 +45,7 @@ qt_add_library(arqade_core STATIC
     src/arqadelink.h src/arqadelink.cpp
     src/arqadeserver.h src/arqadeserver.cpp
     src/dock.h src/dock.cpp
+    src/controllerback.h src/controllerback.cpp
     src/fonts.h
 )
 target_include_directories(arqade_core PUBLIC src)

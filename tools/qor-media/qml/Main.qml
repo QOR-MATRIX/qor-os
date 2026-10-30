@@ -4,6 +4,9 @@ import QOR.Media
 
 // QOR Media's one window: the player, the viewer, the editor or the reader, by what is open (ADR-094; docs/blueprints/library.md
 // section 4). Docked inside the launcher it is borderless and sits over the Library; started by hand it is a window.
+//
+// Changed for QOR OS: on one of the controls of what is open (its steering()), Esc first hands the keyboard back to it
+// (its rest()), as a controller's East does under Prism; then Esc goes back.
 Window {
     id: root
     required property var link
@@ -125,7 +128,14 @@ Window {
     Shortcut {
         sequence: "Esc"
         enabled: root.path.length > 0 && !(stage.item && stage.item.consumesEscape)
-        onActivated: Dock.fullScreen ? Dock.toggleFullScreen(root) : root.close()
+        onActivated: {
+            if (stage.item && stage.item.steering && stage.item.steering())
+                stage.item.rest()
+            else if (Dock.fullScreen)
+                Dock.toggleFullScreen(root)
+            else
+                root.close()
+        }
     }
 
     Component {

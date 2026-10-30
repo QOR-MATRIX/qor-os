@@ -43,7 +43,7 @@ struct ProductRecord
     QSize size;              // the content size it opens at, where there is room; empty: the size it asks for
     bool launchable = false; // opened by itself (ARQADE), or only to show a file (QOR Media)
     bool takesController = false; // a game, which plays with the controller while its window has the focus
-                                  // (the QQ Player): the shell's controller interface steps aside
+                                  // (ARQADE, the QQ Player): the shell's controller interface steps aside
     QString keywords;
     QString description;
     int hue = 0;

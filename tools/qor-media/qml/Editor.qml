@@ -7,6 +7,8 @@ import QOR.Media
 // in the theme's colours, with line numbers for code, a Markdown preview beside the words, and find. Ctrl+S saves, Ctrl+F
 // finds, F3 finds the next, Ctrl+P shows the preview, Alt+Z wraps lines. Nothing is lost on the way out: with unsaved
 // changes it asks before it goes back to the Library or opens something else.
+//
+// Changed for QOR OS: on the bar's actions, where the arrows go from one to the next, Esc comes back to the words first.
 FocusScope {
     id: editor
     required property string path
@@ -20,6 +22,14 @@ FocusScope {
     property string notice
     property var afterAsk: null
     readonly property bool consumesEscape: dirty || finder.visible || asking.visible
+
+    // Whether the keyboard is on one of the bar's actions, reached by the keys (a button, whatever its kind: QML's
+    // instanceof does not know the controls' C++ types); and back from there to the words.
+    function steering() {
+        const item = editor.Window.activeFocusItem
+        return item !== null && typeof item.animateClick === "function" && item.visualFocus
+    }
+    function rest() { area.forceActiveFocus() }
 
     // Called by the window before it goes back or opens another file.
     function ask(then) {
@@ -309,6 +319,7 @@ FocusScope {
         onActivated: {
             if (asking.visible) { asking.visible = false; editor.afterAsk = null; area.forceActiveFocus() }
             else if (finder.visible) { finder.visible = false; area.forceActiveFocus() }
+            else if (editor.steering()) editor.rest()
             else editor.goBack()
         }
     }

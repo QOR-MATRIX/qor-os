@@ -5,6 +5,9 @@ import QOR.Media
 // The viewer (ADR-094 decision 2): a picture fitted to the window, zoomed around the pointer with the wheel, dragged when
 // larger than the window, 1:1 on a double click; the folder's other pictures next and previous with the arrow keys, the
 // picture turned with R, a slideshow with S. Turned as the camera wrote it.
+//
+// Changed for QOR OS: Return takes the keyboard to the bar's actions, where the arrows go from one to the next, and Esc
+// comes back to the picture. Under Prism, a controller's d-pad is the arrows, its A Return and its East Esc.
 FocusScope {
     id: viewer
     required property string path
@@ -27,6 +30,19 @@ FocusScope {
         flick.contentX = 0; flick.contentY = 0
     }
     function fit() { zoom = 1; flick.contentX = 0; flick.contentY = 0 }
+    // Whether the keyboard is on one of the bar's actions, reached by the keys (a button, whatever its kind: QML's
+    // instanceof does not know the controls' C++ types); and back from there to the picture, which focusing the scope
+    // alone would not do, since it hands it back to the action that had it last.
+    function steering() {
+        const item = viewer.Window.activeFocusItem
+        return item !== null && typeof item.animateClick === "function" && item.visualFocus
+    }
+    function rest() {
+        const item = viewer.Window.activeFocusItem
+        if (item && item !== viewer)
+            item.focus = false
+        viewer.forceActiveFocus()
+    }
 
     Rectangle { anchors.fill: parent; color: Theme.void_ }
 
@@ -82,6 +98,7 @@ FocusScope {
     }
 
     TopBar {
+        id: bar
         anchors { left: parent.left; right: parent.right; top: parent.top }
         title: Files.nameOf(viewer.current)
         subtitle: [picture.sourceSize.width > 0 ? picture.sourceSize.width + " × " + picture.sourceSize.height : "", viewer.pictures.length > 1 ? (viewer.index + 1) + " of " + viewer.pictures.length : "", viewer.zoom > 1 ? Math.round(viewer.zoom * 100) + "%" : ""].filter(Boolean).join(" · ")
@@ -110,6 +127,7 @@ FocusScope {
         case Qt.Key_0: viewer.fit(); break
         case Qt.Key_Plus: case Qt.Key_Equal: viewer.zoom = Math.min(12, viewer.zoom * 1.25); break
         case Qt.Key_Minus: viewer.zoom = Math.max(1, viewer.zoom / 1.25); break
+        case Qt.Key_Return: case Qt.Key_Enter: bar.enter(); break
         default: return
         }
         event.accepted = true
