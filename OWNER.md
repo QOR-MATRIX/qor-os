@@ -32,7 +32,7 @@ products on Linux, in Prism.
 
 ## Needs you
 
-1. **Merge demiurge-chain #116** once updated: the homepage's QOR OS facts.
+1. **Merge demiurge-chain #116**: the homepage's QOR OS facts, Home included.
 2. **A real Linux machine with a graphics card**: what stands between QOR OS
    and Phase 1's goal, Orb Run played in Prism with a DualSense (*the
    PlayStation 5 controller*). WSL (*Windows' built-in Linux*) sees none.
