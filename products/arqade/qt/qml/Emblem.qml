@@ -6,10 +6,12 @@ import ARQADE
 
 // A game's emblem: a small 3D scene of what the game is about, in the portal's gilt and ember. It turns slowly, faster
 // when its card is hovered, and holds still with reduced motion.
+//
+// Changed for QOR OS: Rift Delve's, a blade pointing down through the three floors (QOR OS's QOR-0017).
 View3D {
     id: emblem
 
-    // "rift", "void", "synapse", "orbital", "flux" or "reversi".
+    // "rift", "void", "synapse", "orbital", "delve", "flux" or "reversi".
     required property string kind
     property bool lively: false
     readonly property bool moving: !Theme.reducedMotion && emblem.visible
@@ -56,7 +58,7 @@ View3D {
     }
 
     Loader3D {
-        sourceComponent: ({ "rift": rift, "void": runner, "synapse": synapse, "orbital": orbital, "flux": flux, "reversi": reversi })[emblem.kind] ?? null
+        sourceComponent: ({ "rift": rift, "void": runner, "synapse": synapse, "orbital": orbital, "delve": delve, "flux": flux, "reversi": reversi })[emblem.kind] ?? null
     }
 
     component Gilt: PrincipledMaterial {
@@ -117,6 +119,60 @@ View3D {
             }
             Gilt { id: gilded }
             Ember { id: embered; strength: 1.2; tint: Theme.accent }
+        }
+    }
+
+    // Rift Delve: three floors, ring under ring, and a gilt blade pointing down through them to the ember below.
+    Component {
+        id: delve
+        Node {
+            eulerRotation: Qt.vector3d(18, emblem.t * 20, 0)
+            Repeater3D {
+                model: 3
+                Model {
+                    id: floorRing
+                    required property int index
+                    position.y: 34 - floorRing.index * 34
+                    geometry: TorusGeometry { radius: 62 - floorRing.index * 14; tubeRadius: 2.4; rings: 96; segments: 16 }
+                    materials: Gilt { baseColor: floorRing.index === 2 ? Theme.giltBright : Theme.gilt }
+                }
+            }
+            Model {
+                source: "#Sphere"
+                position.y: -58
+                readonly property real beat: 0.16 + 0.02 * Math.sin(emblem.t * 3)
+                scale: Qt.vector3d(beat, beat, beat)
+                materials: Ember { strength: 1.8 }
+            }
+            Node {
+                position.y: Math.sin(emblem.t * 1.4) * 4
+                // The blade, its guard and its grip, point down.
+                Model {
+                    source: "#Cube"
+                    position.y: -6
+                    scale: Qt.vector3d(0.07, 0.86, 0.025)
+                    materials: Gilt { baseColor: Theme.giltBright; roughness: 0.18 }
+                }
+                Model {
+                    source: "#Cone"
+                    position.y: -49
+                    eulerRotation.x: 180
+                    scale: Qt.vector3d(0.07, 0.1, 0.025)
+                    materials: Gilt { baseColor: Theme.giltBright; roughness: 0.18 }
+                }
+                Model {
+                    source: "#Cube"
+                    position.y: 38
+                    scale: Qt.vector3d(0.34, 0.05, 0.06)
+                    materials: Gilt { }
+                }
+                Model {
+                    source: "#Cylinder"
+                    position.y: 52
+                    scale: Qt.vector3d(0.05, 0.24, 0.05)
+                    materials: Ember { strength: 1.0; tint: Theme.accent }
+                }
+            }
         }
     }
 

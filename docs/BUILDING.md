@@ -108,6 +108,80 @@ ctest --test-dir ~/qor-build/linux-release        # GPU suites run on WSLg too
 On Linux the executables sit in their target directories, for example
 `prism/qor-shell`, `prism/compositor/prism` and `platform/lumen-widgets-gallery`.
 
+### Linux on a machine of its own (Fedora on an external SSD)
+
+WSL has no GPU QOR OS may use (the products' runs there are fenced from it)
+and no controllers, so Phase 1's goal, Orb Run in Prism with a DualSense,
+needs Linux on real hardware. The way that leaves Windows untouched is Fedora
+Workstation on an external SSD, started from the laptop's boot menu.
+[QOR-0004](decisions/QOR-0004-the-base-image-is-fedora-atomic.md) builds the
+image on Fedora too.
+
+**What it takes:** an SSD of 500 GB or more on a USB-C port of 10 Gbit/s or
+faster (an NVMe drive in an enclosure, or a portable SSD), and a USB stick of
+8 GB or more for the installer. Everything on both is erased.
+
+1. **Before anything, in Windows:** if the internal drive uses BitLocker,
+   save its recovery key (Control Panel → BitLocker Drive Encryption → Back
+   up your recovery key), in case the firmware's boot menu makes Windows ask
+   for it. Leave Secure Boot on: the steps below sign the NVIDIA driver for
+   it.
+2. **The installer:** write Fedora Workstation's current release to the USB
+   stick with Fedora Media Writer (from fedoraproject.org).
+3. **Install:** plug in both, restart, press **F12** at the Dell logo, and
+   start the USB stick. Choose to install Fedora, and as its destination choose
+   **only the external SSD**, erased whole. Check that the laptop's own drive
+   is not selected: it holds Windows. Turn on disk encryption: the key that
+   signs the NVIDIA driver, and later your Qt Account sign-in, live on this
+   disk.
+4. **Starting it:** Fedora puts its boot files on the SSD. With the SSD
+   plugged in, F12 at the Dell logo lists it; without it, the laptop starts
+   Windows as before. If the firmware puts Fedora first, move Windows Boot
+   Manager back to the top in its boot sequence.
+5. **First start:** finish GNOME's setup, then in a terminal:
+
+   ```bash
+   sudo dnf upgrade --refresh -y && systemctl reboot
+   sudo dnf install -y gh git && gh auth login     # the private repository
+   gh repo clone QOR-MATRIX/qor-os ~/qor-os && cd ~/qor-os
+   tools/dev/setup-fedora.sh
+   ```
+
+`tools/dev/setup-fedora.sh` does the rest, one step at a time, each safe to
+run again (`tools/dev/setup-fedora.sh check` shows what is in place):
+
+- **packages:** the build tools and libraries, named by what pkg-config
+  looks for, plus `dbus-daemon`, `python3-dbus` and `python3-gobject` for the
+  products' hidden test runs.
+- **nvidia:** RPM Fusion's driver (`akmod-nvidia`), as its NVIDIA and Secure
+  Boot guides say. With Secure Boot on, it first makes this machine's signing
+  key and asks you for a one-time password. At the next boot a blue screen,
+  MOK management, appears: choose *Enroll MOK*, *Continue*, *Yes*, type the
+  password (the keyboard there is US English), and reboot. Run the script
+  again: it installs the driver, waits for the module to be built, and asks
+  for one more reboot. The script stops at each reboot and says so.
+- **rust:** rustup with Rust 1.98.1, as CI uses.
+- **qt:** the commercial Qt 6.12 kit in `~/Qt`, through
+  `tools/ci/install_qt.py`. It needs this machine signed in to your Qt
+  Account once: run the Qt Online Installer for Linux, sign in, and close it
+  at the component list.
+- **build:** QOR OS with the `linux-release` preset, and the products with
+  `tools/dev/products.sh --build-only`.
+
+Then `tools/dev/setup-fedora.sh play` starts Prism in a window of GNOME's
+session, with ARQADE, QOR Media, QQ Studio and the QQ Player where it finds
+them and the QQ samples, Orb Run among them, in Home and the Library. A
+DualSense connects by USB, or by Bluetooth from GNOME's settings (hold PS and
+Create until the light bar flashes). The kernel's `hid-playstation` driver
+serves it and logind gives the signed-in person its device, so
+`build/linux-release/tools/gamepads/qor-gamepads` lists it with nothing to
+set up ([CONTROLLERS.md](CONTROLLERS.md)). On this laptop GNOME runs Prism on
+the Intel GPU; `QOR_PLAY_GPU=discrete tools/dev/setup-fedora.sh play` runs it
+on the RTX through switcheroo-control.
+
+Booted into Fedora, the laptop's Windows CI runners are offline, so CI waits
+until Windows is running again ([CI.md](CI.md)).
+
 ## 2. Configure and build
 
 The Ninja presets need the MSVC environment. `tools\dev\Enter-QorShell.ps1`

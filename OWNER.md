@@ -7,39 +7,43 @@ For Andrew, 30 October 2026. One page, rewritten every session (`AGENTS.md` §2)
 The operating system for players, game makers and creators: the Prism shell
 (*the compositor and desktop in one*) and Lumen design (*QOR OS's look*), with
 Demiurge's QQ engine, ARQADE and QOR Media, on Linux. Code:
-`QOR-MATRIX/qor-os` (private), here at `X:\Repoz\QOR-OS`. Phase 1: the three
-products on Linux, in Prism.
+`QOR-MATRIX/qor-os` (private), here at `X:\Repoz\QOR-OS`.
 
 ## This session
 
-1. **qorsync.dev is live**, redone, with QOR Mobile 0.1.0 (*the Android app*)
-   beside it. You merged demiurge-chain #114 and #115.
-2. **ARQADE and QOR Media answer the controller**, and **the products wear
-   Lumen**, your accent included (decision record QOR-0016).
-3. **Home and the Library.** Press Guide: Home shows what you played last,
-   every game and your newest videos, music and pictures; RB goes to the
-   Library, everything by kind or by who made it. The d-pad moves, A plays.
-   - It finds QOR OS's QQ games (Orb Run, Ember Climb), your own QQ projects
-     in Documents, ARQADE's six games and your media, and remembers where a
-     film stopped.
-   - Friends online, what's new in ARQADE and Steam's games come later, with
-     the sign-in (Phase 2).
-4. **Checked:** QOR OS builds without warnings on Windows and Linux. On Linux,
-   hidden and without the graphics card, its suites that need none pass (CI
-   runs the rest), Home driven by a virtual controller included. Speed is the
-   same before and after. The hidden screenshots show Home's layout but not
-   its card art or glass, which need a graphics card to draw.
+1. **qorsync.dev is live**, redone, with QOR Mobile 0.1.0 (*the Android app*).
+   ARQADE and QOR Media answer the controller, the products wear Lumen, and
+   Guide opens **Home and the Library**.
+2. **ARQADE's new games** (decision record QOR-0017): seven original games by
+   genre, the big ones first, each *rewarded* (*ARQADE's server can replay a
+   run to confirm it*) from the start. The online world waits for Phase 2's
+   sign-in.
+3. **Rift Delve**, the first: a dungeon hack-and-slash, three floors down to
+   break the warden. A sword, a whirl, a dash and potions; five kinds of
+   enemy; gold, relics and levels; every floor carved fresh from the run's
+   seed. It is ARQADE's fifth card and in Prism's Library. QQ games can now
+   move with the controller's left stick too.
+4. **A Linux machine:** BUILDING.md's "Linux on a machine of its own" and
+   `tools/dev/setup-fedora.sh` set up Fedora on an external SSD, NVIDIA's
+   driver included, and start Prism with the products.
+5. **Checked:** Rift Delve's rules pass their 14 tests. Played hidden on
+   Linux, a scripted player fought through floor 1 and fell on floor 2, and
+   that recorded run replays to the same result in QQ and in Node. QOR OS
+   builds without warnings on Windows and Linux. The full games suite runs on
+   Windows CI when this is pushed, which opens game windows on this PC.
 
 ## Needs you
 
-1. **Merge demiurge-chain #116**: the homepage's QOR OS facts, Home included.
-2. **A real Linux machine with a graphics card**: what stands between QOR OS
-   and Phase 1's goal, Orb Run played in Prism with a DualSense (*the
-   PlayStation 5 controller*). WSL (*Windows' built-in Linux*) sees none.
-3. **Legal, still open:** trademark advice for "QOR OS", the legal entity, the
-   Qt letter; replacing the 5 October key; the Store keys' backup off this PC.
+1. **Name the game.** "Rift Delve" is a working title: a search found no game
+   of that name, which is not trademark clearance. Its rules go to
+   demiurge-chain only once you approve a name.
+2. **The Linux machine:** an SSD of 500 GB or more for USB-C (10 Gbit/s or
+   faster) and a USB stick of 8 GB or more, then BUILDING.md's steps.
+3. **Merge demiurge-chain #116**: the homepage's QOR OS facts.
+4. **Legal, still open:** trademark advice, the legal entity, the Qt letter,
+   replacing the 5 October key, the Store keys' backup off this PC.
 
 ## Next
 
-Phase 1's goal on a real Linux machine, then Phase 2: the vault, one sign-in,
-chat and publishing from QQ Studio.
+The 3D RPG, then the platformer, racer, pixel-art and arcade games; and
+Phase 1's goal on the Linux machine: Orb Run in Prism with a DualSense.

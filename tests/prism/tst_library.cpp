@@ -126,7 +126,7 @@ private slots:
         QCOMPARE(items.at(2).toMap().value(u"title"_s).toString(), u"film"_s);
     }
 
-    // ARQADE's six games, while ARQADE can be started here.
+    // ARQADE's seven games, while ARQADE can be started here.
     void arqades_games_are_there_while_it_can_start()
     {
         Library library;
@@ -136,7 +136,7 @@ private slots:
         QCOMPARE(changed.size(), 1);
         const QStringList arqade = idsOf(library.games()).filter(u"arqade:"_s);
         QCOMPARE(arqade, (QStringList { u"arqade:void"_s, u"arqade:synapse"_s, u"arqade:orbital"_s, u"arqade:rift"_s,
-                                        u"arqade:flux"_s, u"arqade:reversi"_s }));
+                                        u"arqade:delve"_s, u"arqade:flux"_s, u"arqade:reversi"_s }));
         QCOMPARE(library.item(u"arqade:orbital"_s).value(u"game"_s).toString(), u"orbital"_s);
         library.setArqade(false);
         QVERIFY(library.item(u"arqade:orbital"_s).isEmpty());

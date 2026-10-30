@@ -1,5 +1,8 @@
 # ARQADE's games, rebuilt in QQ
 
+Changed for QOR OS: Rift Delve, the first of QOR OS's own games (its QOR-0017), and the left stick's four ways among
+the pad's bindings.
+
 ARQADE's four solo games and its two arenas are rebuilt as QQ games (ADR-102 decision 2; DIRECTION P7.20 and P7.24).
 They are played in ARQADE's Qt app ([`../qt/`](../qt/README.md)) by QQ's runtime ([`products/qq/`](../../qq/README.md)).
 Each game here is a QQ package, laid out as QQ Studio keeps a project, so it also opens in QQ Studio and plays in the QQ
@@ -12,6 +15,7 @@ Player as it is (an arena there has nobody to ask, so it stays in its lobby).
 | Synapse | Rebuilt, 24 October 2026: the same |
 | Rift Survivor | Rebuilt, 24 October 2026: the same |
 | Flux Four and Rift Reversi | Rebuilt, 24 October 2026: play in ARQADE against another person, on ARQADE's server; a run replays in QQ and in Node |
+| Rift Delve | QOR OS's own, 30 October 2026 (a working title until the owner names it): plays in ARQADE, its rules replay a run in QQ and in Node |
 
 ## A game's package
 
@@ -129,6 +133,53 @@ each warning of the other, so each `make_assets.py` writes the sounds its game p
 to the satellite's white, and Void Runner's red hazards to white and its collapse to yellow. Each glow that carries a
 meaning is kept near or under 1, which keeps its hue. Synapse's lit node is capped at 0.77 for the same reason.
 
+## Rift Delve
+
+QOR OS's own game, the first of the seven its QOR-0017 sets out: a dungeon hack-and-slash, three floors down into the
+rift. Each floor is carved from the run's seed: up to nine rooms that keep apart, each joined to the one before by a
+passage two tiles wide, and one more pair joined for a loop. The delver starts in the first room. The room furthest
+from it by walking holds the stairs down, or on the third floor the warden.
+
+- **The delver** moves three units a step (a diagonal by the half root), and slips round a corner a passage is cut
+  against, as far as the step would have gone. It strikes with a sword: a swing of 18 steps that turns toward the
+  nearest enemy within 96 units, plants the delver while it winds up, and strikes on its seventh step everything within
+  56 units of reach (and the enemy's own half width) and 60 degrees of where it faces. Held, it swings again. Each hit
+  gains fury. A **whirl** costs 35 fury and strikes everything round the delver three times. A **dash** crosses ninety
+  units in ten steps, unwounded, every 75 steps. A **potion** heals 45 hundredths of its most health; it starts with
+  two and carries five at most. A wound holds off the next for 20 steps.
+- **The enemies** sleep until the delver comes within 260 units in their sight, and each that wakes wakes the rest
+  within 170. They come straight while they see the delver, and otherwise by the floor's ways, one tile at a time
+  nearer it. Each winds up a blow, glowing red as it comes, and the blow lands only on a delver still in reach: a
+  **husk**; a **wisp**, fast and weaving; a **brute**, slow and heavy; a **seer**, which keeps its distance and looses
+  bolts; and the **warden**, whose slam lands all round it and which calls two husks out of the rift every nine
+  seconds. A floor down, they have two fifths more health and a quarter more wound.
+- **What they leave**: gold, more often than not; now and then a potion; and a relic, Might (+3 power), Vigor (+20
+  most health), Haste (six hundredths faster, to 130 hundredths of its speed) or Wrath (a quarter more fury a hit). Experience brings
+  levels at 50, 150, 300, 500 and on, each with 12 more health, 2 more power and three tenths of its health back.
+- **The end.** The warden broken clears the rift two seconds later, with a bonus for the time left; the delver's
+  health spent ends the run; and the rift closes after ten minutes. Gold, falls, each floor reached (300) and the
+  warden (2,500) score.
+
+Move with W, A, S and D, the arrows, the pad's left stick or d-pad, or the screen's Up, Left, Right and Down; strike
+with Space, J, the pad's A or the screen's Strike; whirl with K, E, X or Whirl; dash with L, Shift, B or Dash; drink
+with Q, H, Y or Drink; P or Start pauses.
+
+**Its rules** are written for replay as the four's are, and more of them: a floor's tiles in whole numbers, collision
+against them each axis on its own, sight along a line looked at every ten units, and the way to the delver found by a
+breadth-first walk over the tiles, all in the arithmetic above. A swing's arc is a dot product held against cos 60°,
+written in as a number. **Rewarded from the start** (QOR-0017): its rules, its Node test and its fixture are shared
+with demiurge-chain under Apache-2.0, once the owner names the game.
+
+**In 3D.** The floor is a board tilted toward the eye that moves under it, so the delver stays in the middle: worn
+flagstones, and the rock the floor is cut from built as blocks (each row's runs of rock, carried down while the row
+below has the same), in rock veined with the rift's teal. There is no sun underground: a torch goes with the delver and casts the rock's shadows, and beyond it only the cavern's faint light shows the way. A pool's idle pieces are hidden, so they cost nothing to draw.
+The delver is gilt with a blade held to one side, swept across the arc in a swing and round it in a whirl. Husks are
+bone, wisps teal light, brutes iron with ember, seers violet, the warden crimson and ember, and the warden's slam is a
+red ring growing on the floor until it lands. Gold turns, potions glow red, relics in their virtue's colour, and the
+stairs are a teal ring with motes rising from it. Sound comes from where it happens: a blow from what it struck, a
+fall from the fallen, a bolt from its seer, and the delver's swings, wounds and finds from the delver. With reduced
+motion the eye keeps exactly to the delver, nothing on the floor turns, wisps do not bob, and the words do not swell.
+
 ## The arenas: Flux Four and Rift Reversi
 
 Two people play one board on ARQADE's server, which keeps every match and decides every move, as it does for the
@@ -185,6 +236,13 @@ asked for is in the server's answer, which the run keeps. An arena's run is not 
   arena's edges, shots, chains and fragments, a still ship breached four times with the hold between, the signal evolving
   and each perk, and a pilot who keeps away lasting far longer than a still one. For each, nothing moves on the title or
   while paused, and the rules' source uses no sine, cosine, power or logarithm.
+- `../tests/rift-delve.test.mjs` (Node, in QOR OS's lint workflow), 14 tests: the same floors and run for a seed;
+  every floor whole, its stairs in the furthest room and the warden on the last; movement, the corner slip, walls, and
+  nothing moving on the title or paused; a swing's arc and reach, fury, and a held swing again; a whirl's three blows
+  and a dash's ninety units unwounded; potions; enemies asleep until they see, a blow wound up and missing a delver who
+  steps away, and a seer's bolt; levels and finds; a delver with its skills clearing the rift where one that only
+  swings falls; and a still delver never found until the rift closes. Its fixture replays, and not altered; its state
+  is pinned; and its source uses none of the forbidden functions, nor a clock.
 - Each also replays its run kept in `../tests/fixtures/`, a run QQ recorded as ARQADE's games suite played the game, to
   the outcome QQ reached; the same run with another seed, or altered (Orbital's first lock 40 ticks later, Void Runner's
   lanes never changed, Synapse's node out of turn taken away, Rift Survivor's ship never moved), reaches another. And each pins the rules' whole state at
@@ -197,7 +255,10 @@ asked for is in the server's answer, which the run keeps. An arena's run is not 
   node out of turn loses it for 450. Rift Survivor is moved each way there is (D, the left arrow, the d-pad's down and
   the screen's Up button), steered clear by the keys until ten kills evolve the signal, a perk chosen by its button while
   the world holds, then left standing until four breaches end it, a perk chosen by its key each time the signal evolves
-  meanwhile. Each game's placed sounds are checked where they happen: a lock within a unit of the satellite, a change
+  meanwhile. Rift Delve is moved each way there is (D, the left arrow, the left stick down and the screen's Up
+  button), played through its first floor and down its stairs by `../qt/tests/delve-pilot.js` (the Node test's pilot,
+  run in the game's own engine) by the keys, the pad and the screen's Drink button, then walked among the second
+  floor's enemies without a blow until the delver falls. Each game's placed sounds are checked where they happen: a lock within a unit of the satellite, a change
   of lane from a placed voice, each Synapse note at its own node, a kill from a place in the arena. The run ARQADE kept
   of each replays in QQ
   to its outcome, and so does each fixture. The launcher's reduced motion reaches the game, and Esc or Back returns to

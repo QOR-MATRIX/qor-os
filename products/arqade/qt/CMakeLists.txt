@@ -16,7 +16,8 @@
 #   pwsh products/arqade/qt/build.ps1            # build and test
 #   pwsh products/arqade/qt/build.ps1 -Deploy    # and make the self-contained copy the launcher opens
 #
-# Changed for QOR OS: src/controllerback, a controller's Back as the way back from a game.
+# Changed for QOR OS: src/controllerback, a controller's Back as the way back from a game; and Rift Delve's package
+# (QOR OS's QOR-0017).
 
 cmake_minimum_required(VERSION 3.22)
 
@@ -152,6 +153,39 @@ qt_add_resources(arqade_core "rift-survivor"
         ../games/rift-survivor/assets/complete.wav
         ../games/rift-survivor/assets/lost.wav
 )
+# QOR OS's own games (its QOR-0017), rewarded as the four are.
+qt_add_resources(arqade_core "rift-delve"
+    PREFIX /games/rift-delve
+    BASE "${CMAKE_CURRENT_SOURCE_DIR}/../games/rift-delve"
+    FILES
+        ../games/rift-delve/scenes/rift-delve.qml
+        ../games/rift-delve/logic/rift-delve.qml
+        ../games/rift-delve/logic/rules.mjs
+        ../games/rift-delve/assets/delve.hdr
+        ../games/rift-delve/assets/flagstones.png
+        ../games/rift-delve/assets/flagstones-relief.png
+        ../games/rift-delve/assets/rock.png
+        ../games/rift-delve/assets/rock-relief.png
+        ../games/rift-delve/assets/delve.wav
+        ../games/rift-delve/assets/swing.wav
+        ../games/rift-delve/assets/hit.wav
+        ../games/rift-delve/assets/crit.wav
+        ../games/rift-delve/assets/kill.wav
+        ../games/rift-delve/assets/hurt.wav
+        ../games/rift-delve/assets/whirl.wav
+        ../games/rift-delve/assets/dash.wav
+        ../games/rift-delve/assets/potion.wav
+        ../games/rift-delve/assets/coin.wav
+        ../games/rift-delve/assets/relic.wav
+        ../games/rift-delve/assets/bolt.wav
+        ../games/rift-delve/assets/rising.wav
+        ../games/rift-delve/assets/slam.wav
+        ../games/rift-delve/assets/warden.wav
+        ../games/rift-delve/assets/level.wav
+        ../games/rift-delve/assets/descend.wav
+        ../games/rift-delve/assets/cleared.wav
+        ../games/rift-delve/assets/fallen.wav
+)
 # The two arenas (P7.24), one package with a scene for each, played on ARQADE's server, which keeps their rules.
 qt_add_resources(arqade_core "arenas"
     PREFIX /games/arenas
@@ -193,4 +227,5 @@ target_compile_definitions(tst_interface PRIVATE
     ARQADE_TOKENS="${CMAKE_CURRENT_SOURCE_DIR}/../../../docs/design/tokens.json")
 # The runs QQ kept that ARQADE's rules replay in Node (products/arqade/tests/fixtures/), which QQ's replay must agree with.
 target_compile_definitions(tst_games PRIVATE
-    ARQADE_RUNS="${CMAKE_CURRENT_SOURCE_DIR}/../tests/fixtures")
+    ARQADE_RUNS="${CMAKE_CURRENT_SOURCE_DIR}/../tests/fixtures"
+    ARQADE_PILOTS="${CMAKE_CURRENT_SOURCE_DIR}/tests")

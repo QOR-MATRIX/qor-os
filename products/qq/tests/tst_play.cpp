@@ -596,6 +596,34 @@ private slots:
         QCOMPARE(input->held(QStringLiteral("boost")), true);
         QCOMPARE(input->held(QStringLiteral("home")), false);
 
+        // The left stick's four ways, as buttons for a game that moves a way at a time: past half way toward a side
+        // holds it, up and to the right holds both, and a stick barely off its rest holds none.
+        for (const char *way : {"LS Up", "LS Down", "LS Left", "LS Right"})
+            input->define(QString::fromLatin1(way), {}, {QString::fromLatin1(way)});
+        const auto ways = [input] {
+            QStringList held;
+            for (const char *way : {"LS Up", "LS Down", "LS Left", "LS Right"})
+                if (input->held(QString::fromLatin1(way)))
+                    held << QString::fromLatin1(way);
+            return held.join(u',');
+        };
+        state = {};
+        state.axis(Axis::LeftX) = 0.7f;
+        state.axis(Axis::LeftY) = -0.7f;
+        pads->setVirtualState(pad, state);
+        QCOMPARE(ways(), QStringLiteral("LS Up,LS Right"));
+        state.axis(Axis::LeftX) = -1;
+        state.axis(Axis::LeftY) = 0;
+        pads->setVirtualState(pad, state);
+        QCOMPARE(ways(), QStringLiteral("LS Left"));
+        state.axis(Axis::LeftX) = 0;
+        state.axis(Axis::LeftY) = 0.9f;
+        pads->setVirtualState(pad, state);
+        QCOMPARE(ways(), QStringLiteral("LS Down"));
+        state.axis(Axis::LeftY) = 0.3f;
+        pads->setVirtualState(pad, state);
+        QCOMPARE(ways(), QString());
+
         // Unplugged: nothing held, and no pad.
         pads->removeVirtual(pad);
         QCOMPARE(input->gamepad(), false);

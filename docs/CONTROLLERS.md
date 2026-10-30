@@ -115,6 +115,12 @@ and Guide is never a game's. A controller is heard only by the application
 in front: one pressed in the shell or another window moves nothing in a game
 behind it.
 
+A game's actions (`InputAction`) bind the pad's buttons by name, and the left
+stick's four ways too: `LS Up`, `LS Down`, `LS Left` and `LS Right`, each held
+while the stick leans past half way toward it, so a diagonal holds two. A game
+that moves a way at a time, as ARQADE's rewarded games do so their runs replay
+exactly, takes the stick as well as the d-pad that way (Rift Delve does).
+
 Under Prism, a product whose record says it plays with the controller
 (ARQADE and the QQ Player) has it while its window has the focus and nothing
 of the shell is open:

@@ -27,13 +27,21 @@ carried=(products/arqade/tests/fixtures)
 # Copied rather than carried: Demiurge's one look, which the products' tests read.
 copied=(docs/design/tokens.json)
 # ARQADE's rules, in the games but shared with its server: kept identical, and
-# changed in both places at once (QOR-0015 decision 2).
+# changed in both places at once (QOR-0015 decision 2). QOR OS's own games'
+# rules join them (QOR-0017), and differ from upstream until the owner names
+# each game and it is taken there.
 rules=(
     products/arqade/games/orbital/logic/rules.mjs
     products/arqade/games/void-runner/logic/rules.mjs
     products/arqade/games/synapse/logic/rules.mjs
     products/arqade/games/rift-survivor/logic/rules.mjs
     products/arqade/games/arenas/logic/arena.mjs
+    products/arqade/games/rift-delve/logic/rules.mjs
+)
+# The Node tests of QOR OS's own games, written here and shared with their
+# rules (QOR-0017). The four games' tests live upstream only.
+tests=(
+    products/arqade/tests/rift-delve.test.mjs
 )
 # Developed here since QOR-0015; status says where each left upstream.
 developed=(
@@ -128,7 +136,8 @@ patch() {
     local out="$repo/build/upstream-patches"
     mkdir -p "$out"
     # The same paths upstream, so the patches apply there with `git am`.
-    git -C "$repo" format-patch --quiet -1 "$commit" -o "$out" -- "${carried[@]}" "${copied[@]}" "${rules[@]}"
+    git -C "$repo" format-patch --quiet -1 "$commit" -o "$out" -- "${carried[@]}" "${copied[@]}" "${rules[@]}" \
+        "${tests[@]}"
     echo "Patches in $out. Apply them on a branch of demiurge-chain with: git am $out/*.patch"
 }
 

@@ -24,8 +24,9 @@ record supersedes it, and both say so.
 | [QOR-0012](QOR-0012-github-stays-the-source-of-truth-entire-mirrors-it.md) | GitHub stays the source of truth; Entire mirrors QOR OS once it hosts private repositories | Superseded by QOR-0014 (decision 2 first by QOR-0013), 2026-10-29 |
 | [QOR-0013](QOR-0013-entire-may-reach-every-repository.md) | Entire's app may reach every QOR-MATRIX repository, QOR OS included; GitHub stays the source of truth | Superseded by QOR-0014, 2026-10-29 |
 | [QOR-0014](QOR-0014-qor-os-does-not-use-entire.md) | QOR OS does not use Entire: GitHub alone, as before; Entire's app removed from the organisation | Accepted 2026-10-29 |
-| [QOR-0015](QOR-0015-the-products-are-developed-here.md) | QQ, ARQADE's app and games, and QOR Media are developed here, no longer pulled; demiurge-chain's copies frozen (its ADR-126), which the Windows launcher ships; ARQADE's fixtures, the one look and the core still come from upstream; new work is proprietary until the SDK's record | Accepted 2026-10-29; its point on `tokens.json` amended by QOR-0016 |
+| [QOR-0015](QOR-0015-the-products-are-developed-here.md) | QQ, ARQADE's app and games, and QOR Media are developed here, no longer pulled; demiurge-chain's copies frozen (its ADR-126), which the Windows launcher ships; ARQADE's fixtures, the one look and the core still come from upstream; new work is proprietary until the SDK's record | Accepted 2026-10-29; its point on `tokens.json` amended by QOR-0016, its shared rule modules by QOR-0017 |
 | [QOR-0016](QOR-0016-the-products-wear-lumen.md) | The products wear Lumen: Demiurge's one look mapped onto Lumen's roles in `lumen.tokens.json`, resolved dark with the person's accent, tint and contrast; Prism gives them to every product (`theme`, `QOR_THEME_COLORS`) | Accepted 2026-10-30 |
+| [QOR-0017](QOR-0017-arqades-new-games.md) | ARQADE's new games: seven original games by genre, the dungeon hack-and-slash and the 3D RPG first; rewarded from the start, their rules, Node tests and fixtures shared with demiurge-chain under Apache-2.0; the online world after Phase 2; names wait for the owner | Accepted 2026-10-30 |
 
 ## QTOS (inherited)
 

@@ -42,6 +42,10 @@ jobs:
       - name: SPDX license headers
         run: python tools/ci/check_headers.py
 
+      # The rules of QOR OS's own ARQADE games, which ARQADE's server will replay (QOR-0017). The runner's Node.
+      - name: ARQADE's own games' rules (Node)
+        run: node --test products/arqade/tests/*.test.mjs
+
       # The products from demiurge-chain keep their own form (QOR-0015, docs/UPSTREAM.md).
       - name: clang-format (pinned in requirements-dev.txt)
         run: |

@@ -20,7 +20,7 @@ namespace qor {
 //     person's data folder, that has scenes; its scene is
 //     `scenes/<folder>.qml`, else its first.
 //   - The person's own QQ games: such folders in Documents, two deep.
-//   - ARQADE's six games, while ARQADE can be started (`arqade`).
+//   - ARQADE's seven games, while ARQADE can be started (`arqade`).
 //   - Media: video, music and pictures in the person's own folders, newest
 //     first, three deep and at most 400 a folder.
 //

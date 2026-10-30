@@ -5,9 +5,12 @@ over its ARQADE screen, under the launcher's product host, as QOR Media is docke
 [ADR-102](../../../docs/decisions/ADR-102-arqade-in-the-launcher-on-qt.md) decided it, and roadmap item P7.19 in
 [`docs/DIRECTION.md`](../../../docs/DIRECTION.md) tracks it.
 
+Changed for QOR OS: Rift Delve, QOR OS's own game, among those it plays and tests.
+
 This is the shell: the home, the games, the arenas and their rankings, and the player's Sparks. The four games and the
 two arenas are rebuilt in QQ (P7.20, P7.24), in [`../games/`](../games/README.md), and all six play here: the arenas
-against another person, on ARQADE's server.
+against another person, on ARQADE's server. In QOR OS a fifth game plays here too: Rift Delve, QOR OS's own (its
+QOR-0017).
 
 ## What it does
 
@@ -130,6 +133,10 @@ pwsh products/arqade/qt/build.ps1 -Shots dir   # and save what the interface and
     1 to 4, the pad's X, Y, B and A, and the screen's buttons in turn; then a node out of turn loses it for 450.
   - Rift Survivor: moved by D, the left arrow, the d-pad and the screen's Up button; steered clear by the keys until
     the signal evolves and a perk is chosen while the world holds; then left standing until the hull breaks.
+  - Rift Delve: moved by D, the left arrow, the pad's left stick and the screen's Up button; played through its first
+    floor and down its stairs by `tests/delve-pilot.js` (a strike by Space, a whirl by the pad's X, a dash by L and a
+    potion by the screen's Drink button); then walked among the second floor's enemies without a blow until the
+    delver falls.
   - The arenas, against a stand-in ARQADE that signs in as the website does, keeps matches as `arena-store.ts` keeps
     them and moves for the opponent. Signed out, an arena says why and offers nothing. Flux Four opens a match, a
     challenger joins, and four pulses dropped by Space, the key 5, the pad's A and the pointer win it; then a rematch's

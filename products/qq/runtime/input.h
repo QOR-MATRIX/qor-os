@@ -19,7 +19,8 @@
 // the player. A gamepad comes from QOR OS's controller service, QOR.Input (XInput and raw HID on Windows, so DualShock 4
 // and DualSense too; evdev on Linux), and is heard only while this application is the one in front.
 //
-// Changed for QOR OS: gamepads through QOR.Input, in place of XInput, and only for the application in front.
+// Changed for QOR OS: gamepads through QOR.Input, in place of XInput, and only for the application in front; the left
+// stick's four ways as pad buttons.
 //
 // Steps (P3.11): a playing scene takes the hands once a tick (takeStep): move, look, the actions held, and every press
 // and release since the tick before, in order. That is what its logic and its player are given, so a run can be kept
@@ -162,6 +163,8 @@ private:
     /// Work out which actions are held now; announce each change, and `changed` if anything did.
     void settle();
     bool keyHeld(const QString &binding) const;
+    /// "LS Up", "LS Down", "LS Left" or "LS Right": the left stick leaning that way, past half way.
+    bool stickHeld(const QString &binding) const;
     void bind(bool pad, const QString &binding);
 
     QHash<QString, Binding> m_actions;

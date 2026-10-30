@@ -1,7 +1,9 @@
 # QOR-0015: QQ, ARQADE's app and games, and QOR Media are developed here
 
 - **Status:** Accepted; decision 2's point on `docs/design/tokens.json` amended by
-  [QOR-0016](QOR-0016-the-products-wear-lumen.md)
+  [QOR-0016](QOR-0016-the-products-wear-lumen.md); the five shared rule modules
+  of decisions 2 and 3 joined by every new game's rules, Node test and fixture
+  by [QOR-0017](QOR-0017-arqades-new-games.md)
 - **Date:** 2026-10-29
 - **Deciders:** the owner, who chose the assistant's recommended answer to each
   of three questions

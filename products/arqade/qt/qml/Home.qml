@@ -12,7 +12,8 @@ import ARQADE
 // Changed for QOR OS: a controller's d-pad and the arrow keys take the keyboard's focus to the nearest card, button or
 // tab that way, its ring showing, and the pad's A or Return presses it as it comes up. The page follows the focus, and
 // back from a game the focus is on the card that started it. ARQADE has the controller to itself in Prism (its record
-// takes it), so the home answers it here, through QQ's Input, as the games do.
+// takes it), so the home answers it here, through QQ's Input, as the games do. Rift Delve, QOR OS's own game (its
+// QOR-0017), has the fifth card.
 Item {
     id: home
     required property var link
@@ -365,6 +366,7 @@ Item {
                             { kind: "synapse", number: "02", name: "Synapse", tag: qsTr("Memory / pattern"), line: qsTr("Trust the signal. Question your mind."), here: true },
                             { kind: "orbital", number: "03", name: "Orbital", tag: qsTr("Precision / timing"), line: qsTr("Find order in the chaos."), here: true },
                             { kind: "rift", number: "04", name: "Rift Survivor", tag: qsTr("Survival / evolution"), line: qsTr("One signal. Ninety seconds. Evolve."), here: true },
+                            { kind: "delve", number: "05", name: "Rift Delve", tag: qsTr("Dungeon / action RPG"), line: qsTr("Three floors down. Break the warden."), here: true },
                         ]
                         GameCard {
                             id: solo

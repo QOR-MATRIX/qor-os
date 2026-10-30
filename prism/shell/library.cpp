@@ -231,6 +231,7 @@ QVariantList Library::arqadeGames() const
         { "synapse", "Synapse", QT_TRANSLATE_NOOP("Library", "Memory and pattern") },
         { "orbital", "Orbital", QT_TRANSLATE_NOOP("Library", "Precision and timing") },
         { "rift", "Rift Survivor", QT_TRANSLATE_NOOP("Library", "Survival and evolution") },
+        { "delve", "Rift Delve", QT_TRANSLATE_NOOP("Library", "Dungeon and action RPG") },
         { "flux", "Flux Four", QT_TRANSLATE_NOOP("Library", "Arena · strategy") },
         { "reversi", "Rift Reversi", QT_TRANSLATE_NOOP("Library", "Arena · territory") },
     };

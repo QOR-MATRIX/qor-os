@@ -1,5 +1,5 @@
 // Changed for QOR OS: gamepads through QOR.Input's GamepadManager (QOR OS's input/gamepads), in place of XInput, and
-// only for the application in front.
+// only for the application in front; the left stick's four ways as pad buttons ("LS Up" and the rest).
 
 #include "input.h"
 
@@ -398,7 +398,7 @@ void Input::settle()
         for (const QString &k : it->keys)
             on = on || keyHeld(k);
         for (const QString &p : it->pad)
-            on = on || m_pad.contains(p);
+            on = on || m_pad.contains(p) || stickHeld(p);
         if (on)
             down.insert(it.key());
     }
@@ -432,6 +432,21 @@ void Input::settle()
         }
     }
     emit changed();
+}
+
+bool Input::stickHeld(const QString &binding) const
+{
+    // Past half way toward a side, so a diagonal holds two of them and a stick at rest, or barely off it, none.
+    constexpr float past = 0.5f;
+    if (binding == QLatin1String("LS Up"))
+        return m_padLeft.y() > past;
+    if (binding == QLatin1String("LS Down"))
+        return m_padLeft.y() < -past;
+    if (binding == QLatin1String("LS Left"))
+        return m_padLeft.x() < -past;
+    if (binding == QLatin1String("LS Right"))
+        return m_padLeft.x() > past;
+    return false;
 }
 
 bool Input::eventFilter(QObject *watched, QEvent *event)

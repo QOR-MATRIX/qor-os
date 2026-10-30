@@ -7,6 +7,8 @@
 //   Synapse: a press while the signal shows is no answer; three signals repeated, then a node out of turn.
 //   Rift Survivor: moved each way there is; steered clear until the signal evolves and a perk is chosen; then left
 //   standing until its hull breaks.
+//   Rift Delve (QOR OS's own): moved each way there is; fought through the first floor and down its stairs; then walked
+//   among the second floor's enemies without a blow until the delver falls.
 //
 // And the two arenas (P7.24), against another person on ARQADE's server, here a stand-in that signs in as the website
 // does, keeps matches as arena-store.ts keeps them, and plays the opponent when the test says:
@@ -22,7 +24,8 @@
 // motion reaches the game, and Esc and Back return to the home.
 //
 // Changed for QOR OS: the home is chosen from by the d-pad and the arrows, a game played by the pad's A or Return, and
-// put away by the pad's Back, the focus coming back to its card.
+// put away by the pad's Back, the focus coming back to its card. Rift Delve, QOR OS's own game (its QOR-0017), is
+// played too, by tests/delve-pilot.js.
 //
 // It opens a real window, so it needs a desktop session. With ARQADE_SHOT set to a folder, it saves what it drew there;
 // with ARQADE_RUN set to a folder, it writes each run it played there, as <game>-run.json (how the fixtures were made).
@@ -36,10 +39,12 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QQmlApplicationEngine>
+#include <QQmlEngine>
 #include <QQuickItem>
 #include <QQuickWindow>
 #include <QSignalSpy>
 #include <QTest>
+#include <QVector2D>
 #include <QtQml/qqmlextensionplugin.h>
 
 #include <cmath>
@@ -66,6 +71,7 @@ const QUrl kOrbital(QStringLiteral("qrc:/games/orbital/scenes/orbital.qml"));
 const QUrl kVoidRunner(QStringLiteral("qrc:/games/void-runner/scenes/void-runner.qml"));
 const QUrl kSynapse(QStringLiteral("qrc:/games/synapse/scenes/synapse.qml"));
 const QUrl kRiftSurvivor(QStringLiteral("qrc:/games/rift-survivor/scenes/rift-survivor.qml"));
+const QUrl kRiftDelve(QStringLiteral("qrc:/games/rift-delve/scenes/rift-delve.qml"));
 const QUrl kFluxFour(QStringLiteral("qrc:/games/arenas/scenes/flux-four.qml"));
 const QUrl kRiftReversi(QStringLiteral("qrc:/games/arenas/scenes/rift-reversi.qml"));
 // Rift Survivor's rules (logic/rules.mjs): a run's length in steps.
@@ -739,6 +745,44 @@ class TestGames : public QObject
         steering = want;
     }
 
+    // Rift Delve: the rules' game as it stands, read field by field (its floor is too big to copy at every look), and
+    // what tests/delve-pilot.js would do next, run in the game's own engine on it.
+    QJSValue delve() const { return logic() ? logic()->property("game").value<QJSValue>() : QJSValue(); }
+    QJSValue delvePilot;
+    QVariantMap delveChoice(bool calm)
+    {
+        if (delvePilot.isUndefined()) {
+            QFile source(QStringLiteral(ARQADE_PILOTS "/delve-pilot.js"));
+            if (!source.open(QIODevice::ReadOnly))
+                return {};
+            delvePilot = qmlEngine(logic())->evaluate(QString::fromUtf8(source.readAll()), source.fileName());
+        }
+        return delvePilot.call({delve(), QJSValue(calm)}).toVariant().toMap();
+    }
+    // Rift Delve: Space held to strike, and let go.
+    bool striking = false;
+    void strike(bool on)
+    {
+        if (on == striking)
+            return;
+        on ? QTest::keyPress(window, Qt::Key_Space) : QTest::keyRelease(window, Qt::Key_Space);
+        striking = on;
+    }
+    // Rift Delve: the pilot's choice played, the way by W, A, S and D, a strike by Space, a whirl by the pad's X, a
+    // dash by L, and a potion by the screen's Drink button.
+    void playDelve(const QVariantMap &choice)
+    {
+        const QVariantList way = choice.value("way").toList();
+        steer({way.value(0).toInt(), way.value(1).toInt()});
+        strike(choice.value("attack").toBool());
+        if (choice.value("whirl").toBool())
+            pad(QStringLiteral("X"));
+        if (choice.value("dash").toBool())
+            QTest::keyClick(window, Qt::Key_L);
+        if (choice.value("potion").toBool())
+            click(QStringLiteral("Drink"));
+    }
+
     // Synapse: node `n` (0 to 3) pressed by the keys 1 to 4 (way 0), the pad's X, Y, B and A (1), or its button (2).
     void node(int n, int way)
     {
@@ -848,10 +892,11 @@ private slots:
         input->setReadsHardware(false);
     }
 
-    // The four games and the two arenas all play here.
+    // The five games and the two arenas all play here.
     void every_card_plays_its_game_here()
     {
-        for (const char *name : {"Orbital", "Void Runner", "Synapse", "Rift Survivor", "Flux Four", "Rift Reversi"})
+        for (const char *name : {"Orbital", "Void Runner", "Synapse", "Rift Survivor", "Rift Delve", "Flux Four",
+                                 "Rift Reversi"})
             QVERIFY2(find(window->contentItem(), [&](QQuickItem *i) {
                          return i->property("name").toString() == QLatin1String(name) && i->property("here").toBool();
                      }),
@@ -1448,6 +1493,143 @@ private slots:
     }
 
     void esc_leaves_rift_survivor_too()
+    {
+        QTest::keyClick(window, Qt::Key_Escape);
+        QTRY_COMPARE(window->property("playing").toString(), QString());
+        QTRY_VERIFY(!game());
+        QVERIFY(home()->isVisible());
+        QVERIFY2(warnings.isEmpty(), qPrintable(warnings.join('\n')));
+    }
+
+    void rift_delves_card_opens_it_and_play_starts_the_run()
+    {
+        behaviour = QStringLiteral("Rift Delve");
+        open(QStringLiteral("Rift Delve"), QStringLiteral("delve"), kRiftDelve, QStringLiteral("RIFT DELVE"));
+        if (QTest::currentTestFailed())
+            return;
+        QTest::qWait(400);
+        save(window, "delve-title.png");
+        QVERIFY(click(QStringLiteral("Play")));
+        QTRY_COMPARE(delve().property("phase").toString(), QStringLiteral("playing"));
+        QTRY_COMPARE(screenText(QStringLiteral("Health words")), QStringLiteral("100 / 100"));
+        QCOMPARE(screenText(QStringLiteral("Depth")), QStringLiteral("FLOOR 1 OF 3"));
+        // The floor's rock is built as blocks, far fewer than its tiles of rock.
+        QTRY_VERIFY(asList(logic()->property("rock")).size() > 10);
+        QVERIFY(asList(logic()->property("rock")).size() < 300);
+        QTest::qWait(300);
+        save(window, "delve-floor-1.png");
+        QVERIFY2(warnings.isEmpty(), qPrintable(warnings.join('\n')));
+    }
+
+    // Held for a moment each way there is, the delver moves that way: D on the keys, the left arrow, the pad's left
+    // stick down, and the screen's Up button under the pointer.
+    void the_delver_moves_by_keys_the_stick_and_the_screens_buttons()
+    {
+        struct Way { const char *name; double dx, dy; std::function<void(bool)> hold; };
+        const QList<Way> ways = {
+            {"D", 1, 0, [this](bool down) { down ? QTest::keyPress(window, Qt::Key_D) : QTest::keyRelease(window, Qt::Key_D); }},
+            {"the left arrow", -1, 0,
+             [this](bool down) { down ? QTest::keyPress(window, Qt::Key_Left) : QTest::keyRelease(window, Qt::Key_Left); }},
+            {"the left stick down", 0, 1,
+             [this](bool down) { input->gamepadState(QVector2D(0, down ? -1.0f : 0.0f), {}, false, false); }},
+            {"the Up button", 0, -1, [this](bool down) {
+                 QQuickItem *drawn = find(game(), [](QQuickItem *i) { return i->objectName() == QLatin1String("Up"); });
+                 const QPoint at = drawn->mapToScene(QPointF(drawn->width() / 2, drawn->height() / 2)).toPoint();
+                 down ? QTest::mousePress(window, Qt::LeftButton, Qt::NoModifier, at)
+                      : QTest::mouseRelease(window, Qt::LeftButton, Qt::NoModifier, at);
+             }},
+        };
+        for (const Way &way : ways) {
+            const double x = delve().property("x").toNumber(), y = delve().property("y").toNumber();
+            way.hold(true);
+            QTest::qWait(150);
+            way.hold(false);
+            QTest::qWait(30);
+            const double mx = delve().property("x").toNumber() - x, my = delve().property("y").toNumber() - y;
+            QVERIFY2(mx * way.dx > 12 || my * way.dy > 12,
+                     qPrintable(QStringLiteral("%1 moved the delver %2, %3").arg(QLatin1String(way.name)).arg(mx).arg(my)));
+            QVERIFY2(std::abs(mx * way.dy) + std::abs(my * way.dx) < 1, way.name);
+        }
+        QVERIFY(!delve().property("held").property("up").toBool());
+    }
+
+    // Played as a person plays it, by the keys, the pad and the screen's buttons (tests/delve-pilot.js): the first
+    // floor's enemies cut down, a fall heard from where it happened, and the stairs taken to the second floor.
+    void a_delver_cuts_through_the_first_floor_and_goes_down()
+    {
+        QVERIFY(logic());
+        QElapsedTimer waited;
+        waited.start();
+        int frame = 0;
+        bool fallHeard = false;
+        while (delve().property("floor").toInt() == 1 && delve().property("phase").toString() == QLatin1String("playing")) {
+            QVERIFY2(waited.elapsed() < 300000, "five minutes passed on the first floor");
+            playDelve(delveChoice(false));
+            fallHeard = fallHeard || !placedVoices(QStringLiteral("kill.wav")).isEmpty();
+            if (++frame == 600)
+                save(window, "delve-fighting.png");
+            QTest::qWait(4);
+        }
+        steer({0, 0});
+        strike(false);
+        QCOMPARE(delve().property("phase").toString(), QStringLiteral("playing"));
+        QCOMPARE(delve().property("floor").toInt(), 2);
+        QVERIFY(delve().property("kills").toInt() >= 5);
+        QVERIFY(delve().property("level").toInt() >= 2);
+        QVERIFY2(fallHeard, "no fall was heard from a place on the floor");
+        QTRY_COMPARE(screenText(QStringLiteral("Depth")), QStringLiteral("FLOOR 2 OF 3"));
+        QTest::qWait(400);
+        save(window, "delve-floor-2.png");
+    }
+
+    // Then walked among the second floor's enemies without a blow, a potion or a skill: they wake, close in and strike
+    // until the delver falls.
+    void left_among_them_the_delver_falls()
+    {
+        QVERIFY(logic());
+        QElapsedTimer waited;
+        waited.start();
+        bool shot = false;
+        while (delve().property("phase").toString() != QLatin1String("over")) {
+            QVERIFY2(waited.elapsed() < 240000, "four minutes passed and the delver stood");
+            playDelve(delveChoice(true));
+            if (!shot && delve().property("hurt").toInt() > 0) {
+                save(window, "delve-hurt.png");
+                shot = true;
+            }
+            QTest::qWait(4);
+        }
+        steer({0, 0});
+        QCOMPARE(delve().property("health").toInt(), 0);
+        QTRY_COMPARE(screenText(QStringLiteral("Result")), QStringLiteral("FALLEN"));
+        QVERIFY(screenText(QStringLiteral("Final")).startsWith(QStringLiteral("SCORE ")));
+        QVERIFY(screenText(QStringLiteral("Details")).startsWith(QStringLiteral("Floor 2")));
+        QTest::qWait(400);
+        save(window, "delve-over.png");
+        QVERIFY2(warnings.isEmpty(), qPrintable(warnings.join('\n')));
+    }
+
+    void rift_delves_kept_run_replays_to_its_outcome()
+    {
+        QVariantMap outcome;
+        keptRunReplays(kRiftDelve, QStringLiteral("rift-delve"), &outcome);
+        if (QTest::currentTestFailed())
+            return;
+        QCOMPARE(outcome.value("health").toInt(), 0);
+        QCOMPARE(outcome.value("floor").toInt(), 2);
+        QCOMPARE(outcome.value("cleared").toBool(), false);
+        QCOMPARE(outcome.value("over").toBool(), true);
+        QVERIFY(outcome.value("kills").toInt() >= 5);
+        QCOMPARE(QStringLiteral("SCORE ") + QLocale(QLocale::English, QLocale::UnitedKingdom).toString(outcome.value("score").toInt()),
+                 screenText(QStringLiteral("Final")));
+    }
+
+    void rift_delves_kept_run_replays_in_qq_as_its_rules_replay_it()
+    {
+        fixtureReplays(QStringLiteral("rift-delve"), kRiftDelve);
+    }
+
+    void esc_leaves_rift_delve_too()
     {
         QTest::keyClick(window, Qt::Key_Escape);
         QTRY_COMPARE(window->property("playing").toString(), QString());

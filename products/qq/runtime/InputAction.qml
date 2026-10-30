@@ -3,10 +3,13 @@
 //
 // `keys` are keyboard keys and mouse buttons ("E", "Space", "Enter", "Escape", "Shift", "Ctrl", "Alt", "Tab",
 // "Up", "F1", "Mouse Left", "Mouse Right", "Mouse Middle"); `pad` are gamepad buttons ("A", "B", "X", "Y", "LB", "RB",
-// "LT", "RT", "Back", "Start", "LS", "RS", "Up", "Down", "Left", "Right"); each list separated by commas. A
+// "LT", "RT", "Back", "Start", "LS", "RS", "Up", "Down", "Left", "Right", and the left stick leaning past half way,
+// "LS Up", "LS Down", "LS Left" and "LS Right"); each list separated by commas. A
 // ScreenButton whose `action` names it holds it while a finger is on it. Naming "jump" or "run" rebinds those.
 //
 // Logic hears it with onPressed and onReleased, asks held(name), and lets a player rebind it with rebind(name).
+//
+// Changed for QOR OS: the left stick's four ways among the pad's buttons, for games that move a way at a time.
 
 import QtQuick
 import QtQuick3D

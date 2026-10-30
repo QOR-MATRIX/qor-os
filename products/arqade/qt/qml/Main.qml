@@ -6,6 +6,8 @@ import ARQADE
 // ARQADE's one window (ADR-102). Docked inside the launcher it is borderless, sits over the launcher's ARQADE screen and
 // shows when the launcher first places it; started by hand it is an ordinary window. It shows the home, or a game rebuilt
 // in QQ (P7.20) or an arena (P7.24) in its place while one is played.
+//
+// Changed for QOR OS: Rift Delve, QOR OS's own game (its QOR-0017), among those the launcher may ask to open.
 Window {
     id: root
     required property var link
@@ -18,7 +20,7 @@ Window {
     /// The game being played, by its card's kind ("orbital"), or "" on the home.
     property string playing: ""
     /// Every game a card plays, by its kind: all the launcher may ask to open (ADR-118).
-    readonly property var games: ["orbital", "void", "synapse", "rift", "flux", "reversi"]
+    readonly property var games: ["orbital", "void", "synapse", "rift", "delve", "flux", "reversi"]
 
     width: 1360
     height: 860

@@ -302,7 +302,7 @@ export QOR_GAMES=$PWD/products/qq/samples   # the QQ games Home and the Library 
 ARQADE and QQ Studio are then in Beam. Home and the Library (Guide, or Beam's
 Home and Library) offer every game and the person's media: QQ games from
 `QOR_GAMES`, else `share/qor-os/games` beside Prism and in the data folder;
-the person's own QQ projects in Documents; ARQADE's six; and video, music and
+the person's own QQ projects in Documents; ARQADE's seven; and video, music and
 pictures. A game plays in the QQ Player (`Desktop.playQQGame(scene)`) or in
 ARQADE (`Desktop.playInArqade(game)`), and QOR Media opens the files
 (`Desktop.openInMedia(path, kind)`), where they stopped when the Library

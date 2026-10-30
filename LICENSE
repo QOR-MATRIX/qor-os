@@ -40,6 +40,15 @@ License as they change:
 - products/arqade/games/rift-survivor/logic/rules.mjs
 - products/arqade/games/arenas/logic/arena.mjs
 
+QOR OS's own ARQADE games share their rules and their Node test with
+ARQADE's server in the same way, and their recorded runs sit with the
+fixtures above (docs/decisions/QOR-0017-arqades-new-games.md). They are
+written here under the Apache License, Version 2.0, and say so in their
+first line:
+
+- products/arqade/games/rift-delve/logic/rules.mjs
+- products/arqade/tests/rift-delve.test.mjs
+
 Third-party components
 ----------------------
 Fonts, icons and other third-party material in this repository remain under

@@ -21,6 +21,7 @@ demiurge-chain's copies of them are frozen (its ADR-126).
 |-----------------------------------|------------|-----|-----------------|
 | `products/arqade/tests/fixtures/` | Recorded runs that ARQADE's games replay here and its rules replay upstream | carried by `git subtree`, with history | ADR-102 |
 | ARQADE's rules: `logic/rules.mjs` of Orbital, Void Runner, Synapse and Rift Survivor, and the arenas' `logic/arena.mjs`, in `products/arqade/games/` | The rules and nothing else, which ARQADE's Node tests upstream import and its service is to confirm runs by | kept identical, changed in both at once ([below](#changing-a-games-rules)) | ADR-102, ADR-116 (proposed) |
+| QOR OS's own games ([QOR-0017](decisions/QOR-0017-arqades-new-games.md)): Rift Delve's `logic/rules.mjs`, its Node test `products/arqade/tests/rift-delve.test.mjs` and its fixture | Written here, under Apache-2.0; its Node test runs in QOR OS's lint workflow too | not yet upstream: taken there by one pull request once the owner names the game, then kept identical like the rules above | (a record there, with the pull request) |
 | `docs/design/tokens.json` | Demiurge's one look: the products' own colours outside QOR OS, and what their tests read. In QOR OS they wear Lumen's roles under its names ([QOR-0016](decisions/QOR-0016-the-products-wear-lumen.md)) | copied at the same commit | ADR-108 |
 | The QOR core (`tools/qor-launcher/core/` upstream) | Keys, profiles, amounts, the C bridge | built at a pinned commit, never copied | ADR-103, ADR-104 |
 
@@ -113,12 +114,14 @@ again ([games/README.md](../products/arqade/games/README.md)). So a change to
 the rules is made in both repositories at once:
 
 1. **Here:** change the rules and the game, record the game's run again
-   with ARQADE's games suite, and commit.
+   with ARQADE's games suite, and commit. For QOR OS's own games, update the
+   digest their Node test pins here too (`node --test
+   products/arqade/tests/<game>.test.mjs`).
 2. **Upstream:** write the change as patches, which apply there because the
    paths are the same:
 
    ```bash
-   tools/upstream/demiurge.sh patch <commit>   # the rules, fixtures and look it changed
+   tools/upstream/demiurge.sh patch <commit>   # the rules, fixtures, look and shared tests it changed
    # then, on a branch of demiurge-chain:
    git am /path/to/qor-os/build/upstream-patches/*.patch
    ```

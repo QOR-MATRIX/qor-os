@@ -18,6 +18,7 @@
 #   tools/dev/products.sh --display session        # on this desktop, to watch
 #   tools/dev/products.sh --display prism          # inside Prism
 #   tools/dev/products.sh --gpu                    # under WSL, on the GPU, which has frozen the PC
+#   tools/dev/products.sh --build-only             # built, and no suite run
 #
 # Under WSL the run is fenced from the GPU, unless --gpu is given. On 28
 # October three runs that drew on it through Direct3D 12 hung the PC: a suite
@@ -58,6 +59,7 @@ SHOW=offscreen
 PRISM=${QOR_PRISM:-}
 GPU=no
 TESTS=
+BUILD_ONLY=no
 ARGS=("$@")
 
 usage() { sed -n '3,49p' "$0" | sed 's/^# \{0,1\}//'; }
@@ -72,6 +74,7 @@ while [ $# -gt 0 ]; do
         --display) SHOW=$2; shift 2 ;;
         --prism) PRISM=$2; shift 2 ;;
         --gpu) GPU=yes; shift ;;
+        --build-only) BUILD_ONLY=yes; shift ;;
         -h | --help) usage; exit 0 ;;
         *) echo "Unknown argument: $1" >&2; usage >&2; exit 2 ;;
     esac
@@ -238,7 +241,7 @@ start_display() {
     export WAYLAND_DISPLAY=$socket QT_QPA_PLATFORM=wayland
     echo "== The suites' display: ${command[0]##*/} at $socket, offscreen; its log is $log"
 }
-[ "$SHOW" = session ] || start_display
+[ "$SHOW" = session ] || [ "$BUILD_ONLY" = yes ] || start_display
 
 build_and_test() { # name
     local name=$1 source=$REPO/${SOURCES[$1]} build=$BUILD_ROOT/$1
@@ -251,6 +254,7 @@ build_and_test() { # name
     cmake -S "$source" -B "$build" -G Ninja -DCMAKE_PREFIX_PATH="$QT" -DCMAKE_BUILD_TYPE=$CONFIG \
         -DQT_QML_GENERATE_QMLLS_INI=OFF "${extra[@]}" || return 1
     cmake --build "$build" || return 1
+    [ "$BUILD_ONLY" = no ] || return 0
 
     local attempt select=()
     [ -z "$TESTS" ] || select=(-R "$TESTS")
@@ -286,4 +290,8 @@ if [ ${#FAILED[@]} -gt 0 ]; then
     echo "Failed: ${FAILED[*]}"
     exit 1
 fi
-echo "Products built and tested: ${WANTED[*]}"
+if [ "$BUILD_ONLY" = yes ]; then
+    echo "Products built: ${WANTED[*]}"
+else
+    echo "Products built and tested: ${WANTED[*]}"
+fi
