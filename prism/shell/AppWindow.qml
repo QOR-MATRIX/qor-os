@@ -34,6 +34,10 @@ Item {
     // decorations): Prism then draws no title bar of its own.
     property bool decorated: true
     readonly property bool hasTitleBar: !isClient || decorated
+    // A client's window opening at the size the client asks for: unseen, at
+    // a provisional frame, until the client's first commit says what that
+    // size is (adoptContentSize).
+    property bool awaitingSize: false
     // The app asked for focus but was not allowed to take it (focus-stealing
     // prevention); the Shelf shows it until the window is focused.
     property bool demandsAttention: false
@@ -68,11 +72,25 @@ Item {
 
     // A client chose a different size from the one Prism configured, for
     // example a terminal snapping to whole character cells: fit the frame.
+    // Its first size, which it chose itself, is planned like a new window's:
+    // within the work area (the client is then configured to fit), and the
+    // window flies in at that frame.
     function adoptContentSize(contentWidth: real, contentHeight: real) {
+        const chrome = isClient && decorated ? titleBarHeight : 0;
+        if (awaitingSize) {
+            const frame = manager.planFrame(contentWidth, contentHeight + chrome, win);
+            normalX = frame.x;
+            normalY = frame.y;
+            normalW = frame.width;
+            normalH = frame.height;
+            arrive();
+            awaitingSize = false;
+            return;
+        }
         if (maximized || inOverview)
             return;
         normalW = contentWidth;
-        normalH = contentHeight + (isClient && decorated ? titleBarHeight : 0);
+        normalH = contentHeight + chrome;
     }
 
     function focusContent() {
@@ -98,6 +116,8 @@ Item {
         if (!maximized)
             restoreRect = Qt.rect(normalX, normalY, normalW, normalH);
         maximized = !maximized;
+        // A client that opens maximised has the work area for its size.
+        awaitingSize = false;
     }
 
     // ── Geometry springs ────────────────────────────────────────────────────
@@ -136,10 +156,13 @@ Item {
     Spring {
         id: presence
         value: 0
-        target: win.closing || win.minimized ? 0 : 1
+        target: win.closing || win.minimized || win.awaitingSize ? 0 : 1
         preset: win.closing ? Motion.snappy : Motion.smooth
         onSettled: if (win.closing && value === 0) win.closed()
     }
+    // A window closing while out of sight (minimised, or never shown) has
+    // nothing to shrink and no spring to settle: it goes at once.
+    onClosingChanged: if (closing && presence.value === 0 && !presence.running) Qt.callLater(() => win.closed())
 
     // Open/minimise fly between `origin` and the frame; close shrinks in place.
     readonly property real t: presence.value

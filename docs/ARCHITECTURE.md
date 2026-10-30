@@ -201,11 +201,19 @@ one screen-width per Space).
 - **Focus**: z-order counter, focused windows get elevation 5, others 3.
 
 Under `prism`, `WindowLayer.surfaceDelegate` is a `ShellSurfaceItem` component
-and `adopt()` wraps each xdg-toplevel in the same `AppWindow`. A product
-Prism hosts is known by its process, not by what its toplevel says. Its window
-keeps the product's id and name from Prism's record, and opens at the frame
-`planClient()` plans, the plan Prism sent the product when asking it to show
-([§11](#hosted-by-prism)).
+and `adopt()` wraps each xdg-toplevel in the same `AppWindow`.
+
+- **A client's window opens at the size the client asks for.** Prism's first
+  configure has no size (0 × 0), so the client chooses. The window stays
+  unseen (`AppWindow.awaitingSize`) until the client's first commit says what
+  it chose. Prism then plans the frame around that size, cascaded and within
+  the work area (`planFrame()`), configures the client to fit, and the window
+  flies in.
+- **A product Prism hosts is known by its process,** not by what its toplevel
+  says. Its window keeps the product's id and name from Prism's record. A
+  product Prism places opens at the frame `planClient()` planned, the plan
+  Prism sent the product when asking it to show. A product Prism only starts
+  opens at its own size, like any other client ([§11](#hosted-by-prism)).
 
 ## 8. Hosts
 
@@ -242,14 +250,14 @@ own KMS backend is Phase 3
 | `tst_input` | Qt Test | controller reports, CRCs, mappings, dead zones, the manager and the navigator |
 | `tst_store` | Qt Test | catalogue and package signatures, installation, tampering refused |
 | `tst_qorcore` | Qt Test | the QOR core through its C bridge: version, units, exact amounts, refusals ([§10](#10-the-qor-core)) |
-| `tst_producthost` | Qt Test | Prism's side of the host protocol: the handshake, who may connect, the long poll, a real product process with its token on stdin only, nothing secret logged ([§11](#hosted-by-prism)) |
+| `tst_producthost` | Qt Test | Prism's side of the host protocol: the handshake, who may connect, the long poll, a real product process with its token on stdin only, nothing secret logged; products started with no channel, one run at a time ([§11](#hosted-by-prism)) |
 | `store_widgets_qmllint` | qmllint | the Store's widgets against the built modules |
 | `tst_shell` | Qt Quick Test | Beam fuzzy ranking, calculator (including injection rejection), section grouping |
 | `tst_kit_qml` | Qt Quick Test (GPU) | tokens, theme roles, typography, springs in QML, Oklch singleton |
 | `tst_golden` | Qt Test (GPU) | every Kit component in every variant against reference images |
 | `shell_e2e` | scripted shell (GPU) | whole flows with synthetic input, controllers included |
 | `prism_e2e` | Python + real clients (GPU, Linux) | the compositor with real Wayland clients: windows, Spaces, displays |
-| `prism_products` | scripted Prism (Linux, offscreen, in software) | Prism starting stand-ins for ARQADE and QOR Media, placing and naming their windows, passing the Motion setting |
+| `prism_products` | scripted Prism (Linux, offscreen, in software) | Prism starting stand-ins for ARQADE, QOR Media, QQ Studio and the QQ Player, laying out and naming their windows, passing the Motion setting |
 | `tools_generate_tokens` | Python unittest | color math, generated outputs current |
 
 `all_qmllint` must report zero warnings. CI excludes the `gpu` label on hosted
@@ -300,7 +308,7 @@ is its own CMake project, built and tested by its own `build.ps1`, which
 Their suites render on the GPU in real windows and drive them with input. The
 look tests read `docs/design/tokens.json`, Demiurge's one look. They build on
 Windows with their own scripts and on Linux with `tools/dev/products.sh`
-([BUILDING.md](BUILDING.md#on-linux)). Prism hosts ARQADE and QOR Media
+([BUILDING.md](BUILDING.md#on-linux)). Prism hosts all of them
 ([below](#hosted-by-prism)); Lumen theming and QOR.Input are the rest of
 Phase 1.
 
@@ -325,14 +333,27 @@ input, 4-byte length-prefixed JSON frames, and one long-poll request
 is Prism's side of that protocol, version 1, to the same contract as the QOR
 Launcher's (demiurge-chain's `tools/qor-launcher/src-tauri/src/host/`):
 
-- **Records.** Prism knows each product by a record of its own: ARQADE
-  (`arqade`, long poll `arqade.next`), which Beam offers; and QOR Media
-  (`qor-media`, `media.next`), which opens a file Prism hands it
-  (`Desktop.openInMedia()`). A product's program is where `QOR_ARQADE` or
-  `QOR_MEDIA` points, else beside Prism's own. Prism offers a product only
-  where its program is and Prism has a display for it, so `qor-shell` offers
-  none.
-- **Start.** The product runs as a Wayland client of Prism
+- **Records.** Prism knows each product by a record of its own:
+  - ARQADE (`arqade`, long poll `arqade.next`), which Beam offers;
+  - QOR Media (`qor-media`, `media.next`), which opens a file Prism hands it
+    (`Desktop.openInMedia()`);
+  - QQ Studio (`qq-studio`), which Beam offers;
+  - the QQ Player (`qq-player`), which plays the scene Prism hands it
+    (`Desktop.playQQGame()`), one game at a time.
+
+  A product's program is where its variable points (`QOR_ARQADE`,
+  `QOR_MEDIA`, `QOR_QQ_STUDIO`, `QOR_QQ_PLAYER`), else beside Prism's own.
+  Prism offers a product only where its program is and Prism has a display
+  for it, so `qor-shell` offers none.
+- **Only started.** QQ Studio and the QQ Player get no channel (`launch()`).
+  QQ Studio's channel is for publishing (`qontrol.commit`,
+  `cartridge.publish`), which Prism does not offer before the vault service
+  (Phase 2); started without one, the Studio says that publishing needs the
+  launcher. The QQ Player speaks no protocol. Each gets its file as an
+  argument (`--project <folder>`, or `-- <scene>`), its stdin is empty, and
+  its window opens at the size it asks for ([§7](#7-window-management)).
+  Asked to stop, or when Prism ends, it is asked to end at once.
+- **Start.** ARQADE and QOR Media run as Wayland clients of Prism
   (`WAYLAND_DISPLAY`, `QT_QPA_PLATFORM=wayland`) with
   `--launcher-channel <name>`, the person's Motion setting
   (`QOR_REDUCED_MOTION`), a trusted `XDG_ACTIVATION_TOKEN` for its first
@@ -352,13 +373,13 @@ Launcher's (demiurge-chain's `tools/qor-launcher/src-tauri/src/host/`):
   QOR Media reports on its poll is for the Library, and is passed over until
   it exists.
 - **Windows.** When a toplevel arrives, `productOf()` names its product by the
-  client's process id, and the window opens at the planned frame
-  ([§7](#7-window-management)). Closing it ends the product; one that fails
-  says so in a toast.
+  client's process id. The window of a product Prism places opens at the
+  planned frame; any other at the size it asks for ([§7](#7-window-management)).
+  Closing it ends the product; one that fails says so in a toast.
 
 The token and the session's id are never logged; `tst_producthost` looks for
 both at every log level. `prism_products` runs Prism offscreen with stand-ins
-for both products.
+for all four products.
 
 ## 12. Repository conventions
 

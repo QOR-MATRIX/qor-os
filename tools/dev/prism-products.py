@@ -3,14 +3,15 @@
 """Prism hosting the products, with nothing shown and no graphics card.
 
 Runs Prism on Qt's offscreen platform, drawing in software, in a runtime
-folder of its own, with stand-ins for ARQADE and QOR Media (prism-test-arqade
-and prism-test-media) where QOR_ARQADE and QOR_MEDIA point. A JSON UI script
-(`prism --script`) opens them as a person would and checks that Prism starts
-them, places their windows and names them from its own records. ctest runs it
-as prism_products.
+folder of its own, with stand-ins for ARQADE, QOR Media, QQ Studio and the QQ
+Player (prism-test-arqade, prism-test-media, prism-test-qq-studio and
+prism-test-qq-player) where QOR_ARQADE, QOR_MEDIA, QOR_QQ_STUDIO and
+QOR_QQ_PLAYER point. A JSON UI script (`prism --script`) opens them as a person
+would and checks that Prism starts them, lays out their windows and names them
+from its own records. ctest runs it as prism_products.
 
     tools/dev/prism-products.py --prism <prism> --arqade <exe> --media <exe> \\
-        --script tests/prism/products.e2e.json
+        --qq-studio <exe> --qq-player <exe> --script tests/prism/products.e2e.json
 
 Exit status: Prism's (0 when every step passed, 4 when one failed), or 100+
 when it could not run.
@@ -30,11 +31,13 @@ def main() -> int:
     parser.add_argument("--prism", required=True)
     parser.add_argument("--arqade", required=True)
     parser.add_argument("--media", required=True)
+    parser.add_argument("--qq-studio", required=True)
+    parser.add_argument("--qq-player", required=True)
     parser.add_argument("--script", required=True)
     parser.add_argument("--timeout", type=int, default=100)
     args = parser.parse_args()
 
-    for program in (args.prism, args.arqade, args.media):
+    for program in (args.prism, args.arqade, args.media, args.qq_studio, args.qq_player):
         if not os.access(program, os.X_OK):
             print(f"Cannot run {program}", file=sys.stderr)
             return 100
@@ -63,6 +66,8 @@ def main() -> int:
             "QOR_TOUCHPAD": "off",
             "QOR_ARQADE": os.path.abspath(args.arqade),
             "QOR_MEDIA": os.path.abspath(args.media),
+            "QOR_QQ_STUDIO": os.path.abspath(args.qq_studio),
+            "QOR_QQ_PLAYER": os.path.abspath(args.qq_player),
         })
         command = [args.prism, "--unlocked", "--size", "1920x1200", "--socket", "wayland-products",
                    "--script", os.path.abspath(args.script)]

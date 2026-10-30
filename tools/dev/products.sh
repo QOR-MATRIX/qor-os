@@ -39,14 +39,13 @@
 # desktop's screen, speakers or keyring, and nothing on it can take a test
 # window's keyboard. It needs the kit's Qt Wayland Compositor, as Prism does,
 # and for the keyring dbus-daemon, python3-dbus and python3-gi.
-# --display prism opens them inside Prism instead, just as hidden; Prism sizes
-# and places windows itself, so the suites that expect their own size fail
-# there until Prism hosts the products. It finds Prism in build/ci-linux or
-# build/linux-*, or takes --prism. --display session uses the session's own
-# display and sound (Wayland, X11 or WSLg). QOR Media needs Qt PDF in the kit
-# (the installer's extensions.qtpdf) and PDFium, which this script fetches
-# once at the release QOR Media's build.ps1 pins, and checks against its
-# SHA-256.
+# --display prism opens them inside Prism instead, just as hidden; Prism opens
+# each window at the size it asks for, within its work area. It finds Prism
+# in build/ci-linux or build/linux-*, or takes --prism. --display session uses
+# the session's own display and sound (Wayland, X11 or WSLg). QOR Media needs
+# Qt PDF in the kit (the installer's extensions.qtpdf) and PDFium, which this
+# script fetches once at the release QOR Media's build.ps1 pins, and checks
+# against its SHA-256.
 set -euo pipefail
 
 REPO=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)

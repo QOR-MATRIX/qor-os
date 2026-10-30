@@ -8,6 +8,10 @@
 // environment Prism gave it, the welcome or the refusal, each command, and
 // the channel lost. It quits on `quit`, or when the channel is lost. It has no
 // window.
+//
+// As a product Prism only starts, it says nothing: with
+// QOR_TEST_PRODUCT_MODE=plain it runs until it is ended, and with exit-<n> it
+// exits with code n, once it has written what it was given.
 
 #include "productside.h"
 
@@ -44,7 +48,12 @@ int main(int argc, char *argv[])
 
     QByteArray token = ProductSide::readToken();
     note(QStringLiteral("tokenLength"), int(token.size()));
-    if (environment.value(QStringLiteral("QOR_TEST_PRODUCT_MODE")) == QStringLiteral("wrong-token"))
+    const QString mode = environment.value(QStringLiteral("QOR_TEST_PRODUCT_MODE"));
+    if (mode == QStringLiteral("plain"))
+        return QCoreApplication::exec();
+    if (mode.startsWith(QStringLiteral("exit-")))
+        return mode.mid(5).toInt();
+    if (mode == QStringLiteral("wrong-token"))
         token = QByteArray(token.size(), '0');
 
     const QString method = environment.value(QStringLiteral("QOR_TEST_PRODUCT_METHOD"));

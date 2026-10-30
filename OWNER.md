@@ -1,7 +1,6 @@
 # Where QOR OS stands
 
-For Andrew, 29 October 2026 (night). One page, rewritten every session
-(`AGENTS.md` §2).
+For Andrew, 30 October 2026. One page, rewritten every session (`AGENTS.md` §2).
 
 ## What QOR OS is
 
@@ -12,27 +11,28 @@ here at `X:\Repoz\QOR-OS`. Phase 1: the three products on Linux, in Prism.
 
 ## This session
 
-1. **The freezes are stopped.** Linux test runs in WSL (*Windows' built-in
-   Linux*) no longer touch the graphics card and use at most half the PC.
-2. **Housekeeping.** qorsync.dev leads with QOR OS (#110). Entire is not used
-   (QOR-0014; #111 and #112). CI's runners (*the PCs that run the checks*)
-   are registered to `qor-os`, and its builds pass again.
-3. **QQ, ARQADE and QOR Media are developed here** (QOR-0015). You merged
-   demiurge-chain #113, which *freezes* their copies there (kept, not worked
-   on); the Windows launcher keeps shipping those. The 374 files that came
-   from demiurge-chain stay Apache-2.0 (*the open licence*); new work on them
-   is ours. ARQADE's five rule files stay the same in both repositories.
-4. **Prism hosts ARQADE and QOR Media.** Prism now starts them itself and
-   speaks the same private protocol as the Windows launcher: a channel only
-   the program it started can use, and a one-time password on that program's
-   input. Prism lays out their windows by its own plan and names them from
-   its own records. ARQADE is in Beam (*the search bar*) where it is
-   installed; QOR Media opens a file Prism gives it, ready for the Library.
-   - Checked on Windows and Linux, and in Linux CI with stand-ins, in a hidden
-     Prism. The real ARQADE and QOR Media also ran in a hidden Prism, off the
-     graphics card.
+1. **QQ runs inside Prism.** Prism now starts QQ Studio (*QQ's editor*) and
+   the QQ Player itself, as it already started ARQADE and QOR Media, so all
+   three products run in Prism. That roadmap item is ticked. QQ Studio is in
+   Beam (*the search bar*). The Player plays the game the shell hands it, one
+   game at a time; the Library will be what hands it games. Publishing from
+   the Studio needs the vault (*the service that will hold keys*, Phase 2), so
+   for now the Studio says publishing needs the launcher.
+2. **Every window opens at the size its app asks for.** Prism used to force
+   960 × 640 on every app it did not place itself. Now the app chooses, and
+   Prism fits the window to the screen. In a hidden Prism kept off the
+   graphics card, the real Studio opened at its own 1600 × 960 and the Player
+   played Orb Run at 1280 × 720.
+3. **A bug found and fixed:** a window closed while minimised was never
+   really removed. It stayed, unseen, in Prism's list of windows.
+4. **Checked:**
+   - Windows and Linux: builds and checks clean; 11 and 12 suites pass.
+   - Prism's full window test, 52 checks, passed hidden.
+   - QQ's own suites inside Prism: only the cases that time movement fail,
+     as they do whenever QQ draws without the graphics card. Three Studio
+     cases that fail on the test display passed there.
    - Not run: the shell's speed benchmark, which opens a window on your
-     desktop. This change adds no drawing work; say if you want it run.
+     desktop. Nothing here draws more; say if you want it run.
 
 ## Needs you
 
@@ -46,6 +46,6 @@ here at `X:\Repoz\QOR-OS`. Phase 1: the three products on Linux, in Prism.
 
 ## Next
 
-Phase 1: QQ Studio and Player in Prism at their own size; the controller
-service drives QQ; Lumen themes the products; then a controller-first Home
-and Library.
+Phase 1: the controller service drives QQ, so Orb Run plays in Prism with a
+DualSense (*the PlayStation 5 controller*); Lumen themes the products; then a
+controller-first Home and Library.

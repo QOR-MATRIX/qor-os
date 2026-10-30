@@ -339,9 +339,11 @@ tools/dev/products.sh --gpu                           # under WSL, on the GPU, w
   build root.
   - `--display prism` runs them inside Prism, just as hidden, from
     `build/ci-linux` or `build/linux-*` or the one `--prism` names, with
-    settings thrown away after the run. Prism sizes and places windows itself
-    (a new one opens 960 wide), so the suites that expect a size of their
-    own fail there until Prism hosts the products.
+    settings thrown away after the run. Prism opens each window at the size
+    it asks for, within its work area. Run there on 30 October, QQ's suites
+    failed only the cases that time movement in software (below), and
+    Studio's F3 overlay, Group and Duplicate passed; ARQADE's and QOR Media's
+    have not been run there since.
   - `--display session` uses the session's own display and sound.
 - **Keyring:** in the hidden modes the session bus is the run's own too, with
   `tools/dev/secret-service.py` on it: an in-memory Secret Service where QQ

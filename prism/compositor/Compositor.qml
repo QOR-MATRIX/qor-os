@@ -120,9 +120,13 @@ WaylandCompositor {
             readonly property bool activated: content.window ? content.window.focused : false
             readonly property bool maximized: content.window ? content.window.maximized : false
             readonly property bool resizing: content.window ? content.window.resizing : false
+            readonly property bool awaitingSize: content.window ? content.window.awaitingSize : false
             property size configuredSize: Qt.size(0, 0)
 
+            // A window awaiting its size is configured with none (0 x 0): the
+            // client chooses, and its first commit says what it chose.
             function configure() {
+                configureTimer.stop();
                 if (!toplevel || area.width <= 0 || area.height <= 0)
                     return;
                 const states = [];
@@ -132,23 +136,32 @@ WaylandCompositor {
                     states.push(XdgToplevel.MaximizedState);
                 if (resizing)
                     states.push(XdgToplevel.ResizingState);
-                configuredSize = Qt.size(Math.round(area.width), Math.round(area.height));
+                configuredSize = awaitingSize && !maximized ? Qt.size(0, 0)
+                                                            : Qt.size(Math.round(area.width), Math.round(area.height));
                 toplevel.sendConfigure(configuredSize, states);
             }
             onAreaChanged: configureTimer.restart()
             onActivatedChanged: configureTimer.restart()
             onMaximizedChanged: configureTimer.restart()
             onResizingChanged: configureTimer.restart()
+            // Planned around the size the client chose: configured at once, so
+            // that a commit at the size it chose is not taken for another
+            // choice before the client has seen the plan.
+            onAwaitingSizeChanged: if (!awaitingSize) configure()
             // The client chose another size than configured (e.g. a terminal
             // snapping to whole cells, or its preferred size on first map).
             // Only a commit that answers the latest configure says so: while
             // a resize is under way, a client that keeps drawing still commits
             // sizes configured earlier. Checked on every commit, since the
-            // answer may be the size the client already had.
+            // answer may be the size the client already had. A window
+            // awaiting its size has only been configured with none, so any
+            // commit says what the client chose: it need not have answered
+            // the latest configure, which a client that answers only when it
+            // redraws, on a frame callback, does not do for an unseen window.
             function adoptClientSize() {
                 if (content.window && geometry.width > 0 && geometry.height > 0
                         && (geometry.width !== configuredSize.width || geometry.height !== configuredSize.height)
-                        && WindowManagement.configureAcked(toplevel))
+                        && (awaitingSize || WindowManagement.configureAcked(toplevel)))
                     content.window.adoptContentSize(geometry.width, geometry.height);
             }
             onGeometryChanged: adoptClientSize()

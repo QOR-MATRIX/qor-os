@@ -2,7 +2,8 @@
 //
 // Prism's side of the QOR host protocol (prism/shell/producthost.h): first
 // with the test as the product, on a channel in this process, then with a real
-// process ProductHost starts (tst_producthost_product, which has no window).
+// process ProductHost starts (tst_producthost_product, which has no window),
+// and last with that process as a product Prism only starts, with no channel.
 
 #include "producthost.h"
 #include "productside.h"
@@ -10,6 +11,7 @@
 #include <QtCore/QCoreApplication>
 #include <QtCore/QElapsedTimer>
 #include <QtCore/QFile>
+#include <QtCore/QFileInfo>
 #include <QtCore/QJsonArray>
 #include <QtCore/QJsonDocument>
 #include <QtCore/QLoggingCategory>
@@ -55,6 +57,18 @@ ProductRecord testRecord(int waitMs = 200)
     record.glyph = u"app-window"_s;
     record.size = QSize(800, 600);
     record.launchable = true;
+    return record;
+}
+
+// A product Prism only starts, on a file that is its first argument.
+ProductRecord startedRecord()
+{
+    ProductRecord record;
+    record.id = u"test-started"_s;
+    record.name = u"Test Started"_s;
+    record.variable = u"QOR_TEST_PRODUCT_PROGRAM"_s;
+    record.fileArgument = u"--"_s;
+    record.glyph = u"play"_s;
     return record;
 }
 
@@ -131,7 +145,8 @@ private:
     QTemporaryDir m_dir;
     QString m_log;
 
-    // A host whose one product is tst_producthost_product, writing to m_log.
+    // A host whose products are tst_producthost_product, writing to m_log:
+    // as test-product, with a channel, and as test-started, with none.
     std::unique_ptr<ProductHost> host(const QByteArray &mode = {})
     {
         QFile::remove(m_log);
@@ -140,7 +155,7 @@ private:
         qputenv("QOR_TEST_PRODUCT_ID", "test-product");
         qputenv("QOR_TEST_PRODUCT_METHOD", "test.next");
         qputenv("QOR_TEST_PRODUCT_MODE", mode);
-        auto made = std::make_unique<ProductHost>(QList<ProductRecord> { testRecord() });
+        auto made = std::make_unique<ProductHost>(QList<ProductRecord> { testRecord(), startedRecord() });
         made->setDisplay(u"wayland-test"_s);
         return made;
     }
@@ -498,6 +513,104 @@ private slots:
             QVERIFY2(!message.contains(QString::fromLatin1(token)), qPrintable(message));
             QVERIFY2(!message.contains(sessionId), qPrintable(message));
         }
+    }
+
+    // ── Products Prism only starts (QQ Studio, the QQ Player) ──────────────
+
+    void a_product_with_no_channel_starts_on_its_file()
+    {
+        auto host = this->host("plain");
+        QSignalSpy exited(host.get(), &ProductHost::exited);
+        QCOMPARE(host->product(u"test-started"_s).value(u"placed"_s).toBool(), false);
+        QCOMPARE(host->product(u"test-product"_s).value(u"placed"_s).toBool(), true);
+        QVERIFY(host->launch(u"test-started"_s, u"/games/orb-run.qml"_s, u"activation-2"_s));
+        QCOMPARE(host->session(u"test-started"_s), nullptr);
+        QTRY_COMPARE_WITH_TIMEOUT(entriesOf(m_log, u"tokenLength"_s).size(), 1, 10000);
+
+        const QJsonObject started = entriesOf(m_log, u"started"_s).value(0).toObject();
+        QCOMPARE(started.value(u"arguments"_s).toArray(), (QJsonArray { u"--"_s, u"/games/orb-run.qml"_s }));
+        const QJsonObject environment = started.value(u"environment"_s).toObject();
+        QCOMPARE(environment.value(u"WAYLAND_DISPLAY"_s).toString(), u"wayland-test"_s);
+        QCOMPARE(environment.value(u"QT_QPA_PLATFORM"_s).toString(), u"wayland"_s);
+        QCOMPARE(environment.value(u"XDG_ACTIVATION_TOKEN"_s).toString(), u"activation-2"_s);
+        // Nothing on its stdin.
+        QCOMPARE(entriesOf(m_log, u"tokenLength"_s).value(0).toInt(), 0);
+        const qint64 pid = started.value(u"pid"_s).toInteger();
+        QCOMPARE(host->productOf(pid), u"test-started"_s);
+        QCOMPARE(host->product(u"test-started"_s).value(u"running"_s).toBool(), true);
+
+        // One run at a time, on one file.
+        QVERIFY(host->launch(u"test-started"_s, u"/games/orb-run.qml"_s));
+        QVERIFY(!host->launch(u"test-started"_s, u"/games/ember-climb.qml"_s));
+        QVERIFY(!host->launch(u"test-started"_s));
+        // It is never placed or sent a file to open.
+        QVERIFY(!host->place(u"test-started"_s, QRect(0, 0, 800, 600)));
+        QVERIFY(!host->open(u"test-started"_s, u"/films/clip.mkv"_s, u"video"_s, QRect(0, 0, 800, 600)));
+        QTest::qWait(300);
+        QCOMPARE(entriesOf(m_log, u"started"_s).size(), 1);
+
+        // Stopped, it is asked to end at once, and its end is no failure.
+        QElapsedTimer stopping;
+        stopping.start();
+        host->stop(u"test-started"_s);
+        QTRY_COMPARE_WITH_TIMEOUT(exited.size(), 1, 10000);
+        QCOMPARE(exited.first().at(0).toString(), u"test-started"_s);
+        QCOMPARE(exited.first().at(1).toBool(), false);
+        QVERIFY2(stopping.elapsed() < 4500, qPrintable(QString::number(stopping.elapsed())));
+        QCOMPARE(host->productOf(pid), QString());
+        QCOMPARE(host->product(u"test-started"_s).value(u"running"_s).toBool(), false);
+    }
+
+    void a_product_is_launched_or_placed_by_its_record()
+    {
+        auto host = this->host();
+        // One with a channel is placed, never only started.
+        QVERIFY(!host->launch(u"test-product"_s));
+        QCOMPARE(host->product(u"test-product"_s).value(u"running"_s).toBool(), false);
+        // One with no file argument is never started on a file.
+        ProductRecord bare = startedRecord();
+        bare.fileArgument.clear();
+        ProductHost plain(QList<ProductRecord> { bare });
+        plain.setDisplay(u"wayland-test"_s);
+        QVERIFY(!plain.launch(u"test-started"_s, u"/games/orb-run.qml"_s));
+        QCOMPARE(plain.product(u"test-started"_s).value(u"running"_s).toBool(), false);
+    }
+
+    void a_product_with_no_channel_says_how_it_ended_data()
+    {
+        QTest::addColumn<QByteArray>("mode");
+        QTest::addColumn<bool>("failed");
+        QTest::newRow("exit 0") << QByteArray("exit-0") << false;
+        QTest::newRow("exit 3") << QByteArray("exit-3") << true;
+    }
+
+    void a_product_with_no_channel_says_how_it_ended()
+    {
+        QFETCH(QByteArray, mode);
+        QFETCH(bool, failed);
+        auto host = this->host(mode);
+        QSignalSpy exited(host.get(), &ProductHost::exited);
+        QVERIFY(host->launch(u"test-started"_s));
+        QTRY_COMPARE_WITH_TIMEOUT(exited.size(), 1, 10000);
+        QCOMPARE(exited.first().at(1).toBool(), failed);
+        // Started on no file, it was given no arguments.
+        QCOMPARE(entriesOf(m_log, u"started"_s).value(0).toObject().value(u"arguments"_s).toArray(), QJsonArray());
+    }
+
+    void a_product_with_no_channel_ends_with_prism()
+    {
+        auto host = this->host("plain");
+        QVERIFY(host->launch(u"test-started"_s));
+        QTRY_COMPARE_WITH_TIMEOUT(entriesOf(m_log, u"tokenLength"_s).size(), 1, 10000);
+        const qint64 pid = entriesOf(m_log, u"started"_s).value(0).toObject().value(u"pid"_s).toInteger();
+        QVERIFY(pid > 0);
+        QElapsedTimer ending;
+        ending.start();
+        host.reset();
+        QVERIFY2(ending.elapsed() < 4000, qPrintable(QString::number(ending.elapsed())));
+#if defined(Q_OS_LINUX)
+        QVERIFY(!QFileInfo::exists(u"/proc/%1"_s.arg(pid)));
+#endif
     }
 };
 

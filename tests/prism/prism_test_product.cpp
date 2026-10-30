@@ -1,9 +1,12 @@
 // SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 //
-// prism-test-arqade and prism-test-media: stand in for ARQADE and QOR Media
-// in Prism's product test (tests/prism/products.e2e.json), as Wayland clients
-// that speak a product's side of the host protocol as those do and show a
-// plain window where they show theirs:
+// prism-test-arqade, prism-test-media, prism-test-qq-studio and
+// prism-test-qq-player: stand in for ARQADE, QOR Media, QQ Studio and the QQ
+// Player in Prism's product test (tests/prism/products.e2e.json), as Wayland
+// clients that show a plain window where those show theirs.
+//
+// ARQADE and QOR Media speak a product's side of the host protocol as those
+// do:
 //
 //   - ARQADE stays hidden until `place`, then shows a window of the
 //     rectangle's size (its Dock with no parent window). `prefs` shows in its
@@ -13,9 +16,16 @@
 //
 // Each quits on `quit`, when its window is closed, or when its channel is
 // lost, as they do.
+//
+// QQ Studio and the QQ Player read their arguments as those do and show at
+// once, at a size of their own: the Player at its 1280 x 720, naming its
+// scene in its title; the Studio at more than a 1920 x 1200 screen holds, so
+// that Prism must fit it. A channel they were given shows in their title.
+// Each quits when its window is closed.
 
 #include "productside.h"
 
+#include <QtCore/QCommandLineParser>
 #include <QtCore/QFileInfo>
 #include <QtGui/QGuiApplication>
 #include <QtGui/QPainter>
@@ -33,6 +43,28 @@ protected:
     }
 };
 
+// QQ Studio or the QQ Player, which Prism only starts.
+int startedOnly(QGuiApplication &app, const QString &id, const QString &name)
+{
+    QCommandLineParser parser;
+    const QCommandLineOption channel(QStringLiteral("launcher-channel"), QString(), QStringLiteral("name"));
+    const QCommandLineOption project(QStringLiteral("project"), QString(), QStringLiteral("folder"));
+    parser.addOptions({ channel, project });
+    parser.addPositionalArgument(QStringLiteral("file"), QString());
+    parser.process(app);
+
+    Window window;
+    const QString file = parser.isSet(project) ? parser.value(project) : parser.positionalArguments().value(0);
+    QString title = file.isEmpty() ? QStringLiteral("Test %1").arg(name)
+                                   : QStringLiteral("%1 — Test %2").arg(QFileInfo(file).fileName(), name);
+    if (parser.isSet(channel))
+        title += QStringLiteral(" · launcher channel");
+    window.setTitle(title);
+    window.resize(id == QStringLiteral("qq-player") ? QSize(1280, 720) : QSize(2000, 1300));
+    window.show();
+    return QGuiApplication::exec();
+}
+
 } // namespace
 
 int main(int argc, char *argv[])
@@ -40,6 +72,8 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
     const QString id = QStringLiteral(PRODUCT_ID);
     const QString name = QStringLiteral(PRODUCT_NAME);
+    if (id.startsWith(QStringLiteral("qq-")))
+        return startedOnly(app, id, name);
     const QString method =
         id == QStringLiteral("arqade") ? QStringLiteral("arqade.next") : QStringLiteral("media.next");
 

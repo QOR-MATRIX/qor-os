@@ -34,11 +34,13 @@ struct ProductRecord
     QString id;              // what its hello must say: "arqade"
     QString name;            // what a person reads: "ARQADE"
     QString variable;        // the environment variable that may name its program: "QOR_ARQADE"
-    QString method;          // its long poll, the one method Prism offers it: "arqade.next"
+    QString method;          // its long poll, the one method Prism offers it: "arqade.next"; empty for a
+                             // product Prism only starts (QQ), which is served no channel
     int waitMs = 3000;       // how long the long poll waits for a command
     QStringList commands;    // the commands it understands
+    QString fileArgument;    // what comes before a file it is started on: "--project", or "--" for a first argument
     QString glyph;           // its icon in the Shelf and Beam
-    QSize size;              // the content size it opens at, where there is room
+    QSize size;              // the content size it opens at, where there is room; empty: the size it asks for
     bool launchable = false; // opened by itself (ARQADE), or only to show a file (QOR Media)
     QString keywords;
     QString description;
@@ -132,20 +134,27 @@ private:
     QList<QJsonObject> m_commands;
 };
 
-// QML singleton `ProductHost`: Prism hosts QOR OS's products, ARQADE and QOR
-// Media, as demiurge-chain's QOR Launcher does on Windows (QOR-0010).
+// QML singleton `ProductHost`: Prism hosts QOR OS's products, ARQADE, QOR
+// Media, QQ Studio and the QQ Player, as demiurge-chain's QOR Launcher does on
+// Windows (QOR-0010).
 //
 // It starts a product as a Wayland client of Prism (WAYLAND_DISPLAY is
-// `display`) with `--launcher-channel <name>` and its run's token on its
-// stdin, never in its arguments or environment, and serves its channel
-// (HostSession). On Windows the launcher docks a product's window inside its
-// own; on Wayland the window stays a toplevel, so `place` carries the content
-// rectangle Prism planned for it and no parent, and Prism lays out the window
-// when it arrives: productOf() tells which product a client is by its
-// process.
+// `display`). ARQADE and QOR Media get `--launcher-channel <name>` and their
+// run's token on stdin, never in their arguments or environment, and Prism
+// serves their channel (HostSession). On Windows the launcher docks their
+// windows inside its own; on Wayland a window stays a toplevel, so `place`
+// carries the content rectangle Prism planned for it and no parent, and Prism
+// lays out the window when it arrives: productOf() tells which product a
+// client is by its process.
 //
-// A product ends with Prism: its channel closes and it quits. On Linux it is
-// also sent SIGTERM if Prism dies first.
+// QQ Studio and the QQ Player are only started, with no channel: QQ Studio's
+// is for publishing, which Prism does not offer before the vault service
+// (Phase 2), and the QQ Player has none. Their windows open at the size they
+// ask for.
+//
+// A product ends with Prism: its channel closes and it quits, or, with no
+// channel, it is asked to end. On Linux it is also sent SIGTERM if Prism dies
+// first.
 class ProductHost : public QObject
 {
     Q_OBJECT
@@ -165,7 +174,7 @@ public:
     explicit ProductHost(const QList<ProductRecord> &records, QObject *parent = nullptr);
     ~ProductHost() override;
 
-    // ARQADE and QOR Media.
+    // ARQADE, QOR Media, QQ Studio and the QQ Player.
     static QList<ProductRecord> defaultRecords();
 
     QString display() const { return m_display; }
@@ -174,8 +183,10 @@ public:
     void setReducedMotion(bool reduced);
     QVariantList products() const;
 
-    // { id, name, glyph, width, height, launchable, keywords, description,
-    //   hue, chroma, available, running }, or an empty map for no product.
+    // { id, name, glyph, width, height, launchable, placed, keywords,
+    //   description, hue, chroma, available, running }, or an empty map for
+    // no product. `placed`: Prism tells it where to show (place); otherwise it
+    // is only started, and width and height are 0.
     Q_INVOKABLE QVariantMap product(const QString &id) const;
     // The product's program, if it can be started: the file its variable
     // names, else `<id>` beside Prism's own program.
@@ -192,8 +203,13 @@ public:
     // with its content at `rect`, starting it first if need be.
     Q_INVOKABLE bool open(const QString &id, const QString &path, const QString &kind, const QRect &rect,
                           const QString &activationToken = QString());
+    // Starts a product Prism only starts (QQ Studio, the QQ Player), on `file`
+    // if one is given: a project, a scene. True if it now runs on that file;
+    // false if it cannot be started, or already runs on another.
+    Q_INVOKABLE bool launch(const QString &id, const QString &file = QString(),
+                            const QString &activationToken = QString());
     // Asks a running product to quit, and ends it if it has not within a few
-    // seconds.
+    // seconds. One with no channel is asked at once. Not a failure (exited).
     Q_INVOKABLE void stop(const QString &id);
 
     // The running product's session (for the tests).
@@ -213,11 +229,13 @@ private:
     struct Run
     {
         QPointer<QProcess> process;
-        QPointer<HostSession> session;
+        QPointer<HostSession> session; // none for a product with no channel
+        QString file;                  // what it was started on (launch)
+        bool stopping = false;         // stop() was asked: its end is no failure
     };
 
     const ProductRecord *record(const QString &id) const;
-    bool start(const ProductRecord &record, const QString &activationToken);
+    bool start(const ProductRecord &record, const QString &file, const QString &activationToken);
     void finish(const QString &id, bool failed);
     static QJsonObject rectJson(const QRect &rect);
 

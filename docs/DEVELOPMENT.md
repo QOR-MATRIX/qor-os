@@ -192,7 +192,7 @@ scale.
 | `{"call": "setSurface", "args": [...]}` | Call a `Desktop` method (`launch`, `setSurface`, `switchSpace`, ...) |
 | `{"restore": spec}` | What clicking the window's app on the Shelf does |
 | `{"close": spec}` | Ask a window to close (`xdg_toplevel.close` for clients) |
-| `{"expect": {"path": ..., "equals": value}}` | Assert on the state below; `"window": spec` scopes the path to a window; `"near": [..] \| number \| "statePath"` with `"scale"` and `"tolerance"` compares rectangles and numbers |
+| `{"expect": {"path": ..., "equals": value}}` | Assert on the state below; `"window": spec` scopes the path to a window; in an array a path step is an index or `length` (`windows.length` counts closing windows too); `"near": [..] \| number \| "statePath"` with `"scale"` and `"tolerance"` compares rectangles and numbers |
 | `{"state": file}`, `{"screenshot": file}` | Write the state as JSON or grab the window (paths relative to the script); `"display": n` grabs another display under Prism |
 | `{"log": text}` | Print a progress line |
 
@@ -267,27 +267,37 @@ Two suites use the runner (label `gpu`), and a third needs no display:
   in software in a runtime folder of its own, and shows nothing, so the suite
   needs neither a display nor a graphics card. Stand-ins for ARQADE and QOR
   Media (`prism-test-arqade`, `prism-test-media`) speak the products' side of
-  the host protocol. Prism starts them and the suite checks:
+  the host protocol; those for QQ Studio and the QQ Player
+  (`prism-test-qq-studio`, `prism-test-qq-player`) read their arguments as
+  those do and show at a size of their own. Prism starts them and the suite
+  checks:
   - each window's place and size, and that it is named from Prism's record;
+  - that a window opens at the size its client asks for, fitted to the work
+    area when it asks for more;
   - that the Motion setting reaches ARQADE while it runs;
   - that opening ARQADE again brings back its window;
+  - that the QQ Player plays one game at a time;
   - that closing a window ends its product.
 
 ### Run a product inside Prism
 
-Prism starts ARQADE and QOR Media itself and places their windows
+Prism starts the products itself and lays out their windows
 ([ARCHITECTURE.md](ARCHITECTURE.md#hosted-by-prism)). It finds each where
-`QOR_ARQADE` or `QOR_MEDIA` points, else beside its own program. On Linux,
-after `tools/dev/products.sh` has built them:
+`QOR_ARQADE`, `QOR_MEDIA`, `QOR_QQ_STUDIO` or `QOR_QQ_PLAYER` points, else
+beside its own program. On Linux, after `tools/dev/products.sh` has built
+them:
 
 ```bash
 export QOR_ARQADE=$PWD/build/products-linux/arqade/arqade
 export QOR_MEDIA=$PWD/build/products-linux/media/qor-media
+export QOR_QQ_STUDIO=$PWD/build/products-linux/qq/studio/qq-studio
+export QOR_QQ_PLAYER=$PWD/build/products-linux/qq/player/qq-player
 ./build/linux-release/prism/compositor/prism --unlocked
 ```
 
-ARQADE is then in Beam. QOR Media opens the files Prism hands it
-(`Desktop.openInMedia(path, kind)`, which the Library will call).
+ARQADE and QQ Studio are then in Beam. QOR Media opens the files Prism hands
+it (`Desktop.openInMedia(path, kind)`), and the QQ Player the games
+(`Desktop.playQQGame(scene)`), which the Library will call.
 
 ### Add an icon
 
@@ -404,7 +414,7 @@ and mark any record it supersedes or amends.
 | `tools/dev/products.sh` | Build and test QQ, ARQADE and QOR Media on Linux, on a display nobody sees and, under WSL, fenced from the GPU ([BUILDING.md](BUILDING.md#on-linux)) |
 | `tools/dev/products-display.qml` | That display: a compositor on Qt's offscreen platform, for the products' suites |
 | `tools/dev/secret-service.py` | That run's keyring: an in-memory Secret Service on the run's own session bus ([QOR-0011](decisions/QOR-0011-the-creators-provider-key-in-the-secret-service.md)) |
-| `tools/dev/prism-products.py` | Prism hosting stand-ins for ARQADE and QOR Media, offscreen and in software (`prism_products`) |
+| `tools/dev/prism-products.py` | Prism hosting stand-ins for ARQADE, QOR Media, QQ Studio and the QQ Player, offscreen and in software (`prism_products`) |
 | `tools/upstream/demiurge.sh` | Pull ARQADE's fixtures and the one look from demiurge-chain, check ARQADE's rules match it, write patches for upstream |
 | `tools/ci/runners.ps1` | Move the workstation's two CI runners to the organisation or a repository, and start them |
 | `qorctl` | Drive services from the command line ([SERVICES.md](SERVICES.md#qorctl)) |

@@ -102,16 +102,23 @@ Item {
         return Math.max(workArea.y, Math.min(y, workArea.y + workArea.height - h));
     }
 
-    // Where a client window with content of this size opens: cascaded like
-    // the others, within the work area, with room for its title bar
-    // (AppWindow.titleBarHeight). Prism plans a product's window this way.
-    // Before the work area is laid out, the size is the content's own.
-    function planClient(contentWidth: real, contentHeight: real): rect {
-        const index = windowsOn(currentSpace).length;
-        const w = workArea.width > 60 ? Math.min(contentWidth, workArea.width - 60) : contentWidth;
-        const h = workArea.height > 40 ? Math.min(contentHeight + 40, workArea.height - 40) : contentHeight + 40;
+    // Where a window with a frame of this size opens: cascaded like the
+    // others, within the work area. Before the work area is laid out, the
+    // size is the frame's own. `except`: a window already here, planned now
+    // that its client has said what size it wants.
+    function planFrame(frameWidth: real, frameHeight: real, except: AppWindow): rect {
+        const index = windowsOn(currentSpace).filter(w => w !== except).length;
+        const w = workArea.width > 60 ? Math.min(frameWidth, workArea.width - 60) : frameWidth;
+        const h = workArea.height > 40 ? Math.min(frameHeight, workArea.height - 40) : frameHeight;
         const cascade = (index % 5) - 2;
         return Qt.rect(cascadeX(w, cascade), cascadeY(h, cascade), w, h);
+    }
+
+    // Where a client window with content of this size opens, with room for
+    // its title bar (AppWindow.titleBarHeight). Prism plans the window of a
+    // product it places this way.
+    function planClient(contentWidth: real, contentHeight: real): rect {
+        return planFrame(contentWidth, contentHeight + 40, null);
     }
 
     // Name and icon for an app that is not a first-party one (a Wayland
@@ -245,14 +252,13 @@ Item {
 
     // Manages a window for a Wayland xdg-toplevel (Prism compositor only).
     // `product` is { id, frame } for a product Prism hosts: its window is
-    // known by the product's id, whatever the client calls itself, and opens
-    // at the frame Prism planned for it (null: planned now).
+    // known by the product's id, whatever the client calls itself. With a
+    // frame (a product Prism places) it opens there. Otherwise (any other
+    // client, or a product Prism only starts) it opens at the size its client
+    // asks for, planned once the client has said (AppWindow.awaitingSize).
     function adopt(shellSurface: var, toplevel: var, product: var): AppWindow {
-        const index = windowsOn(currentSpace).length;
-        const w = Math.min(960, workArea.width - 60);
-        const h = Math.min(640, workArea.height - 40);
-        const cascade = (index % 5) - 2;
-        const frame = product ? product.frame : Qt.rect(cascadeX(w, cascade), cascadeY(h, cascade), w, h);
+        const planned = product !== null && product.frame !== null;
+        const frame = planned ? product.frame : planFrame(960, 640, null);
         const window = windowFactory.createObject(strip, {
             manager: layer,
             appId: product ? product.id : toplevel.appId,
@@ -265,6 +271,7 @@ Item {
             origin: Qt.rect(workArea.x + workArea.width / 2 - 40, workArea.y + workArea.height / 2 - 30, 80, 60),
             shellSurface: shellSurface,
             toplevel: toplevel,
+            awaitingSize: !planned,
             serial: ++serialCounter
         });
         // Clients usually set their title and app id just after creating the

@@ -108,21 +108,26 @@ if(TARGET prism)
     endif()
 
     # ── Prism hosting the products (Linux, no display) ──────────────────────
-    # Stand-ins for ARQADE and QOR Media, started by Prism as a person would
-    # and placed by it. Prism runs offscreen and draws in software, so this
-    # needs no display and no graphics card, and shows nothing.
-    foreach(product IN ITEMS arqade media)
+    # Stand-ins for ARQADE, QOR Media, QQ Studio and the QQ Player, started by
+    # Prism as a person would and laid out by it. Prism runs offscreen and
+    # draws in software, so this needs no display and no graphics card, and
+    # shows nothing.
+    foreach(product IN ITEMS arqade media qq-studio qq-player)
         qt_add_executable(prism-test-${product} prism/prism_test_product.cpp)
         target_link_libraries(prism-test-${product} PRIVATE Qt6::Gui Qt6::Network qor::compiler_settings)
     endforeach()
     target_compile_definitions(prism-test-arqade PRIVATE PRODUCT_ID="arqade" PRODUCT_NAME="ARQADE")
     target_compile_definitions(prism-test-media PRIVATE PRODUCT_ID="qor-media" PRODUCT_NAME="QOR Media")
+    target_compile_definitions(prism-test-qq-studio PRIVATE PRODUCT_ID="qq-studio" PRODUCT_NAME="QQ Studio")
+    target_compile_definitions(prism-test-qq-player PRIVATE PRODUCT_ID="qq-player" PRODUCT_NAME="QQ Player")
     if(Python3_Interpreter_FOUND)
         add_test(NAME prism_products
             COMMAND Python3::Interpreter "${CMAKE_SOURCE_DIR}/tools/dev/prism-products.py"
                 --prism $<TARGET_FILE:prism>
                 --arqade $<TARGET_FILE:prism-test-arqade>
                 --media $<TARGET_FILE:prism-test-media>
+                --qq-studio $<TARGET_FILE:prism-test-qq-studio>
+                --qq-player $<TARGET_FILE:prism-test-qq-player>
                 --script "${CMAKE_CURRENT_SOURCE_DIR}/prism/products.e2e.json")
         set_tests_properties(prism_products PROPERTIES TIMEOUT 120)
     endif()

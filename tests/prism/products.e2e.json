@@ -1,5 +1,5 @@
 {
-  "description": "Prism hosting the products (QOR-0010): it starts ARQADE and QOR Media as Wayland clients of its own, speaking the QOR Launcher's side of the host protocol, places their windows where it planned and names them from its own records. Run by ctest as prism_products, through tools/dev/prism-products.py, with stand-ins for both, at 1920 x 1200.",
+  "description": "Prism hosting the products (QOR-0010): it starts ARQADE and QOR Media as Wayland clients of its own, speaking the QOR Launcher's side of the host protocol, and places their windows where it planned; it starts QQ Studio and the QQ Player with no channel, and their windows open at the size they ask for, fitted to the screen. Every window is named from Prism's own records. Run by ctest as prism_products, through tools/dev/prism-products.py, with stand-ins for all four, at 1920 x 1200 (a work area of 1900 x 1052 at 10, 52).",
   "steps": [
     { "log": "ARQADE, asked for as Prism starts (perhaps before the desktop is laid out): started, placed where Prism plans, known by Prism's record" },
     { "call": "launch", "args": ["arqade", {}] },
@@ -50,6 +50,52 @@
     { "close": { "appId": "qor-media" } },
     { "waitFor": { "gone": { "appId": "qor-media" }, "timeout": 10000 } },
     { "wait": 1500 },
-    { "expect": { "path": "products.qor-media.running", "equals": false } }
+    { "expect": { "path": "products.qor-media.running", "equals": false } },
+
+    { "log": "QQ Studio, opened as from Beam: started with no channel, at the size it asks for (2000 x 1300), fitted to the work area" },
+    { "expect": { "path": "products.qq-studio.available", "equals": true } },
+    { "expect": { "path": "products.qq-player.available", "equals": true } },
+    { "call": "launch", "args": ["qq-studio", {}] },
+    { "waitFor": { "window": { "title": "Test QQ Studio" }, "timeout": 20000 } },
+    { "wait": 1200 },
+    { "expect": { "path": "products.qq-studio.running", "equals": true } },
+    { "expect": { "window": { "title": "Test QQ Studio" }, "path": "appId", "equals": "qq-studio" } },
+    { "expect": { "window": { "appId": "qq-studio" }, "path": "identity.name", "equals": "QQ Studio" } },
+    { "expect": { "window": { "appId": "qq-studio" }, "path": "decorated", "equals": true } },
+    { "expect": { "window": { "appId": "qq-studio" }, "path": "frameRect", "near": [10, 52, 1840, 1012], "tolerance": 1 } },
+    { "expect": { "window": { "appId": "qq-studio" }, "path": "configuredSize", "near": [1840, 972], "tolerance": 1 } },
+    { "expect": { "window": { "appId": "qq-studio" }, "path": "clientGeometry", "near": [0, 0, 1840, 972], "tolerance": 1 } },
+
+    { "log": "The QQ Player plays the scene it is given, at its own 1280 x 720, cascaded from the Studio" },
+    { "call": "playQQGame", "args": ["/srv/games/orb-run/scenes/orb-run.qml"] },
+    { "waitFor": { "window": { "title": "orb-run.qml — Test QQ Player" }, "timeout": 20000 } },
+    { "wait": 1200 },
+    { "expect": { "path": "products.qq-player.running", "equals": true } },
+    { "expect": { "window": { "title": "orb-run.qml — Test QQ Player" }, "path": "appId", "equals": "qq-player" } },
+    { "expect": { "window": { "appId": "qq-player" }, "path": "identity.name", "equals": "QQ Player" } },
+    { "expect": { "window": { "appId": "qq-player" }, "path": "focused", "equals": true } },
+    { "expect": { "window": { "appId": "qq-player" }, "path": "frameRect", "near": [290, 174, 1280, 760], "tolerance": 1 } },
+    { "expect": { "window": { "appId": "qq-player" }, "path": "configuredSize", "near": [1280, 720], "tolerance": 1 } },
+    { "expect": { "window": { "appId": "qq-player" }, "path": "clientGeometry", "near": [0, 0, 1280, 720], "tolerance": 1 } },
+
+    { "log": "One game at a time: asked for another, the one playing stays" },
+    { "call": "playQQGame", "args": ["/srv/games/ember-climb/scenes/ember-climb.qml"] },
+    { "wait": 1200 },
+    { "waitFor": { "windows": 2, "timeout": 2000 } },
+    { "expect": { "window": { "appId": "qq-player" }, "path": "title", "equals": "orb-run.qml — Test QQ Player" } },
+
+    { "log": "Closing their windows ends them; closed while minimised, a window goes at once" },
+    { "click": { "window": { "appId": "qq-player" }, "part": "minimize" } },
+    { "wait": 1500 },
+    { "expect": { "window": { "appId": "qq-player" }, "path": "minimized", "equals": true } },
+    { "close": { "appId": "qq-player" } },
+    { "waitFor": { "gone": { "appId": "qq-player" }, "timeout": 10000 } },
+    { "wait": 500 },
+    { "expect": { "path": "windows.length", "equals": 1 } },
+    { "close": { "appId": "qq-studio" } },
+    { "waitFor": { "gone": { "appId": "qq-studio" }, "timeout": 10000 } },
+    { "wait": 1500 },
+    { "expect": { "path": "products.qq-player.running", "equals": false } },
+    { "expect": { "path": "products.qq-studio.running", "equals": false } }
   ]
 }

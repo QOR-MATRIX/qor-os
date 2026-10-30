@@ -53,7 +53,7 @@ QQ's, ARQADE's and QOR Media's suites.
     in Studio's and the agent's, and the QQ Player's floor of 20 frames a second (5.8 there; 13 to 15 on the GPU).
 
   Linux CI does not run them yet ([CI.md](CI.md#the-carried-products)).
-- [ ] Each runs as a Wayland client of Prism, and Prism places it (the launcher's `place` request becomes a Prism layout request)
+- [x] Each runs as a Wayland client of Prism, and Prism places it (the launcher's `place` request becomes a Prism layout request)
 
   **ARQADE and QOR Media, 29 October:** Prism hosts them.
   - `ProductHost` starts each as a Wayland client of Prism. It speaks the launcher's side of the host protocol, and
@@ -63,8 +63,12 @@ QQ's, ARQADE's and QOR Media's suites.
   - The real ARQADE and QOR Media ran in a hidden, GPU-fenced Prism: their windows landed at the planned frames, and
     closing them ended them.
 
-  **Left:** QQ Studio and the QQ Player. Prism does not start them yet, and opens their windows, like any other
-  client's, in its default 960 × 640 frame rather than at the size they ask for.
+  **QQ Studio and the QQ Player, 30 October:** Prism starts them with no channel (QQ Studio's publishing waits for
+  the vault service, Phase 2), and every client's window, theirs included, opens at the size it asks for, fitted to
+  the work area, where Prism used to open it at 960 × 640. QQ Studio is in Beam; the QQ Player plays the scene the
+  shell gives it (`Desktop.playQQGame()`), one game at a time. The real QQ Studio and QQ Player ran in a hidden,
+  GPU-fenced Prism: the Studio at its own 1600 × 960, the Player playing Orb Run at its own 1280 × 720, and closing
+  each ended it.
 - [ ] The controller service drives QQ through `Input`'s gamepad seam; ARQADE and QOR Media gain controller focus navigation
 - [ ] Lumen's tokens theme every app: Demiurge's one look (`docs/design/tokens.json`) mapped onto Lumen roles, with one source
 - [ ] A controller-first **Home** and **Library** in the shell: QQ games, ARQADE, media

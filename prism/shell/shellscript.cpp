@@ -871,8 +871,19 @@ private:
                     value = state();
                 }
                 const QString path = expectation[u"path"_s].toString();
-                for (const QString &key : path.split(u'.', Qt::SkipEmptyParts))
-                    value = value.toObject().value(key);
+                for (const QString &key : path.split(u'.', Qt::SkipEmptyParts)) {
+                    // In an array: its "length", or an element by index.
+                    if (value.isArray()) {
+                        const QJsonArray array = value.toArray();
+                        bool isIndex = false;
+                        const int index = key.toInt(&isIndex);
+                        value = key == u"length"_s ? QJsonValue(qint64(array.size()))
+                                : isIndex          ? array.at(index)
+                                                   : QJsonValue();
+                    } else {
+                        value = value.toObject().value(key);
+                    }
+                }
                 const QString actual =
                     QString::fromUtf8(QJsonDocument(QJsonArray { value }).toJson(QJsonDocument::Compact));
                 if (expectation.contains(u"near"_s)) {

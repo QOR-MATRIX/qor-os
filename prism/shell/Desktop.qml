@@ -261,19 +261,33 @@ FocusScope {
     // Set by Prism: a trusted xdg-activation token for a window it opens.
     property var activationToken: () => ""
 
-    // ── Products (ARQADE, QOR Media) ───────────────────────────────────────
-    // Prism hosts them as Wayland clients (ProductHost, QOR-0010). It plans a
-    // product's window before asking the product to show it and tells the
-    // product that content rectangle in `place`; when the window arrives it
-    // is laid out by the same plan, made again then (adoptSurface).
+    // ── Products (ARQADE, QOR Media, QQ Studio, the QQ Player) ─────────────
+    // Prism hosts them as Wayland clients (ProductHost, QOR-0010). ARQADE and
+    // QOR Media it places: it plans a product's window before asking the
+    // product to show it and tells the product that content rectangle in
+    // `place`; when the window arrives it is laid out by the same plan, made
+    // again then (adoptSurface). QQ Studio and the QQ Player it only starts:
+    // their windows open at the size they ask for.
     Binding { target: ProductHost; property: "reducedMotion"; value: Theme.reduceMotion }
 
     // Shows a product, starting it if need be: `file` ({ path, kind }) is
-    // what QOR Media opens. False if it cannot be shown here.
+    // what it opens: QOR Media a file, the QQ Player a game's scene. False if
+    // it cannot be shown here.
     function showProduct(id: string, file: var): bool {
         const product = ProductHost.product(id);
         if (product.id === undefined)
             return false;
+        if (!product.placed) {
+            // One run at a time: its window comes forward, on its file or not.
+            const shown = ProductHost.launch(id, file ? file.path : "", activationToken());
+            const owner = displays.find(layer => layer.find(id) !== null);
+            if (owner)
+                owner.raise(owner.find(id));
+            if (!shown)
+                toast.show(product.glyph, product.running ? qsTr("%1 is already open").arg(product.name)
+                                                          : qsTr("%1 cannot be opened here").arg(product.name));
+            return shown;
+        }
         const frame = windows.planClient(product.width, product.height);
         // The content below the title bar, in the output's physical pixels
         // (1 while the output's screen is not known).
@@ -293,6 +307,14 @@ FocusScope {
             return false;
         surface = "";
         return showProduct("qor-media", { path: path, kind: kind });
+    }
+
+    // Plays a QQ game, its scene file, in the QQ Player: one game at a time.
+    function playQQGame(scene: string): bool {
+        if (locked)
+            return false;
+        surface = "";
+        return showProduct("qq-player", { path: scene });
     }
 
     Connections {
@@ -353,12 +375,15 @@ FocusScope {
     }
 
     // `product`: the product Prism hosts that the client is (ProductHost's
-    // productOf), or "". Its window goes where Prism plans it.
+    // productOf), or "". The window of a product Prism places goes where
+    // Prism plans it; any other opens at the size its client asks for.
     function adoptSurface(shellSurface: var, toplevel: var, product: string): AppWindow {
         if (product !== "") {
             const record = ProductHost.product(product);
-            return windows.adopt(shellSurface, toplevel,
-                                 { id: product, frame: windows.planClient(record.width, record.height) });
+            return windows.adopt(shellSurface, toplevel, {
+                                     id: product,
+                                     frame: record.placed ? windows.planClient(record.width, record.height) : null
+                                 });
         }
         // prism --spread-clients: each new client on the display with the
         // fewest windows (benchmarks put load on every output).

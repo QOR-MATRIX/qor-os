@@ -94,12 +94,13 @@ QJsonObject prefsCommand(bool reducedMotion)
     return { { u"type"_s, u"prefs"_s }, { u"prefs"_s, QJsonObject { { u"reduced_motion"_s, reducedMotion } } } };
 }
 
-// Ends a product that has not ended by itself: asked first, then made to.
-void endLater(QProcess *process)
+// Ends a product that has not ended by itself within `graceMs`: asked first,
+// then made to.
+void endLater(QProcess *process, int graceMs = 5000)
 {
     if (!process)
         return;
-    QTimer::singleShot(5000, process, [process] {
+    QTimer::singleShot(graceMs, process, [process] {
         if (process->state() == QProcess::NotRunning)
             return;
         process->terminate();
@@ -384,7 +385,8 @@ ProductHost::ProductHost(const QList<ProductRecord> &records, QObject *parent) :
 
 ProductHost::~ProductHost()
 {
-    // Every product ends with Prism: its channel closes, and it quits.
+    // Every product ends with Prism: its channel closes, and it quits. One
+    // with no channel is asked to.
     const QHash<QString, Run> runs = std::exchange(m_runs, {});
     for (const Run &run : runs) {
         if (run.process)
@@ -392,6 +394,8 @@ ProductHost::~ProductHost()
         if (run.session) {
             run.session->disconnect(this);
             run.session->close();
+        } else if (run.process) {
+            run.process->terminate();
         }
     }
     for (const Run &run : runs) {
@@ -434,7 +438,31 @@ QList<ProductRecord> ProductHost::defaultRecords()
     media.hue = 205;
     media.chroma = 0.12;
 
-    return { arqade, media };
+    ProductRecord studio;
+    studio.id = u"qq-studio"_s;
+    studio.name = u"QQ Studio"_s;
+    studio.variable = u"QOR_QQ_STUDIO"_s;
+    studio.fileArgument = u"--project"_s;
+    studio.glyph = u"layers"_s;
+    studio.launchable = true;
+    studio.keywords = u"qq engine editor scenes worlds games make create build 3d agent"_s;
+    studio.description = u"QQ's editor: make scenes and games, and play them."_s;
+    studio.hue = 45;
+    studio.chroma = 0.16;
+
+    ProductRecord player;
+    player.id = u"qq-player"_s;
+    player.name = u"QQ Player"_s;
+    player.variable = u"QOR_QQ_PLAYER"_s;
+    player.fileArgument = u"--"_s;
+    player.glyph = u"play"_s;
+    player.launchable = false;
+    player.keywords = u"qq games play"_s;
+    player.description = u"Plays a QQ game."_s;
+    player.hue = 140;
+    player.chroma = 0.15;
+
+    return { arqade, media, studio, player };
 }
 
 void ProductHost::setDisplay(const QString &display)
@@ -476,6 +504,7 @@ QVariantMap ProductHost::product(const QString &id) const
              { u"width"_s, r->size.width() },
              { u"height"_s, r->size.height() },
              { u"launchable"_s, r->launchable },
+             { u"placed"_s, r->commands.contains(u"place"_s) },
              { u"keywords"_s, r->keywords },
              { u"description"_s, r->description },
              { u"hue"_s, r->hue },
@@ -539,7 +568,7 @@ bool ProductHost::place(const QString &id, const QRect &rect, const QString &act
         qCWarning(lcProducts, "%s cannot be shown in an empty rectangle", qPrintable(r->name));
         return false;
     }
-    if (!start(*r, activationToken))
+    if (!start(*r, {}, activationToken))
         return false;
     session(id)->send({ { u"type"_s, u"place"_s }, { u"rect"_s, rectJson(rect) }, { u"parent"_s, QJsonValue::Null } });
     return true;
@@ -555,7 +584,7 @@ bool ProductHost::open(const QString &id, const QString &path, const QString &ki
         qCWarning(lcProducts, "%s cannot be shown in an empty rectangle", qPrintable(r->name));
         return false;
     }
-    if (!start(*r, activationToken))
+    if (!start(*r, {}, activationToken))
         return false;
     session(id)->send({ { u"type"_s, u"open"_s },
                         { u"path"_s, path },
@@ -566,22 +595,36 @@ bool ProductHost::open(const QString &id, const QString &path, const QString &ki
     return true;
 }
 
+bool ProductHost::launch(const QString &id, const QString &file, const QString &activationToken)
+{
+    const ProductRecord *r = record(id);
+    if (!r || !r->method.isEmpty() || (!file.isEmpty() && r->fileArgument.isEmpty()))
+        return false;
+    if (const auto it = m_runs.constFind(id); it != m_runs.cend() && it->file != file) {
+        qCInfo(lcProducts, "%s already runs on another file", qPrintable(r->name));
+        return false;
+    }
+    return start(*r, file, activationToken);
+}
+
 void ProductHost::stop(const QString &id)
 {
-    const auto it = m_runs.constFind(id);
+    const auto it = m_runs.find(id);
     const ProductRecord *r = record(id);
-    if (it == m_runs.cend() || !r)
+    if (it == m_runs.end() || !r)
         return;
+    it->stopping = true;
     if (it->session) {
         if (it->session->welcomed() && r->commands.contains(u"quit"_s))
             it->session->send({ { u"type"_s, u"quit"_s } });
         else
             it->session->close();
     }
-    endLater(it->process);
+    // With no channel, nothing else asks it to end.
+    endLater(it->process, it->session ? 5000 : 0);
 }
 
-bool ProductHost::start(const ProductRecord &record, const QString &activationToken)
+bool ProductHost::start(const ProductRecord &record, const QString &file, const QString &activationToken)
 {
     if (m_runs.contains(record.id))
         return true;
@@ -592,15 +635,23 @@ bool ProductHost::start(const ProductRecord &record, const QString &activationTo
         return false;
     }
 
-    auto *session = new HostSession(record, this);
-    if (!session->listen()) {
-        qCWarning(lcProducts, "%s: its channel could not be opened", qPrintable(record.name));
-        delete session;
-        return false;
+    HostSession *session = nullptr;
+    if (!record.method.isEmpty()) {
+        session = new HostSession(record, this);
+        if (!session->listen()) {
+            qCWarning(lcProducts, "%s: its channel could not be opened", qPrintable(record.name));
+            delete session;
+            return false;
+        }
     }
     auto *process = new QProcess(this);
     process->setProgram(program);
-    process->setArguments({ u"--launcher-channel"_s, session->channel() });
+    if (session)
+        process->setArguments({ u"--launcher-channel"_s, session->channel() });
+    else if (!file.isEmpty())
+        process->setArguments({ record.fileArgument, file });
+    if (!session)
+        process->setStandardInputFile(QProcess::nullDevice());
     QProcessEnvironment environment = QProcessEnvironment::systemEnvironment();
     environment.insert(u"WAYLAND_DISPLAY"_s, m_display);
     environment.insert(u"QT_QPA_PLATFORM"_s, u"wayland"_s);
@@ -618,17 +669,6 @@ bool ProductHost::start(const ProductRecord &record, const QString &activationTo
 #endif
 
     const QString id = record.id;
-    connect(process, &QProcess::started, session, [process, session] {
-        // The process Prism started is the one that may connect. It connects
-        // once it has read its token, so this comes first.
-        session->expect(process->processId());
-        // The token on its stdin, which then closes: never an argument or a
-        // variable another process could read.
-        QByteArray line = session->token() + '\n';
-        process->write(line);
-        line.fill('\0');
-        process->closeWriteChannel();
-    });
     connect(process, &QProcess::finished, this, [this, id](int code, QProcess::ExitStatus status) {
         finish(id, status != QProcess::NormalExit || code != 0);
     });
@@ -638,17 +678,30 @@ bool ProductHost::start(const ProductRecord &record, const QString &activationTo
             finish(id, true);
         }
     });
-    connect(session, &HostSession::welcomedChanged, this, [this, id] {
-        emit connected(id);
-        emit productsChanged();
-    });
-    // Without its channel a product has nothing to do: it quits by itself
-    // once welcomed, and is ended if it does not.
-    connect(session, &HostSession::ended, process, [process] { endLater(process); });
+    if (session) {
+        connect(process, &QProcess::started, session, [process, session] {
+            // The process Prism started is the one that may connect. It
+            // connects once it has read its token, so this comes first.
+            session->expect(process->processId());
+            // The token on its stdin, which then closes: never an argument or
+            // a variable another process could read.
+            QByteArray line = session->token() + '\n';
+            process->write(line);
+            line.fill('\0');
+            process->closeWriteChannel();
+        });
+        connect(session, &HostSession::welcomedChanged, this, [this, id] {
+            emit connected(id);
+            emit productsChanged();
+        });
+        // Without its channel a product has nothing to do: it quits by itself
+        // once welcomed, and is ended if it does not.
+        connect(session, &HostSession::ended, process, [process] { endLater(process); });
+        if (record.commands.contains(u"prefs"_s))
+            session->send(prefsCommand(m_reducedMotion));
+    }
 
-    m_runs.insert(id, { process, session });
-    if (record.commands.contains(u"prefs"_s))
-        session->send(prefsCommand(m_reducedMotion));
+    m_runs.insert(id, { process, session, file });
     qCInfo(lcProducts, "Starting %s", qPrintable(record.name));
     process->start();
     emit productsChanged();
@@ -662,7 +715,9 @@ void ProductHost::finish(const QString &id, bool failed)
         return;
     const Run run = *it;
     m_runs.erase(it);
-    const bool welcomed = run.session && run.session->welcomed();
+    const ProductRecord *r = record(id);
+    // One with a channel that never said hello did not start properly.
+    const bool started = (r && r->method.isEmpty()) || (run.session && run.session->welcomed());
     if (run.session) {
         run.session->close();
         run.session->deleteLater();
@@ -671,10 +726,9 @@ void ProductHost::finish(const QString &id, bool failed)
         run.process->disconnect(this);
         run.process->deleteLater();
     }
-    const ProductRecord *r = record(id);
     qCInfo(lcProducts, "%s has ended", qPrintable(r ? r->name : id));
     emit productsChanged();
-    emit exited(id, failed || !welcomed);
+    emit exited(id, !run.stopping && (failed || !started));
 }
 
 } // namespace qor

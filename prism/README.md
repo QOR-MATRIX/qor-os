@@ -28,12 +28,14 @@ QOR Launcher's side of their host protocol: a private channel, a one-time
 token on the product's stdin, and `place` with the frame Prism planned, since
 on Wayland the product's window stays a toplevel
 ([QOR-0010](../docs/decisions/QOR-0010-on-wayland-prism-places-the-products-windows.md)).
-It knows a product's window by its process and names it from its own record.
-Point it at their builds with `QOR_ARQADE` and `QOR_MEDIA`
+QQ Studio and the QQ Player it only starts, with no channel, and their windows
+open at the size they ask for, as every client's does. It knows a product's
+window by its process and names it from its own record. Point it at their
+builds with `QOR_ARQADE`, `QOR_MEDIA`, `QOR_QQ_STUDIO` and `QOR_QQ_PLAYER`
 ([DEVELOPMENT.md](../docs/DEVELOPMENT.md#run-a-product-inside-prism));
 [ARCHITECTURE.md](../docs/ARCHITECTURE.md#hosted-by-prism) has the details.
 `tst_producthost` tests the protocol. `prism_products` runs Prism offscreen
-with stand-ins for both products, needing no display.
+with stand-ins for all four products, needing no display.
 
 ## End-to-end tests
 
