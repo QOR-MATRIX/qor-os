@@ -8,6 +8,8 @@ import ARQADE
 // ARQADE's portal: an astrolabe of gilt rings around an ember core, the homepage's triangle and square turning inside it,
 // embers rising through it and leaning toward the pointer. Physically based metal lit by a warm sky, filmic tonemapping,
 // bloom and a vignette (ADR-102 decision 1). With reduced motion it holds still, embers and all.
+//
+// Changed for QOR OS: the core's halo takes the theme's accent, so in QOR OS it glows in the person's (QOR-0016).
 View3D {
     id: portal
 
@@ -131,6 +133,8 @@ View3D {
             scale: Qt.vector3d(4.2 * core.beat, 4.2 * core.beat, 1)
             materials: PrincipledMaterial {
                 lighting: PrincipledMaterial.NoLighting
+                // The white halo in the accent's light: in Demiurge's look exactly the ember it was drawn in before.
+                baseColor: Qt.tint(Theme.accent, Qt.rgba(Theme.accentBright.r, Theme.accentBright.g, Theme.accentBright.b, 0.4))
                 baseColorMap: Texture { source: Theme.halo }
                 alphaMode: PrincipledMaterial.Blend
                 blendMode: PrincipledMaterial.Screen

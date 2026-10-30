@@ -94,6 +94,11 @@ QJsonObject prefsCommand(bool reducedMotion)
     return { { u"type"_s, u"prefs"_s }, { u"prefs"_s, QJsonObject { { u"reduced_motion"_s, reducedMotion } } } };
 }
 
+QJsonObject themeCommand(const QVariantMap &colors)
+{
+    return { { u"type"_s, u"theme"_s }, { u"colors"_s, QJsonObject::fromVariantMap(colors) } };
+}
+
 // Ends a product that has not ended by itself within `graceMs`: asked first,
 // then made to.
 void endLater(QProcess *process, int graceMs = 5000)
@@ -491,6 +496,19 @@ void ProductHost::setReducedMotion(bool reduced)
     emit reducedMotionChanged();
 }
 
+void ProductHost::setTheme(const QVariantMap &theme)
+{
+    if (m_theme == theme)
+        return;
+    m_theme = theme;
+    for (auto it = m_runs.cbegin(); it != m_runs.cend(); ++it) {
+        const ProductRecord *r = record(it.key());
+        if (it->session && r && r->commands.contains(u"theme"_s))
+            it->session->send(themeCommand(m_theme));
+    }
+    emit themeChanged();
+}
+
 const ProductRecord *ProductHost::record(const QString &id) const
 {
     const auto found = std::find_if(m_records.cbegin(), m_records.cend(), [&id](const auto &r) { return r.id == id; });
@@ -661,6 +679,13 @@ bool ProductHost::start(const ProductRecord &record, const QString &file, const 
     environment.insert(u"WAYLAND_DISPLAY"_s, m_display);
     environment.insert(u"QT_QPA_PLATFORM"_s, u"wayland"_s);
     environment.insert(u"QOR_REDUCED_MOTION"_s, m_reducedMotion ? u"1"_s : u"0"_s);
+    // The colours it wears, for a product with no `theme` to follow (QQ).
+    if (m_theme.isEmpty())
+        environment.remove(u"QOR_THEME_COLORS"_s);
+    else
+        environment.insert(
+            u"QOR_THEME_COLORS"_s,
+            QString::fromUtf8(QJsonDocument(QJsonObject::fromVariantMap(m_theme)).toJson(QJsonDocument::Compact)));
     // A token Prism was started with was for its own window.
     environment.remove(u"XDG_ACTIVATION_TOKEN"_s);
     if (!activationToken.isEmpty())
@@ -704,6 +729,8 @@ bool ProductHost::start(const ProductRecord &record, const QString &file, const 
         connect(session, &HostSession::ended, process, [process] { endLater(process); });
         if (record.commands.contains(u"prefs"_s))
             session->send(prefsCommand(m_reducedMotion));
+        if (record.commands.contains(u"theme"_s) && !m_theme.isEmpty())
+            session->send(themeCommand(m_theme));
     }
 
     m_runs.insert(id, { process, session, file });

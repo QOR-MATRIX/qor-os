@@ -6,7 +6,8 @@ import QtQuick.Controls.Basic
 // a hairline that lights under the pointer. Tab reaches it, and Return or Space presses it.
 //
 // Changed for QOR OS: the arrows go on to the next control, or back (Up, Left), as Tab does, so a controller's d-pad,
-// which Prism gives a window as the arrows, goes from control to control.
+// which Prism gives a window as the arrows, goes from control to control. And lit, the primary keeps its fill and
+// lights its edge: its ink is the theme's on-accent, white on Lumen's accent in QOR OS (QOR-0016).
 Button {
     id: control
     property bool primary: false
@@ -37,10 +38,11 @@ Button {
         implicitWidth: 64
         implicitHeight: 36
         radius: Theme.radiusControl
-        color: control.primary ? (control.lit && !control.down ? Theme.accentBright : Theme.accent)
+        color: control.primary ? Theme.accent
                                : control.down ? Theme.well : control.lit ? Theme.raised : "transparent"
         border.width: 1
-        border.color: control.primary ? Theme.accentBright : control.lit ? Theme.inkMuted : Theme.edge
+        border.color: control.primary ? (control.lit ? Theme.ink : Theme.accentBright)
+                                      : control.lit ? Theme.inkMuted : Theme.edge
         Behavior on color { ColorAnimation { duration: Theme.quick } }
         FocusRing { visible: control.visualFocus }
     }

@@ -287,6 +287,8 @@ FocusScope {
     // again then (adoptSurface). QQ Studio and the QQ Player it only starts:
     // their windows open at the size they ask for.
     Binding { target: ProductHost; property: "reducedMotion"; value: Theme.reduceMotion }
+    // They wear Lumen (QOR-0016): Demiurge's look on its roles, with the person's accent, tint and contrast.
+    Binding { target: ProductHost; property: "theme"; value: Theme.productColors }
 
     // Shows a product, starting it if need be: `file` ({ path, kind }) is
     // what it opens: QOR Media a file, the QQ Player a game's scene. False if

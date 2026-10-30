@@ -107,4 +107,28 @@ QtObject {
     readonly property MotionTokens motion: MotionTokens {}
     readonly property MaterialTokens material: MaterialTokens {}
     readonly property var elevation: [({ "blur": 0, "offsetY": 0, "opacity": 0 }), ({ "blur": 8, "offsetY": 1, "opacity": 0.45 }), ({ "blur": 18, "offsetY": 4, "opacity": 0.6 }), ({ "blur": 34, "offsetY": 10, "opacity": 0.75 }), ({ "blur": 56, "offsetY": 18, "opacity": 0.9 }), ({ "blur": 84, "offsetY": 28, "opacity": 1 })]
+    // Demiurge's one look on Lumen's roles (QOR-0016): the role each colour the products name takes.
+    readonly property var products: ({
+        "void": "background",
+        "base": "surfaceSunken",
+        "well": "surfaceSunken",
+        "surface": "surface",
+        "raised": "surfaceRaised",
+        "edge": "windowStroke",
+        "edge-soft": "separator",
+        "ink": "textPrimary",
+        "ink-body": "textSecondary",
+        "ink-muted": "textSecondary",
+        "ink-faint": "textTertiary",
+        "accent": "accent",
+        "accent-bright": "accentText",
+        "accent-dim": "accentHover",
+        "on-accent": "onAccent",
+        "gilt": "accentText",
+        "gilt-bright": "accentText",
+        "gilt-dim": "textTertiary",
+        "ok": "positive",
+        "warn": "warning",
+        "bad": "critical"
+    })
 }

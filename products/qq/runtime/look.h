@@ -8,10 +8,14 @@
 // Reduced motion is the person's: what the launcher passes on (QOR_REDUCED_MOTION, 1 or 0), or else, on Windows, the
 // system's own "Animation effects" setting. Screens and the Studio's controls then appear and change at once, and a
 // creator's logic can read it.
+//
+// Changed for QOR OS: a host may pass its own colours as the runtime starts (QOR_THEME_COLORS), as Prism passes
+// Lumen's (QOR-0016); each colour it leaves out stays the look's.
 
 #pragma once
 
 #include <QColor>
+#include <QHash>
 #include <QObject>
 #include <QString>
 #include <QVariantList>
@@ -168,11 +172,15 @@ signals:
     void reducedMotionChanged();
 
 private:
+    /// The colour `name` ("void", "ink-muted"): the host's, else the look's own.
+    QColor color(const QString &name, QRgb own) const;
+
     QString m_display;
     QString m_ui;
     QString m_body;
     QString m_mono;
     bool m_reducedMotion = false;
+    QHash<QString, QColor> m_colors;
 };
 
 }  // namespace qq

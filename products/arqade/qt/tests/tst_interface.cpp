@@ -2,6 +2,8 @@
 // the player and their Sparks as the launcher sends them, and holds still with reduced motion. It wears Demiurge's one
 // look (ADR-108): its Theme is the source's values, every text is in the look's faces, scale and colours, and its
 // primary reads dark on ember and takes the keyboard's focus ring. It opens a real window, so it needs a desktop session.
+//
+// Changed for QOR OS: every colour a host sends is worn, Lumen's in QOR OS (QOR-0016).
 // With ARQADE_SHOT set to a folder, it saves what it drew there, for a person to look at.
 
 #include <QDir>
@@ -371,6 +373,72 @@ private slots:
         window->resize(760, 560);
         QTest::qWait(500);
         save(window, "narrow.png");
+        QVERIFY2(warnings.isEmpty(), qPrintable(warnings.join('\n')));
+    }
+
+    // In QOR OS, Prism sends every colour of the look, each a role of Lumen's (QOR-0016): all are worn, the gilt and the
+    // status colours too. Lit, the primary keeps its fill, so its on-accent ink, white on Lumen's accent, still reads.
+    // Then the look's own colours are sent back.
+    void every_colour_the_host_sends_is_worn()
+    {
+        window->resize(1440, 900);
+        QObject *theme = engine->singletonInstance<QObject *>("ARQADE", "Theme");
+        QVERIFY(theme);
+        const QVariantMap lumen{{"void", "#0b0e14"},          {"base", "#101319"},       {"well", "#101319"},
+                                {"surface", "#161a20"},       {"raised", "#21252c"},     {"edge", "#1cffffff"},
+                                {"edge-soft", "#17ffffff"},   {"ink", "#f5f7f9"},        {"ink-body", "#b7bbc1"},
+                                {"ink-muted", "#b7bbc1"},     {"ink-faint", "#7f838b"},  {"accent", "#5967e5"},
+                                {"accent-bright", "#a9b9ff"}, {"accent-dim", "#4f5bd9"}, {"on-accent", "#fdfdff"},
+                                {"gilt", "#a9b9ff"},          {"gilt-bright", "#a9b9ff"}, {"gilt-dim", "#7f838b"},
+                                {"ok", "#58cd78"},            {"warn", "#f7bc50"},       {"bad", "#fb605c"}};
+        const QList<std::pair<const char *, const char *>> worn{
+            {"void_", "void"},         {"base", "base"},          {"well", "well"},
+            {"surface", "surface"},    {"raised", "raised"},      {"edge", "edge"},
+            {"edgeSoft", "edge-soft"}, {"ink", "ink"},            {"inkBody", "ink-body"},
+            {"inkMuted", "ink-muted"}, {"inkFaint", "ink-faint"}, {"accent", "accent"},
+            {"accentBright", "accent-bright"}, {"accentDim", "accent-dim"}, {"inkOnAccent", "on-accent"},
+            {"gilt", "gilt"},          {"giltBright", "gilt-bright"}, {"giltDim", "gilt-dim"},
+            {"ok", "ok"},              {"warn", "warn"},          {"bad", "bad"}};
+        emit link->themeRequested(lumen);
+        for (const auto &[property, name] : worn)
+            QCOMPARE(theme->property(property).value<QColor>(), QColor::fromString(lumen.value(name).toString()));
+        QCOMPARE(theme->property("focus").value<QColor>(), QColor(0xa9, 0xb9, 0xff));
+
+        QList<QQuickItem *> items;
+        visibleItems(window->contentItem(), items);
+        QQuickItem *primary = nullptr;
+        for (QQuickItem *item : items)
+            if (item->property("primary").toBool())
+                primary = item;
+        QVERIFY(primary);
+        auto *background = primary->property("background").value<QQuickItem *>();
+        QVERIFY(background);
+        QQuickItem *face = background->childItems().value(1);
+        QVERIFY(face);
+        const QColor accent = theme->property("accent").value<QColor>();
+        const QQuickItem *label = primary->property("contentItem").value<QQuickItem *>();
+        QVERIFY(label);
+        // The label's colour moves to the new ink over a moment.
+        QTRY_COMPARE(label->property("color").value<QColor>(), theme->property("inkOnAccent").value<QColor>());
+        const QColor ink = label->property("color").value<QColor>();
+        primary->forceActiveFocus(Qt::TabFocusReason);
+        QTRY_COMPARE(face->property("color").value<QColor>(), accent);
+        QVERIFY2(contrast(ink, accent) >= 4.5, "the primary's ink on Lumen's accent under 4.5:1");
+        QTest::qWait(300);
+        save(window, "lumen.png");
+        primary->setFocus(false);
+
+        QVariantMap own;
+        const QJsonObject colour = tokens()["color"].toObject();
+        for (auto it = colour.constBegin(); it != colour.constEnd(); ++it) {
+            QString name;
+            for (const QChar c : it.key())
+                name += c.isUpper() ? QStringLiteral("-") + c.toLower() : QString(c);
+            own.insert(name, it.value().toString());
+        }
+        emit link->themeRequested(own);
+        for (const auto &[property, name] : worn)
+            QCOMPARE(theme->property(property).value<QColor>(), QColor::fromString(own.value(name).toString()));
         QVERIFY2(warnings.isEmpty(), qPrintable(warnings.join('\n')));
     }
 };

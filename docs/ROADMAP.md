@@ -91,7 +91,16 @@ QQ's, ARQADE's and QOR Media's suites.
     checks that ARQADE in front takes the controller and QOR Media does not.
 
   **Left:** Orb Run with a real DualSense on a Linux machine, since WSL has no controllers.
-- [ ] Lumen's tokens theme every app: Demiurge's one look (`docs/design/tokens.json`) mapped onto Lumen roles, with one source
+- [x] Lumen's tokens theme every app: Demiurge's one look (`docs/design/tokens.json`) mapped onto Lumen roles, with one source
+
+  **30 October** ([QOR-0016](decisions/QOR-0016-the-products-wear-lumen.md)):
+  - The mapping is `lumen.tokens.json`'s `products.colors`: each of the look's 21 colours, a Lumen role. Its inks are
+    tested to read at 4.5:1 on its grounds at every accent and contrast, the faintest at 4.0:1 on the raised one, as
+    Lumen's own tertiary text.
+  - Prism resolves the roles dark, with the person's accent, tint and contrast. It sends them to ARQADE and QOR Media as
+    they connect and whenever they change (`theme`), and passes them to every product as it starts
+    (`QOR_THEME_COLORS`), which QQ's `Look` takes.
+  - **Left**, should either be wanted: Lumen's faces and type scale for the products, and its light appearance.
 - [ ] A controller-first **Home** and **Library** in the shell: QQ games, ARQADE, media
 - [ ] From QTOS's Phase 1: evaluate Qt Interface Framework for service code generation and simulation (a QOR record)
 - [ ] From QTOS's Phase 1: a Qt Design Studio project for Lumen components

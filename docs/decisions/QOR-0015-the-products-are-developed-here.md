@@ -1,6 +1,7 @@
 # QOR-0015: QQ, ARQADE's app and games, and QOR Media are developed here
 
-- **Status:** Accepted
+- **Status:** Accepted; decision 2's point on `docs/design/tokens.json` amended by
+  [QOR-0016](QOR-0016-the-products-wear-lumen.md)
 - **Date:** 2026-10-29
 - **Deciders:** the owner, who chose the assistant's recommended answer to each
   of three questions

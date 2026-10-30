@@ -4,6 +4,9 @@ import QtQuick
 // ARQADE's look: Demiurge's one look in the showcase register (ADR-108). Every value comes from Tokens, which
 // docs/design/tokens.mjs generates from docs/design/tokens.json; nothing here is written by hand. When the launcher sends
 // its theme, its grounds, accent and inks are laid over them, so ARQADE sits in the launcher as one of its screens.
+//
+// Changed for QOR OS: Prism sends every colour, the gilt and the status colours too, each a role of Lumen's
+// (QOR-0016), so in QOR OS ARQADE wears the system's look, accent and all.
 QtObject {
     id: theme
 
@@ -24,13 +27,14 @@ QtObject {
     property color inkMuted: Tokens.colorInkMuted
     property color inkFaint: Tokens.colorInkFaint
 
-    // The gilt of ARQADE's rings, rules and numerals, and the status colours: the same in every launcher theme.
-    readonly property color gilt: Tokens.colorGilt
-    readonly property color giltBright: Tokens.colorGiltBright
-    readonly property color giltDim: Tokens.colorGiltDim
-    readonly property color ok: Tokens.colorOk
-    readonly property color warn: Tokens.colorWarn
-    readonly property color bad: Tokens.colorBad
+    // The gilt of ARQADE's rings, rules and numerals, and the status colours: the same in every launcher theme, and
+    // Lumen's in QOR OS.
+    property color gilt: Tokens.colorGilt
+    property color giltBright: Tokens.colorGiltBright
+    property color giltDim: Tokens.colorGiltDim
+    property color ok: Tokens.colorOk
+    property color warn: Tokens.colorWarn
+    property color bad: Tokens.colorBad
     readonly property color line: Qt.rgba(gilt.r, gilt.g, gilt.b, 0.18)
     readonly property color lineStrong: Qt.rgba(gilt.r, gilt.g, gilt.b, 0.42)
 
@@ -84,6 +88,9 @@ QtObject {
         set("void_", "void"); set("base", "base"); set("surface", "surface"); set("raised", "raised")
         set("edge", "edge"); set("accent", "accent"); set("accentBright", "accent-bright"); set("ink", "ink")
         set("inkBody", "ink-body"); set("inkMuted", "ink-muted"); set("inkFaint", "ink-faint")
+        set("well", "well"); set("edgeSoft", "edge-soft"); set("accentDim", "accent-dim"); set("inkOnAccent", "on-accent")
+        set("gilt", "gilt"); set("giltBright", "gilt-bright"); set("giltDim", "gilt-dim")
+        set("ok", "ok"); set("warn", "warn"); set("bad", "bad")
     }
 
     // A colour as linear HDR light for a material's emissive factor: above 1 so the bloom catches it. Linear, so an

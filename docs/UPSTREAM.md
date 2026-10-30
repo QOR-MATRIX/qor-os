@@ -21,7 +21,7 @@ demiurge-chain's copies of them are frozen (its ADR-126).
 |-----------------------------------|------------|-----|-----------------|
 | `products/arqade/tests/fixtures/` | Recorded runs that ARQADE's games replay here and its rules replay upstream | carried by `git subtree`, with history | ADR-102 |
 | ARQADE's rules: `logic/rules.mjs` of Orbital, Void Runner, Synapse and Rift Survivor, and the arenas' `logic/arena.mjs`, in `products/arqade/games/` | The rules and nothing else, which ARQADE's Node tests upstream import and its service is to confirm runs by | kept identical, changed in both at once ([below](#changing-a-games-rules)) | ADR-102, ADR-116 (proposed) |
-| `docs/design/tokens.json` | Demiurge's one look, read by the products' tests | copied at the same commit | ADR-108 |
+| `docs/design/tokens.json` | Demiurge's one look: the products' own colours outside QOR OS, and what their tests read. In QOR OS they wear Lumen's roles under its names ([QOR-0016](decisions/QOR-0016-the-products-wear-lumen.md)) | copied at the same commit | ADR-108 |
 | The QOR core (`tools/qor-launcher/core/` upstream) | Keys, profiles, amounts, the C bridge | built at a pinned commit, never copied | ADR-103, ADR-104 |
 
 Everything Demiurge runs as a service stays upstream: the chain, QOR ID,

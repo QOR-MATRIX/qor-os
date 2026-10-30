@@ -6,6 +6,9 @@ import ARQADE
 // the one thing a screen asks first, is ember, lit from above, with a glow and dark ink on it (7:1; white would read
 // 2.9:1); any other is a gilt hairline. It lifts a pixel under the pointer and gives under a press, unless the person
 // asked for less motion; the focus ring is the one every surface draws, for the keyboard only.
+//
+// Changed for QOR OS: lit, the primary keeps its fill and lights its edge in the brightest ink. Its ink is the theme's
+// on-accent, dark on ember but white on Lumen's accent (QOR-0016), which a brighter fill would leave unreadable.
 Button {
     id: button
     property bool primary: false
@@ -57,10 +60,11 @@ Button {
             id: face
             anchors.fill: parent
             radius: Theme.radiusControl
-            color: button.primary ? (button.lit ? Theme.accentBright : Theme.accent)
+            color: button.primary ? Theme.accent
                                   : (button.lit ? Qt.rgba(Theme.gilt.r, Theme.gilt.g, Theme.gilt.b, 0.1) : "transparent")
             border.width: 1
-            border.color: button.primary ? Theme.accentBright : (button.lit ? Theme.giltBright : Theme.lineStrong)
+            border.color: button.primary ? (button.lit ? Theme.ink : Theme.accentBright)
+                                         : (button.lit ? Theme.giltBright : Theme.lineStrong)
             Behavior on color { ColorAnimation { duration: Theme.quick } }
             Behavior on border.color { ColorAnimation { duration: Theme.quick } }
 

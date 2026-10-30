@@ -8,7 +8,10 @@ The sky is a dark vault warming to an ember horizon, a dim ground, and a low sun
 obsidian and ember as light. It is an uncompressed Radiance RGBE file, 256 by 128, equirectangular.
 
 The halo is the soft light around the portal's core, drawn on a plane that faces the eye and screened over the scene:
-ember fading to nothing, its colour already multiplied by its fall-off so its edge adds no light. A 256-pixel PNG.
+white fading to nothing, its colour already multiplied by its fall-off so its edge adds no light. A 256-pixel PNG.
+
+Changed for QOR OS: the halo is white, and the portal tints it with the theme's accent (Portal.qml), ember in Demiurge's
+look and the person's accent in QOR OS's (QOR-0016).
 
     python products/arqade/qt/tools/make_light.py
 """
@@ -65,7 +68,7 @@ def sky():
 
 
 def halo(size=256):
-    ember = (255, 122, 26)
+    white = (255, 255, 255)
     rows = bytearray()
     for y in range(size):
         rows.append(0)  # no filter
@@ -73,7 +76,7 @@ def halo(size=256):
             r = math.hypot((x + 0.5) / size * 2 - 1, (y + 0.5) / size * 2 - 1)
             # A bright inner glow and a long, faint reach.
             fall = min(1.0, 0.85 * math.exp(-(r / 0.22) ** 2) + 0.35 * math.exp(-(r / 0.55) ** 2)) * max(0.0, 1 - r)
-            rows += bytes([round(c * fall) for c in ember] + [round(255 * fall)])
+            rows += bytes([round(c * fall) for c in white] + [round(255 * fall)])
 
     def chunk(kind, data):
         return struct.pack(">I", len(data)) + kind + data + struct.pack(">I", zlib.crc32(kind + data) & 0xFFFFFFFF)

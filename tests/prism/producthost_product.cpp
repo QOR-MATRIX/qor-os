@@ -36,7 +36,8 @@ int main(int argc, char *argv[])
     };
 
     QJsonObject given;
-    for (const char *name : { "WAYLAND_DISPLAY", "QT_QPA_PLATFORM", "QOR_REDUCED_MOTION", "XDG_ACTIVATION_TOKEN" }) {
+    for (const char *name :
+         { "WAYLAND_DISPLAY", "QT_QPA_PLATFORM", "QOR_REDUCED_MOTION", "QOR_THEME_COLORS", "XDG_ACTIVATION_TOKEN" }) {
         const QString key = QString::fromLatin1(name);
         given.insert(key, environment.contains(key) ? QJsonValue(environment.value(key)) : QJsonValue());
     }

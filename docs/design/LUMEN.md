@@ -63,6 +63,19 @@ Rules:
 - Translucent fills (`fill*`) are composed over whatever is below, so they
   work on any surface and on glass.
 
+### The products
+
+QQ, ARQADE and QOR Media name their colours as Demiurge's one look does
+(`void`, `ink`, `accent`, `gilt`...). In QOR OS each is a Lumen role
+([QOR-0016](../decisions/QOR-0016-the-products-wear-lumen.md)), mapped in
+`lumen.tokens.json`'s `products.colors`; [tokens.md](tokens.md#the-products-colours)
+lists them. Prism resolves them dark, whatever the shell's appearance, with the
+person's accent, tint and contrast (`Theme.productColors`), and gives them to
+every product: as it starts (`QOR_THEME_COLORS`) and, to ARQADE and QOR Media,
+whenever they change (`theme`). Their inks read at 4.5:1 on every ground but
+the faintest on the raised, at 4.0:1, as Lumen's tertiary text does there
+(`tests/tools/test_generate_tokens.py`).
+
 ## Materials
 
 | Material | Component | Backdrop | Use |

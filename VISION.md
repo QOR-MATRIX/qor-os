@@ -271,8 +271,9 @@ where focus is.
 
 `kit/tokens/lumen.tokens.json` is generated into a `Tokens.qml` singleton, the Widgets QStyle's palette and metrics,
 and the design docs. **Demiurge's one look** (obsidian and gilt, Cinzel and Barlow; ADR-108), which QQ, ARQADE and
-QOR Media carry in `docs/design/tokens.json`, is mapped onto Lumen's roles in Phase 1, so the whole system again
-has one source.
+QOR Media carry in `docs/design/tokens.json`, is mapped onto Lumen's roles in the same file
+([QOR-0016](docs/decisions/QOR-0016-the-products-wear-lumen.md)), so in QOR OS the whole system wears one look, from one
+source.
 
 ### Signature moments (the demo reel)
 

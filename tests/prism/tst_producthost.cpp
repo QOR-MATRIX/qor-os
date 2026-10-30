@@ -53,7 +53,7 @@ ProductRecord testRecord(int waitMs = 200)
     record.variable = u"QOR_TEST_PRODUCT_PROGRAM"_s;
     record.method = u"test.next"_s;
     record.waitMs = waitMs;
-    record.commands = { u"place"_s, u"open"_s, u"prefs"_s, u"quit"_s };
+    record.commands = { u"place"_s, u"open"_s, u"prefs"_s, u"theme"_s, u"quit"_s };
     record.glyph = u"app-window"_s;
     record.size = QSize(800, 600);
     record.launchable = true;
@@ -516,6 +516,76 @@ private slots:
     }
 
     // ── Products Prism only starts (QQ Studio, the QQ Player) ──────────────
+
+    // The colours the products wear (QOR-0016): passed to a product as it
+    // starts, given to one that follows `theme` as it connects, after its
+    // Motion setting, and sent again when they change, but not when they do
+    // not.
+    void the_colours_reach_a_product_as_it_starts_and_as_they_change()
+    {
+        auto host = this->host();
+        const QVariantMap colors { { u"void"_s, u"#0b0e14"_s },
+                                   { u"accent"_s, u"#5967e5"_s },
+                                   { u"edge"_s, u"#1cffffff"_s } };
+        host->setTheme(colors);
+        QSignalSpy connected(host.get(), &ProductHost::connected);
+        QVERIFY(host->place(u"test-product"_s, QRect(0, 0, 800, 600)));
+        QTRY_COMPARE_WITH_TIMEOUT(connected.size(), 1, 10000);
+        const QJsonObject environment =
+            entriesOf(m_log, u"started"_s).value(0).toObject().value(u"environment"_s).toObject();
+        QCOMPARE(QJsonDocument::fromJson(environment.value(u"QOR_THEME_COLORS"_s).toString().toUtf8()).object(),
+                 QJsonObject::fromVariantMap(colors));
+        QTRY_COMPARE(entriesOf(m_log, u"command"_s).size(), 3);
+        QList<QJsonValue> commands = entriesOf(m_log, u"command"_s);
+        QCOMPARE(commands.at(0).toObject().value(u"type"_s).toString(), u"prefs"_s);
+        QCOMPARE(commands.at(1).toObject(),
+                 (QJsonObject { { u"type"_s, u"theme"_s }, { u"colors"_s, QJsonObject::fromVariantMap(colors) } }));
+        QCOMPARE(commands.at(2).toObject(), place(0, 0, 800, 600));
+
+        QVariantMap changed = colors;
+        changed.insert(u"accent"_s, u"#e5596b"_s);
+        host->setTheme(changed);
+        QTRY_COMPARE(entriesOf(m_log, u"command"_s).size(), 4);
+        QCOMPARE(entriesOf(m_log, u"command"_s).at(3).toObject().value(u"colors"_s).toObject(),
+                 QJsonObject::fromVariantMap(changed));
+        host->setTheme(changed);
+        QTest::qWait(400);
+        QCOMPARE(entriesOf(m_log, u"command"_s).size(), 4);
+    }
+
+    // A product with no channel, which no `theme` reaches (QQ), takes the
+    // colours as it starts; with none set, none are passed.
+    void a_product_with_no_channel_takes_the_colours_as_it_starts()
+    {
+        auto host = this->host("plain");
+        QSignalSpy exited(host.get(), &ProductHost::exited);
+        QVERIFY(host->launch(u"test-started"_s, u"/games/orb-run.qml"_s));
+        QTRY_COMPARE_WITH_TIMEOUT(entriesOf(m_log, u"started"_s).size(), 1, 10000);
+        QVERIFY(entriesOf(m_log, u"started"_s)
+                    .value(0)
+                    .toObject()
+                    .value(u"environment"_s)
+                    .toObject()
+                    .value(u"QOR_THEME_COLORS"_s)
+                    .isNull());
+        host->stop(u"test-started"_s);
+        QTRY_COMPARE_WITH_TIMEOUT(exited.size(), 1, 10000);
+
+        const QVariantMap colors { { u"ink"_s, u"#f5f7f9"_s } };
+        host->setTheme(colors);
+        QVERIFY(host->launch(u"test-started"_s, u"/games/orb-run.qml"_s));
+        QTRY_COMPARE_WITH_TIMEOUT(entriesOf(m_log, u"started"_s).size(), 2, 10000);
+        const QString passed = entriesOf(m_log, u"started"_s)
+                                   .value(1)
+                                   .toObject()
+                                   .value(u"environment"_s)
+                                   .toObject()
+                                   .value(u"QOR_THEME_COLORS"_s)
+                                   .toString();
+        QCOMPARE(QJsonDocument::fromJson(passed.toUtf8()).object(), QJsonObject::fromVariantMap(colors));
+        host->stop(u"test-started"_s);
+        QTRY_COMPARE_WITH_TIMEOUT(exited.size(), 2, 10000);
+    }
 
     void a_product_with_no_channel_starts_on_its_file()
     {

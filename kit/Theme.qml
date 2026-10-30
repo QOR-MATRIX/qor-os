@@ -120,6 +120,25 @@ QtObject {
     readonly property color warning: resolve(Tokens.color.warning)
     readonly property color critical: resolve(Tokens.color.critical)
 
+    // ── The products' colours (QOR-0016) ──────────────────────────────────
+    // Demiurge's one look on Lumen's roles: each colour QQ, ARQADE and QOR Media name (Tokens.products), its role
+    // resolved dark whatever the shell's appearance, since their stage is dark (games, films, pages), with the
+    // person's accent, tint and contrast as set rather than as they animate. As "#rrggbb" or "#aarrggbb".
+    readonly property var productColors: {
+        const colors = {};
+        const contrastSet = increaseContrast ? 1 : 0;
+        const tintHue = ((neutralHue % 360) + 360) % 360;
+        for (const name in Tokens.products) {
+            const role = Tokens.products[name];
+            const token = Tokens.color[role];
+            const status = role === "positive" || role === "warning" || role === "critical";
+            const value = token.followAccent || status ? Oklch.themed(token, 1, accentHue, contrastSet)
+                                                       : Oklch.themed(token, 1, accentHue, contrastSet, tintHue, neutralTint);
+            colors[name] = value.toString();
+        }
+        return colors;
+    }
+
     // ── Typography ────────────────────────────────────────────────────────
     readonly property string fontFamily: Kit.uiFontFamily
     readonly property string monoFamily: Kit.monoFontFamily

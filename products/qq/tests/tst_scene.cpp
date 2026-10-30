@@ -5,6 +5,8 @@
 // runtime module "QQ", against the fixtures: tests/fixtures/scenes/sample.qml (every entity type, written by hand in
 // the canonical layout), tests/fixtures/first-light.qq.json (the 2D preview's starter scene), and the 2D fixtures that
 // tests/fixtures/make_2d.py writes (a Tiled map, its tileset and a sheet of sprite frames, P3.10).
+//
+// Changed for QOR OS: the look takes the colours a host passes as the runtime starts (QOR_THEME_COLORS).
 
 #include <QDir>
 #include <QFile>
@@ -1083,6 +1085,30 @@ private slots:
         qputenv("QOR_REDUCED_MOTION", "0");
         QVERIFY(!qq::Look::systemPrefersReducedMotion());
         qunsetenv("QOR_REDUCED_MOTION");
+    }
+
+    // The colours a host passes as the runtime starts (QOR_THEME_COLORS), as Prism passes Lumen's (QOR-0016), are the
+    // look's, its focus ring following the bright accent; a colour left out or misspelt stays the look's own.
+    void aHostsColoursAreTheLooks()
+    {
+        qunsetenv("QOR_THEME_COLORS");
+        const qq::Look own;
+        qputenv("QOR_THEME_COLORS", QJsonDocument(QJsonObject{{"void", "#0b0e14"},
+                                                              {"ink", "#f5f7f9"},
+                                                              {"accent-bright", "#a9b9ff"},
+                                                              {"edge", "#1cffffff"},
+                                                              {"gilt", "not a colour"}})
+                                        .toJson(QJsonDocument::Compact));
+        const qq::Look hosted;
+        qunsetenv("QOR_THEME_COLORS");
+        QCOMPARE(hosted.property("deepest").value<QColor>(), QColor(0x0b, 0x0e, 0x14));
+        QCOMPARE(hosted.property("ink").value<QColor>(), QColor(0xf5, 0xf7, 0xf9));
+        QCOMPARE(hosted.property("accentBright").value<QColor>(), QColor(0xa9, 0xb9, 0xff));
+        QCOMPARE(hosted.property("focus").value<QColor>(), QColor(0xa9, 0xb9, 0xff));
+        QCOMPARE(hosted.property("edge").value<QColor>(), QColor(0xff, 0xff, 0xff, 0x1c));
+        QCOMPARE(hosted.property("gilt").value<QColor>(), own.property("gilt").value<QColor>());
+        QCOMPARE(hosted.property("base").value<QColor>(), own.property("base").value<QColor>());
+        QVERIFY(own.property("deepest").value<QColor>() != hosted.property("deepest").value<QColor>());
     }
 
     // ── sound (P3.13, ADR-105) ──

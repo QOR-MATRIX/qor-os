@@ -103,6 +103,32 @@ class Generation(unittest.TestCase):
                     ratio = self._contrast(name, bg, appearance, True, self.tokens["color"]["accentDefaultHue"])
                     self.assertGreaterEqual(ratio, minimum, f"{name}/{bg} {appearance}")
 
+    # QOR-0016: Demiurge's one look on Lumen's roles.
+    def test_the_products_colours_are_every_colour_of_demiurges_look(self) -> None:
+        look = json.loads((REPO / "docs" / "design" / "tokens.json").read_text(encoding="utf-8"))["color"]
+        kebab = {"".join("-" + ch.lower() if ch.isupper() else ch for ch in name) for name in look}
+        mapping = self.tokens["products"]["colors"]
+        self.assertEqual(set(mapping), kebab)
+        for name, role in mapping.items():
+            self.assertIn(role, self.tokens["color"]["roles"], name)
+
+    def test_the_products_inks_read_on_their_grounds(self) -> None:
+        mapping = self.tokens["products"]["colors"]
+        grounds = ("void", "base", "well", "surface", "raised")
+        # Every ink at 4.5:1 on every ground, but the faintest on the raised, which is held to 4.0, as Lumen's own
+        # tertiary text is there.
+        inks = ("ink", "ink-body", "ink-muted", "ink-faint", "accent-bright", "gilt", "gilt-bright", "ok", "warn", "bad")
+        for hue in self.tokens["color"]["accentPresets"]:
+            for high_contrast in (False, True):
+                for ink in inks:
+                    for ground in grounds:
+                        floor = 4.0 if (ink, ground) == ("ink-faint", "raised") else 4.5
+                        ratio = self._contrast(mapping[ink], mapping[ground], "dark", high_contrast, hue)
+                        self.assertGreaterEqual(ratio, floor, f"{ink} on {ground} hc={high_contrast} hue={hue}")
+                for fill in ("accent", "accent-dim"):
+                    ratio = self._contrast(mapping["on-accent"], mapping[fill], "dark", high_contrast, hue)
+                    self.assertGreaterEqual(ratio, 4.5, f"on-accent on {fill} hc={high_contrast} hue={hue}")
+
     def test_generated_files_are_current(self) -> None:
         self.assertEqual(gen.TOKENS_QML.read_text(encoding="utf-8"), gen.emit_qml(self.tokens),
                          "kit/Tokens.qml is stale: run tools/tokens/generate_tokens.py")

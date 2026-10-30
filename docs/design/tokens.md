@@ -43,6 +43,36 @@ so white text on it keeps 4.5:1 at every accent hue.
 
 Accent presets (hue °): 274, 248, 205, 162, 95, 58, 25, 338
 
+## The products' colours
+
+Demiurge's one look on Lumen's roles ([QOR-0016](../decisions/QOR-0016-the-products-wear-lumen.md)): each
+colour QQ, ARQADE and QOR Media name, the role it takes in QOR OS, and that role dark, as Prism resolves it for
+them with the person's accent, tint and contrast.
+
+| Product colour | Lumen role | Dark | Dark, high contrast |
+|----------------|------------|------|---------------------|
+| `void` | `background` | `#0b0e14` | — |
+| `base` | `surfaceSunken` | `#101319` | — |
+| `well` | `surfaceSunken` | `#101319` | — |
+| `surface` | `surface` | `#161a20` | — |
+| `raised` | `surfaceRaised` | `#21252c` | — |
+| `edge` | `windowStroke` | `#ffffff @ 11%` | `#ffffff @ 36%` |
+| `edge-soft` | `separator` | `#ffffff @ 9%` | `#ffffff @ 30%` |
+| `ink` | `textPrimary` | `#f5f7f9` | `#ffffff` |
+| `ink-body` | `textSecondary` | `#b7bbc1` | `#dbdee3` |
+| `ink-muted` | `textSecondary` | `#b7bbc1` | `#dbdee3` |
+| `ink-faint` | `textTertiary` | `#7f838b` | `#babec4` |
+| `accent` | `accent` | `#5967e5` | `#525fd5` |
+| `accent-bright` | `accentText` | `#a9b9ff` | `#c7d2ff` |
+| `accent-dim` | `accentHover` | `#4f5bd9` | `#4852c7` |
+| `on-accent` | `onAccent` | `#fdfdff` | `#ffffff` |
+| `gilt` | `accentText` | `#a9b9ff` | `#c7d2ff` |
+| `gilt-bright` | `accentText` | `#a9b9ff` | `#c7d2ff` |
+| `gilt-dim` | `textTertiary` | `#7f838b` | `#babec4` |
+| `ok` | `positive` | `#58cd78` | `#7ce695` |
+| `warn` | `warning` | `#f7bc50` | `#ffd16b` |
+| `bad` | `critical` | `#fb605c` | `#ff958d` |
+
 ## Radius
 
 | Token | Value |

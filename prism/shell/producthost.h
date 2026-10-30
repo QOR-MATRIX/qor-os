@@ -168,6 +168,11 @@ class ProductHost : public QObject
     // The person's Motion setting: passed to every product as it starts
     // (QOR_REDUCED_MOTION), and to those that follow `prefs` while they run.
     Q_PROPERTY(bool reducedMotion READ reducedMotion WRITE setReducedMotion NOTIFY reducedMotionChanged)
+    // The colours the products wear (QOR-0016), by the names of Demiurge's
+    // look ("void", "ink", "accent"...), as "#rrggbb" or "#aarrggbb": passed to
+    // every product as it starts (QOR_THEME_COLORS, a JSON object), and to
+    // those that follow `theme` as they connect and whenever it changes.
+    Q_PROPERTY(QVariantMap theme READ theme WRITE setTheme NOTIFY themeChanged)
     // Every product: product(id) for each.
     Q_PROPERTY(QVariantList products READ products NOTIFY productsChanged)
 
@@ -183,6 +188,8 @@ public:
     void setDisplay(const QString &display);
     bool reducedMotion() const { return m_reducedMotion; }
     void setReducedMotion(bool reduced);
+    QVariantMap theme() const { return m_theme; }
+    void setTheme(const QVariantMap &theme);
     QVariantList products() const;
 
     // { id, name, glyph, width, height, launchable, placed, takesController,
@@ -220,6 +227,7 @@ public:
 signals:
     void displayChanged();
     void reducedMotionChanged();
+    void themeChanged();
     void productsChanged();
     // The product said hello and was welcomed.
     void connected(const QString &id);
@@ -245,6 +253,7 @@ private:
     QHash<QString, Run> m_runs;
     QString m_display;
     bool m_reducedMotion = false;
+    QVariantMap m_theme;
 };
 
 } // namespace qor

@@ -4,6 +4,8 @@
 
 #include <QFile>
 #include <QFontDatabase>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QQmlEngine>
 #include <QStringList>
 
@@ -28,9 +30,18 @@ QString loadFace(const QStringList &files, const char *family)
     return QString::fromLatin1(family);
 }
 
-QColor rgb(QRgb value)
+/// The colours a host passed on (QOR_THEME_COLORS: a JSON object of the look's colours by name, "#rrggbb" or
+/// "#aarrggbb"): Prism's, Lumen's roles in QOR OS (QOR-0016). A colour it leaves out or misspells stays the look's own.
+QHash<QString, QColor> hostColors()
 {
-    return QColor(value);
+    QHash<QString, QColor> colors;
+    const QJsonObject asked = QJsonDocument::fromJson(qgetenv("QOR_THEME_COLORS")).object();
+    for (auto it = asked.constBegin(); it != asked.constEnd(); ++it) {
+        const QColor color = QColor::fromString(it.value().toString());
+        if (color.isValid())
+            colors.insert(it.key(), color);
+    }
+    return colors;
 }
 
 }  // namespace
@@ -49,7 +60,13 @@ Look::Look(QObject *parent)
                        QStringLiteral(":/qq/studio-fonts/IBMPlexMono-Medium.ttf")},
                       tokens::fontMono))
     , m_reducedMotion(systemPrefersReducedMotion())
+    , m_colors(hostColors())
 {
+}
+
+QColor Look::color(const QString &name, QRgb own) const
+{
+    return m_colors.value(name, QColor(own));
 }
 
 Look *Look::create(QQmlEngine *, QJSEngine *)
@@ -57,27 +74,27 @@ Look *Look::create(QQmlEngine *, QJSEngine *)
     return new Look;
 }
 
-QColor Look::deepest() const { return rgb(tokens::colorVoid); }
-QColor Look::base() const { return rgb(tokens::colorBase); }
-QColor Look::well() const { return rgb(tokens::colorWell); }
-QColor Look::surface() const { return rgb(tokens::colorSurface); }
-QColor Look::raised() const { return rgb(tokens::colorRaised); }
-QColor Look::edge() const { return rgb(tokens::colorEdge); }
-QColor Look::edgeSoft() const { return rgb(tokens::colorEdgeSoft); }
-QColor Look::ink() const { return rgb(tokens::colorInk); }
-QColor Look::inkBody() const { return rgb(tokens::colorInkBody); }
-QColor Look::inkMuted() const { return rgb(tokens::colorInkMuted); }
-QColor Look::inkFaint() const { return rgb(tokens::colorInkFaint); }
-QColor Look::accent() const { return rgb(tokens::colorAccent); }
-QColor Look::accentBright() const { return rgb(tokens::colorAccentBright); }
-QColor Look::accentDim() const { return rgb(tokens::colorAccentDim); }
-QColor Look::onAccent() const { return rgb(tokens::colorOnAccent); }
-QColor Look::gilt() const { return rgb(tokens::colorGilt); }
-QColor Look::giltBright() const { return rgb(tokens::colorGiltBright); }
-QColor Look::giltDim() const { return rgb(tokens::colorGiltDim); }
-QColor Look::ok() const { return rgb(tokens::colorOk); }
-QColor Look::warn() const { return rgb(tokens::colorWarn); }
-QColor Look::bad() const { return rgb(tokens::colorBad); }
+QColor Look::deepest() const { return color(QStringLiteral("void"), tokens::colorVoid); }
+QColor Look::base() const { return color(QStringLiteral("base"), tokens::colorBase); }
+QColor Look::well() const { return color(QStringLiteral("well"), tokens::colorWell); }
+QColor Look::surface() const { return color(QStringLiteral("surface"), tokens::colorSurface); }
+QColor Look::raised() const { return color(QStringLiteral("raised"), tokens::colorRaised); }
+QColor Look::edge() const { return color(QStringLiteral("edge"), tokens::colorEdge); }
+QColor Look::edgeSoft() const { return color(QStringLiteral("edge-soft"), tokens::colorEdgeSoft); }
+QColor Look::ink() const { return color(QStringLiteral("ink"), tokens::colorInk); }
+QColor Look::inkBody() const { return color(QStringLiteral("ink-body"), tokens::colorInkBody); }
+QColor Look::inkMuted() const { return color(QStringLiteral("ink-muted"), tokens::colorInkMuted); }
+QColor Look::inkFaint() const { return color(QStringLiteral("ink-faint"), tokens::colorInkFaint); }
+QColor Look::accent() const { return color(QStringLiteral("accent"), tokens::colorAccent); }
+QColor Look::accentBright() const { return color(QStringLiteral("accent-bright"), tokens::colorAccentBright); }
+QColor Look::accentDim() const { return color(QStringLiteral("accent-dim"), tokens::colorAccentDim); }
+QColor Look::onAccent() const { return color(QStringLiteral("on-accent"), tokens::colorOnAccent); }
+QColor Look::gilt() const { return color(QStringLiteral("gilt"), tokens::colorGilt); }
+QColor Look::giltBright() const { return color(QStringLiteral("gilt-bright"), tokens::colorGiltBright); }
+QColor Look::giltDim() const { return color(QStringLiteral("gilt-dim"), tokens::colorGiltDim); }
+QColor Look::ok() const { return color(QStringLiteral("ok"), tokens::colorOk); }
+QColor Look::warn() const { return color(QStringLiteral("warn"), tokens::colorWarn); }
+QColor Look::bad() const { return color(QStringLiteral("bad"), tokens::colorBad); }
 
 int Look::sizeMicro() const { return tokens::sizeMicro; }
 int Look::sizeCaption() const { return tokens::sizeCaption; }
@@ -98,7 +115,7 @@ int Look::enter() const { return m_reducedMotion ? 0 : tokens::motionEnter; }
 int Look::sheen() const { return m_reducedMotion ? 0 : tokens::motionSheen; }
 int Look::focusWidth() const { return tokens::focusWidth; }
 int Look::focusHalo() const { return tokens::focusHalo; }
-QColor Look::focus() const { return rgb(tokens::focusColor); }
+QColor Look::focus() const { return color(QStringLiteral("accent-bright"), tokens::focusColor); }
 
 QVariantList Look::ease() const
 {

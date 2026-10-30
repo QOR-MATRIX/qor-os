@@ -295,6 +295,18 @@ private slots:
         QTRY_COMPARE(window->color(), QColor("#010203"));
     }
 
+    // And Prism's, Lumen's in QOR OS (QOR-0016), whose ink on the accent is white: that is worn too.
+    void the_ink_on_the_accent_is_worn_too()
+    {
+        QObject *theme = engine->singletonInstance<QObject *>("QOR.Media", "Theme");
+        QVERIFY(theme);
+        QCOMPARE(theme->property("inkOnAccent").value<QColor>(), QColor::fromRgb(qormedia::tokens::colorOnAccent));
+        QMetaObject::invokeMethod(link, "themeRequested",
+                                  Q_ARG(QVariantMap, (QVariantMap{{"accent", "#5967e5"}, {"on-accent", "#fdfdff"}})));
+        QTRY_COMPARE(theme->property("inkOnAccent").value<QColor>(), QColor(0xfd, 0xfd, 0xff));
+        QCOMPARE(theme->property("accent").value<QColor>(), QColor(0x59, 0x67, 0xe5));
+    }
+
     void it_docks_inside_the_launchers_window_and_lifts_out_to_full_screen()
     {
         if (QGuiApplication::platformName().startsWith(QLatin1String("wayland")))

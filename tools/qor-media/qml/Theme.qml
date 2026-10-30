@@ -5,6 +5,8 @@ import QtQuick
 // docs/design/tokens.mjs generates from docs/design/tokens.json; nothing here is written by hand. Docked in the launcher
 // it wears the launcher's theme (ADR-094): apply() lays the theme's grounds, accent and inks over these, sent with every
 // theme change.
+//
+// Changed for QOR OS: in Prism the theme is Lumen's (QOR-0016), its on-accent ink with it.
 QtObject {
     id: theme
 
@@ -22,8 +24,8 @@ QtObject {
     property color inkBody: Tokens.colorInkBody
     property color inkMuted: Tokens.colorInkMuted
     property color inkFaint: Tokens.colorInkFaint
-    // The ink on an ember fill: dark, in every theme (white would read 2.9:1).
-    readonly property color inkOnAccent: Tokens.colorOnAccent
+    // The ink on an ember fill: dark, in every launcher theme (white would read 2.9:1); white on Lumen's accent.
+    property color inkOnAccent: Tokens.colorOnAccent
     property var tokens: ({})
 
     // The faces, carried in the executable (look.h): Barlow Semi Condensed for titles and controls, Barlow for reading,
@@ -69,7 +71,7 @@ QtObject {
         set("void_", "void"); set("base", "base"); set("surface", "surface"); set("raised", "raised")
         set("well", "well"); set("edge", "edge"); set("accent", "accent"); set("accentBright", "accent-bright")
         set("accentDim", "accent-dim"); set("ink", "ink"); set("inkBody", "ink-body"); set("inkMuted", "ink-muted")
-        set("inkFaint", "ink-faint")
+        set("inkFaint", "ink-faint"); set("inkOnAccent", "on-accent")
         tokens = colors
     }
 

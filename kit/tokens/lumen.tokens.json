@@ -90,5 +90,31 @@
     "blurMax": 40,
     "saturation": 0.45,
     "grain": 0.022
+  },
+  "products": {
+    "about": "Demiurge's one look mapped onto Lumen's roles (QOR-0016): each colour QQ, ARQADE and QOR Media name (docs/design/tokens.json) and the Lumen role it takes in QOR OS, resolved dark with the person's accent, tint and contrast.",
+    "colors": {
+      "void": "background",
+      "base": "surfaceSunken",
+      "well": "surfaceSunken",
+      "surface": "surface",
+      "raised": "surfaceRaised",
+      "edge": "windowStroke",
+      "edge-soft": "separator",
+      "ink": "textPrimary",
+      "ink-body": "textSecondary",
+      "ink-muted": "textSecondary",
+      "ink-faint": "textTertiary",
+      "accent": "accent",
+      "accent-bright": "accentText",
+      "accent-dim": "accentHover",
+      "on-accent": "onAccent",
+      "gilt": "accentText",
+      "gilt-bright": "accentText",
+      "gilt-dim": "textTertiary",
+      "ok": "positive",
+      "warn": "warning",
+      "bad": "critical"
+    }
   }
 }

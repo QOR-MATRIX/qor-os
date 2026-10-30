@@ -221,6 +221,12 @@ def emit_qml(tokens: dict) -> str:
         for e in tokens["elevation"]
     )
     line(f"readonly property var elevation: [{elevations}]")
+    line("// Demiurge's one look on Lumen's roles (QOR-0016): the role each colour the products name takes.")
+    line("readonly property var products: ({")
+    names = list(tokens["products"]["colors"].items())
+    for i, (name, role) in enumerate(names):
+        line(f"\"{name}\": \"{role}\"" + ("," if i < len(names) - 1 else ""), 2)
+    line("})")
     out.append("}")
     return "\n".join(out) + "\n"
 
@@ -318,6 +324,22 @@ def emit_markdown(tokens: dict) -> str:
         )
 
     md += ["", "Accent presets (hue °): " + ", ".join(str(h) for h in color["accentPresets"]), ""]
+
+    md += [
+        "## The products' colours",
+        "",
+        "Demiurge's one look on Lumen's roles ([QOR-0016](../decisions/QOR-0016-the-products-wear-lumen.md)): each",
+        "colour QQ, ARQADE and QOR Media name, the role it takes in QOR OS, and that role dark, as Prism resolves it for",
+        "them with the person's accent, tint and contrast.",
+        "",
+        "| Product colour | Lumen role | Dark | Dark, high contrast |",
+        "|----------------|------------|------|---------------------|",
+    ]
+    for name, role_name in tokens["products"]["colors"].items():
+        role = color["roles"][role_name]
+        high = f"`{role_hex(role, 'dark', True, accent)}`" if "highContrast" in role else "—"
+        md.append(f"| `{name}` | `{role_name}` | `{role_hex(role, 'dark', False, accent)}` | {high} |")
+    md.append("")
 
     md += ["## Radius", "", "| Token | Value |", "|-------|-------|"]
     md += [f"| `{k}` | {qml_number(v)} |" for k, v in tokens["radius"].items()]

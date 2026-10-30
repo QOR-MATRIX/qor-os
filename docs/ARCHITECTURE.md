@@ -369,7 +369,11 @@ Launcher's (demiurge-chain's `tools/qor-launcher/src-tauri/src/host/`):
   website (`arqade.signin`, `arqade.web`) wait for Phase 2.
 - **Commands.** `place` carries the content rectangle Prism planned
   (`WindowLayer.planClient()`) and no parent. `open` is QOR Media's. `prefs`
-  goes to ARQADE when the Motion setting changes, and `quit` stops it. A
+  goes to ARQADE when the Motion setting changes, and `quit` stops it.
+  `theme` carries the colours the products wear, Lumen's roles under the
+  names of Demiurge's look ([QOR-0016](decisions/QOR-0016-the-products-wear-lumen.md)),
+  as a product connects and whenever they change; every product, QQ's with
+  no channel too, is also given them as it starts (`QOR_THEME_COLORS`). A
   newer place, theme, player, prefs or play replaces one not yet sent. What
   QOR Media reports on its poll is for the Library, and is passed over until
   it exists.

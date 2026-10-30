@@ -56,6 +56,25 @@ medians:
 The same within run-to-run noise: the change does its work when a client's
 window opens, and the tour opens none.
 
+Re-measured on 2026-10-30, before and after the products took Lumen's colours
+(QOR-0016: `Theme.productColors` in the Kit, a `theme` for ProductHost). This
+was Prism on Linux, `prism --size 1600x1000 --benchmark 8`, hidden: Qt's
+offscreen platform and the software scene graph, under WSL, fenced from the
+GPU, so no window reached the desktop. It is the same build folder, rebuilt
+without and with the change. The medians:
+
+| Build | Runs | Average | p50 | p95 | p99 | Missed | Input to swap p50 / p95 |
+|-------|------|---------|-----|-----|-----|--------|-------------------------|
+| Before (`3650c4d`) | 3 | 7.35 ms | 7.24 ms | 8.52 ms | 9.22 ms | 0% | 8.00 / 9.76 ms |
+| After, straight after its rebuild | 5 | 7.36 ms | 7.23 ms | 8.51 ms | 9.27 ms | 0% | 7.80 / 10.41 ms |
+| After, the machine idle | 5 | 7.37 ms | — | 8.54 ms | — | 0% | 8.03 / 9.97 ms |
+
+Frame times are the same. Input to swap counts 40 inputs a run, so its p95 is
+the second slowest. The first five runs after the change put it at 10.04 to
+11.33 ms; five more on an idle machine put it at 9.51 to 10.62 ms, against 9.53
+to 9.86 ms before. The colours are worked out when the theme changes, and the
+tour changes none.
+
 ### Input-to-swap latency (2026-10-24)
 
 `inputToSwap` times a pointer move over the Shelf. The clock starts when the
