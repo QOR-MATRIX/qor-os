@@ -38,11 +38,10 @@ Plug it in again to try ARQADE or QQ with it on Windows.
 
 ## Needs you
 
-1. **Merge demiurge-chain #115**, its records of the release.
-2. **A real Linux machine with a graphics card**: what stands between QOR OS
+1. **A real Linux machine with a graphics card**: what stands between QOR OS
    and Phase 1's goal, Orb Run played in Prism with a DualSense (*the
    PlayStation 5 controller*). WSL (*Windows' built-in Linux*) sees none.
-3. **Legal, still open:** trademark advice for "QOR OS", the legal entity, the
+2. **Legal, still open:** trademark advice for "QOR OS", the legal entity, the
    Qt letter; replacing the 5 October key; the Store keys' backup off this PC.
 
 ## Next
