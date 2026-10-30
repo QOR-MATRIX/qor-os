@@ -1,6 +1,6 @@
 # Where QOR OS stands
 
-For Andrew, 29 October 2026 (evening). One page, rewritten every session
+For Andrew, 29 October 2026 (night). One page, rewritten every session
 (`AGENTS.md` §2).
 
 ## What QOR OS is
@@ -14,23 +14,25 @@ here at `X:\Repoz\QOR-OS`. Phase 1: the three products on Linux, in Prism.
 
 1. **The freezes are stopped.** Linux test runs in WSL (*Windows' built-in
    Linux*) no longer touch the graphics card and use at most half the PC.
-   Without the card, QOR Media passes everything, ARQADE three suites of four
-   and QQ four of eight; QQ's timing tests fail because software is slow.
-2. **qorsync.dev leads with QOR OS** (*demiurge-chain's ADR-123*), live since
-   you merged #110.
-3. **Entire is not used** (QOR-0014); you removed its app and merged #111
-   and #112, its records.
-4. **CI works again.** Its runners (*the PCs that run the checks*) are now
-   registered to `qor-os`, and every Build since has passed.
-5. **QQ, ARQADE and QOR Media are now developed here** (QOR-0015), as you
-   chose. Their copies in demiurge-chain are *frozen* (kept, not worked on)
-   since you merged #113, its ADR-126, and the Windows launcher keeps shipping
-   them. New work on them is
-   proprietary until the public SDK's record decides about QQ's source. The
-   374 files that came from demiurge-chain stay Apache-2.0 (*the open
-   licence*), and a check now tells old files from new. ARQADE's five rule
-   files stay the same in both repositories, because ARQADE's server judges
-   runs by them.
+2. **Housekeeping.** qorsync.dev leads with QOR OS (#110). Entire is not used
+   (QOR-0014; #111 and #112). CI's runners (*the PCs that run the checks*)
+   are registered to `qor-os`, and its builds pass again.
+3. **QQ, ARQADE and QOR Media are developed here** (QOR-0015). You merged
+   demiurge-chain #113, which *freezes* their copies there (kept, not worked
+   on); the Windows launcher keeps shipping those. The 374 files that came
+   from demiurge-chain stay Apache-2.0 (*the open licence*); new work on them
+   is ours. ARQADE's five rule files stay the same in both repositories.
+4. **Prism hosts ARQADE and QOR Media.** Prism now starts them itself and
+   speaks the same private protocol as the Windows launcher: a channel only
+   the program it started can use, and a one-time password on that program's
+   input. Prism lays out their windows by its own plan and names them from
+   its own records. ARQADE is in Beam (*the search bar*) where it is
+   installed; QOR Media opens a file Prism gives it, ready for the Library.
+   - Checked on Windows and Linux, and in Linux CI with stand-ins, in a hidden
+     Prism. The real ARQADE and QOR Media also ran in a hidden Prism, off the
+     graphics card.
+   - Not run: the shell's speed benchmark, which opens a window on your
+     desktop. This change adds no drawing work; say if you want it run.
 
 ## Needs you
 
@@ -44,5 +46,6 @@ here at `X:\Repoz\QOR-OS`. Phase 1: the three products on Linux, in Prism.
 
 ## Next
 
-Phase 1: Prism hosts the products and places their windows; QOR.Input drives
-QQ; Lumen themes them; then a controller-first Home and Library.
+Phase 1: QQ Studio and Player in Prism at their own size; the controller
+service drives QQ; Lumen themes the products; then a controller-first Home
+and Library.

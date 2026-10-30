@@ -102,9 +102,25 @@ Item {
         return Math.max(workArea.y, Math.min(y, workArea.y + workArea.height - h));
     }
 
+    // Where a client window with content of this size opens: cascaded like
+    // the others, within the work area, with room for its title bar
+    // (AppWindow.titleBarHeight). Prism plans a product's window this way.
+    // Before the work area is laid out, the size is the content's own.
+    function planClient(contentWidth: real, contentHeight: real): rect {
+        const index = windowsOn(currentSpace).length;
+        const w = workArea.width > 60 ? Math.min(contentWidth, workArea.width - 60) : contentWidth;
+        const h = workArea.height > 40 ? Math.min(contentHeight + 40, workArea.height - 40) : contentHeight + 40;
+        const cascade = (index % 5) - 2;
+        return Qt.rect(cascadeX(w, cascade), cascadeY(h, cascade), w, h);
+    }
+
     // Name and icon for an app that is not a first-party one (a Wayland
-    // client): from its desktop entry, else its window title.
+    // client): a product's from Prism's own record; any other's from its
+    // desktop entry, else its window title.
     function clientIdentity(appId: string): var {
+        const product = ProductHost.product(appId);
+        if (product.id !== undefined)
+            return { name: product.name, icon: "", glyph: product.glyph, hue: product.hue, chroma: product.chroma };
         const entry = DesktopEntries.lookup(appId);
         const window = find(appId);
         return {
@@ -228,20 +244,24 @@ Item {
     }
 
     // Manages a window for a Wayland xdg-toplevel (Prism compositor only).
-    function adopt(shellSurface: var, toplevel: var): AppWindow {
+    // `product` is { id, frame } for a product Prism hosts: its window is
+    // known by the product's id, whatever the client calls itself, and opens
+    // at the frame Prism planned for it (null: planned now).
+    function adopt(shellSurface: var, toplevel: var, product: var): AppWindow {
         const index = windowsOn(currentSpace).length;
         const w = Math.min(960, workArea.width - 60);
         const h = Math.min(640, workArea.height - 40);
         const cascade = (index % 5) - 2;
+        const frame = product ? product.frame : Qt.rect(cascadeX(w, cascade), cascadeY(h, cascade), w, h);
         const window = windowFactory.createObject(strip, {
             manager: layer,
-            appId: toplevel.appId,
+            appId: product ? product.id : toplevel.appId,
             title: toplevel.title,
             space: currentSpace,
-            normalX: cascadeX(w, cascade),
-            normalY: cascadeY(h, cascade),
-            normalW: w,
-            normalH: h,
+            normalX: frame.x,
+            normalY: frame.y,
+            normalW: frame.width,
+            normalH: frame.height,
             origin: Qt.rect(workArea.x + workArea.width / 2 - 40, workArea.y + workArea.height / 2 - 30, 80, 60),
             shellSurface: shellSurface,
             toplevel: toplevel,
@@ -250,7 +270,8 @@ Item {
         // Clients usually set their title and app id just after creating the
         // toplevel, so both are followed rather than read once.
         toplevel.titleChanged.connect(() => window.title = toplevel.title);
-        toplevel.appIdChanged.connect(() => window.appId = toplevel.appId);
+        if (!product)
+            toplevel.appIdChanged.connect(() => window.appId = toplevel.appId);
         // Its manager at the time: the window may have moved to another display.
         window.closed.connect(() => window.manager.remove(window));
         windows = windows.concat([window]);

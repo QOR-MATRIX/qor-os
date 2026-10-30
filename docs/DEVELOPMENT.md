@@ -240,9 +240,10 @@ The **state** includes:
   on-screen rectangles, Space, `display`, `visible`, `commits` (client
   commits) and `overviewMix` (how far into its Overview place).
   Wayland clients also report their window geometry, configured size, Shelf
-  identity and surface item (with `onOutput`).
+  identity and surface item (with `onOutput`);
+- `products`: each product Prism hosts, by id, `available` and `running`.
 
-Two suites use the runner (label `gpu`):
+Two suites use the runner (label `gpu`), and a third needs no display:
 
 - **`shell_e2e`** runs `tests/shell/apps.e2e.json` in `qor-shell` on every
   platform. A Lumen `Switch` receives a click, and maximise, snap, minimise,
@@ -261,6 +262,32 @@ Two suites use the runner (label `gpu`):
   - Overview and close.
 
   Run it with `--keep` to keep the states and screenshots.
+- **`prism_products`** (Linux) runs `tests/prism/products.e2e.json` through
+  `tools/dev/prism-products.py`. Prism runs on the offscreen platform, draws
+  in software in a runtime folder of its own, and shows nothing, so the suite
+  needs neither a display nor a graphics card. Stand-ins for ARQADE and QOR
+  Media (`prism-test-arqade`, `prism-test-media`) speak the products' side of
+  the host protocol. Prism starts them and the suite checks:
+  - each window's place and size, and that it is named from Prism's record;
+  - that the Motion setting reaches ARQADE while it runs;
+  - that opening ARQADE again brings back its window;
+  - that closing a window ends its product.
+
+### Run a product inside Prism
+
+Prism starts ARQADE and QOR Media itself and places their windows
+([ARCHITECTURE.md](ARCHITECTURE.md#hosted-by-prism)). It finds each where
+`QOR_ARQADE` or `QOR_MEDIA` points, else beside its own program. On Linux,
+after `tools/dev/products.sh` has built them:
+
+```bash
+export QOR_ARQADE=$PWD/build/products-linux/arqade/arqade
+export QOR_MEDIA=$PWD/build/products-linux/media/qor-media
+./build/linux-release/prism/compositor/prism --unlocked
+```
+
+ARQADE is then in Beam. QOR Media opens the files Prism hands it
+(`Desktop.openInMedia(path, kind)`, which the Library will call).
 
 ### Add an icon
 
@@ -377,6 +404,7 @@ and mark any record it supersedes or amends.
 | `tools/dev/products.sh` | Build and test QQ, ARQADE and QOR Media on Linux, on a display nobody sees and, under WSL, fenced from the GPU ([BUILDING.md](BUILDING.md#on-linux)) |
 | `tools/dev/products-display.qml` | That display: a compositor on Qt's offscreen platform, for the products' suites |
 | `tools/dev/secret-service.py` | That run's keyring: an in-memory Secret Service on the run's own session bus ([QOR-0011](decisions/QOR-0011-the-creators-provider-key-in-the-secret-service.md)) |
+| `tools/dev/prism-products.py` | Prism hosting stand-ins for ARQADE and QOR Media, offscreen and in software (`prism_products`) |
 | `tools/upstream/demiurge.sh` | Pull ARQADE's fixtures and the one look from demiurge-chain, check ARQADE's rules match it, write patches for upstream |
 | `tools/ci/runners.ps1` | Move the workstation's two CI runners to the organisation or a repository, and start them |
 | `qorctl` | Drive services from the command line ([SERVICES.md](SERVICES.md#qorctl)) |

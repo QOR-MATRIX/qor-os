@@ -2,7 +2,7 @@
 
 | Path | Contents |
 |------|----------|
-| `shell/` | **QOR.Shell**: `Main` (simulator window), `Desktop` (orchestration, layering, shortcuts, actions), `WindowLayer` + `AppWindow` (window management), `Rail`, `LiveActivity`, `MediaPopover`, `Shelf` + `ShelfButton`, `Beam` + `search.js`, `ControlCenter`, `NotificationStack` + `NotificationCard`, `LockScreen`, `SpaceSwitcher` |
+| `shell/` | **QOR.Shell**: `Main` (simulator window), `Desktop` (orchestration, layering, shortcuts, actions), `WindowLayer` + `AppWindow` (window management), `Rail`, `LiveActivity`, `MediaPopover`, `Shelf` + `ShelfButton`, `Beam` + `search.js`, `ControlCenter`, `NotificationStack` + `NotificationCard`, `LockScreen`, `SpaceSwitcher`, `ProductHost` (`producthost.cpp`: hosting the products) |
 | `host/` | **qor-shell**: CLI options, embedded simulator, screenshot, `--benchmark`, GPU preference (`gpupreference.cpp`) |
 | `compositor/` | **prism** (Linux, experimental): `Compositor.qml` hosts the same `Desktop` in a Qt Wayland Compositor scene; xdg-shell, server- and client-side decorations, text input |
 
@@ -20,6 +20,20 @@ WAYLAND_DISPLAY=wayland-qor QT_QPA_PLATFORM=wayland some-qt-app
 
 Without `--socket`, Prism takes the first free socket in `$XDG_RUNTIME_DIR`
 (`wayland-1` inside most sessions) and prints it at start.
+
+## Hosting the products
+
+Prism starts ARQADE and QOR Media as its own Wayland clients and speaks the
+QOR Launcher's side of their host protocol: a private channel, a one-time
+token on the product's stdin, and `place` with the frame Prism planned, since
+on Wayland the product's window stays a toplevel
+([QOR-0010](../docs/decisions/QOR-0010-on-wayland-prism-places-the-products-windows.md)).
+It knows a product's window by its process and names it from its own record.
+Point it at their builds with `QOR_ARQADE` and `QOR_MEDIA`
+([DEVELOPMENT.md](../docs/DEVELOPMENT.md#run-a-product-inside-prism));
+[ARCHITECTURE.md](../docs/ARCHITECTURE.md#hosted-by-prism) has the details.
+`tst_producthost` tests the protocol. `prism_products` runs Prism offscreen
+with stand-ins for both products, needing no display.
 
 ## End-to-end tests
 

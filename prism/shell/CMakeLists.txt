@@ -38,6 +38,7 @@ qt_add_qml_module(qor_shell
         search.js
     SOURCES
         desktopentries.h desktopentries.cpp
+        producthost.h producthost.cpp
     DEPENDENCIES
         QtQuick
         QtQuick.Controls
@@ -63,5 +64,7 @@ target_link_libraries(qor_shell
         qor_input
         qor_store
     PRIVATE
+        # The products' channels (producthost.cpp).
+        Qt6::Network
         qor::compiler_settings
 )

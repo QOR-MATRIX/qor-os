@@ -213,6 +213,13 @@ FocusScope {
             surface = "";
         // An app already open on another display comes back there.
         const owner = displays.find(layer => layer.find(appId) !== null) ?? windows;
+        // A product Prism hosts, with no window yet, is asked to show one.
+        if (owner.find(appId) === null && ProductHost.product(appId).launchable === true) {
+            showProduct(appId, null);
+            if (surface === "overview")
+                surface = "";
+            return;
+        }
         const window = owner.open(appId, shelf.originFor(appId), args === undefined ? ({}) : args);
         if (window && window.space !== currentSpace)
             currentSpace = window.space;
@@ -251,6 +258,51 @@ FocusScope {
 
     // ── Compositor integration (Prism on device) ───────────────────────────
     readonly property alias windowLayer: windows
+    // Set by Prism: a trusted xdg-activation token for a window it opens.
+    property var activationToken: () => ""
+
+    // ── Products (ARQADE, QOR Media) ───────────────────────────────────────
+    // Prism hosts them as Wayland clients (ProductHost, QOR-0010). It plans a
+    // product's window before asking the product to show it and tells the
+    // product that content rectangle in `place`; when the window arrives it
+    // is laid out by the same plan, made again then (adoptSurface).
+    Binding { target: ProductHost; property: "reducedMotion"; value: Theme.reduceMotion }
+
+    // Shows a product, starting it if need be: `file` ({ path, kind }) is
+    // what QOR Media opens. False if it cannot be shown here.
+    function showProduct(id: string, file: var): bool {
+        const product = ProductHost.product(id);
+        if (product.id === undefined)
+            return false;
+        const frame = windows.planClient(product.width, product.height);
+        // The content below the title bar, in the output's physical pixels
+        // (1 while the output's screen is not known).
+        const ratio = Screen.devicePixelRatio > 0 ? Screen.devicePixelRatio : 1;
+        const content = Qt.rect(Math.round(frame.x * ratio), Math.round((frame.y + 40) * ratio),
+                                Math.round(frame.width * ratio), Math.round((frame.height - 40) * ratio));
+        const shown = file ? ProductHost.open(id, file.path, file.kind, content, activationToken())
+                           : ProductHost.place(id, content, activationToken());
+        if (!shown)
+            toast.show(product.glyph, qsTr("%1 cannot be opened here").arg(product.name));
+        return shown;
+    }
+
+    // Opens a file in QOR Media: a video, audio, picture or document.
+    function openInMedia(path: string, kind: string): bool {
+        if (locked)
+            return false;
+        surface = "";
+        return showProduct("qor-media", { path: path, kind: kind });
+    }
+
+    Connections {
+        target: ProductHost
+        function onExited(id: string, failed: bool) {
+            const product = ProductHost.product(id);
+            if (failed)
+                toast.show(product.glyph, qsTr("%1 stopped").arg(product.name));
+        }
+    }
 
     // ── Displays ────────────────────────────────────────────────────────────
     // Every display's window layer, left to right: this one first, then those
@@ -300,7 +352,14 @@ FocusScope {
         return displays.reduce((list, layer) => list.concat(layer.windows), []);
     }
 
-    function adoptSurface(shellSurface: var, toplevel: var): AppWindow {
+    // `product`: the product Prism hosts that the client is (ProductHost's
+    // productOf), or "". Its window goes where Prism plans it.
+    function adoptSurface(shellSurface: var, toplevel: var, product: string): AppWindow {
+        if (product !== "") {
+            const record = ProductHost.product(product);
+            return windows.adopt(shellSurface, toplevel,
+                                 { id: product, frame: windows.planClient(record.width, record.height) });
+        }
         // prism --spread-clients: each new client on the display with the
         // fewest windows (benchmarks put load on every output).
         let layer = windows;
@@ -308,7 +367,7 @@ FocusScope {
             for (const other of displays)
                 if (other.windows.length < layer.windows.length)
                     layer = other;
-        return layer.adopt(shellSurface, toplevel);
+        return layer.adopt(shellSurface, toplevel, null);
     }
 
     // Volume keys: sixteen steps, unmuting on the way up.

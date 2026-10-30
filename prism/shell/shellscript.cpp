@@ -3,6 +3,7 @@
 
 #include "gamepadmanager.h"
 #include "injection.h"
+#include "producthost.h"
 #include "services.h"
 #include "store.h"
 #include "storeengine.h"
@@ -1077,7 +1078,24 @@ private:
             // callbacks only when Prism draws, which a host compositor (WSLg)
             // may stop asking it to do.
             { u"frames"_s, qint64(m_frames.load()) },
+            { u"products"_s, productsState() },
         };
+    }
+
+    // The products Prism hosts, by id: { available, running }.
+    QJsonObject productsState() const
+    {
+        QJsonObject products;
+        auto *host = m_engine ? m_engine->singletonInstance<ProductHost *>("QOR.Shell", "ProductHost") : nullptr;
+        if (!host)
+            return products;
+        for (const QVariant &entry : host->products()) {
+            const QVariantMap product = entry.toMap();
+            products.insert(product.value(u"id"_s).toString(),
+                            QJsonObject { { u"available"_s, product.value(u"available"_s).toBool() },
+                                          { u"running"_s, product.value(u"running"_s).toBool() } });
+        }
+        return products;
     }
 
     QQuickWindow *m_window;

@@ -28,6 +28,14 @@ target_compile_definitions(tst_store PRIVATE
     QOR_STORE_CATALOG="${CMAKE_SOURCE_DIR}/store/catalog"
     QOR_STORE_PUB="${CMAKE_SOURCE_DIR}/store/keys/store.pub"
     QOR_STORE_FIXTURES="${CMAKE_CURRENT_SOURCE_DIR}/store/fixtures")
+# Prism's side of the QOR host protocol (prism/shell/producthost.h), against
+# a product with no window that tst_producthost_product stands in for.
+qt_add_executable(tst_producthost_product prism/producthost_product.cpp)
+target_link_libraries(tst_producthost_product PRIVATE Qt6::Core Qt6::Network qor::compiler_settings)
+set_target_properties(tst_producthost_product PROPERTIES WIN32_EXECUTABLE OFF)
+qor_add_test(tst_producthost SOURCES prism/tst_producthost.cpp LIBRARIES qor_shell Qt6::Network)
+target_compile_definitions(tst_producthost PRIVATE QOR_TEST_PRODUCT="$<TARGET_FILE:tst_producthost_product>")
+add_dependencies(tst_producthost tst_producthost_product)
 # The QOR core through its C bridge, built from demiurge-chain at the pinned commit (core/, QOR-0003).
 if(TARGET qor::core)
     qor_add_test(tst_qorcore SOURCES core/tst_qorcore.cpp LIBRARIES qor::core)
@@ -97,6 +105,26 @@ if(TARGET prism)
         add_test(NAME prism_e2e
             COMMAND Python3::Interpreter "${CMAKE_SOURCE_DIR}/tools/dev/prism-e2e.py" --build-dir "${CMAKE_BINARY_DIR}")
         set_tests_properties(prism_e2e PROPERTIES LABELS "gpu" TIMEOUT 180)
+    endif()
+
+    # ── Prism hosting the products (Linux, no display) ──────────────────────
+    # Stand-ins for ARQADE and QOR Media, started by Prism as a person would
+    # and placed by it. Prism runs offscreen and draws in software, so this
+    # needs no display and no graphics card, and shows nothing.
+    foreach(product IN ITEMS arqade media)
+        qt_add_executable(prism-test-${product} prism/prism_test_product.cpp)
+        target_link_libraries(prism-test-${product} PRIVATE Qt6::Gui Qt6::Network qor::compiler_settings)
+    endforeach()
+    target_compile_definitions(prism-test-arqade PRIVATE PRODUCT_ID="arqade" PRODUCT_NAME="ARQADE")
+    target_compile_definitions(prism-test-media PRIVATE PRODUCT_ID="qor-media" PRODUCT_NAME="QOR Media")
+    if(Python3_Interpreter_FOUND)
+        add_test(NAME prism_products
+            COMMAND Python3::Interpreter "${CMAKE_SOURCE_DIR}/tools/dev/prism-products.py"
+                --prism $<TARGET_FILE:prism>
+                --arqade $<TARGET_FILE:prism-test-arqade>
+                --media $<TARGET_FILE:prism-test-media>
+                --script "${CMAKE_CURRENT_SOURCE_DIR}/prism/products.e2e.json")
+        set_tests_properties(prism_products PROPERTIES TIMEOUT 120)
     endif()
 endif()
 

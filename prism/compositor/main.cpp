@@ -16,6 +16,7 @@
 
 #include "backend.h"
 #include "kit.h"
+#include "producthost.h"
 #include "services.h"
 #include "shellbenchmark.h"
 #include "shellscript.h"
@@ -164,6 +165,9 @@ int main(int argc, char *argv[])
 
     const QByteArray socketName = engine.rootObjects().constFirst()->property("socketName").toByteArray();
     qInfo("Prism is running. Start clients with WAYLAND_DISPLAY=%s", socketName.constData());
+    // The products Prism hosts open their windows here.
+    if (auto *products = engine.singletonInstance<qor::ProductHost *>("QOR.Shell", "ProductHost"))
+        products->setDisplay(QString::fromUtf8(socketName));
 
     // One QQuickWindow per WaylandOutput, the main display's (the Desktop's)
     // first.

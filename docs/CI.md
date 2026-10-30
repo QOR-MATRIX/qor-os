@@ -204,6 +204,10 @@ With `QOR_RUN_GPU_TESTS`, the Linux job also runs two things on WSLg's
 display: the GPU suites, and `tools/dev/prism-protocol-check.sh`, which
 connects real clients to the built compositor.
 
+`prism_products` runs in the plain test step, without it. Prism runs offscreen
+and in software, in a runtime folder of its own, with the session's display
+variables removed. Nothing reaches WSLg's display or the GPU.
+
 Two runner files are pinned rather than captured from the shell that
 configured the runner. `tools/ci/runners.ps1` writes both:
 

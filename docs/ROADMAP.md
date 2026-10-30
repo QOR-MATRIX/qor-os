@@ -54,6 +54,17 @@ QQ's, ARQADE's and QOR Media's suites.
 
   Linux CI does not run them yet ([CI.md](CI.md#the-carried-products)).
 - [ ] Each runs as a Wayland client of Prism, and Prism places it (the launcher's `place` request becomes a Prism layout request)
+
+  **ARQADE and QOR Media, 29 October:** Prism hosts them.
+  - `ProductHost` starts each as a Wayland client of Prism. It speaks the launcher's side of the host protocol, and
+    places and names their windows by its own plan and records ([ARCHITECTURE.md](ARCHITECTURE.md#hosted-by-prism)).
+  - `tst_producthost` tests the protocol on Windows and Linux. `prism_products` tests the hosting with stand-ins,
+    hidden, in Linux CI.
+  - The real ARQADE and QOR Media ran in a hidden, GPU-fenced Prism: their windows landed at the planned frames, and
+    closing them ended them.
+
+  **Left:** QQ Studio and the QQ Player. Prism does not start them yet, and opens their windows, like any other
+  client's, in its default 960 × 640 frame rather than at the size they ask for.
 - [ ] The controller service drives QQ through `Input`'s gamepad seam; ARQADE and QOR Media gain controller focus navigation
 - [ ] Lumen's tokens theme every app: Demiurge's one look (`docs/design/tokens.json`) mapped onto Lumen roles, with one source
 - [ ] A controller-first **Home** and **Library** in the shell: QQ games, ARQADE, media

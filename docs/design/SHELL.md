@@ -57,10 +57,11 @@ The universal command bar. <kbd>Ctrl</kbd>+<kbd>Space</kbd>,
 - A scrim plus a 24 px-radius glass panel at 16% of screen height, up to
   860 px wide. A results list on the left (56%) with section headers, and a
   preview pane on the right.
-- **Sources**: apps, actions (appearance, Overview, media, lock, Control
-  Center, Wi-Fi, Bluetooth, Focus, Reduce Motion, Reduce Transparency, living
-  wallpaper, test notification, Space 1–3, eight accent presets), settings
-  pages (deep links), and files (simulated index).
+- **Sources**: apps (with ARQADE under Prism, where it is installed),
+  actions (appearance, Overview, media, lock, Control Center, Wi-Fi,
+  Bluetooth, Focus, Reduce Motion, Reduce Transparency, living wallpaper,
+  test notification, Space 1–3, eight accent presets), settings pages (deep
+  links), and files (simulated index).
 - **Ranking**: fuzzy subsequence matching with exact, prefix and word-start
   bonuses, consecutive-run bonuses and length penalties. Sections are
   weighted (Apps 1.15, Actions 1.0, Settings 0.95, Files 0.9), kept
@@ -120,6 +121,11 @@ top-right on `snappy`.
 - **Wayland clients** (under `prism`): the same frame. Content is a
   `ShellSurfaceItem` below the title bar. Close asks the client
   (`sendClose`), and size changes are sent as xdg configures.
+- **The products** (under `prism`): ARQADE and QOR Media, which Prism starts
+  itself. Prism plans the window before the product shows it, at the
+  product's own size where there is room, and names it and gives it its icon
+  from Prism's own record. Closing the window ends the product. A toast says
+  so when a product crashes, exits with an error, or never connects.
 
 ### Spaces
 
@@ -261,8 +267,8 @@ On a device, <kbd>Super</kbd> bindings are added in Prism.
 
 `Desktop` exposes `setSurface(name)`, `toggleSurface(name)`,
 `launch(appId, args)`, `lock()`, `unlock()`, `switchSpace(index)`,
-`runAction(id, args)`, `adoptSurface(shellSurface, toplevel)` and
-`windowLayer`. `qor-shell --benchmark` drives `setSurface` and
+`runAction(id, args)`, `adoptSurface(shellSurface, toplevel, product)`,
+`openInMedia(path, kind)` and `windowLayer`. `qor-shell --benchmark` drives `setSurface` and
 `switchSpace` through these.
 
 ## Signature moments: status

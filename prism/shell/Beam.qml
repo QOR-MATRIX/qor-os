@@ -39,6 +39,15 @@ Item {
             icon: a.glyph, hue: a.hue, chroma: a.chroma, description: a.description,
             action: "app.open", args: JSON.stringify({ id: a.id })
         }));
+        // The products Prism hosts that open by themselves (ARQADE), where
+        // they are installed and Prism can show them.
+        for (const p of ProductHost.products)
+            if (p.launchable && p.available)
+                apps.push({
+                    kind: "app", id: p.id, title: p.name, subtitle: qsTr("Application"), keywords: p.keywords,
+                    icon: p.glyph, hue: p.hue, chroma: p.chroma, description: p.description,
+                    action: "app.open", args: JSON.stringify({ id: p.id })
+                });
 
         const s = Services.settings;
         const playing = Services.media.playing;

@@ -231,10 +231,17 @@ WaylandCompositor {
         }
     }
 
-    Component.onCompleted: desktop.windowLayer.surfaceDelegate = clientSurface
+    Component.onCompleted: {
+        desktop.windowLayer.surfaceDelegate = clientSurface;
+        // A window Prism opens (a product it starts) may take focus.
+        desktop.activationToken = () => activation.createToken();
+    }
 
     XdgShell {
-        onToplevelCreated: (toplevel, xdgSurface) => desktop.adoptSurface(xdgSurface, toplevel)
+        // A product Prism started is known by its process, never by what its
+        // toplevel says it is.
+        onToplevelCreated: (toplevel, xdgSurface) => desktop.adoptSurface(
+                               xdgSurface, toplevel, ProductHost.productOf(xdgSurface.surface.client.processId))
     }
 
     XdgDecorationManagerV1 {
@@ -251,6 +258,7 @@ WaylandCompositor {
     }
     CursorShapeManagerV1 { }
     XdgActivationV1 {
+        id: activation
         // A trusted request focuses the window; any other only asks for attention.
         onActivationRequested: (surface, trusted) => {
             const window = desktop.allWindows().find(w => w.shellSurface && w.shellSurface.surface === surface);

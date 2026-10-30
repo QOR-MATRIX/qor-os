@@ -13,7 +13,8 @@ Item {
     property Backdrop backdrop
     property var runningApps: []
     property var attentionApps: []
-    // appId => {name, icon} for apps outside the registry (Wayland clients).
+    // appId => {name, icon} for apps outside the registry (Wayland clients),
+    // with a glyph, hue and chroma for a product Prism hosts.
     property var identityProvider: appId => ({ name: appId, icon: "" })
     property bool overview: false
 
@@ -82,10 +83,10 @@ Item {
                 readonly property var app: AppRegistry.app(modelData)
                 readonly property var client: app ? null : shelf.identityProvider(modelData)
                 appId: modelData
-                glyph: app ? app.glyph : "app-window"
+                glyph: app ? app.glyph : (client.glyph ?? "app-window")
                 iconSource: client ? client.icon : ""
-                hue: app ? app.hue : 274
-                chroma: app ? app.chroma : 0.1
+                hue: app ? app.hue : (client.hue ?? 274)
+                chroma: app ? app.chroma : (client.chroma ?? 0.1)
                 label: app ? app.name : client.name
                 running: shelf.runningApps.indexOf(modelData) >= 0
                 attention: shelf.attentionApps.indexOf(modelData) >= 0
