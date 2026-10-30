@@ -2,9 +2,9 @@
 
 Conventions, recipes and debugging techniques for working on QOR OS. Read
 [ARCHITECTURE.md](ARCHITECTURE.md) first, and [`AGENTS.md`](../AGENTS.md) for
-the rules that bind every change. The carried products (QQ, ARQADE, QOR Media)
-keep their own conventions upstream; see [UPSTREAM.md](UPSTREAM.md) before
-changing them.
+the rules that bind every change. The products (QQ, ARQADE, QOR Media) keep
+the conventions they had in demiurge-chain; see [UPSTREAM.md](UPSTREAM.md)
+before changing them.
 
 ## 1. Daily loop
 
@@ -310,24 +310,26 @@ Create `kit/style/<Control>.qml` deriving from `QtQuick.Templates`
 Add a `case` in `Desktop.runAction()`, an entry in `Beam.catalog()`, and if it
 is useful from outside, a `qorctl` command or an `Intents` action.
 
-### Pull the carried products from upstream
+### Change a product
+
+Make the change here. A file from demiurge-chain (listed in
+`LICENSES/from-demiurge-chain.txt`) gets a `Changed for QOR OS:` comment near
+its top (Apache-2.0 §4(b)); a new file gets QOR OS's SPDX header. Keep the
+product's own formatting, and run `tools/dev/products.ps1` and
+`tools/dev/products.sh`, since a change for one platform must keep the other
+as it was. A change to ARQADE's rules is also made upstream, with its fixture
+([UPSTREAM.md](UPSTREAM.md#changing-a-games-rules)).
+
+### Pull ARQADE's fixtures and the one look from upstream
 
 ```bash
-tools/upstream/demiurge.sh status          # what each carried path was last split at, and the core's pin
-tools/upstream/demiurge.sh pull            # merge demiurge-chain main into every carried path
-pwsh tools/dev/products.ps1                # build and test what came in
+tools/upstream/demiurge.sh status          # last upstream commits, whether ARQADE's rules match, the core's pin
+tools/upstream/demiurge.sh pull            # merge demiurge-chain main's fixtures and copy its tokens.json
+pwsh tools/dev/products.ps1                # build and test the products against them
 tools/dev/products.sh                      # and on Linux
 ```
 
 Update the state tables in [UPSTREAM.md](UPSTREAM.md) in the same change.
-
-### Change a carried product for QOR OS only
-
-Make the change here, mark the file with a `Changed for QOR OS:` comment near
-its top (Apache-2.0 §4(b)), keep its upstream formatting, and run
-`tools/dev/products.ps1` and `tools/dev/products.sh`, since a change for Linux
-must keep Windows as it was. If the change is general, make it upstream instead,
-or send it there with `tools/upstream/demiurge.sh patch <commit>`.
 
 ### Use the QOR core
 
@@ -375,6 +377,6 @@ and mark any record it supersedes or amends.
 | `tools/dev/products.sh` | Build and test QQ, ARQADE and QOR Media on Linux, on a display nobody sees and, under WSL, fenced from the GPU ([BUILDING.md](BUILDING.md#on-linux)) |
 | `tools/dev/products-display.qml` | That display: a compositor on Qt's offscreen platform, for the products' suites |
 | `tools/dev/secret-service.py` | That run's keyring: an in-memory Secret Service on the run's own session bus ([QOR-0011](decisions/QOR-0011-the-creators-provider-key-in-the-secret-service.md)) |
-| `tools/upstream/demiurge.sh` | Pull carried code from demiurge-chain, show its state, write patches for upstream |
+| `tools/upstream/demiurge.sh` | Pull ARQADE's fixtures and the one look from demiurge-chain, check ARQADE's rules match it, write patches for upstream |
 | `tools/ci/runners.ps1` | Move the workstation's two CI runners to the organisation or a repository, and start them |
 | `qorctl` | Drive services from the command line ([SERVICES.md](SERVICES.md#qorctl)) |

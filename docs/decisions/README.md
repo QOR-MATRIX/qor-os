@@ -11,7 +11,7 @@ record supersedes it, and both say so.
 | Record | Decision | Status |
 |--------|----------|--------|
 | [QOR-0001](QOR-0001-one-rulebook-and-one-decision-log.md) | One rulebook (`AGENTS.md`) and this one log; three series: QOR, QTOS, Demiurge ADR | Accepted 2026-10-26 |
-| [QOR-0002](QOR-0002-one-repository-from-qtos-and-demiurge.md) | One private repository from QTOS's history; QQ, ARQADE and QOR Media carried with theirs at upstream paths; the network stays in demiurge-chain | Accepted 2026-10-26 |
+| [QOR-0002](QOR-0002-one-repository-from-qtos-and-demiurge.md) | One private repository from QTOS's history; QQ, ARQADE and QOR Media carried with theirs at upstream paths; the network stays in demiurge-chain | Accepted 2026-10-26; decision 3 superseded by QOR-0015 for the products |
 | [QOR-0003](QOR-0003-the-qor-core-at-a-pinned-commit.md) | The QOR core is built from demiurge-chain at a pinned commit, never copied; reached only through its bridge; a service of its own on the device | Accepted 2026-10-26 |
 | [QOR-0004](QOR-0004-the-base-image-is-fedora-atomic.md) | The image is built on Fedora Atomic with bootc: NVIDIA open modules, Mesa, whole-image updates with rollback; Yocto retired | Accepted 2026-10-26 |
 | [QOR-0005](QOR-0005-every-display-at-its-own-refresh.md) | Every display at its own refresh rate on every GPU is the acceptance test; Prism's own KMS backend; the bare-metal gate deferred, not failed | Accepted 2026-10-26 |
@@ -24,6 +24,7 @@ record supersedes it, and both say so.
 | [QOR-0012](QOR-0012-github-stays-the-source-of-truth-entire-mirrors-it.md) | GitHub stays the source of truth; Entire mirrors QOR OS once it hosts private repositories | Superseded by QOR-0014 (decision 2 first by QOR-0013), 2026-10-29 |
 | [QOR-0013](QOR-0013-entire-may-reach-every-repository.md) | Entire's app may reach every QOR-MATRIX repository, QOR OS included; GitHub stays the source of truth | Superseded by QOR-0014, 2026-10-29 |
 | [QOR-0014](QOR-0014-qor-os-does-not-use-entire.md) | QOR OS does not use Entire: GitHub alone, as before; Entire's app removed from the organisation | Accepted 2026-10-29 |
+| [QOR-0015](QOR-0015-the-products-are-developed-here.md) | QQ, ARQADE's app and games, and QOR Media are developed here, no longer pulled; demiurge-chain's copies frozen (its ADR-126), which the Windows launcher ships; ARQADE's fixtures, the one look and the core still come from upstream; new work is proprietary until the SDK's record | Accepted 2026-10-29 |
 
 ## QTOS (inherited)
 

@@ -15,13 +15,30 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE.
 
-Code carried from demiurge-chain
---------------------------------
-The paths listed under "Code carried from demiurge-chain" in
-THIRD_PARTY_NOTICES.md (products/qq, products/arqade/qt, products/arqade/games,
-products/arqade/tests/fixtures, tools/qor-media and docs/design/tokens.json)
-are licensed under the Apache License, Version 2.0, not under this license.
-Its text is LICENSES/Apache-2.0.txt.
+Code from demiurge-chain
+------------------------
+These are licensed under the Apache License, Version 2.0, not under this
+license. Its text is LICENSES/Apache-2.0.txt.
+
+- products/arqade/tests/fixtures and docs/design/tokens.json, which are still
+  carried from demiurge-chain.
+- The files listed in LICENSES/from-demiurge-chain.txt, in products/qq,
+  products/arqade/qt, products/arqade/games and tools/qor-media, as they stood
+  on 29 October 2026, when the development of those paths moved to QOR OS
+  (docs/decisions/QOR-0015-the-products-are-developed-here.md).
+
+Changes made to those files after that, and files added to those four paths,
+are licensed under this license, as section 4 of the Apache License allows
+for modifications. A file from demiurge-chain changed in QOR OS says so near
+its top. The exception is ARQADE's five rule modules, which ARQADE's server
+shares. They are kept the same as demiurge-chain's and remain under the Apache
+License as they change:
+
+- products/arqade/games/orbital/logic/rules.mjs
+- products/arqade/games/void-runner/logic/rules.mjs
+- products/arqade/games/synapse/logic/rules.mjs
+- products/arqade/games/rift-survivor/logic/rules.mjs
+- products/arqade/games/arenas/logic/arena.mjs
 
 Third-party components
 ----------------------

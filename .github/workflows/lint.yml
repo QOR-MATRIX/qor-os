@@ -42,7 +42,7 @@ jobs:
       - name: SPDX license headers
         run: python tools/ci/check_headers.py
 
-      # Code carried from demiurge-chain keeps its upstream form (docs/UPSTREAM.md).
+      # The products from demiurge-chain keep their own form (QOR-0015, docs/UPSTREAM.md).
       - name: clang-format (pinned in requirements-dev.txt)
         run: |
           git ls-files '*.cpp' '*.h' ':!:platform/common/lumentokens.h' ':!:sdk/**' \

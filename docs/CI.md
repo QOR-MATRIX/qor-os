@@ -4,7 +4,7 @@ Workflows live in [`.github/workflows/`](../.github/workflows/).
 
 | Workflow | Runs on | Needs Qt | Checks |
 |----------|---------|----------|--------|
-| **Lint** (`lint.yml`) | `ubuntu-24.04` | No | Generated tokens are current, token generator tests, the Store's signed catalogue, SPDX headers, clang-format 20.1.8, JSON validity. Carried code ([UPSTREAM.md](UPSTREAM.md)) is skipped by the header and format checks |
+| **Lint** (`lint.yml`) | `ubuntu-24.04` | No | Generated tokens are current, token generator tests, the Store's signed catalogue, SPDX headers, clang-format 20.1.8, JSON validity. The products keep their own form, so the format checks skip them; the header check skips only their files from demiurge-chain (`LICENSES/from-demiurge-chain.txt`, [UPSTREAM.md](UPSTREAM.md)) |
 | **Build** (`build.yml`) | Windows and Linux, self-hosted (or hosted with the online installer) | Yes (commercial) | Configure (`ci-windows`/`ci-linux`, warnings as errors, the QOR core required), build, `all_qmllint`, `ctest -LE gpu` (plus `-L gpu` when enabled). On both, the carried products (QQ, ARQADE, QOR Media) when they changed. Tags and manual runs also upload an installable Windows artifact (kept 7 days) |
 
 Both run on pushes to `main`, on pull requests and on demand; Build also runs on `v*` tags.
@@ -132,8 +132,8 @@ variables, so each repository sets its own:
 |----------|-------|--------|
 | `QOR_WINDOWS_RUNNER` | `["self-hosted","windows","qt"]` | Windows job runs on the workstation |
 | `QOR_WINDOWS_QT_DIR` | `C:/Qt/6.12.0/msvc2022_64` | Use the installed kit; skip the installer |
-| `QOR_RUN_GPU_TESTS` | `true` (optional) | Also run GPU-labelled suites and the carried products (opens brief test windows on the runner's desktop) |
-| `QOR_RUN_LINUX_PRODUCTS` | `true` (optional, unset) | With `QOR_RUN_GPU_TESTS`, also run the carried products on Linux ([why it is off](#the-carried-products)) |
+| `QOR_RUN_GPU_TESTS` | `true` (optional) | Also run GPU-labelled suites and the products (opens brief test windows on the runner's desktop) |
+| `QOR_RUN_LINUX_PRODUCTS` | `true` (optional, unset) | With `QOR_RUN_GPU_TESTS`, also run the products on Linux ([why it is off](#the-carried-products)) |
 | `QOR_LINUX_RUNNER` | `["self-hosted","linux","qt"]` | Linux job runs in WSL on the workstation |
 | `QOR_LINUX_QT_DIR` | `/home/<user>/Qt/6.12.0/gcc_64` | Use the installed kit |
 

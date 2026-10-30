@@ -3,8 +3,7 @@
 QOR OS is built entirely with Qt. This is the authoritative list of every Qt
 module, add-on and tool in the Qt 6.12 Enterprise installation, with its role
 in QOR OS and when it is adopted. "In use" covers the OS and the products
-carried from demiurge-chain (QQ, ARQADE, QOR Media), named where only they use
-a module. Status:
+(QQ, ARQADE, QOR Media), named where only they use a module. Status:
 
 - **In use**: compiled and exercised in the current tree.
 - **Phase N**: scheduled for that roadmap phase ([ROADMAP.md](ROADMAP.md)).

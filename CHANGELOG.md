@@ -3,8 +3,9 @@
 All notable changes to QOR OS, and before it QTOS, are recorded here. The
 format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project uses [Semantic Versioning](https://semver.org/) from 1.0 onward. The
-carried products (QQ, ARQADE, QOR Media) keep their own history upstream in
-demiurge-chain; pulls from it are recorded here.
+products (QQ, ARQADE, QOR Media) kept their own history in demiurge-chain until
+29 October 2026 ([QOR-0015](docs/decisions/QOR-0015-the-products-are-developed-here.md));
+their changes since, and pulls of what is still shared, are recorded here.
 
 ## [Unreleased]
 
@@ -36,6 +37,10 @@ QOR OS begins: QTOS and Demiurge's device-side products in one repository
 
 ### Changed
 
+- **[QOR-0015](docs/decisions/QOR-0015-the-products-are-developed-here.md): QQ, ARQADE's app and games, and QOR Media are developed here** from 29 October 2026, no longer pulled from demiurge-chain, whose copies its ADR-126 freezes and its Windows launcher keeps shipping. Nothing had changed upstream in their paths since the carry (`28d9e97`, identical to `db98ac0`). The owner chose each part of it: the products move and the core and both launchers stay; new work on QQ is closed until the public SDK's record; the launcher ships frozen copies.
+  - **Licence:** the 374 files that came from demiurge-chain are listed in `LICENSES/from-demiurge-chain.txt` and stay Apache-2.0; work on the products since is QOR OS's (`LICENSE`, `THIRD_PARTY_NOTICES.md`). `tools/ci/check_headers.py` now checks the products: a file not on the list needs QOR OS's SPDX header, and the list may name only files that exist (`tests/tools/test_check_headers.py`, 5 cases).
+  - **Still shared:** ARQADE's five rule modules (each game's `logic/rules.mjs`, the arenas' `logic/arena.mjs`), which ARQADE's Node tests upstream import and its service is to judge runs by, stay identical there and Apache-2.0, and change in both at once with their fixtures. `tools/upstream/demiurge.sh` now pulls only the fixtures and `docs/design/tokens.json`, says whether the rules match upstream, and writes patches of all three.
+  - `AGENTS.md` §3 and §7, UPSTREAM, ARCHITECTURE §11, BUILDING §6, DEVELOPMENT, CI, CONTRIBUTING, README, VISION and the roadmap say so.
 - The product is **QOR OS**. README, VISION, ROADMAP, ARCHITECTURE, BUILDING, DEVELOPMENT, CI, PERFORMANCE, QT-MODULES, STORE, CONTRIBUTING, SECURITY, issue templates, labels and milestones are rewritten for it.
 - **The name is QOR OS in the code too** ([QOR-0009](docs/decisions/QOR-0009-the-name-is-qor-os.md), superseding QOR-0008's wait for clearance). QTOS now names only the predecessor.
   - Code: the `qor::` namespace, `qor_*` targets, `qor.*` logging categories, `QOR.*` QML modules (`QOR.Kit`, `QOR.Shell`, `QOR.Services`, `QOR.Store`, `QOR.Input`, `QOR.Apps`, `QOR.Prism`), `QOR_*` options and environment variables, `LicenseRef-QOR-OS-Proprietary`, and `project(qor-os)`.

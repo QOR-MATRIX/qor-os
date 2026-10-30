@@ -1,6 +1,7 @@
 # Where QOR OS stands
 
-For Andrew, 29 October 2026. One page, rewritten every session (`AGENTS.md` §2).
+For Andrew, 29 October 2026 (evening). One page, rewritten every session
+(`AGENTS.md` §2).
 
 ## What QOR OS is
 
@@ -11,37 +12,36 @@ here at `X:\Repoz\QOR-OS`. Phase 1: the three products on Linux, in Prism.
 
 ## This session
 
-1. **The freezes are stopped.** Three on 28 October each came from a Linux
-   test run in WSL (*Windows' built-in Linux*) using the graphics card, and a
-   test stuck in its driver. Under WSL, `products.sh` now hides the card from
-   the run, draws on the processor, and uses at most half the PC. 45 minutes
-   of watched runs: nothing reached the card, and the PC stayed up.
-2. **Results without the card:** QOR Media passes everything; ARQADE three
-   suites of four (one Orbital case cannot finish a frame in software); QQ
-   four of eight, with every agent-key test passing in Linux's keyring. QQ's
-   timing tests fail because software runs slower than real time. A crash in
-   the hidden test display was fixed.
-3. **Committed and pushed** (`86dad74`). QQ on Windows passed every suite.
-4. **qorsync.dev now leads with QOR OS** (*demiurge-chain's ADR-123*): you
-   merged #110, it was read live from outside, and search engines were told
-   (IndexNow). It says only what ADR-123 lists, including "no download yet".
-5. **Entire is not used** (QOR-0014), on my recommendation, which you asked
-   for: it duplicated GitHub, had no CI for your licensed Qt kit, and its app
-   could write to this private repository. You removed the app; GitHub alone,
-   as before. You also merged demiurge-chain #111 and #112, its records.
-6. **CI works again.** Its runners (*the PCs that run the checks*) had taken
-   no jobs since 3:36 AM, even re-registered: GitHub had stopped giving jobs
-   to organisation-wide runners. Registered to `qor-os` instead, they took the
-   waiting Build within 15 seconds, and it passed on Windows and Linux; that
-   is now the script's default.
+1. **The freezes are stopped.** Linux test runs in WSL (*Windows' built-in
+   Linux*) no longer touch the graphics card and use at most half the PC.
+   Without the card, QOR Media passes everything, ARQADE three suites of four
+   and QQ four of eight; QQ's timing tests fail because software is slow.
+2. **qorsync.dev leads with QOR OS** (*demiurge-chain's ADR-123*), live since
+   you merged #110.
+3. **Entire is not used** (QOR-0014); you removed its app and merged #111
+   and #112, its records.
+4. **CI works again.** Its runners (*the PCs that run the checks*) are now
+   registered to `qor-os`, and every Build since has passed.
+5. **QQ, ARQADE and QOR Media are now developed here** (QOR-0015), as you
+   chose. Their copies in demiurge-chain are *frozen* (kept, not worked on),
+   and the Windows launcher keeps shipping them. New work on them is
+   proprietary until the public SDK's record decides about QQ's source. The
+   374 files that came from demiurge-chain stay Apache-2.0 (*the open
+   licence*), and a check now tells old files from new. ARQADE's five rule
+   files stay the same in both repositories, because ARQADE's server judges
+   runs by them.
 
 ## Needs you
 
-1. **A real graphics card for Linux testing:** a Linux boot (recommended), or
+1. **Merge demiurge-chain #113**: ADR-126, the freeze there. It changes no
+   code.
+2. **A real graphics card for Linux testing:** a Linux boot (recommended), or
    a careful WSL trial on the NVIDIA card, which might freeze the PC again.
-2. **Trademark advice for "QOR OS"** is still open, and the site now uses the
-   name publicly. Also open: the legal entity, the Qt letter, replacing the
-   5 October key, moving the Store keys' backup off this PC.
+3. **Legal, still open:** trademark advice for "QOR OS", which the site now
+   uses publicly; the legal entity; the Qt letter. When a lawyer reads the
+   list, add the new paragraph in `LICENSE` that makes the products' new work
+   proprietary. Also open: replacing the 5 October key, and moving the Store
+   keys' backup off this PC.
 
 ## Next
 

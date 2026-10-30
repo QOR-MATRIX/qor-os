@@ -523,9 +523,9 @@ qor-os/
 ├─ platform/         Lumen QStyle, qor QPA platform theme, widgets gallery
 ├─ core/             the QOR core, built from demiurge-chain at a pinned commit (Rust, Corrosion)
 ├─ products/
-│  ├─ qq/            QQ: runtime, Studio, Player, agent (carried, Apache-2.0)
-│  └─ arqade/        ARQADE's Qt app, games and fixtures (carried, Apache-2.0)
-├─ tools/            qorctl, generators, dev, CI and upstream scripts; qor-media/ (QOR Media, carried)
+│  ├─ qq/            QQ: runtime, Studio, Player, agent (from demiurge-chain)
+│  └─ arqade/        ARQADE's Qt app, games and fixtures (from demiurge-chain)
+├─ tools/            qorctl, generators, dev, CI and upstream scripts; qor-media/ (QOR Media)
 ├─ image/            the Fedora Atomic image (Phase 3)
 ├─ sdk/              app template
 ├─ tests/            Qt Test, Qt Quick Test, Python
@@ -540,7 +540,7 @@ extensions).
 - CMake presets + **Qt 6.12** (commercial kit); move to the next LTS when validated.
 - `qt_add_qml_module` everywhere, so QML is AOT-compiled with `qmlsc` and type-checked with `qmllint` (zero warnings).
 - **Rust** (1.91+) builds the QOR core through Corrosion.
-- The carried products keep their own builds (`tools/dev/products.ps1`).
+- The products keep their own builds (`tools/dev/products.ps1`).
 - bootc builds images; `systemd-sysext` handles fast on-device iteration.
 
 ### Testing
@@ -571,7 +571,7 @@ license, so:
 
 - QOR OS is developed on the **commercial Qt** kit, including commercial tooling such as `qmlsc`.
 - The repository is **private** and the code **proprietary** (`LICENSE`).
-- Code carried from demiurge-chain (QQ, ARQADE, QOR Media) remains **Apache-2.0** with its notices.
+- Code from demiurge-chain (QQ, ARQADE, QOR Media as they came) remains **Apache-2.0** with its notices; work on them since QOR-0015 is proprietary, except ARQADE's rules, which its server shares.
 - Third-party assets are permissively licensed (OFL fonts, ISC/MIT icons) and listed in `THIRD_PARTY_NOTICES.md`.
 - **Distributing** Qt inside a free-to-download OS image and SDK needs The Qt Company's written confirmation before
   any public release (QOR-0008).
@@ -619,7 +619,7 @@ The detail, with every item, is [docs/ROADMAP.md](docs/ROADMAP.md).
 | Keys on an operating system | Loss of people's assets | One source in the QOR core, a vault service outside every app, approvals in the trusted layer, an external review before value |
 | Hosting of QOR ID and Social on one provider in one region | People can't sign in | Offline login, then a second region, before QOR ID signs people in to the OS |
 | Licensing: Qt for a distributed OS, trademarks, code signing | Legal and product risk | Release gates in QOR-0008, settled before any public image |
-| Two-way flow with demiurge-chain | Drift or conflicts | Same paths, `tools/upstream/demiurge.sh`, a cut-over record when QOR OS becomes where the products ship |
+| ARQADE's rules shared with demiurge-chain | A game and ARQADE's server judging a run differently | Same paths and one fixture per game; `tools/upstream/demiurge.sh status` shows when the rules differ; each change made in both ([QOR-0015](docs/decisions/QOR-0015-the-products-are-developed-here.md)) |
 
 ---
 
@@ -628,7 +628,7 @@ The detail, with every item, is [docs/ROADMAP.md](docs/ROADMAP.md).
 | Question | Decision | Record |
 |----------|----------|--------|
 | Decision log and rules | One rulebook (`AGENTS.md`), one log, three series | [QOR-0001](docs/decisions/QOR-0001-one-rulebook-and-one-decision-log.md) |
-| Where the code lives | Private `qor-os` from QTOS's history; QQ, ARQADE, QOR Media carried; the network stays public | [QOR-0002](docs/decisions/QOR-0002-one-repository-from-qtos-and-demiurge.md) |
+| Where the code lives | Private `qor-os` from QTOS's history; QQ, ARQADE, QOR Media carried, then developed here; the network stays public | [QOR-0002](docs/decisions/QOR-0002-one-repository-from-qtos-and-demiurge.md), [QOR-0015](docs/decisions/QOR-0015-the-products-are-developed-here.md) |
 | Code that handles keys | The QOR core, from demiurge-chain at a pinned commit, never copied | [QOR-0003](docs/decisions/QOR-0003-the-qor-core-at-a-pinned-commit.md) |
 | Base image | Fedora Atomic with bootc; NVIDIA open modules; Mesa | [QOR-0004](docs/decisions/QOR-0004-the-base-image-is-fedora-atomic.md) |
 | Displays and the compositor's backend | Every display at its own rate on every GPU; Prism's own KMS backend; the gate deferred | [QOR-0005](docs/decisions/QOR-0005-every-display-at-its-own-refresh.md), [QTOS-0003](docs/decisions/qtos/QTOS-0003-compositor-strategy.md) |

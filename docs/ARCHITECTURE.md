@@ -8,8 +8,8 @@ rationale are recorded in [`decisions/`](decisions/README.md).
 
 ```text
 ┌───────────────────────────────────────────────────────────────────────┐
-│ Products       QQ (Studio, Player, runtime) · ARQADE · QOR Media      │  carried from
-│                each its own process and CMake project                 │  demiurge-chain
+│ Products       QQ (Studio, Player, runtime) · ARQADE · QOR Media      │  from demiurge-
+│                each its own process and CMake project                 │  chain
 ├───────────────────────────────────────────────────────────────────────┤
 │ Apps           QOR.Apps        Files · Music · Notes · Terminal · …  │
 │ Shell          QOR.Shell       Desktop · Rail · Shelf · Beam · …     │
@@ -25,7 +25,7 @@ rationale are recorded in [`decisions/`](decisions/README.md).
 └───────────────────────────────────────────────────────────────────────┘
 ```
 
-The carried products are separate programs today. Phase 1 runs them as
+The products are separate programs today. Phase 1 runs them as
 Wayland clients of Prism and moves their theming and controller input onto
 QOR.Kit and QOR.Input. The QOR core is linked into a test today. Phase 2
 makes it the vault service, a process of its own.
@@ -58,9 +58,9 @@ In simulation the *sources* are the classes in `sim/`; on a device they are the
 | `qor_core` (`qor::core`) | static lib (Rust) + header | — | `core/` | The QOR core from demiurge-chain at `QOR_CORE_COMMIT`, built by Corrosion; `qor_core.h` is its C bridge ([§10](#10-the-qor-core)) |
 | `tst_*` | tests | — | `tests/` | See [§9](#9-testing) |
 
-The carried products are not targets of this build. Each is its own CMake
-project, built by its own script (`tools/dev/products.ps1`), exactly as
-upstream ([§11](#11-carried-products)).
+The products are not targets of this build. Each is its own CMake project,
+built by its own script (`tools/dev/products.ps1`), as it was upstream
+([§11](#11-the-products)).
 
 All QML modules are static libraries linked into the executables and loaded
 with `Q_IMPORT_QML_PLUGIN`. Their QML is compiled ahead of time by the QML
@@ -245,7 +245,7 @@ own KMS backend is Phase 3
 | `tools_generate_tokens` | Python unittest | color math, generated outputs current |
 
 `all_qmllint` must report zero warnings. CI excludes the `gpu` label on hosted
-runners. The carried products' suites are listed in [§11](#11-carried-products).
+runners. The products' suites are listed in [§11](#11-the-products).
 
 ## 10. The QOR core
 
@@ -273,11 +273,14 @@ QOR OS never copies it
   Phase 2 needs them.
 - `QOR_BUILD_CORE` is on where `cargo` is found, and the CI presets require it.
 
-## 11. Carried products
+## 11. The products
 
-QQ, ARQADE and QOR Media come from demiurge-chain with their history, at the
-same paths as upstream ([UPSTREAM.md](UPSTREAM.md)). Each is its own CMake
-project, built and tested by its own `build.ps1`, which
+QQ, ARQADE and QOR Media came from demiurge-chain with their history, at the
+paths they had there, and are developed here since
+[QOR-0015](decisions/QOR-0015-the-products-are-developed-here.md)
+([UPSTREAM.md](UPSTREAM.md)). ARQADE's rules and recorded runs stay shared
+with demiurge-chain, where ARQADE's server judges runs by them. Each product
+is its own CMake project, built and tested by its own `build.ps1`, which
 `tools/dev/products.ps1` calls.
 
 | Product | Path | Targets | Suites |
@@ -313,9 +316,9 @@ input, 4-byte length-prefixed JSON frames, and one long-poll request
   `platform/common/lumentokens.h` and `docs/design/tokens.md` (from
   `tools/tokens/generate_tokens.py`).
 - Every source file carries `SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary`,
-  except the carried code, which keeps its Apache-2.0 notices and its own
-  formatting.
+  except the files from demiurge-chain, which keep their Apache-2.0 notices.
+  The products keep their own formatting.
 - Naming ([QOR-0009](decisions/QOR-0009-the-name-is-qor-os.md)): C++ in namespace `qor` (`qor::sim`,
   `qor::lumen`, `qor::host`), targets `qor_*`, programs `qor-*`, logging
-  categories `qor.*`, and QML modules under `QOR.*` (beside the carried
+  categories `qor.*`, and QML modules under `QOR.*` (beside QOR Media's
   `QOR.Media`) except the style module `Lumen`.

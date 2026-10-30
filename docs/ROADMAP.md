@@ -30,6 +30,10 @@ products included on Windows.
 *About 2–4 weeks.* Exit: Orb Run plays inside Prism on Linux with a DualSense, and Linux CI runs
 QQ's, ARQADE's and QOR Media's suites.
 
+- [x] QQ, ARQADE's app and games, and QOR Media are developed here from 29 October
+  ([QOR-0015](decisions/QOR-0015-the-products-are-developed-here.md)); demiurge-chain freezes its copies (its ADR-126),
+  which its Windows launcher keeps shipping. ARQADE's rules and recorded runs stay shared with ARQADE's server there
+  ([UPSTREAM.md](UPSTREAM.md#changing-a-games-rules))
 - [ ] QQ, ARQADE and QOR Media build and pass their suites on Linux. Their Windows-only parts get platform seams:
   - XInput becomes QOR.Input;
   - the DXGI GPU choice is handled per platform;
@@ -98,10 +102,15 @@ SDK.
 - [ ] The public SDK: QOR.Kit, Lumen, the service interfaces and QQ, with a Qt Creator wizard and the simulator
 - [ ] The Store and the Market as one catalogue in the shell: the Store's signature decides what installs; the chain records who made a work and who holds a licence
 - [ ] Store stage 2: the developer program and portal, review, privacy-preserving analytics, with no payments ([STORE.md](STORE.md#roadmap))
-- [ ] QQ's engine work continues, upstream until the cut-over (Demiurge's P3 track)
+- [ ] QQ's agent proven: a scene built from a written description with no human edit, recorded with its frames, on
+  the creator's own provider key (Demiurge's P3.3, otherwise built before the cut-over)
+- [ ] Published QQ games played on ARQADE's website through the WebAssembly QQ Player, each in a sandboxed frame from a
+  site of its own (Demiurge's P3.5; the website's part is made in demiurge-chain)
+- [ ] QOR Media: Office documents through LibreOffice's engine, its own record first; and pictures beyond Qt's plugins
+  (HEIC, AVIF, JPEG XL and camera RAW) (Demiurge's L9.7 and L9.8)
 - [ ] The Mesh for distributing games and creations, off until turned on
 - [ ] From QTOS's Phases 2 and 4: a browser (Qt WebEngine), HDR, fractional scaling, Quick Look, Stacks and Projects, hero transitions, a Qt-native screen reader, Increase Contrast, translations
-- [ ] Paid items, only once [QOR-0006](decisions/QOR-0006-qor-os-1-0-moves-no-money.md)'s conditions are met and a record chooses the model
+- [ ] Paid items, only once [QOR-0006](decisions/QOR-0006-qor-os-1-0-moves-no-money.md)'s conditions are met and a record chooses the model; QQ's side of Demiurge's P3.6 (collectibles and in-game purchases) with them
 - [ ] Later than 1.0 ([QOR-0007](decisions/QOR-0007-what-1-0-ships.md)): GNOSIS, Stream, Spatial mode (Qt Quick 3D Xr), on-device intelligence, Continuity
 
 ## Release gates

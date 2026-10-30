@@ -3,23 +3,32 @@
 QOR OS includes or depends on the following third-party components. Their
 license texts ship next to the files they cover.
 
-## Code carried from demiurge-chain (Apache-2.0)
+## Code from demiurge-chain (Apache-2.0)
 
-These paths come from [`QOR-MATRIX/demiurge-chain`](https://github.com/QOR-MATRIX/demiurge-chain)
+These came from [`QOR-MATRIX/demiurge-chain`](https://github.com/QOR-MATRIX/demiurge-chain)
 with their history
 ([QOR-0002](docs/decisions/QOR-0002-one-repository-from-qtos-and-demiurge.md),
 [docs/UPSTREAM.md](docs/UPSTREAM.md)). They remain under the Apache License,
 Version 2.0, whose text is [`LICENSES/Apache-2.0.txt`](LICENSES/Apache-2.0.txt)
-("Copyright 2026 Demiurge"). A carried file changed in QOR OS says so in a
-comment near its top, as the license's §4(b) requires. Everything else in this
-repository is proprietary ([LICENSE](LICENSE)).
+("Copyright 2026 Demiurge"). A file from demiurge-chain changed in QOR OS says
+so in a comment near its top, as the license's §4(b) requires.
 
-| Path | What it is |
-|------|------------|
-| `products/qq/` | QQ, the QOR Engine |
-| `products/arqade/qt/`, `products/arqade/games/`, `products/arqade/tests/fixtures/` | ARQADE's Qt app, its games, and their replay fixtures |
-| `tools/qor-media/` | QOR Media |
-| `docs/design/tokens.json` | Demiurge's one look |
+| Path | What it is | What is Apache-2.0 |
+|------|------------|--------------------|
+| `products/qq/` | QQ, the QOR Engine | The files listed in [`LICENSES/from-demiurge-chain.txt`](LICENSES/from-demiurge-chain.txt) |
+| `products/arqade/qt/`, `products/arqade/games/` | ARQADE's Qt app and its games | The same |
+| `tools/qor-media/` | QOR Media | The same |
+| `products/arqade/tests/fixtures/` | The runs ARQADE's games replay, still carried | All of it |
+| `docs/design/tokens.json` | Demiurge's one look, still copied | All of it |
+
+Since 29 October 2026 QQ, ARQADE's app and games, and QOR Media are developed
+in QOR OS ([QOR-0015](docs/decisions/QOR-0015-the-products-are-developed-here.md)).
+Changes made to their files after that, and files added to them, are QOR OS's,
+under [LICENSE](LICENSE), as the Apache License's §4 allows for
+modifications. The exception is ARQADE's five rule modules (each game's
+`logic/rules.mjs`, and the arenas' `logic/arena.mjs`). ARQADE's server shares
+them, so they are kept the same as demiurge-chain's and stay Apache-2.0 as
+they change. Everything else in this repository is proprietary too.
 
 The **QOR core** is built from demiurge-chain at a pinned commit and linked
 into QOR OS, not carried in this repository

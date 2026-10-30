@@ -1,37 +1,67 @@
-# Upstream: what QOR OS carries from demiurge-chain
+# Upstream: what QOR OS shares with demiurge-chain
 
-QOR OS carries Demiurge's device-side Qt code with its history and builds the
-QOR core from demiurge-chain at a pinned commit
-([QOR-0002](decisions/QOR-0002-one-repository-from-qtos-and-demiurge.md),
-[QOR-0003](decisions/QOR-0003-the-qor-core-at-a-pinned-commit.md)).
-demiurge-chain (`QOR-MATRIX/demiurge-chain`, public, Apache-2.0) stays their
-upstream until a later record cuts over.
+demiurge-chain (`QOR-MATRIX/demiurge-chain`, public, Apache-2.0) is
+Demiurge's repository: the chain, QOR ID, Social, the websites and the QOR
+Launcher. QOR OS shares three things with it:
 
-## What is carried
+- the QOR core, built from it at a pinned commit
+  ([QOR-0003](decisions/QOR-0003-the-qor-core-at-a-pinned-commit.md));
+- ARQADE's rules and recorded runs;
+- Demiurge's one look.
 
-| Path (the same here and upstream) | What it is | Carried by | Upstream record |
-|-----------------------------------|------------|------------|-----------------|
-| `products/qq/` | QQ, the QOR Engine: the runtime, QQ Studio, the QQ Player, the agent's tools, tests | `git subtree`, with history | ADR-081, ADR-083, ADR-105 |
-| `products/arqade/qt/` | ARQADE's Qt app | `git subtree`, with history | ADR-102 |
-| `products/arqade/games/` | ARQADE's games and arenas, rebuilt in QQ | `git subtree`, with history | ADR-102 |
-| `products/arqade/tests/fixtures/` | Recorded runs that ARQADE's games replay | `git subtree`, with history | ADR-116 |
-| `tools/qor-media/` | QOR Media: player, viewer, editor, PDF reader | `git subtree`, with history | ADR-094 |
-| `docs/design/tokens.json` | Demiurge's one look, read by the carried tests | copied at the same commit | ADR-108 |
+QQ, ARQADE's app and games, and QOR Media came from it with their history
+([QOR-0002](decisions/QOR-0002-one-repository-from-qtos-and-demiurge.md)).
+They are developed here since 29 October 2026
+([QOR-0015](decisions/QOR-0015-the-products-are-developed-here.md)), and
+demiurge-chain's copies of them are frozen (its ADR-126).
+
+## What is shared
+
+| Path (the same here and upstream) | What it is | How | Upstream record |
+|-----------------------------------|------------|-----|-----------------|
+| `products/arqade/tests/fixtures/` | Recorded runs that ARQADE's games replay here and its rules replay upstream | carried by `git subtree`, with history | ADR-102 |
+| ARQADE's rules: `logic/rules.mjs` of Orbital, Void Runner, Synapse and Rift Survivor, and the arenas' `logic/arena.mjs`, in `products/arqade/games/` | The rules and nothing else, which ARQADE's Node tests upstream import and its service is to confirm runs by | kept identical, changed in both at once ([below](#changing-a-games-rules)) | ADR-102, ADR-116 (proposed) |
+| `docs/design/tokens.json` | Demiurge's one look, read by the products' tests | copied at the same commit | ADR-108 |
 | The QOR core (`tools/qor-launcher/core/` upstream) | Keys, profiles, amounts, the C bridge | built at a pinned commit, never copied | ADR-103, ADR-104 |
 
 Everything Demiurge runs as a service stays upstream: the chain, QOR ID,
 Social, ARQADE's website, the homepage and the QOR Launcher for Windows and
 Android.
 
-The paths match upstream so that ARQADE's build still finds QQ's runtime at
-`../../qq/runtime`, its games at `../games` and its fixtures at
-`../tests/fixtures`. Each product's tests also still find `docs/design/tokens.json`.
+## The products, developed here
+
+| Path | What it is | Upstream record |
+|------|------------|-----------------|
+| `products/qq/` | QQ, the QOR Engine: the runtime, QQ Studio, the QQ Player, the agent's tools, tests | ADR-081, ADR-083, ADR-105 |
+| `products/arqade/qt/` | ARQADE's Qt app | ADR-102 |
+| `products/arqade/games/` | ARQADE's games and arenas, rebuilt in QQ | ADR-102 |
+| `tools/qor-media/` | QOR Media: player, viewer, editor, PDF reader | ADR-094 |
+
+They came by `git subtree`, with their history, at the paths they have
+upstream. They keep those paths, so that ARQADE's build still finds QQ's
+runtime at `../../qq/runtime`, its games at `../games` and its fixtures at
+`../tests/fixtures`, and each product's tests still find
+`docs/design/tokens.json`.
+
+Since QOR-0015:
+
+- **They are not pulled**, and nothing of them goes upstream but ARQADE's
+  rules.
+- **Licence.** Their files from demiurge-chain stay Apache-2.0; they are
+  listed in [`LICENSES/from-demiurge-chain.txt`](../LICENSES/from-demiurge-chain.txt),
+  and one changed here says so near its top. Other work on them is QOR OS's,
+  under [`LICENSE`](../LICENSE).
+- **The Windows launcher** ships demiurge-chain's frozen copies, the same code
+  as its 0.1.17. Only the owner releases a fix into them, by a pull request
+  there.
+- **Their open items** from Demiurge's roadmap are in [ROADMAP.md](ROADMAP.md).
 
 ## State
 
-| Carried path | Upstream commit it was last split at |
-|--------------|---------------------------------------|
-| All five | demiurge-chain `28d9e97` (`main`, 26 October 2026). Unchanged upstream as of `6a4822d` (28 October, the merge of #109), so no pull was needed |
+| Path | Upstream commit it was last split at |
+|------|---------------------------------------|
+| `products/arqade/tests/fixtures/` | demiurge-chain `28d9e97` (`main`, 26 October 2026). Unchanged upstream as of `db98ac0` (29 October, the merge of #112), so no pull was needed |
+| The four products | `28d9e97`, identical in their paths to `db98ac0`. Developed here since |
 
 | QOR core pin | Features | What that core has |
 |--------------|----------|---------------------|
@@ -47,46 +77,58 @@ above whenever they change.
 From a clean working tree, in Git Bash or WSL:
 
 ```bash
-tools/upstream/demiurge.sh pull            # demiurge-chain main
+tools/upstream/demiurge.sh pull            # the fixtures and the look, from demiurge-chain main
 tools/upstream/demiurge.sh pull <commit>   # or a specific commit
-pwsh tools/dev/products.ps1                # build and test what came in
+pwsh tools/dev/products.ps1                # build and test the products against them
 ```
 
 The script keeps a clone of demiurge-chain in `../_upstream/demiurge-chain`
-(set `QOR_UPSTREAM_DIR` to change it). For each carried path it splits
-upstream's history there (`git subtree split`) and merges it here
-(`git subtree pull`), one merge commit per path. Then it copies
-`docs/design/tokens.json` at the same commit. Splitting is deterministic, so
-every pull adds only what is new. On Windows the first split of a path takes
-minutes.
+(set `QOR_UPSTREAM_DIR` to change it). It splits the fixtures' upstream
+history there (`git subtree split`) and merges it here (`git subtree pull`),
+in one merge commit. Then it copies `docs/design/tokens.json` at the same
+commit, and says if ARQADE's rules differ from upstream's. Splitting is
+deterministic, so every pull adds only what is new.
 
-## Changing carried code
+## Changing the products
 
-- **A fix that isn't specific to QOR OS** goes upstream first, as a pull
-  request to demiurge-chain under its rules (`AGENTS.md` there). It reaches
-  QOR OS with the next pull.
-- **Work that only QOR OS needs** is made here. That covers the Linux build,
-  running as a Wayland client of Prism, Lumen theming, the controller service,
-  and placing windows on Wayland, where Prism does what the Windows docking
-  does ([QOR-0010](decisions/QOR-0010-on-wayland-prism-places-the-products-windows.md)).
-  A carried file changed here
-  gets a line near its top saying so, as Apache-2.0 §4(b) requires:
+A change to a product is made here, like any other in QOR OS. A file from
+demiurge-chain that is changed gets a line near its top saying so, as
+Apache-2.0 §4(b) requires:
 
-  ```cpp
-  // Changed for QOR OS: <what changed and why>.
-  ```
+```cpp
+// Changed for QOR OS: <what changed and why>.
+```
 
-- **A fix made here first** goes upstream as a patch, because the paths are
-  identical:
+A file added to a product carries QOR OS's SPDX header
+(`tools/ci/check_headers.py` checks it). The products keep their own build
+scripts and formatting; don't reformat them.
 
-  ```bash
-  tools/upstream/demiurge.sh patch <commit>   # writes build/upstream-patches/*.patch
-  # then, on a branch of demiurge-chain:
-  git am /path/to/qor-os/build/upstream-patches/*.patch
-  ```
+## Changing a game's rules
 
-Keep each change to one kind: a commit that mixes a general fix with work for
-QOR OS only is split before it lands.
+ARQADE's rules live once, in each game's `logic/rules.mjs` (the arenas'
+`logic/arena.mjs`), and are used in two repositories: by the game here, and
+by ARQADE's Node tests and service upstream. Every change to a game's rules
+fails its test until its fixture and the digest of the rules' state are made
+again ([games/README.md](../products/arqade/games/README.md)). So a change to
+the rules is made in both repositories at once:
+
+1. **Here:** change the rules and the game, record the game's run again
+   with ARQADE's games suite, and commit.
+2. **Upstream:** write the change as patches, which apply there because the
+   paths are the same:
+
+   ```bash
+   tools/upstream/demiurge.sh patch <commit>   # the rules, fixtures and look it changed
+   # then, on a branch of demiurge-chain:
+   git am /path/to/qor-os/build/upstream-patches/*.patch
+   ```
+
+   Update the digests its Node tests pin (`products/arqade/tests/`), and open
+   a pull request there for the owner. Published there, the rules stay
+   Apache-2.0, and reach the Windows launcher's frozen games at its next
+   release, so the change has to suit those too.
+3. **Once it is merged,** `tools/upstream/demiurge.sh status` shows the rules
+   the same as upstream's again, and a pull takes the fixture back unchanged.
 
 ## Moving the core's pin
 
@@ -131,19 +173,28 @@ QOR OS only is split before it lands.
 
 ### Open upstream
 
-Nothing. [demiurge-chain #109](https://github.com/QOR-MATRIX/demiurge-chain/pull/109) merged on 28 October 2026 at
-`6a4822d`, and the pin moved to it (above). Both records QOR OS was waiting on
-are accepted and on demiurge-chain's `main`:
+- **ADR-126**, demiurge-chain's side of the cut-over (below), is on
+  [demiurge-chain #113](https://github.com/QOR-MATRIX/demiurge-chain/pull/113)
+  for the owner to merge.
 
-- **ADR-121:** the core's audit ignores RUSTSEC-2026-0344 in `ruzstd`, which
-  only subxt's light client reaches and nothing builds, as the launcher's audit
-  already does. #107 carried it, and #108 recorded it accepted.
-- **ADR-122:** the six active crates, the core among them, declare Apache-2.0,
-  the repository's licence, instead of MIT. #109 carried it.
+The records QOR OS waited on for the core are accepted and on demiurge-chain's
+`main`. ADR-121 (#107, accepted by #108) has the core's audit ignore
+RUSTSEC-2026-0344 in `ruzstd`, which only subxt's light client reaches and
+nothing builds. ADR-122 (#109) has the six active crates, the core among
+them, declare Apache-2.0, the repository's licence, instead of MIT.
 
-## Cutting over
+## The cut-over, 29 October 2026
 
-When QOR OS becomes where these products ship, a QOR record moves their
-development here, and a record in demiurge-chain freezes its copies. From then
-on there are no more pulls, and the carried paths are QOR OS's own. Whether
-QQ's development stays open source is decided in that record.
+QOR-0002 kept demiurge-chain the products' upstream until a record moved
+their development here. On 29 October 2026 the owner asked to "move forward
+with their development transition to this repo entirely", and chose:
+
+- the products move, and the core and both launchers stay upstream;
+- new work on QQ is closed until the public SDK's record decides whether its
+  source is published;
+- the Windows launcher ships frozen copies.
+
+[QOR-0015](decisions/QOR-0015-the-products-are-developed-here.md) records it
+here and ADR-126 upstream. Nothing had changed upstream in the products'
+paths since the carry, so nothing was pulled first. From then on, the
+products' paths are QOR OS's own, except ARQADE's rules, which stay shared.

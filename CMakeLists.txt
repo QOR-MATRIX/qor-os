@@ -2,8 +2,8 @@
 #
 # Builds the Lumen kit, the simulated system services, the Prism shell, the
 # first-party apps, the developer tools and the link to the QOR core. The
-# products carried from demiurge-chain (products/, tools/qor-media/) keep their
-# own builds: tools/dev/products.ps1. See docs/BUILDING.md.
+# products from demiurge-chain (products/, tools/qor-media/) keep their own
+# builds: tools/dev/products.ps1. See docs/BUILDING.md.
 #
 # Names follow QOR-0009: QOR OS in prose, qor-os for this project, qor in code
 # (qor:: namespace, qor_* targets, qor-* programs), QOR.* QML modules and

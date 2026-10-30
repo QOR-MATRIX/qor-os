@@ -4,9 +4,9 @@
 # Builds and tests the products QOR OS carries from demiurge-chain (QQ, ARQADE
 # and QOR Media) on Linux: the counterpart of tools/dev/products.ps1.
 #
-# Upstream builds them on Windows only, with PowerShell scripts that call MSVC.
-# The Linux build is work only QOR OS needs (docs/UPSTREAM.md), so it lives
-# here, outside the carried paths. Each product is configured with CMake and
+# Their own scripts build them on Windows only, with PowerShell that calls
+# MSVC, as demiurge-chain did. The Linux build lives here, outside the
+# products (docs/UPSTREAM.md). Each product is configured with CMake and
 # Ninja against the Qt kit, built, and every suite it registers with CTest is
 # run. A product whose suites fail has its failed suites run once more, as
 # products.ps1 and CI's GPU suites do; a genuine failure fails both attempts.

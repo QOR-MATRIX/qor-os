@@ -168,6 +168,16 @@ bear on the policy:
 13. Breach notification: what duties apply, and to whom?
 14. Hosting plans: which providers' terms (for example Vercel's Hobby plan)
     limit commercial use, and when must they change?
+15. QQ, ARQADE's app and games, and QOR Media came from demiurge-chain under
+    Apache-2.0 and are developed in QOR OS since 29 October 2026
+    ([QOR-0015](../decisions/QOR-0015-the-products-are-developed-here.md)).
+    [`LICENSE`](../../LICENSE) keeps the 374 files that came
+    ([`LICENSES/from-demiurge-chain.txt`](../../LICENSES/from-demiurge-chain.txt))
+    under Apache-2.0, and puts later changes to them and new files under QOR
+    OS's proprietary licence, relying on Apache-2.0 §4. Is that wording
+    sound? What must a distributed build carry for them? Do ARQADE's five rule
+    modules, kept identical and Apache-2.0 in both repositories, need anything
+    more?
 
 ---
 

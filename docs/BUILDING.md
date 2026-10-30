@@ -5,8 +5,8 @@ QOR OS has two kinds of build:
 - **The OS**: the CMake presets below. They build the Kit, services, shell,
   apps, compositor, tools, and the QOR core from demiurge-chain at its pinned
   commit.
-- **The carried products**: QQ, ARQADE and QOR Media, each built by its own
-  script, exactly as upstream ([§6](#6-the-carried-products-qq-arqade-qor-media)).
+- **The products**: QQ, ARQADE and QOR Media, each built by its own script,
+  as it was upstream ([§6](#6-the-products-qq-arqade-qor-media)).
 
 ## 1. Prerequisites
 
@@ -37,7 +37,7 @@ Install these for the `MSVC 2022 64-bit` kit in the Qt Maintenance Tool
 | Qt Quick Compiler extensions | `qt.qt6.6120.addons.qtqmlscriptcompiler` | `qmlsc` ahead-of-time QML compilation (commercial) |
 | Qt Task Tree (TP) | `qt.qt6.6120.addons.qttasktree` | Dependency of Qt's own QML asset-downloader plugin; without it CMake prints a warning at configure time |
 
-The carried products also need these, from the same kit:
+The products also need these, from the same kit:
 
 - **Qt Multimedia**;
 - **Qt Quick 3D**, with **Qt Quick 3D Physics** (`qt.qt6.6120.addons.qtquick3dphysics`), which every QQ scene imports;
@@ -286,10 +286,10 @@ Because the QOR OS QML modules are static and embedded in the executable,
 and `services/` so the deployment scan finds their imports (for example
 `QtCore` and `QtGraphs`). Add new module directories there.
 
-## 6. The carried products (QQ, ARQADE, QOR Media)
+## 6. The products (QQ, ARQADE, QOR Media)
 
-QQ, ARQADE and QOR Media come from demiurge-chain at the same paths as
-upstream ([UPSTREAM.md](UPSTREAM.md)). Each keeps its own CMake project and
+QQ, ARQADE and QOR Media came from demiurge-chain at the paths they had
+there, and are developed here ([UPSTREAM.md](UPSTREAM.md)). Each keeps its own CMake project and
 `build.ps1`, which configures with MSVC 2022 and Ninja, builds, and runs every
 suite. `tools/dev/products.ps1` runs them all:
 
@@ -312,8 +312,8 @@ test. `products.ps1` tries a failing product once more. The look tests read
 
 ### On Linux
 
-Upstream builds the products on Windows only. QOR OS builds them on Linux with
-its own script, outside the carried paths: `tools/dev/products.sh` configures
+demiurge-chain built the products on Windows only. QOR OS builds them on Linux
+with its own script, outside the products: `tools/dev/products.sh` configures
 each with CMake and Ninja against the `gcc_64` kit, builds it, and runs the
 suites it registers with CTest. A product whose suites fail has its failed
 suites run once more.
@@ -392,4 +392,4 @@ Phase 1.
 | Services did not initialise in time | Another QOR OS instance holds `local:qor-services`. The host falls back to a PID-suffixed endpoint; pass `--services-url` to `qorctl` |
 | `QOR core: No QOR core at …` or Corrosion cannot find `cargo` | Install Rust from rustup (1.91+), open a new terminal, and reconfigure; or turn the core off with `-DQOR_BUILD_CORE=OFF` |
 | The core's configure cannot fetch demiurge-chain | It needs network access to GitHub once per build tree; or point `QOR_CORE_SOURCE_DIR` at a local checkout |
-| A carried product's suite fails on a busy desktop | Leave the desktop alone while the suites run, or run `products.ps1` again; a failure that repeats is real |
+| A product's suite fails on a busy desktop | Leave the desktop alone while the suites run, or run `products.ps1` again; a failure that repeats is real |

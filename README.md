@@ -105,9 +105,9 @@ On Linux, Prism runs as a real Wayland compositor nested in your session; see
 | [`store/`](store/), [`apps/`](apps/) | The signed Store; first-party apps (Files, Music, Notes, Terminal, Monitor, Settings, Store) |
 | [`platform/`](platform/) | Lumen `QStyle` for Qt Widgets, the `qor` platform theme, a widgets gallery |
 | [`core/`](core/) | The **QOR core**, built from demiurge-chain at a pinned commit ([QOR-0003](docs/decisions/QOR-0003-the-qor-core-at-a-pinned-commit.md)) |
-| [`products/qq/`](products/qq/) | **QQ**, the QOR Engine: runtime, QQ Studio, QQ Player, the agent's tools (carried, Apache-2.0) |
-| [`products/arqade/`](products/arqade/) | **ARQADE**: the Qt app, its games and their replay fixtures (carried, Apache-2.0) |
-| [`tools/qor-media/`](tools/qor-media/) | **QOR Media**: player, viewer, editor and PDF reader (carried, Apache-2.0) |
+| [`products/qq/`](products/qq/) | **QQ**, the QOR Engine: runtime, QQ Studio, QQ Player, the agent's tools (from demiurge-chain, developed here since [QOR-0015](docs/decisions/QOR-0015-the-products-are-developed-here.md)) |
+| [`products/arqade/`](products/arqade/) | **ARQADE**: the Qt app and its games (developed here), and their replay fixtures (carried) |
+| [`tools/qor-media/`](tools/qor-media/) | **QOR Media**: player, viewer, editor and PDF reader (from demiurge-chain, developed here) |
 | [`image/`](image/) | The QOR OS image on Fedora Atomic (Phase 3) |
 | [`sdk/`](sdk/), [`tools/`](tools/), [`tests/`](tests/) | App template; `qorctl`, generators, dev, CI and upstream scripts; tests |
 | [`docs/`](docs/) | Architecture, building, development, CI, performance, roadmap, design, decisions |
@@ -119,7 +119,7 @@ On Linux, Prism runs as a real Wayland compositor nested in your session; see
 - [AGENTS.md](AGENTS.md): the rules for everyone working here
 - [docs/ROADMAP.md](docs/ROADMAP.md): phases, exits and release gates
 - [docs/decisions/](docs/decisions/README.md): every decision (QOR, QTOS and Demiurge records)
-- [docs/UPSTREAM.md](docs/UPSTREAM.md): what is carried from demiurge-chain and how it moves
+- [docs/UPSTREAM.md](docs/UPSTREAM.md): what QOR OS shares with demiurge-chain, and how it moves
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/BUILDING.md](docs/BUILDING.md), [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md), [docs/CI.md](docs/CI.md)
 - [docs/design/LUMEN.md](docs/design/LUMEN.md), [docs/design/SHELL.md](docs/design/SHELL.md): design specifications
 - [docs/SERVICES.md](docs/SERVICES.md), [docs/AUDIO.md](docs/AUDIO.md), [docs/CONTROLLERS.md](docs/CONTROLLERS.md), [docs/STORE.md](docs/STORE.md), [docs/QT-MODULES.md](docs/QT-MODULES.md), [docs/PERFORMANCE.md](docs/PERFORMANCE.md)
@@ -144,7 +144,8 @@ Linux, driven by a controller. See [docs/ROADMAP.md](docs/ROADMAP.md).
 ## License
 
 Proprietary. Copyright © 2026 QOR-MATRIX. All rights reserved. See
-[LICENSE](LICENSE). The code carried from demiurge-chain remains under
-Apache-2.0 ([LICENSES/Apache-2.0.txt](LICENSES/Apache-2.0.txt)). Built with Qt
+[LICENSE](LICENSE). The code from demiurge-chain remains under Apache-2.0
+([LICENSES/Apache-2.0.txt](LICENSES/Apache-2.0.txt)), as
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) says. Built with Qt
 under a commercial license. Third-party material is listed in
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

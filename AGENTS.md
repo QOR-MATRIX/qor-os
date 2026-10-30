@@ -40,17 +40,24 @@ in that list is not current.
 ## 3. Scope and boundaries
 
 - **This repository** is QOR OS: everything that runs on the device.
-- **Carried code**:
-  - The carried paths are `products/qq/`, `products/arqade/qt/`,
-    `products/arqade/games/`, `products/arqade/tests/fixtures/`,
-    `tools/qor-media/` and `docs/design/tokens.json`. They come from
-    demiurge-chain under Apache-2.0
-    ([QOR-0002](docs/decisions/QOR-0002-one-repository-from-qtos-and-demiurge.md)).
-  - Change them only as [`docs/UPSTREAM.md`](docs/UPSTREAM.md) says. General
-    fixes go upstream first; work only QOR OS needs is done here.
-  - Keep their licence notices, and mark a carried file changed here with a
-    `Changed for QOR OS:` comment.
-  - Lint, header and format checks skip them on purpose; don't reformat them.
+- **The products** are developed here since 29 October 2026
+  ([QOR-0015](docs/decisions/QOR-0015-the-products-are-developed-here.md)):
+  QQ (`products/qq/`), ARQADE's app and games (`products/arqade/qt/`,
+  `products/arqade/games/`) and QOR Media (`tools/qor-media/`).
+  - Their files from demiurge-chain, listed in
+    [`LICENSES/from-demiurge-chain.txt`](LICENSES/from-demiurge-chain.txt),
+    stay under Apache-2.0. Keep their notices, and mark one changed here with
+    a `Changed for QOR OS:` comment near its top.
+  - A file added to them is QOR OS's and carries its SPDX header.
+  - They keep their own form. The format checks skip them on purpose; don't
+    reformat them.
+- **Shared with demiurge-chain**, under Apache-2.0, and changed only as
+  [`docs/UPSTREAM.md`](docs/UPSTREAM.md) says:
+  - **ARQADE's rules**: each game's `logic/rules.mjs` and the arenas'
+    `logic/arena.mjs`. ARQADE's server judges runs by the same files, so they
+    stay identical there, and a change is made in both at once.
+  - **Carried code**: `products/arqade/tests/fixtures/` (the runs both sides
+    replay) and `docs/design/tokens.json`, still pulled from upstream.
 - **The QOR core** (keys, profiles, amounts, the chain client) is built from
   demiurge-chain at a pinned commit and is never copied here
   ([QOR-0003](docs/decisions/QOR-0003-the-qor-core-at-a-pinned-commit.md)).
@@ -139,9 +146,9 @@ QTOS's practice, which QOR OS keeps:
   - `all_qmllint` reports zero warnings;
   - `pre-commit run --all-files` is clean (clang-format 20.1.8, generated
     tokens, SPDX headers);
-  - for the carried products, `tools/dev/products.ps1` passes.
-- **Every source file carries `SPDX-License-Identifier`**, except the carried
-  code, which keeps its own notices.
+  - for the products, `tools/dev/products.ps1` passes.
+- **Every source file carries `SPDX-License-Identifier`**, except the files
+  from demiurge-chain, which keep their own notices.
 - **New behaviour has tests**: Qt Test for C++, Qt Quick Test for QML logic,
   `unittest` for Python, and golden images for Kit components.
 - **Render on demand.** No continuous frames or wakeups when nothing changes.

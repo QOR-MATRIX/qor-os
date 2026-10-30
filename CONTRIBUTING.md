@@ -18,9 +18,11 @@ that bind everyone, people and AI assistants alike, are in
 - Visual changes to Lumen start from the tokens
   ([`kit/tokens/lumen.tokens.json`](kit/tokens/lumen.tokens.json)) and the spec
   ([`docs/design/LUMEN.md`](docs/design/LUMEN.md)).
-- Changes to QQ, ARQADE or QOR Media follow [`docs/UPSTREAM.md`](docs/UPSTREAM.md).
-  A general fix goes to demiurge-chain first; work only QOR OS needs is done
-  here and marked `Changed for QOR OS:`.
+- QQ, ARQADE and QOR Media are developed here
+  ([QOR-0015](docs/decisions/QOR-0015-the-products-are-developed-here.md)).
+  A file of theirs from demiurge-chain that you change is marked
+  `Changed for QOR OS:`; a change to ARQADE's rules is made upstream too
+  ([`docs/UPSTREAM.md`](docs/UPSTREAM.md#changing-a-games-rules)).
 - Changes to the QOR core are made in demiurge-chain, under its rules, and
   reach QOR OS when the pin moves
   ([QOR-0003](docs/decisions/QOR-0003-the-qor-core-at-a-pinned-commit.md)).
@@ -60,8 +62,8 @@ core.
 4. **Open a pull request** using the template. Visual changes need before and
    after screenshots from `tools/screenshots/capture.ps1`.
 5. **Merge** by squash (default) or rebase. `main` keeps a linear history,
-   except for the merge commits that `git subtree` makes when it pulls from
-   upstream.
+   except for the merge commits that `git subtree` makes when it pulls
+   ARQADE's fixtures from upstream.
 
 ## Definition of done
 
@@ -88,12 +90,14 @@ explicitly in the PR description.
 
 ## Licensing of contributions
 
-QOR OS is proprietary (see [`LICENSE`](LICENSE)), except the code carried from
+QOR OS is proprietary (see [`LICENSE`](LICENSE)), except the code from
 demiurge-chain, which remains Apache-2.0
 ([`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md)). By contributing, you
 confirm that you have the right to submit the work and you assign it to
-QOR-MATRIX under the project's license. A change to a carried file is made
-under Apache-2.0 and marked as changed. Do not add third-party code or assets
+QOR-MATRIX under the project's license. A change to one of the products'
+files from demiurge-chain is made under the project's license and marked as
+changed, except a change to ARQADE's rules or fixtures, which stays
+Apache-2.0 because it is published upstream too. Do not add third-party code or assets
 without recording them in `THIRD_PARTY_NOTICES.md`, and do not add anything
 under copyleft licenses that would conflict with proprietary distribution.
 
