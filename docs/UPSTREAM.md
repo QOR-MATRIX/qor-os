@@ -60,8 +60,8 @@ Since QOR-0015:
 
 | Path | Upstream commit it was last split at |
 |------|---------------------------------------|
-| `products/arqade/tests/fixtures/` | demiurge-chain `28d9e97` (`main`, 26 October 2026). Unchanged upstream as of `db98ac0` (29 October, the merge of #112), so no pull was needed |
-| The four products | `28d9e97`, identical in their paths to `db98ac0`. Developed here since |
+| `products/arqade/tests/fixtures/` | demiurge-chain `28d9e97` (`main`, 26 October 2026). Unchanged upstream as of `8b4344e` (29 October, the merge of #113), so no pull was needed |
+| The four products | `28d9e97`, identical in their paths to `db98ac0`, where demiurge-chain froze its copies. Developed here since |
 
 | QOR core pin | Features | What that core has |
 |--------------|----------|---------------------|
@@ -173,12 +173,14 @@ the rules is made in both repositories at once:
 
 ### Open upstream
 
-- **ADR-126**, demiurge-chain's side of the cut-over (below), is on
-  [demiurge-chain #113](https://github.com/QOR-MATRIX/demiurge-chain/pull/113)
-  for the owner to merge.
+Nothing. ADR-126, demiurge-chain's side of the cut-over (below), is on its
+`main`: the owner merged
+[demiurge-chain #113](https://github.com/QOR-MATRIX/demiurge-chain/pull/113)
+on 29 October 2026, as `8b4344e`. In the products' paths it added only a note
+at the top of each one's README there, and it changed nothing that is shared.
 
 The records QOR OS waited on for the core are accepted and on demiurge-chain's
-`main`. ADR-121 (#107, accepted by #108) has the core's audit ignore
+`main` too. ADR-121 (#107, accepted by #108) has the core's audit ignore
 RUSTSEC-2026-0344 in `ruzstd`, which only subxt's light client reaches and
 nothing builds. ADR-122 (#109) has the six active crates, the core among
 them, declare Apache-2.0, the repository's licence, instead of MIT.

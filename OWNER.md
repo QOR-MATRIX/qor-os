@@ -23,8 +23,9 @@ here at `X:\Repoz\QOR-OS`. Phase 1: the three products on Linux, in Prism.
 4. **CI works again.** Its runners (*the PCs that run the checks*) are now
    registered to `qor-os`, and every Build since has passed.
 5. **QQ, ARQADE and QOR Media are now developed here** (QOR-0015), as you
-   chose. Their copies in demiurge-chain are *frozen* (kept, not worked on),
-   and the Windows launcher keeps shipping them. New work on them is
+   chose. Their copies in demiurge-chain are *frozen* (kept, not worked on)
+   since you merged #113, its ADR-126, and the Windows launcher keeps shipping
+   them. New work on them is
    proprietary until the public SDK's record decides about QQ's source. The
    374 files that came from demiurge-chain stay Apache-2.0 (*the open
    licence*), and a check now tells old files from new. ARQADE's five rule
@@ -33,11 +34,9 @@ here at `X:\Repoz\QOR-OS`. Phase 1: the three products on Linux, in Prism.
 
 ## Needs you
 
-1. **Merge demiurge-chain #113**: ADR-126, the freeze there. It changes no
-   code.
-2. **A real graphics card for Linux testing:** a Linux boot (recommended), or
+1. **A real graphics card for Linux testing:** a Linux boot (recommended), or
    a careful WSL trial on the NVIDIA card, which might freeze the PC again.
-3. **Legal, still open:** trademark advice for "QOR OS", which the site now
+2. **Legal, still open:** trademark advice for "QOR OS", which the site now
    uses publicly; the legal entity; the Qt letter. When a lawyer reads the
    list, add the new paragraph in `LICENSE` that makes the products' new work
    proprietary. Also open: replacing the 5 October key, and moving the Store
