@@ -11,10 +11,11 @@ here at `X:\Repoz\QOR-OS`. Phase 1: the three products on Linux, in Prism.
 
 ## This session
 
-1. **qorsync.dev, redone** (in demiurge-chain, pull request #114, not yet
-   merged): everything current about QOR OS, both downloads, a phone-first
-   page and a new background. It needs QOR Mobile's release published first;
-   that pull request says how.
+1. **qorsync.dev, redone and live** (demiurge-chain #114, which you merged):
+   everything current about QOR OS, both downloads, a phone-first page and a
+   new background. QOR Mobile 0.1.0, the Android app, is published beside it,
+   and search engines were told. One line is already behind: it lists item 2
+   below as work left.
 2. **ARQADE answers the controller.** In Prism it now takes the controller as
    the QQ Player does. Before, the shell answered too, so a d-pad press arrived
    twice and the ○ / B button (*East*) closed the game. On its home the d-pad
@@ -37,7 +38,7 @@ Plug it in again to try ARQADE or QQ with it on Windows.
 
 ## Needs you
 
-1. **Publish QOR Mobile's release, then merge #114** (the command is in it).
+1. **Merge demiurge-chain #115**, its records of the release.
 2. **A real Linux machine with a graphics card**: what stands between QOR OS
    and Phase 1's goal, Orb Run played in Prism with a DualSense (*the
    PlayStation 5 controller*). WSL (*Windows' built-in Linux*) sees none.
