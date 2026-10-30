@@ -6,11 +6,15 @@
 // kept in the operating system's keychain; it is never shown again or written anywhere else. The provider bills that
 // account for what is used, and Demiurge neither pays for it nor charges for it (ADR-086): without a key, the agent is
 // simply off. What each run used is shown under the steps.
+//
+// Changed for QOR OS: imports QQ, whose Look the panel's colours and faces come from. Without it, Look was undefined:
+// the key's problem and the steps were not coloured, and the tool steps were not in the mono face.
 
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Controls.Material
 import QtQuick.Layouts
+import QQ
 
 ColumnLayout {
     id: panel

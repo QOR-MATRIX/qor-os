@@ -3,6 +3,9 @@
 // Each case opens the Studio's own Main.qml, with a temporary project, and works it the way a person does: a click in
 // the viewport, a drag on a handle, Save, Play and Stop. What is checked is what changed in the scene and what reached
 // the disk.
+//
+// Changed for QOR OS: a warning from QQ's own QML (an undefined name, a failed binding) fails the case it happens in;
+// and a Studio is open once its window has the keyboard too, so that a shortcut is not pressed before it can answer.
 
 #include <QDir>
 #include <QElapsedTimer>
@@ -17,6 +20,7 @@
 #include <QQuickItem>
 #include <QQuickStyle>
 #include <QQuickWindow>
+#include <QRegularExpression>
 #include <QStandardPaths>
 #include <QTemporaryDir>
 #include <QTest>
@@ -68,7 +72,13 @@ struct Studio {
         window = qobject_cast<QQuickWindow *>(engine.rootObjects().first());
         if (!window || !QTest::qWaitForWindowExposed(window))
             return false;
-        return QTest::qWaitFor([this] { return window->property("settled").toBool(); }, 15000);
+        if (!QTest::qWaitFor([this] { return window->property("settled").toBool(); }, 15000))
+            return false;
+        // The Studio's shortcuts answer only once its window has the keyboard, as they do a person. A compositor may
+        // give it only after the first frame, which in software can take seconds; a window that never gets it is left
+        // to the cases that need it.
+        [[maybe_unused]] const bool hasKeyboard = QTest::qWaitForWindowActive(window, 15000);
+        return true;
     }
 
     ~Studio()
@@ -181,6 +191,9 @@ private slots:
         // Games' stores (P3.16) go to the test's own folders, never a person's.
         QStandardPaths::setTestModeEnabled(true);
     }
+
+    // QQ's own QML says nothing is wrong with it.
+    void init() { QTest::failOnWarning(QRegularExpression(QStringLiteral("^qrc:/qt/qml/QQ/"))); }
 
     void aNewStudioOpensALitSceneInItsProject()
     {

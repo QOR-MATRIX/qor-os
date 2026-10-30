@@ -12,27 +12,30 @@ here at `X:\Repoz\QOR-OS`. Phase 1: the three products on Linux, in Prism.
 ## This session
 
 1. **QQ runs inside Prism.** Prism now starts QQ Studio (*QQ's editor*) and
-   the QQ Player itself, as it already started ARQADE and QOR Media, so all
-   three products run in Prism. That roadmap item is ticked. QQ Studio is in
-   Beam (*the search bar*). The Player plays the game the shell hands it, one
-   game at a time; the Library will be what hands it games. Publishing from
-   the Studio needs the vault (*the service that will hold keys*, Phase 2), so
-   for now the Studio says publishing needs the launcher.
-2. **Every window opens at the size its app asks for.** Prism used to force
-   960 × 640 on every app it did not place itself. Now the app chooses, and
-   Prism fits the window to the screen. In a hidden Prism kept off the
-   graphics card, the real Studio opened at its own 1600 × 960 and the Player
-   played Orb Run at 1280 × 720.
-3. **A bug found and fixed:** a window closed while minimised was never
-   really removed. It stayed, unseen, in Prism's list of windows.
-4. **Checked:**
-   - Windows and Linux: builds and checks clean; 11 and 12 suites pass.
-   - Prism's full window test, 52 checks, passed hidden.
-   - QQ's own suites inside Prism: only the cases that time movement fail,
-     as they do whenever QQ draws without the graphics card. Three Studio
-     cases that fail on the test display passed there.
-   - Not run: the shell's speed benchmark, which opens a window on your
-     desktop. Nothing here draws more; say if you want it run.
+   the QQ Player, as it does ARQADE and QOR Media; that roadmap item is
+   ticked. The Studio is in Beam (*the search bar*); the Player plays the game
+   the shell hands it, one at a time. Publishing waits for the vault (*the
+   service that will hold keys*, Phase 2).
+2. **Every window opens at the size its app asks for**, fitted to the screen,
+   instead of a forced 960 × 640. The real Studio opened at its own
+   1600 × 960 and the Player played Orb Run at 1280 × 720, in a hidden Prism.
+3. **The speed benchmark, as you asked:** three runs before this work and
+   three after, on this PC. The same within noise: 2.78 and 2.79 ms a frame,
+   about 358 frames a second, as on 23 October.
+4. **QQ Studio's errors, fixed:**
+   - The Agent panel lacked one import, so its colours and fonts failed and
+     the Studio printed `Look is not defined`. QQ's tests now fail on any
+     such error.
+   - Duplicate, Group and the F3 overlay failed in the Linux tests: the tests
+     pressed the keys before the Studio's window had the keyboard. They now
+     wait for it, and pass.
+   - Left: on Linux without the graphics card, QQ runs slower than real time,
+     so the 7 tests that time movement fail. A real graphics card fixes that.
+5. **Also fixed:** a window closed while minimised stayed, unseen, in Prism.
+
+Checked on Windows and Linux: builds and checks clean, QOR OS's own suites
+passing; Prism's window test (52 checks) hidden. Pushing the QQ fix runs the products'
+Windows tests, which open windows on your desktop for about 10 minutes.
 
 ## Needs you
 

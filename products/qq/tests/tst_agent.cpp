@@ -5,6 +5,8 @@
 // window and on disk. And the real programs: qq-mcp started as an MCP client starts it, relaying to a real qq-studio
 // over a pipe of the test's own. And the design loop, against a stand-in for Anthropic's API on this computer: what
 // it sends, what it runs, what it leaves for the creator, and how it meets a busy provider, a refused key and a refusal.
+//
+// Changed for QOR OS: a warning from QQ's own QML (an undefined name, a failed binding) fails the case it happens in.
 
 #include <QColor>
 #include <QDir>
@@ -21,6 +23,7 @@
 #include <QQuickStyle>
 #include <QQuickWindow>
 #include <QRandomGenerator>
+#include <QRegularExpression>
 #include <QSet>
 #include <QSignalSpy>
 #include <QTcpServer>
@@ -289,6 +292,9 @@ private slots:
         QQuickStyle::setStyle(QStringLiteral("Material"));
         qq::StudioLog::install();
     }
+
+    // QQ's own QML says nothing is wrong with it.
+    void init() { QTest::failOnWarning(QRegularExpression(QStringLiteral("^qrc:/qt/qml/QQ/"))); }
 
     // ── the protocol ──
 

@@ -43,6 +43,19 @@ Re-measured on 2026-10-24 with the shared benchmark driver:
   baseline (avg 7.2 ms, p95 9.1 ms); the others sit at p95 about 11.1 ms,
   which looks like a GPU power state. Compare the better of several runs.
 
+Re-measured on 2026-10-30, before and after Prism's windows took the size
+their clients ask for (`c2dd379` and `866aa18`, both `ci-windows`, three
+runs each, alternating, on the default high-performance GPU at 360 Hz). The
+medians:
+
+| Build | Average | p50 | p95 | p99 | Missed | Input to swap p50 / p95 |
+|-------|---------|-----|-----|-----|--------|-------------------------|
+| Before (`c2dd379`) | 2.78 ms | 2.77 ms | 3.03 ms | 3.32 ms | 0.2% | 5.8 / 6.0 ms |
+| After (`866aa18`) | 2.79 ms | 2.77 ms | 3.02 ms | 3.36 ms | 0.3% | 5.9 / 6.1 ms |
+
+The same within run-to-run noise: the change does its work when a client's
+window opens, and the tour opens none.
+
 ### Input-to-swap latency (2026-10-24)
 
 `inputToSwap` times a pointer move over the Shelf. The clock starts when the

@@ -48,9 +48,11 @@ QQ's, ARQADE's and QOR Media's suites.
     frames did not finish drawing in 30 minutes, so the 35 cases after it do not run. On the GPU, on 28 October, it
     passed;
   - QQ passes its world, scene, lockdown and publish suites, and its agent's key cases, now kept in the Secret Service.
-    QQ Studio's F3 overlay, Group and Duplicate fail, as they did on the GPU. In software QQ plays slower than real time
-    (the Player caps a frame's step at 0.05 s), so the cases that time movement fail: four in the play suite, one each
-    in Studio's and the agent's, and the QQ Player's floor of 20 frames a second (5.8 there; 13 to 15 on the GPU).
+    In software QQ plays slower than real time (the Player caps a frame's step at 0.05 s), so the cases that time
+    movement fail: four in the play suite, one each in Studio's and the agent's, and the QQ Player's floor of 20 frames
+    a second (5.8 there; 13 to 15 on the GPU). On 30 October those seven were the only failures: QQ Studio's F3 overlay,
+    Group and Duplicate, which failed too, had pressed their keys before the Studio's window had the keyboard, which
+    the display gives once the first frame is drawn, and now wait for it.
 
   Linux CI does not run them yet ([CI.md](CI.md#the-carried-products)).
 - [x] Each runs as a Wayland client of Prism, and Prism places it (the launcher's `place` request becomes a Prism layout request)
