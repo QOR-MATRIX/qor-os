@@ -35,7 +35,7 @@ QQ's, ARQADE's and QOR Media's suites.
   which its Windows launcher keeps shipping. ARQADE's rules and recorded runs stay shared with ARQADE's server there
   ([UPSTREAM.md](UPSTREAM.md#changing-a-games-rules))
 - [ ] QQ, ARQADE and QOR Media build and pass their suites on Linux. Their Windows-only parts get platform seams:
-  - XInput becomes QOR.Input;
+  - XInput becomes QOR.Input (done 30 October: QQ's `Input` reads QOR.Input's backends);
   - the DXGI GPU choice is handled per platform;
   - the agent's key is kept in the Secret Service on Linux ([QOR-0011](decisions/QOR-0011-the-creators-provider-key-in-the-secret-service.md));
   - on Wayland Prism places the windows the Windows launcher docks ([QOR-0010](decisions/QOR-0010-on-wayland-prism-places-the-products-windows.md)).
@@ -72,6 +72,14 @@ QQ's, ARQADE's and QOR Media's suites.
   GPU-fenced Prism: the Studio at its own 1600 × 960, the Player playing Orb Run at its own 1280 × 720, and closing
   each ended it.
 - [ ] The controller service drives QQ through `Input`'s gamepad seam; ARQADE and QOR Media gain controller focus navigation
+
+  **QQ, 30 October:** QOR.Input's backends are `qor_gamepads`, which QQ's runtime links, and `Input` takes every
+  controller they report as its gamepad, on Windows (DualShock 4 and DualSense too) and Linux, heard only by the
+  application in front ([CONTROLLERS.md](CONTROLLERS.md#games)). ARQADE's games, on QQ's runtime, get it too. In
+  Prism the controller interface steps aside while the QQ Player has the focus, and Guide brings Overview. `tst_play`
+  plays a virtual controller through QOR.Input; `prism_products` checks the shell's side.
+  **Left:** ARQADE's and QOR Media's focus navigation; and Orb Run with a real DualSense on a Linux machine, since
+  WSL has no controllers.
 - [ ] Lumen's tokens theme every app: Demiurge's one look (`docs/design/tokens.json`) mapped onto Lumen roles, with one source
 - [ ] A controller-first **Home** and **Library** in the shell: QQ games, ARQADE, media
 - [ ] From QTOS's Phase 1: evaluate Qt Interface Framework for service code generation and simulation (a QOR record)

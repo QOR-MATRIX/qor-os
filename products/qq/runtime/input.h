@@ -16,7 +16,10 @@
 // the next key, mouse button or pad button they press becomes its binding for that device.
 //
 // The keyboard is read from the whole application, except while a text field has focus, so typing a name never walks
-// the player. A gamepad is read through XInput on Windows; anywhere else only keyboard and mouse.
+// the player. A gamepad comes from QOR OS's controller service, QOR.Input (XInput and raw HID on Windows, so DualShock 4
+// and DualSense too; evdev on Linux), and is heard only while this application is the one in front.
+//
+// Changed for QOR OS: gamepads through QOR.Input, in place of XInput, and only for the application in front.
 //
 // Steps (P3.11): a playing scene takes the hands once a tick (takeStep): move, look, the actions held, and every press
 // and release since the tick before, in order. That is what its logic and its player are given, so a run can be kept
@@ -36,7 +39,6 @@
 
 class QQmlEngine;
 class QJSEngine;
-class QTimer;
 
 namespace qq {
 
@@ -87,7 +89,8 @@ public:
     Q_INVOKABLE QPointF takePointer();
 
     /// A gamepad's state: sticks from -1 to 1 (y up), with the dead zone not yet applied; jump is A held and run a
-    /// shoulder held. A test's or the agent's pad arrives here; a real pad's through XInput.
+    /// shoulder held. A test's or the agent's pad arrives here; a real pad's from QOR.Input, whose own dead zone is
+    /// already out of its sticks.
     Q_INVOKABLE void gamepadState(QVector2D left, QVector2D right, bool jump, bool run, bool connected = true);
     /// The gamepad's buttons held now, by name (A, B, X, Y, LB, RB, LT, RT, Back, Start, LS, RS, Up, Down, Left,
     /// Right), its sticks left as they are: for a check, or the agent, pressing what a real pad would.
@@ -152,8 +155,10 @@ private:
         QStringList pad;
     };
 
-    void pollGamepad();
-    void padState(QVector2D left, QVector2D right, const QSet<QString> &buttons, bool connected);
+    /// The controllers QOR.Input reports, as the pad: nothing held while this application is not the one in front.
+    void readPads();
+    /// `deadZoned`: the sticks' dead zone is already out (QOR.Input's), so QQ's own is not taken out again.
+    void padState(QVector2D left, QVector2D right, const QSet<QString> &buttons, bool connected, bool deadZoned);
     /// Work out which actions are held now; announce each change, and `changed` if anything did.
     void settle();
     bool keyHeld(const QString &binding) const;
@@ -173,10 +178,12 @@ private:
     QVector2D m_padLeft;
     QVector2D m_padRight;
     bool m_padConnected = false;
-    int m_padIndex = -1;
-    int m_padIdlePolls = 0;
+    bool m_padDeadZoned = false;
+    /// Whether the pad is a real controller's, from QOR.Input, rather than one a check or the agent gives.
+    bool m_padFromHardware = false;
     bool m_readsHardware = true;
-    QTimer *m_poll = nullptr;
+    /// Whether this application is the one in front, whose window has the keyboard.
+    bool m_front = false;
     /// Presses and releases since the last takeStep(), in order.
     QVariantList m_edges;
     bool m_replaying = false;

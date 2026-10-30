@@ -457,6 +457,7 @@ QList<ProductRecord> ProductHost::defaultRecords()
     player.fileArgument = u"--"_s;
     player.glyph = u"play"_s;
     player.launchable = false;
+    player.takesController = true;
     player.keywords = u"qq games play"_s;
     player.description = u"Plays a QQ game."_s;
     player.hue = 140;
@@ -505,6 +506,7 @@ QVariantMap ProductHost::product(const QString &id) const
              { u"height"_s, r->size.height() },
              { u"launchable"_s, r->launchable },
              { u"placed"_s, r->commands.contains(u"place"_s) },
+             { u"takesController"_s, r->takesController },
              { u"keywords"_s, r->keywords },
              { u"description"_s, r->description },
              { u"hue"_s, r->hue },

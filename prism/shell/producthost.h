@@ -42,6 +42,8 @@ struct ProductRecord
     QString glyph;           // its icon in the Shelf and Beam
     QSize size;              // the content size it opens at, where there is room; empty: the size it asks for
     bool launchable = false; // opened by itself (ARQADE), or only to show a file (QOR Media)
+    bool takesController = false; // a game, which plays with the controller while its window has the focus
+                                  // (the QQ Player): the shell's controller interface steps aside
     QString keywords;
     QString description;
     int hue = 0;
@@ -183,10 +185,10 @@ public:
     void setReducedMotion(bool reduced);
     QVariantList products() const;
 
-    // { id, name, glyph, width, height, launchable, placed, keywords,
-    //   description, hue, chroma, available, running }, or an empty map for
-    // no product. `placed`: Prism tells it where to show (place); otherwise it
-    // is only started, and width and height are 0.
+    // { id, name, glyph, width, height, launchable, placed, takesController,
+    //   keywords, description, hue, chroma, available, running }, or an empty
+    // map for no product. `placed`: Prism tells it where to show (place);
+    // otherwise it is only started, and width and height are 0.
     Q_INVOKABLE QVariantMap product(const QString &id) const;
     // The product's program, if it can be started: the file its variable
     // names, else `<id>` beside Prism's own program.

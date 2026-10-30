@@ -6,7 +6,10 @@
 # controller into pointer, scroll and key input for the shell. See
 # docs/CONTROLLERS.md. SystemGestures recognises three-finger swipes on
 # touchpads (precision touchpads read through Raw Input on Windows) and
-# touchscreens.
+# touchscreens. The controllers themselves are qor_gamepads (gamepads/), which
+# the products link too.
+
+add_subdirectory(gamepads)
 
 set_source_files_properties(qml/ControllerGlyph.qml PROPERTIES QT_RESOURCE_ALIAS ControllerGlyph.qml)
 
@@ -22,14 +25,8 @@ qt_add_qml_module(qor_input
         qml/gamepads.h qml/gamepads.cpp
         qml/navigator.h qml/navigator.cpp
         qml/systemgestures.h qml/systemgestures.cpp
-        src/backends.h
-        src/gamepad.h
-        src/gamepadbackend.h
-        src/gamepadmanager.h src/gamepadmanager.cpp
         src/injection.h src/injection.cpp
         src/keycodes.h src/keycodes.cpp
-        src/mapping.h src/mapping.cpp
-        src/playstation.h src/playstation.cpp
         src/touchpad.h src/touchpad.cpp
     DEPENDENCIES
         QtQuick
@@ -38,12 +35,10 @@ qt_add_qml_module(qor_input
 )
 
 if(WIN32)
-    target_sources(qor_input PRIVATE src/backends_windows.cpp src/touchpad_windows.cpp)
-    target_link_libraries(qor_input PRIVATE hid setupapi cfgmgr32)
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    target_sources(qor_input PRIVATE src/backends_linux.cpp src/touchpad_other.cpp)
+    target_sources(qor_input PRIVATE src/touchpad_windows.cpp)
+    target_link_libraries(qor_input PRIVATE hid)
 else()
-    target_sources(qor_input PRIVATE src/backends_other.cpp src/touchpad_other.cpp)
+    target_sources(qor_input PRIVATE src/touchpad_other.cpp)
 endif()
 
 target_include_directories(qor_input PUBLIC
@@ -52,6 +47,7 @@ target_include_directories(qor_input PUBLIC
 )
 target_link_libraries(qor_input
     PUBLIC
+        qor_gamepads
         Qt6::Core
         Qt6::Gui
         Qt6::Quick

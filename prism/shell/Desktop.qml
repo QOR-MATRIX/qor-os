@@ -80,13 +80,23 @@ FocusScope {
     // A game controller drives everything while this is on (see
     // docs/CONTROLLERS.md). Keyboard and mouse always keep working.
     readonly property bool controllerActive: Services.settings.controllerInterface && Gamepads.count > 0
+    // A game in front plays with the controller: a product whose record says
+    // so (the QQ Player), with its window focused and nothing of the shell
+    // open. The game reads the controller itself, through QOR.Input, and the
+    // controller interface steps aside so that a press is the game's alone.
+    // Guide brings the shell back over it.
+    readonly property bool controllerForGame: !locked && surface === "" && focusedLayer.active !== null
+                                              && !focusedLayer.active.minimized
+                                              && ProductHost.product(focusedLayer.active.appId).takesController === true
     // For the shell's script runner and tests.
     readonly property var controllerState: ({
         gamepads: Gamepads.count,
         prompt: controllerPrompt.open,
         keyboard: controllerKeyboard.open,
         cursorVisible: controller.cursorVisible,
-        cursor: [Math.round(controller.cursor.x), Math.round(controller.cursor.y)]
+        cursor: [Math.round(controller.cursor.x), Math.round(controller.cursor.y)],
+        acting: controller.enabled,
+        game: controllerForGame
     })
 
     function controllerConnected(gamepad: var) {
@@ -95,6 +105,9 @@ FocusScope {
         } else if (Services.settings.controllerAutoSwitch) {
             Services.settings.controllerInterface = true;
             toast.show("gamepad-2", qsTr("Controller interface on"));
+        } else if (controllerForGame) {
+            // Picked up to play: the game has it, and the question waits.
+            toast.show("gamepad-2", qsTr("%1 connected").arg(gamepad.name));
         } else {
             controllerPrompt.ask(gamepad);
         }
@@ -146,7 +159,7 @@ FocusScope {
     ControllerNavigator {
         id: controller
         window: desktop.Window.window
-        enabled: desktop.controllerActive
+        enabled: desktop.controllerActive && !desktop.controllerForGame
         cursorSpeed: Services.settings.controllerCursorSpeed
         vibration: Services.settings.controllerVibration
         keyboardOpen: controllerKeyboard.open
@@ -163,6 +176,7 @@ FocusScope {
         else if (controller.textInputFocused)
             controllerKeyboard.open = true;
     }
+    onControllerForGameChanged: if (controllerForGame) controllerKeyboard.open = false
 
     // PlayStation light bars glow in the accent colour.
     readonly property color controllerLight: Services.settings.controllerLightbar
@@ -190,6 +204,10 @@ FocusScope {
                 controllerPrompt.controllerButton(button);
             else if (desktop.controllerActive && desktop.locked && button === Gamepads.South)
                 desktop.unlock();
+            // Over a game, Guide brings the shell back: Overview, to pick
+            // another window or return to the game.
+            else if (desktop.controllerActive && desktop.controllerForGame && button === Gamepads.Guide)
+                desktop.toggleSurface("overview");
         }
     }
 
@@ -847,7 +865,7 @@ FocusScope {
         x: 16
         y: parent.height - height - 18
         backdrop: sceneBackdrop
-        active: desktop.controllerActive
+        active: desktop.controllerActive && !desktop.controllerForGame
         entries: desktop.controllerHints
     }
 

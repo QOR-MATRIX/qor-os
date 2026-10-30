@@ -41,7 +41,8 @@ In simulation the *sources* are the classes in `sim/`; on a device they are the
 |--------|------|------------|--------|---------|
 | `qor_kit` | static lib + QML plugin | `QOR.Kit` | `kit/` | Tokens, Theme, Motion, Materials, Spring, Oklch, SceneRect, FrameStats, Surface, Glass, Backdrop, RoundMask, Wallpaper, Icon, AppIcon, Artwork, QorMark, Spectrum, Sounds, building blocks |
 | `qor_lumen_style` | static lib + QML plugin | `Lumen` | `kit/style/` | Qt Quick Controls 2 style (24 controls, Basic fallback) |
-| `qor_input` | static lib + QML plugin | `QOR.Input` | `input/` | Game controllers: XInput, HID and evdev backends, `Gamepads`, `ControllerNavigator`, `ControllerGlyph` ([CONTROLLERS.md](CONTROLLERS.md)) |
+| `qor_gamepads` | static lib | — | `input/gamepads/` | Game controllers: XInput, HID and evdev backends and `GamepadManager`, with Qt Core and Gui only, so QQ links it too ([CONTROLLERS.md](CONTROLLERS.md#games)) |
+| `qor_input` | static lib + QML plugin | `QOR.Input` | `input/` | The controllers (`qor_gamepads`) for QML: `Gamepads`, `ControllerNavigator`, `ControllerGlyph` ([CONTROLLERS.md](CONTROLLERS.md)) |
 | `qor_audio` | static lib | — | `audio/` | The audio engine: real-time output, QOR Sessions synth, file decoding, EQ, limiter, analysis ([AUDIO.md](AUDIO.md)) |
 | `qor_services` | static lib + QML plugin | `QOR.Services` | `services/` | `Services` singleton (replicas), `Intents`, `Reactive`, QML type info for replicas |
 | `qor_sim` | static lib | — | `sim/` | Simulated sources (audio and media on `qor_audio`) + scenario loader + QtRO host |
@@ -317,7 +318,7 @@ What ties them to Windows today, and where Phase 1 changes it:
 | Seam | Today | On QOR OS |
 |------|-------|-----------|
 | Placement | The launcher's `place` command parents the product's window into its own by native handle (`Dock`, `products/arqade/qt/src/dock.cpp`, `tools/qor-media/src/dock.cpp`), which Wayland cannot do | On Wayland the product's window stays a toplevel and Prism places it, speaking the launcher's side of the host protocol ([QOR-0010](decisions/QOR-0010-on-wayland-prism-places-the-products-windows.md), [below](#hosted-by-prism)); `Dock` stays for Windows |
-| Controllers | XInput, polled by QQ's `Input` (`products/qq/runtime/input.cpp`) | QOR.Input feeds `Input`'s gamepad state, with the same button names |
+| Controllers | XInput, polled by QQ's `Input` (`products/qq/runtime/input.cpp`) | Since 30 October QOR.Input's backends (`qor_gamepads`) feed `Input`'s gamepad state, with the same button names, on every platform: DualShock 4 and DualSense on Windows too ([CONTROLLERS.md](CONTROLLERS.md#games)) |
 | The agent's key | Windows Credential Manager (`products/qq/agent/keychain.cpp`) | The Secret Service, over Qt D-Bus, in the same file: the creator's own provider key, not a QOR key ([QOR-0011](decisions/QOR-0011-the-creators-provider-key-in-the-secret-service.md)). The image must ship a provider (Phase 3) |
 | GPU choice | DXGI's high-performance adapter (`products/qq/runtime/gpu.cpp`, ARQADE's `main.cpp`) | Mesa and Prism's own outputs; nothing to do in the products |
 
@@ -372,6 +373,10 @@ Launcher's (demiurge-chain's `tools/qor-launcher/src-tauri/src/host/`):
   newer place, theme, player, prefs or play replaces one not yet sent. What
   QOR Media reports on its poll is for the Library, and is passed over until
   it exists.
+- **The controller.** A product whose record `takesController` (the QQ
+  Player) plays with it: while its window has the focus and nothing of the
+  shell is open, the controller interface steps aside and Guide brings
+  Overview ([CONTROLLERS.md](CONTROLLERS.md#games)).
 - **Windows.** When a toplevel arrives, `productOf()` names its product by the
   client's process id. The window of a product Prism places opens at the
   planned frame; any other at the size it asks for ([§7](#7-window-management)).

@@ -8,7 +8,7 @@ Keyboard and mouse keep working throughout.
 
 | Piece | Where | What it does |
 |-------|-------|--------------|
-| Controller backends and `GamepadManager` | [`input/src/`](../input/src/) (`qor_input`) | Find controllers, read them, present one standard layout |
+| Controller backends and `GamepadManager` | [`input/src/`](../input/src/) (`qor_gamepads`, in `qor_input`) | Find controllers, read them, present one standard layout; Qt Core and Gui only, so QQ links it too ([below](#games)) |
 | `Gamepads` | [`input/qml/gamepads.h`](../input/qml/gamepads.h) (`QOR.Input`) | The connected controllers and their live state, for QML |
 | `ControllerNavigator` | [`input/qml/navigator.h`](../input/qml/navigator.h) | Turns a controller into pointer, scroll and key input, and shell actions |
 | `ControllerGlyph` | [`input/qml/ControllerGlyph.qml`](../input/qml/ControllerGlyph.qml) | A button as printed on the controller in use |
@@ -99,6 +99,29 @@ LB and RB move the text cursor; LT is Shift; East closes the keyboard.
 
 **Vibration.** A light tap on selections and shell actions (Settings ›
 Controllers › Vibration).
+
+### Games
+
+A game reads the controller itself, through the same backends: QQ's `Input`
+(`products/qq/runtime/input.cpp`) takes every controller `GamepadManager`
+reports, combined, as its gamepad. That is the QQ Player, QQ Studio while it
+plays, and ARQADE's games, which run on QQ's runtime. Its sticks arrive with
+QOR.Input's dead zone already out, so QQ does not take out its own as well,
+and Guide is never a game's. A controller is heard only by the application
+in front: one pressed in the shell or another window moves nothing in a game
+behind it.
+
+Under Prism, a product whose record says it plays with the controller (the
+QQ Player) has it while its window has the focus and nothing of the shell is
+open:
+
+- the controller interface steps aside, with its cursor and hints, so a press
+  is the game's alone;
+- Guide brings the shell back: Overview, where East returns to the game;
+- a controller connected then is the game's, and nothing is asked.
+
+QQ Studio is not such a product, since it is mostly edited with keyboard and
+mouse: while it plays with the controller interface on, both answer.
 
 ### Preferences
 

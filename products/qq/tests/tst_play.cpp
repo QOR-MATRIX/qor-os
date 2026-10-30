@@ -6,6 +6,8 @@
 // gamepad's state), what was drawn (particles counted by their colour in the frame), and what a logic file does
 // before and after it is saved again while the world plays. A 2D world (P3.10) is checked pixel for pixel against the
 // colours tests/fixtures/make_2d.py paints.
+//
+// Changed for QOR OS: a controller comes from QOR OS's controller service, QOR.Input; here, only its virtual ones.
 
 #include <QDir>
 #include <QElapsedTimer>
@@ -39,6 +41,7 @@
 #include <numbers>
 
 #include "confinement.h"
+#include "gamepadmanager.h"
 #include "input.h"
 #include "mixer.h"
 #include "run.h"
@@ -341,6 +344,8 @@ private slots:
     {
         // Games' stores (P3.16) go to the test's own folders, never a person's.
         QStandardPaths::setTestModeEnabled(true);
+        // The controllers are the cases' own, never one in a person's hands.
+        qputenv("QOR_GAMEPADS", "virtual");
     }
 
     // ── physics ──
@@ -529,6 +534,73 @@ private slots:
         QCOMPARE(input->move(), QVector2D(0, 0));
         QCOMPARE(input->jump(), false);
         QCOMPARE(input->gamepad(), false);
+    }
+
+    void aControllerComesFromQorOsToTheGameInFront()
+    {
+        using qor::input::Axis;
+        using qor::input::Button;
+        Stage s;
+        QVERIFY(s.open(sceneText(QStringLiteral("    Player { name: \"Hero\" }\n"))));
+        QObject *hero = s.entity(QStringLiteral("Hero"));
+        qq::Input *input = s.input();
+        // A controller is heard by the application in front: this one, once its window has the keyboard.
+        QVERIFY(QTest::qWaitForWindowActive(s.window.get()));
+        auto *pads = qor::input::GamepadManager::instance();
+        const QString pad = pads->addVirtual(qor::input::Family::PlayStation, QStringLiteral("DualSense"));
+        QCOMPARE(input->gamepad(), true);
+
+        // Forward on the left stick (QOR.Input's y runs down), and Cross, the south button: walking, and a jump.
+        qor::input::GamepadState state;
+        state.axis(Axis::LeftY) = -1;
+        state.set(Button::South, true);
+        pads->setVirtualState(pad, state);
+        QCOMPARE(input->move(), QVector2D(0, 1));
+        QCOMPARE(input->jump(), true);
+        const QVector3D from = hero->property("feet").value<QVector3D>();
+        s.run(800);
+        const QVector3D to = hero->property("feet").value<QVector3D>();
+        QVERIFY2(QVector2D(to.x() - from.x(), to.z() - from.z()).length() > 0.5f,
+                 qPrintable(QStringLiteral("walked %1").arg(QVector2D(to.x() - from.x(), to.z() - from.z()).length())));
+
+        // The stick's dead zone is the controller service's, taken out once: a third of the way across moves the
+        // player a little, where QQ's own taken out again would hold it still.
+        state = {};
+        state.axis(Axis::LeftX) = 0.3f;
+        pads->setVirtualState(pad, state);
+        QVERIFY2(input->move().x() > 0.15f, qPrintable(QStringLiteral("x %1").arg(input->move().x())));
+
+        // Another application in front: the pad moves nobody here; back in front, it does again.
+        state.axis(Axis::LeftX) = 0;
+        state.axis(Axis::LeftY) = -1;
+        state.set(Button::South, true);
+        pads->setVirtualState(pad, state);
+        emit qGuiApp->applicationStateChanged(Qt::ApplicationInactive);
+        QCOMPARE(input->move(), QVector2D(0, 0));
+        QCOMPARE(input->jump(), false);
+        QCOMPARE(input->gamepad(), true);
+        emit qGuiApp->applicationStateChanged(Qt::ApplicationActive);
+        QCOMPARE(input->move(), QVector2D(0, 1));
+        QCOMPARE(input->jump(), true);
+
+        // Its buttons by QQ's names (a trigger pulled past half way is pressed); Guide is the system's, never a game's.
+        state = {};
+        state.set(Button::West, true);
+        state.axis(Axis::RightTrigger) = 1;
+        state.set(Button::Guide, true);
+        pads->setVirtualState(pad, state);
+        input->define(QStringLiteral("fire"), {}, {QStringLiteral("X")});
+        input->define(QStringLiteral("boost"), {}, {QStringLiteral("RT")});
+        input->define(QStringLiteral("home"), {}, {QStringLiteral("Guide")});
+        QCOMPARE(input->held(QStringLiteral("fire")), true);
+        QCOMPARE(input->held(QStringLiteral("boost")), true);
+        QCOMPARE(input->held(QStringLiteral("home")), false);
+
+        // Unplugged: nothing held, and no pad.
+        pads->removeVirtual(pad);
+        QCOMPARE(input->gamepad(), false);
+        QCOMPARE(input->held(QStringLiteral("fire")), false);
+        QCOMPARE(input->move(), QVector2D(0, 0));
     }
 
     void typingIntoAFieldIsNotPlaying()

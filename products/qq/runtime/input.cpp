@@ -1,3 +1,6 @@
+// Changed for QOR OS: gamepads through QOR.Input's GamepadManager (QOR OS's input/gamepads), in place of XInput, and
+// only for the application in front.
+
 #include "input.h"
 
 #include <QGuiApplication>
@@ -5,15 +8,12 @@
 #include <QMouseEvent>
 #include <QQuickItem>
 #include <QQuickWindow>
-#include <QTimer>
 
 #include <algorithm>
 #include <cmath>
 
-#ifdef Q_OS_WIN
-#define NOMINMAX
-#include <windows.h>
-#include <xinput.h>
+#ifndef Q_OS_WASM
+#include "gamepadmanager.h"
 #endif
 
 namespace qq {
@@ -78,12 +78,6 @@ QStringList cleaned(const QStringList &names)
     return out;
 }
 
-#ifdef Q_OS_WIN
-constexpr int pollMs = 16;
-// XInput is slow to ask about an empty slot, so with no pad connected the slots are asked about every two seconds.
-constexpr int idlePollsBetweenScans = 2000 / pollMs;
-#endif
-
 }  // namespace
 
 QVector2D withDeadZone(QVector2D stick, float dead)
@@ -147,15 +141,20 @@ Input::Input(QObject *parent) : QObject(parent)
         m_actions.insert(QLatin1String(b.name), {b.keys, b.pad});
     if (qApp)
         qApp->installEventFilter(this);
+    m_front = QGuiApplication::applicationState() == Qt::ApplicationActive;
     connect(qGuiApp, &QGuiApplication::applicationStateChanged, this, [this](Qt::ApplicationState state) {
-        if (state != Qt::ApplicationActive)
+        m_front = state == Qt::ApplicationActive;
+        if (!m_front)
             release();
+        readPads();
     });
-#ifdef Q_OS_WIN
-    m_poll = new QTimer(this);
-    m_poll->setInterval(pollMs);
-    connect(m_poll, &QTimer::timeout, this, &Input::pollGamepad);
-    m_poll->start();
+#ifndef Q_OS_WASM
+    // QOR OS's controller service: every controller connected, combined, in one standard layout.
+    auto *pads = qor::input::GamepadManager::instance();
+    connect(pads, &qor::input::GamepadManager::connected, this, &Input::readPads);
+    connect(pads, &qor::input::GamepadManager::disconnected, this, &Input::readPads);
+    connect(pads, &qor::input::GamepadManager::mergedChanged, this, &Input::readPads);
+    readPads();
 #endif
 }
 
@@ -176,7 +175,7 @@ QVector2D Input::move() const
         return m_replayMove;
     auto held = [this](int a, int b = 0) { return m_keys.contains(a) || (b && m_keys.contains(b)) ? 1.0f : 0.0f; };
     const QVector2D keys(held(Qt::Key_D) - held(Qt::Key_A), held(Qt::Key_W, Qt::Key_Up) - held(Qt::Key_S, Qt::Key_Down));
-    return clampedToOne(keys + withDeadZone(m_padLeft));
+    return clampedToOne(keys + (m_padDeadZoned ? m_padLeft : withDeadZone(m_padLeft)));
 }
 
 QVector2D Input::look() const
@@ -184,7 +183,7 @@ QVector2D Input::look() const
     if (m_replaying)
         return m_replayLook;
     const float turn = (m_keys.contains(Qt::Key_Right) ? 1.0f : 0.0f) - (m_keys.contains(Qt::Key_Left) ? 1.0f : 0.0f);
-    return clampedToOne(QVector2D(turn, 0) + withDeadZone(m_padRight));
+    return clampedToOne(QVector2D(turn, 0) + (m_padDeadZoned ? m_padRight : withDeadZone(m_padRight)));
 }
 
 void Input::setReadsHardware(bool reads)
@@ -192,9 +191,8 @@ void Input::setReadsHardware(bool reads)
     if (reads == m_readsHardware)
         return;
     m_readsHardware = reads;
-    m_padIndex = -1;
-    m_padIdlePolls = 0;
     emit readsHardwareChanged();
+    readPads();
 }
 
 void Input::pointerMoved(QPointF delta)
@@ -216,7 +214,7 @@ void Input::gamepadState(QVector2D left, QVector2D right, bool jump, bool run, b
         buttons.insert(QStringLiteral("A"));
     if (run)
         buttons.insert(QStringLiteral("LB"));
-    padState(left, right, buttons, connected);
+    padState(left, right, buttons, connected, false);
 }
 
 void Input::gamepadButtons(const QStringList &down)
@@ -224,10 +222,10 @@ void Input::gamepadButtons(const QStringList &down)
     QSet<QString> buttons;
     for (const QString &b : down)
         buttons.insert(b.trimmed());
-    padState(m_padLeft, m_padRight, buttons, true);
+    padState(m_padLeft, m_padRight, buttons, true, m_padDeadZoned);
 }
 
-void Input::padState(QVector2D left, QVector2D right, const QSet<QString> &buttons, bool connected)
+void Input::padState(QVector2D left, QVector2D right, const QSet<QString> &buttons, bool connected, bool deadZoned)
 {
     const bool wasConnected = m_padConnected;
     QSet<QString> down = connected ? buttons : QSet<QString>();
@@ -245,12 +243,14 @@ void Input::padState(QVector2D left, QVector2D right, const QSet<QString> &butto
         }
     }
     down -= m_swallowedPad;
-    if (left == m_padLeft && right == m_padRight && down == m_pad && connected == wasConnected)
+    if (left == m_padLeft && right == m_padRight && down == m_pad && connected == wasConnected
+        && deadZoned == m_padDeadZoned)
         return;
     m_padLeft = left;
     m_padRight = right;
     m_pad = down;
     m_padConnected = connected;
+    m_padDeadZoned = deadZoned;
     settle();
     emit changed();
     if (connected != wasConnected)
@@ -333,6 +333,7 @@ void Input::endReplay()
         emit replayingChanged();
     }
     emit changed();
+    readPads();
 }
 
 void Input::hold(const QString &name, bool down)
@@ -505,61 +506,57 @@ bool Input::eventFilter(QObject *watched, QEvent *event)
     return QObject::eventFilter(watched, event);
 }
 
-void Input::pollGamepad()
+void Input::readPads()
 {
-#ifdef Q_OS_WIN
+#ifndef Q_OS_WASM
     if (!m_readsHardware || m_replaying)
         return;
-    if (m_padIndex < 0) {
-        if (m_padIdlePolls++ % idlePollsBetweenScans != 0)
-            return;
-        for (DWORD i = 0; i < XUSER_MAX_COUNT; ++i) {
-            XINPUT_STATE state{};
-            if (XInputGetState(i, &state) == ERROR_SUCCESS) {
-                m_padIndex = int(i);
-                break;
-            }
+    using qor::input::Axis;
+    using qor::input::Button;
+    const auto *pads = qor::input::GamepadManager::instance();
+    // With no controller connected, the pad is whatever a check or the agent gives (gamepadState); the last one
+    // unplugged lets go of everything it held.
+    if (pads->gamepads().isEmpty()) {
+        if (m_padFromHardware) {
+            m_padFromHardware = false;
+            padState({}, {}, {}, false, true);
         }
-        if (m_padIndex < 0)
-            return;
-    }
-    XINPUT_STATE state{};
-    if (XInputGetState(DWORD(m_padIndex), &state) != ERROR_SUCCESS) {
-        m_padIndex = -1;
-        m_padIdlePolls = 1;
-        padState({}, {}, {}, false);
         return;
     }
-    const XINPUT_GAMEPAD &pad = state.Gamepad;
-    auto axis = [](SHORT v) { return std::max(-1.0f, float(v) / 32767.0f); };
-    static const QList<QPair<WORD, QString>> names{
-        {XINPUT_GAMEPAD_A, QStringLiteral("A")},
-        {XINPUT_GAMEPAD_B, QStringLiteral("B")},
-        {XINPUT_GAMEPAD_X, QStringLiteral("X")},
-        {XINPUT_GAMEPAD_Y, QStringLiteral("Y")},
-        {XINPUT_GAMEPAD_LEFT_SHOULDER, QStringLiteral("LB")},
-        {XINPUT_GAMEPAD_RIGHT_SHOULDER, QStringLiteral("RB")},
-        {XINPUT_GAMEPAD_BACK, QStringLiteral("Back")},
-        {XINPUT_GAMEPAD_START, QStringLiteral("Start")},
-        {XINPUT_GAMEPAD_LEFT_THUMB, QStringLiteral("LS")},
-        {XINPUT_GAMEPAD_RIGHT_THUMB, QStringLiteral("RS")},
-        {XINPUT_GAMEPAD_DPAD_UP, QStringLiteral("Up")},
-        {XINPUT_GAMEPAD_DPAD_DOWN, QStringLiteral("Down")},
-        {XINPUT_GAMEPAD_DPAD_LEFT, QStringLiteral("Left")},
-        {XINPUT_GAMEPAD_DPAD_RIGHT, QStringLiteral("Right")},
+    m_padFromHardware = true;
+    // A pad pressed while another application is in front, the shell's included, moves nobody here.
+    if (!m_front) {
+        padState({}, {}, {}, true, true);
+        return;
+    }
+    const qor::input::GamepadState pad = pads->merged();
+    // Guide is the system's, never a game's.
+    static const QList<QPair<Button, QString>> names{
+        {Button::South, QStringLiteral("A")},
+        {Button::East, QStringLiteral("B")},
+        {Button::West, QStringLiteral("X")},
+        {Button::North, QStringLiteral("Y")},
+        {Button::LeftShoulder, QStringLiteral("LB")},
+        {Button::RightShoulder, QStringLiteral("RB")},
+        {Button::LeftTrigger, QStringLiteral("LT")},
+        {Button::RightTrigger, QStringLiteral("RT")},
+        {Button::Back, QStringLiteral("Back")},
+        {Button::Start, QStringLiteral("Start")},
+        {Button::LeftStick, QStringLiteral("LS")},
+        {Button::RightStick, QStringLiteral("RS")},
+        {Button::DPadUp, QStringLiteral("Up")},
+        {Button::DPadDown, QStringLiteral("Down")},
+        {Button::DPadLeft, QStringLiteral("Left")},
+        {Button::DPadRight, QStringLiteral("Right")},
     };
     QSet<QString> buttons;
-    for (const auto &[bit, name] : names) {
-        if (pad.wButtons & bit)
+    for (const auto &[button, name] : names) {
+        if (pad.pressed(button))
             buttons.insert(name);
     }
-    // A trigger counts as pressed past a little travel, so a finger resting on it does not.
-    if (pad.bLeftTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD)
-        buttons.insert(QStringLiteral("LT"));
-    if (pad.bRightTrigger > XINPUT_GAMEPAD_TRIGGER_THRESHOLD)
-        buttons.insert(QStringLiteral("RT"));
-    padState(QVector2D(axis(pad.sThumbLX), axis(pad.sThumbLY)), QVector2D(axis(pad.sThumbRX), axis(pad.sThumbRY)), buttons,
-             true);
+    // QOR.Input's sticks point down for +y, QQ's up; its triggers count as pressed past half way.
+    padState(QVector2D(pad.axis(Axis::LeftX), -pad.axis(Axis::LeftY)),
+             QVector2D(pad.axis(Axis::RightX), -pad.axis(Axis::RightY)), buttons, true, true);
 #endif
 }
 

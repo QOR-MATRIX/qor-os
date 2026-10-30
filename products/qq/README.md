@@ -1,6 +1,6 @@
 # QQ, the QOR Engine
 
-<!-- Changed for QOR OS: on Linux the Studio keeps the provider's key in the Secret Service (QOR OS's QOR-0011). -->
+<!-- Changed for QOR OS: on Linux the Studio keeps the provider's key in the Secret Service (QOR OS's QOR-0011); gamepads come from QOR OS's controller service, QOR.Input, in place of XInput. -->
 
 An engine for virtual worlds and experiences, built on **Qt 6** under the owner's commercial licence
 ([ADR-083](../../docs/decisions/ADR-083-qq-on-qt.md)). The blueprint is [`docs/blueprints/qq.md`](../../docs/blueprints/qq.md);
@@ -15,8 +15,8 @@ it; the QQ Player plays a scene on its own, natively and in a browser.
 - **Play (P3.2):** shapes with bodies (`body`: none, static or dynamic; mass, bounce, friction) that fall, collide as
   their shapes and come to rest, under the scene's gravity; a **Player**, a character controller that walks, runs, turns
   and jumps, is stopped by walls and climbs low steps, with a camera that follows; **input** from the keyboard (WASD or
-  the arrows, Space, Shift), the mouse (a drag looks around) and a gamepad (XInput: sticks past a dead zone, A, the
-  shoulders), read as one set of intentions (`Input`: move, look, jump, run) so every game works with every device and
+  the arrows, Space, Shift), the mouse (a drag looks around) and a gamepad (QOR OS's QOR.Input: sticks past a dead
+  zone, A, the shoulders), read as one set of intentions (`Input`: move, look, jump, run) so every game works with every device and
   the agent can play one too; **particles** (`Emitter`: soft points of light that rise, spread and fade); **sound**
   (`Sound`: placed in the world, louder nearer, panned, silent beyond its reach, heard through the camera, in a browser
   too); and **logic** (`Behaviour` names a `logic/<name>.qml` file whose root is a `Logic`; it runs only
@@ -536,8 +536,9 @@ the web has no audio, so in a browser sound is QQ's own, on the page's Web Audio
   operating system only scheme by scheme, so a scheme off the list still reaches it; and Qt Multimedia (its camera and
   microphone types among them) cannot be refused natively, because Qt's spatial audio library registers it when it
   loads. Natively only a person's own games play; in a browser the browser asks before any camera or microphone.
-- **Gamepads are read through XInput, so on Windows only**, and only Xbox-style pads; the checks give the pad's state
-  rather than reading a real one.
+- **Gamepads come from QOR OS's controller service, QOR.Input** (`input/gamepads` in QOR OS): XInput and raw HID on
+  Windows (so DualShock 4 and DualSense too), evdev on Linux, and none in a browser yet. A pad is heard only by the
+  application in front. The checks give the pad's state, or a virtual controller's, rather than reading a real one.
 - **One Studio at a time offers its tools.** A second Studio on the same pipe says so and stays out; `QQ_MCP_PIPE`
   gives one another name (for `qq-mcp` too).
 - **An agent works with the creator's trust.** The pipe is open only to the user running the Studio, and the agent can
