@@ -75,8 +75,8 @@ HostOptions parseOptions(const QGuiApplication &app)
     const QCommandLineOption open(
         u"open"_s, u"Comma-separated apps to open at start, optionally at a page (e.g. music,settings/sound)."_s,
         u"apps"_s);
-    const QCommandLineOption surface(u"surface"_s, u"Shell surface to show: beam, control-center, overview."_s,
-                                     u"name"_s);
+    const QCommandLineOption surface(
+        u"surface"_s, u"Shell surface to show: home, library, beam, control-center, overview."_s, u"name"_s);
     const QCommandLineOption query(u"query"_s, u"Initial Beam query."_s, u"text"_s);
     const QCommandLineOption theme(u"theme"_s, u"Force appearance: light or dark."_s, u"theme"_s);
     const QCommandLineOption accent(u"accent"_s, u"Force accent hue in degrees."_s, u"hue"_s);

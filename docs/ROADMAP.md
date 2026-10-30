@@ -101,7 +101,23 @@ QQ's, ARQADE's and QOR Media's suites.
     they connect and whenever they change (`theme`), and passes them to every product as it starts
     (`QOR_THEME_COLORS`), which QQ's `Look` takes.
   - **Left**, should either be wanted: Lumen's faces and type scale for the products, and its light appearance.
-- [ ] A controller-first **Home** and **Library** in the shell: QQ games, ARQADE, media
+- [x] A controller-first **Home** and **Library** in the shell: QQ games, ARQADE, media
+
+  **30 October** ([SHELL.md](design/SHELL.md#home-and-the-library-homeqml-homeshelfqml-homecardqml-libraryh)):
+  - **Home** (Guide, or Beam) shows what was played last, every game and the newest media, a row at a time. The
+    **Library** shows everything, chosen by what it is or who made it.
+  - The d-pad goes card to card, South plays or opens, LB and RB go between the two, and the hints show the
+    controller's own glyphs.
+  - **The Library** (`library.h`) finds, until the core's index (Phase 2):
+    - the QQ games QOR OS carries (`QOR_GAMES`, else `share/qor-os/games`);
+    - the person's own QQ projects in Documents;
+    - ARQADE's six games;
+    - video, music and pictures.
+  - It remembers what was played, and where QOR Media last stopped, which Prism now takes from QOR Media's reports.
+    A game plays in the QQ Player or in ARQADE (`play`), and a film resumes there.
+  - `tst_library`, `tst_producthost` and `prism_products` test it, the last by a virtual controller.
+  - **Left** for later phases: friends online and what's new in ARQADE (Phase 2, with Social and QOR ID), Steam's
+    games, and the core's index.
 - [ ] From QTOS's Phase 1: evaluate Qt Interface Framework for service code generation and simulation (a QOR record)
 - [ ] From QTOS's Phase 1: a Qt Design Studio project for Lumen components
 

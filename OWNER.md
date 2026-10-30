@@ -13,31 +13,33 @@ products on Linux, in Prism.
 ## This session
 
 1. **qorsync.dev is live**, redone, with QOR Mobile 0.1.0 (*the Android app*)
-   published beside it. You merged demiurge-chain #114 and #115.
-2. **ARQADE and QOR Media answer the controller** (`8df6dbf`): a visible focus
-   the d-pad moves, A to choose, ○ / B or View to go back.
-3. **The products wear Lumen** (decision record QOR-0016). In QOR OS, QQ,
-   ARQADE and QOR Media now take the shell's colours, your accent included,
-   instead of their own obsidian, gold and orange. They stay dark whatever the
-   shell's mode. Outside QOR OS they keep their own look.
-   - Every text colour is tested to stay readable at every accent you can
-     choose.
-   - Fonts are unchanged; Lumen's fonts and light mode for them are left.
-4. **Checked:** QOR OS and the products build without warnings on Windows. On
-   Linux, hidden and without the graphics card, QOR OS's suites that need none
-   (CI runs the rest) and the product suites touched pass, except ARQADE's
-   known stall at Orbital in software drawing. Speed before and after is the
-   same (7.35 and 7.36 ms a frame, Prism in software).
+   beside it. You merged demiurge-chain #114 and #115.
+2. **ARQADE and QOR Media answer the controller**, and **the products wear
+   Lumen**, your accent included (decision record QOR-0016).
+3. **Home and the Library.** Press Guide: Home shows what you played last,
+   every game and your newest videos, music and pictures; RB goes to the
+   Library, everything by kind or by who made it. The d-pad moves, A plays.
+   - It finds QOR OS's QQ games (Orb Run, Ember Climb), your own QQ projects
+     in Documents, ARQADE's six games and your media, and remembers where a
+     film stopped.
+   - Friends online, what's new in ARQADE and Steam's games come later, with
+     the sign-in (Phase 2).
+4. **Checked:** QOR OS builds without warnings on Windows and Linux. On Linux,
+   hidden and without the graphics card, its suites that need none pass (CI
+   runs the rest), Home driven by a virtual controller included. Speed is the
+   same before and after. The hidden screenshots show Home's layout but not
+   its card art or glass, which need a graphics card to draw.
 
 ## Needs you
 
-1. **A real Linux machine with a graphics card**: what stands between QOR OS
+1. **Merge demiurge-chain #116** once updated: the homepage's QOR OS facts.
+2. **A real Linux machine with a graphics card**: what stands between QOR OS
    and Phase 1's goal, Orb Run played in Prism with a DualSense (*the
    PlayStation 5 controller*). WSL (*Windows' built-in Linux*) sees none.
-2. **Legal, still open:** trademark advice for "QOR OS", the legal entity, the
+3. **Legal, still open:** trademark advice for "QOR OS", the legal entity, the
    Qt letter; replacing the 5 October key; the Store keys' backup off this PC.
 
 ## Next
 
-The homepage restated (in demiurge-chain), then Phase 1's last items: a
-controller-first Home and Library in the shell.
+Phase 1's goal on a real Linux machine, then Phase 2: the vault, one sign-in,
+chat and publishing from QQ Studio.

@@ -35,10 +35,14 @@ qt_add_qml_module(qor_shell
         WidgetLayer.qml
         WidgetGallery.qml
         DisplayDesktop.qml
+        Home.qml
+        HomeCard.qml
+        HomeShelf.qml
         search.js
     SOURCES
         desktopentries.h desktopentries.cpp
         producthost.h producthost.cpp
+        library.h library.cpp
     DEPENDENCIES
         QtQuick
         QtQuick.Controls
@@ -66,5 +70,7 @@ target_link_libraries(qor_shell
     PRIVATE
         # The products' channels (producthost.cpp).
         Qt6::Network
+        # The Library reads the person's folders on a worker thread (library.cpp).
+        Qt6::Concurrent
         qor::compiler_settings
 )

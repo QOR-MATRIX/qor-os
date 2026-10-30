@@ -3,6 +3,7 @@
 
 #include "gamepadmanager.h"
 #include "injection.h"
+#include "library.h"
 #include "producthost.h"
 #include "services.h"
 #include "store.h"
@@ -910,6 +911,13 @@ private:
                             path, actual, QString::fromUtf8(QJsonDocument(want).toJson(QJsonDocument::Compact)));
                         return -1;
                     }
+                } else if (expectation.contains(u"contains"_s)) {
+                    // A string holding another: a path made where the run is.
+                    if (!value.toString().contains(expectation[u"contains"_s].toString())) {
+                        m_error = u"%1 is %2, expected to contain %3"_s.arg(path, actual,
+                                                                            expectation[u"contains"_s].toString());
+                        return -1;
+                    }
                 } else if (value != expectation[u"equals"_s]) {
                     m_error = u"%1 is %2, expected %3"_s.arg(
                         path, actual,
@@ -1090,7 +1098,27 @@ private:
             // may stop asking it to do.
             { u"frames"_s, qint64(m_frames.load()) },
             { u"products"_s, productsState() },
+            { u"library"_s, libraryState() },
         };
+    }
+
+    // The Library and Home: the ids of its games, how much media it holds,
+    // what was played last, its first, and the page Home shows.
+    QJsonObject libraryState() const
+    {
+        auto *library = m_engine ? m_engine->singletonInstance<Library *>("QOR.Shell", "Library") : nullptr;
+        if (!library)
+            return {};
+        QJsonArray games;
+        for (const QVariant &game : library->games())
+            games.append(game.toMap().value(u"id"_s).toString());
+        const QVariantList recent = library->recent();
+        QObject *home = m_desktop->findChild<QObject *>(u"home"_s);
+        return { { u"games"_s, games },
+                 { u"media"_s, int(library->media().size()) },
+                 { u"recent"_s, recent.isEmpty() ? QString() : recent.first().toMap().value(u"id"_s).toString() },
+                 { u"scanning"_s, library->scanning() },
+                 { u"page"_s, home ? home->property("page").toString() : QString() } };
     }
 
     // The products Prism hosts, by id: { available, running }.

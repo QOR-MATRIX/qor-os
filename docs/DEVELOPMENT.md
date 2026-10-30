@@ -192,7 +192,7 @@ scale.
 | `{"call": "setSurface", "args": [...]}` | Call a `Desktop` method (`launch`, `setSurface`, `switchSpace`, ...) |
 | `{"restore": spec}` | What clicking the window's app on the Shelf does |
 | `{"close": spec}` | Ask a window to close (`xdg_toplevel.close` for clients) |
-| `{"expect": {"path": ..., "equals": value}}` | Assert on the state below; `"window": spec` scopes the path to a window; in an array a path step is an index or `length` (`windows.length` counts closing windows too); `"near": [..] \| number \| "statePath"` with `"scale"` and `"tolerance"` compares rectangles and numbers |
+| `{"expect": {"path": ..., "equals": value}}` | Assert on the state below; `"window": spec` scopes the path to a window; in an array a path step is an index or `length` (`windows.length` counts closing windows too); `"near": [..] \| number \| "statePath"` with `"scale"` and `"tolerance"` compares rectangles and numbers; `"contains": "text"` checks a string holds another |
 | `{"state": file}`, `{"screenshot": file}` | Write the state as JSON or grab the window (paths relative to the script); `"display": n` grabs another display under Prism |
 | `{"log": text}` | Print a progress line |
 
@@ -242,6 +242,9 @@ The **state** includes:
   Wayland clients also report their window geometry, configured size, Shelf
   identity and surface item (with `onOutput`);
 - `products`: each product Prism hosts, by id, `available` and `running`.
+- `library`: the ids of the Library's `games`, how many `media` it holds,
+  the id of what was played or opened last (`recent`), whether it is
+  `scanning`, and the `page` Home shows.
 
 Two suites use the runner (label `gpu`), and a third needs no display:
 
@@ -292,12 +295,18 @@ export QOR_ARQADE=$PWD/build/products-linux/arqade/arqade
 export QOR_MEDIA=$PWD/build/products-linux/media/qor-media
 export QOR_QQ_STUDIO=$PWD/build/products-linux/qq/studio/qq-studio
 export QOR_QQ_PLAYER=$PWD/build/products-linux/qq/player/qq-player
+export QOR_GAMES=$PWD/products/qq/samples   # the QQ games Home and the Library offer
 ./build/linux-release/prism/compositor/prism --unlocked
 ```
 
-ARQADE and QQ Studio are then in Beam. QOR Media opens the files Prism hands
-it (`Desktop.openInMedia(path, kind)`), and the QQ Player the games
-(`Desktop.playQQGame(scene)`), which the Library will call.
+ARQADE and QQ Studio are then in Beam. Home and the Library (Guide, or Beam's
+Home and Library) offer every game and the person's media: QQ games from
+`QOR_GAMES`, else `share/qor-os/games` beside Prism and in the data folder;
+the person's own QQ projects in Documents; ARQADE's six; and video, music and
+pictures. A game plays in the QQ Player (`Desktop.playQQGame(scene)`) or in
+ARQADE (`Desktop.playInArqade(game)`), and QOR Media opens the files
+(`Desktop.openInMedia(path, kind)`), where they stopped when the Library
+knows.
 
 ### Add an icon
 

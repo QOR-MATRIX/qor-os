@@ -65,6 +65,20 @@ QOR OS begins: QTOS and Demiurge's device-side products in one repository
   - **Readable in both looks.** A lit primary button in ARQADE and QOR Media keeps its fill and lights its edge, since Lumen's ink on the accent is white. ARQADE's core halo is drawn white (`make_light.py`) and tinted by the accent, exactly the ember it was in Demiurge's look.
   - **Tests.** `test_generate_tokens.py`: the mapping is every colour of Demiurge's look, and its inks read on its grounds at every accent and contrast. `tst_producthost`: the colours reach a product as it starts and as they change, and one with no channel. `tst_interface` (ARQADE): every colour sent is worn, and the lit primary's ink reads. `tst_playback` (QOR Media) and `tst_scene` (QQ): the on-accent ink, and a host's colours at start.
   - **Benchmarked** before and after, hidden on Linux ([PERFORMANCE.md](docs/PERFORMANCE.md)): frame times the same, 7.35 and 7.36 ms average.
+- **Home and the Library** (Phase 1, 30 October; [SHELL.md](docs/design/SHELL.md#home-and-the-library-homeqml-homeshelfqml-homecardqml-libraryh)).
+  - **Home** (`Home.qml`, `HomeShelf.qml`, `HomeCard.qml`) is a new surface, opened by Guide (and closed by it again) or Beam's Home. It has three rows: Continue (what was played or opened last, a film's progress on its card), Games, and the newest Media. **The Library**, its second page, shows everything by Everything, Games, ARQADE, Made by you or Media. Cards take their art from their hue (Kit's `Artwork`) until they have their own.
+  - **By controller:** the d-pad goes card to card, Up and Down a row at a time; South plays a game or opens a file; LB and RB go between Home and the Library; East closes; the hints show those buttons. The keyboard does the same with the arrows, Return and Esc. Every arrow is taken, so the controller interface never falls back to Tab there.
+  - **The Library** (`qor::Library`, `prism/shell/library.h`) finds, on a worker thread:
+    - the QQ games QOR OS carries, in `QOR_GAMES`, else `share/qor-os/games` beside Prism and in the data folder;
+    - the person's own QQ projects in Documents;
+    - ARQADE's six games while ARQADE can start;
+    - video, music and pictures in the person's folders.
+
+    It keeps what was played or opened, and where QOR Media last stopped, in `library-history.json`.
+  - **ProductHost:** `play()` asks ARQADE for one of its games (the `play` command, which Prism had listed but never sent); `open()` carries where a film or song resumes; and QOR Media's reports, passed over until now, reach the Library (`reported`), checked for their type and size.
+  - **Beam** lists every game of the Library and the actions Home and Library. `--surface home` or `library` opens them at start.
+  - **Tests.** `tst_library` (new): games found by their scenes, media newest first and by kind, ARQADE's six while it can start, what was played remembered across runs, malformed reports kept out, and a refresh on the worker. `tst_producthost`: a game played, a file opened where it resumes, a poll's reports passed on. `prism_products`: the Library knows a QQ game, ARQADE's six and a video; a virtual controller opens Home by Guide, goes to the Library and back by RB and LB, and plays ARQADE's first game by the d-pad and South; Beam's action plays another. The script's `expect` gains `contains`.
+  - **Benchmarked** before and after, hidden on Linux ([PERFORMANCE.md](docs/PERFORMANCE.md)): 7.36 and 7.30 ms a frame, the same.
 - **The CI runners are registered to `qor-os`, not the organisation.** On 29 October GitHub stopped giving the organisation's runners jobs: online, they took none for hours, even after `tools/ci/runners.ps1 -Reregister` (new: it removes and registers both again where they are, deleting the settings GitHub migrated for the removed registrations). Registered to the repository, they took the waiting jobs within 15 seconds. That is now the script's default ([CI.md](docs/CI.md#where-the-runners-are-registered)).
 
 ### Changed

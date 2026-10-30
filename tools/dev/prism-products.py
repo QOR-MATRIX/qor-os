@@ -45,6 +45,21 @@ def main() -> int:
     with tempfile.TemporaryDirectory(prefix="qor-prism-products-") as home:
         runtime = os.path.join(home, "runtime")
         os.mkdir(runtime, 0o700)
+        # The Library's (prism/shell/library.h): a QQ game where QOR OS keeps its
+        # own, in the run's data folder, and the person's folders, the run's
+        # own too, empty but for one video.
+        scenes = os.path.join(home, "data", "qor-os", "games", "orb-run", "scenes")
+        os.makedirs(scenes)
+        with open(os.path.join(scenes, "orb-run.qml"), "w", encoding="utf-8") as scene:
+            scene.write("import QQ\nScene {}\n")
+        folders = {"DOCUMENTS": "Documents", "VIDEOS": "Videos", "MUSIC": "Music", "PICTURES": "Pictures"}
+        for name in folders.values():
+            os.makedirs(os.path.join(home, name))
+        open(os.path.join(home, "Videos", "clip.mkv"), "wb").close()
+        os.makedirs(os.path.join(home, "config"))
+        with open(os.path.join(home, "config", "user-dirs.dirs"), "w", encoding="utf-8") as dirs:
+            for key, name in folders.items():
+                dirs.write(f'XDG_{key}_DIR="{os.path.join(home, name)}"\n')
         env = dict(os.environ)
         # Nothing of the session it runs in: no display to show on, and no
         # socket a real session uses.

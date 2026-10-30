@@ -48,6 +48,13 @@ Item {
                     icon: p.glyph, hue: p.hue, chroma: p.chroma, description: p.description,
                     action: "app.open", args: JSON.stringify({ id: p.id })
                 });
+        // Every game in the Library (library.h), played as from Home.
+        for (const g of Library.games)
+            apps.push({
+                kind: "app", id: g.id, title: g.title, subtitle: qsTr("Game"), keywords: "game play " + g.subtitle,
+                icon: g.glyph, hue: g.hue, chroma: 0.15, description: g.subtitle,
+                action: "library.play", args: JSON.stringify({ id: g.id })
+            });
 
         const s = Services.settings;
         const playing = Services.media.playing;
@@ -57,6 +64,10 @@ Item {
             args: JSON.stringify(args === undefined ? {} : args)
         });
         const actions = [
+            action("home.open", qsTr("Home"), "house", "home games play continue controller",
+                   qsTr("What you played last, every game, and your newest media.")),
+            action("library.open", qsTr("Library"), "library", "library games media videos music pictures",
+                   qsTr("Every game and every film, song and picture, by what it is or who made it.")),
             action("appearance.toggle", s.darkMode ? qsTr("Switch to Light Appearance") : qsTr("Switch to Dark Appearance"),
                    s.darkMode ? "sun" : "moon", "theme dark light mode appearance",
                    qsTr("Every color morphs through OKLab as the appearance spring settles.")),

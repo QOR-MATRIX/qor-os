@@ -73,10 +73,10 @@ combined before the interface acts on it, so a press never counts twice.
 | North (Y, △) | Beam |
 | Start (Menu, Options) | Control Center |
 | Back (View, Share) | Overview |
-| Guide (Xbox, PS) | Home; on the lock screen, unlock |
+| Guide (Xbox, PS) | Home, and again closes it; on the lock screen, unlock |
 | D-pad | Arrow keys; Tab and Shift+Tab where nothing takes arrows |
 | Right stick | Scroll |
-| LB / RB (L1 / R1) | Previous / next Space |
+| LB / RB (L1 / R1) | Previous / next Space; on Home, Home / the Library |
 | LT / RT (L2 / R2) | Volume down / up (held: repeats) |
 | Left stick click | On-screen keyboard |
 | Right stick click | Play or pause |
@@ -87,6 +87,10 @@ responds without knowing about controllers. Key strokes press their
 modifier keys around the key, as a keyboard does: Prism's compositor
 rebuilds key events from the keys it has seen go down. A real mouse moving
 takes over from the controller's cursor at once.
+
+**Home and the Library** ([SHELL.md](design/SHELL.md#home-and-the-library-homeqml-homeshelfqml-homecardqml-libraryh))
+are moved through by the d-pad, card by card, and South plays a game or opens
+a file.
 
 **Hints.** A glass bar at the bottom left shows what the buttons do right
 now, with the glyphs of the controller in use. It fades after a few seconds

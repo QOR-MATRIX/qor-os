@@ -374,9 +374,11 @@ Launcher's (demiurge-chain's `tools/qor-launcher/src-tauri/src/host/`):
   names of Demiurge's look ([QOR-0016](decisions/QOR-0016-the-products-wear-lumen.md)),
   as a product connects and whenever they change; every product, QQ's with
   no channel too, is also given them as it starts (`QOR_THEME_COLORS`). A
-  newer place, theme, player, prefs or play replaces one not yet sent. What
-  QOR Media reports on its poll is for the Library, and is passed over until
-  it exists.
+  newer place, theme, player, prefs or play replaces one not yet sent. `play`
+  asks ARQADE for one of its games, from Home or the Library, and `open`
+  carries where a film or song resumes when the Library knows. What QOR
+  Media reports on its poll, where a file stopped and how long it is, goes to
+  the Library (`ProductHost.reported`), checked for its type and size.
 - **The controller.** A product whose record `takesController` (ARQADE, the
   QQ Player) plays with it: while its window has the focus and nothing of the
   shell is open, the controller interface steps aside and Guide brings

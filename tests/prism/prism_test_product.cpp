@@ -9,8 +9,8 @@
 // do:
 //
 //   - ARQADE stays hidden until `place`, then shows a window of the
-//     rectangle's size (its Dock with no parent window). `prefs` shows in its
-//     title.
+//     rectangle's size (its Dock with no parent window). `prefs` and the game
+//     `play` asks for show in its title.
 //   - QOR Media shows when it is asked to `open` a file, sized by the
 //     rectangle that comes with it, and names the file in its title.
 //
@@ -80,9 +80,12 @@ int main(int argc, char *argv[])
     Window window;
     bool lessMotion = false;
     QString file;
+    QString game;
     const auto retitle = [&] {
         QString title = file.isEmpty() ? QStringLiteral("Test %1").arg(name)
                                        : QStringLiteral("%1 — Test %2").arg(QFileInfo(file).fileName(), name);
+        if (!game.isEmpty())
+            title += QStringLiteral(" · playing %1").arg(game);
         if (lessMotion)
             title += QStringLiteral(" · less motion");
         window.setTitle(title);
@@ -114,6 +117,9 @@ int main(int argc, char *argv[])
             window.show();
         } else if (type == QStringLiteral("hide")) {
             window.hide();
+        } else if (type == QStringLiteral("play")) {
+            game = command.value(QStringLiteral("game")).toString();
+            retitle();
         } else if (type == QStringLiteral("prefs")) {
             lessMotion =
                 command.value(QStringLiteral("prefs")).toObject().value(QStringLiteral("reduced_motion")).toBool();

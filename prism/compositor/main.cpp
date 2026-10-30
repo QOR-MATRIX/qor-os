@@ -71,8 +71,8 @@ int main(int argc, char *argv[])
                                            u"Open each new client on the output with the fewest windows."_s);
     const QCommandLineOption outputs(
         u"outputs"_s, u"Nested: drive this many outputs, side by side, each a window of --size."_s, u"n"_s, u"1"_s);
-    const QCommandLineOption surface(u"surface"_s, u"Shell surface to show: beam, control-center, overview."_s,
-                                     u"name"_s);
+    const QCommandLineOption surface(
+        u"surface"_s, u"Shell surface to show: home, library, beam, control-center, overview."_s, u"name"_s);
     const QCommandLineOption screenshot(u"screenshot"_s, u"Save a screenshot of the output to this path and exit."_s,
                                         u"file"_s);
     const QCommandLineOption delay(u"delay"_s, u"Milliseconds to wait before the screenshot."_s, u"ms"_s, u"5000"_s);

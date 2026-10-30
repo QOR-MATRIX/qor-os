@@ -104,6 +104,9 @@ signals:
     // protocol, or never said hello in time. `reason` is for the log, and
     // never holds the token or the session's id.
     void ended(const QString &reason);
+    // A report the product's poll carried (QOR Media's: where a file
+    // stopped, how long it is), each an object with a `type`.
+    void reported(const QJsonObject &report);
 
 private:
     void accept();
@@ -210,7 +213,13 @@ public:
     Q_INVOKABLE bool place(const QString &id, const QRect &rect, const QString &activationToken = QString());
     // QOR Media: opens `path` (of `kind`: video, audio, picture, document)
     // with its content at `rect`, starting it first if need be.
+    // `position`, in seconds, is where a film or song resumes; below 0, where
+    // the product itself last left it.
     Q_INVOKABLE bool open(const QString &id, const QString &path, const QString &kind, const QRect &rect,
+                          const QString &activationToken = QString(), double position = -1);
+    // ARQADE: plays one of its games, by its kind ("orbital"), with its
+    // content at `rect`, starting it first if need be.
+    Q_INVOKABLE bool play(const QString &id, const QString &game, const QRect &rect,
                           const QString &activationToken = QString());
     // Starts a product Prism only starts (QQ Studio, the QQ Player), on `file`
     // if one is given: a project, a scene. True if it now runs on that file;
@@ -234,6 +243,8 @@ signals:
     // The product's process ended: `failed` when it crashed, exited with an
     // error, or never connected.
     void exited(const QString &id, bool failed);
+    // A report a product made (HostSession::reported), for the Library.
+    void reported(const QString &id, const QVariantMap &report);
 
 private:
     struct Run

@@ -53,12 +53,12 @@ public:
         m_socket.connectToServer(channel);
     }
 
-    void ask(const QString &method)
+    void ask(const QString &method, const QJsonObject &params = {})
     {
         send({ { QStringLiteral("type"), QStringLiteral("request") },
                { QStringLiteral("id"), ++m_id },
                { QStringLiteral("method"), method },
-               { QStringLiteral("params"), QJsonObject {} } });
+               { QStringLiteral("params"), params } });
     }
 
     void send(const QJsonObject &frame)

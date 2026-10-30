@@ -53,7 +53,7 @@ ProductRecord testRecord(int waitMs = 200)
     record.variable = u"QOR_TEST_PRODUCT_PROGRAM"_s;
     record.method = u"test.next"_s;
     record.waitMs = waitMs;
-    record.commands = { u"place"_s, u"open"_s, u"prefs"_s, u"theme"_s, u"quit"_s };
+    record.commands = { u"place"_s, u"open"_s, u"prefs"_s, u"theme"_s, u"play"_s, u"quit"_s };
     record.glyph = u"app-window"_s;
     record.size = QSize(800, 600);
     record.launchable = true;
@@ -377,6 +377,27 @@ private slots:
         QVERIFY(clock.elapsed() >= 140);
     }
 
+    // What a product's poll reports (QOR Media's: where a film stopped) is
+    // passed on: each object with a type, and nothing else.
+    void a_polls_reports_are_passed_on()
+    {
+        auto session = openSession();
+        QSignalSpy reported(session.get(), &HostSession::reported);
+        Product product;
+        product.side.connectTo(session->channel(), hello(session->token()));
+        QTRY_COMPARE(product.welcomes.size(), 1);
+        const QJsonObject where { { u"type"_s, u"position"_s },
+                                  { u"path"_s, u"/films/a.mkv"_s },
+                                  { u"position"_s, 42.5 } };
+        const QJsonObject closed { { u"type"_s, u"closed"_s } };
+        product.side.ask(
+            u"test.next"_s,
+            { { u"reports"_s, QJsonArray { where, QJsonObject { { u"path"_s, u"/films/b.mkv"_s } }, 7, closed } } });
+        QTRY_COMPARE(reported.size(), 2);
+        QCOMPARE(reported.at(0).at(0).value<QJsonObject>(), where);
+        QCOMPARE(reported.at(1).at(0).value<QJsonObject>(), closed);
+    }
+
     void a_command_answers_a_held_poll_at_once()
     {
         auto session = openSession(testRecord(60000));
@@ -453,6 +474,37 @@ private slots:
         QCOMPARE(exited.first().at(1).toBool(), false);
         QCOMPARE(host->productOf(pid), QString());
         QCOMPARE(host->product(u"test-product"_s).value(u"running"_s).toBool(), false);
+    }
+
+    // A game is played in the product that has it (ARQADE): shown where
+    // Prism planned, then the game asked for, by its kind.
+    void a_game_is_played_in_its_product()
+    {
+        auto host = this->host();
+        QSignalSpy connected(host.get(), &ProductHost::connected);
+        QVERIFY(!host->play(u"test-product"_s, QString(), QRect(0, 0, 800, 600)));
+        QVERIFY(!host->play(u"test-started"_s, u"orbital"_s, QRect(0, 0, 800, 600)));
+        QVERIFY(host->play(u"test-product"_s, u"orbital"_s, QRect(0, 0, 800, 600)));
+        QTRY_COMPARE_WITH_TIMEOUT(connected.size(), 1, 10000);
+        QTRY_COMPARE(entriesOf(m_log, u"command"_s).size(), 3);
+        const QList<QJsonValue> commands = entriesOf(m_log, u"command"_s);
+        QCOMPARE(commands.at(1).toObject(), place(0, 0, 800, 600));
+        QCOMPARE(commands.at(2).toObject(), (QJsonObject { { u"type"_s, u"play"_s }, { u"game"_s, u"orbital"_s } }));
+    }
+
+    // A file opens where it resumes, when Prism knows; otherwise where the
+    // product itself left it.
+    void a_file_opens_where_it_resumes()
+    {
+        auto host = this->host();
+        QSignalSpy connected(host.get(), &ProductHost::connected);
+        QVERIFY(host->open(u"test-product"_s, u"/films/a.mkv"_s, u"video"_s, QRect(0, 0, 800, 600), QString(), 42.5));
+        QTRY_COMPARE_WITH_TIMEOUT(connected.size(), 1, 10000);
+        QTRY_COMPARE(entriesOf(m_log, u"command"_s).size(), 2);
+        QCOMPARE(entriesOf(m_log, u"command"_s).at(1).toObject().value(u"position"_s).toDouble(), 42.5);
+        QVERIFY(host->open(u"test-product"_s, u"/films/b.mkv"_s, u"video"_s, QRect(0, 0, 800, 600)));
+        QTRY_COMPARE(entriesOf(m_log, u"command"_s).size(), 3);
+        QVERIFY(entriesOf(m_log, u"command"_s).at(2).toObject().value(u"position"_s).isNull());
     }
 
     void the_motion_setting_reaches_a_running_product()

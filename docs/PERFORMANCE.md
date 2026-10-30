@@ -75,6 +75,13 @@ the second slowest. The first five runs after the change put it at 10.04 to
 to 9.86 ms before. The colours are worked out when the theme changes, and the
 tour changes none.
 
+Re-measured the same way the same day, after Home and the Library (the
+Library's folders read on a worker thread as the shell starts; Home made
+but hidden): five runs, median 7.30 ms average (7.22 to 7.36), p50 7.19 ms,
+p95 8.46 ms, p99 8.97 ms, no frame missed, input to swap 7.80 / 10.21 ms,
+against the ten runs at `7f7f544` above (7.36 and 7.37 ms). The same within
+noise: the tour opens neither.
+
 ### Input-to-swap latency (2026-10-24)
 
 `inputToSwap` times a pointer move over the Shelf. The clock starts when the

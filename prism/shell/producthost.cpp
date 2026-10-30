@@ -286,8 +286,14 @@ void HostSession::request(const QJsonObject &frame)
         return;
     }
     // What QOR Media reports on its long poll (where playback stopped, a
-    // file's length) is for the Library, which Prism does not have yet: it is
-    // passed over.
+    // file's length) is for the Library: each object with a type, 64 at most,
+    // as the product keeps them.
+    const QJsonArray reports = frame.value(u"params"_s).toObject().value(u"reports"_s).toArray();
+    for (qsizetype i = 0; i < std::min<qsizetype>(reports.size(), 64); ++i) {
+        const QJsonObject report = reports.at(i).toObject();
+        if (report.value(u"type"_s).isString())
+            emit reported(report);
+    }
     m_held = id.toInteger();
     if (!m_commands.isEmpty())
         answer(m_commands.takeFirst());
@@ -598,7 +604,7 @@ bool ProductHost::place(const QString &id, const QRect &rect, const QString &act
 }
 
 bool ProductHost::open(const QString &id, const QString &path, const QString &kind, const QRect &rect,
-                       const QString &activationToken)
+                       const QString &activationToken, double position)
 {
     const ProductRecord *r = record(id);
     if (!r || !r->commands.contains(u"open"_s) || path.isEmpty())
@@ -612,9 +618,20 @@ bool ProductHost::open(const QString &id, const QString &path, const QString &ki
     session(id)->send({ { u"type"_s, u"open"_s },
                         { u"path"_s, path },
                         { u"kind"_s, kind },
-                        { u"position"_s, QJsonValue::Null },
+                        { u"position"_s, position >= 0 ? QJsonValue(position) : QJsonValue(QJsonValue::Null) },
                         { u"rect"_s, rectJson(rect) },
                         { u"parent"_s, QJsonValue::Null } });
+    return true;
+}
+
+bool ProductHost::play(const QString &id, const QString &game, const QRect &rect, const QString &activationToken)
+{
+    const ProductRecord *r = record(id);
+    if (!r || !r->commands.contains(u"play"_s) || game.isEmpty())
+        return false;
+    if (!place(id, rect, activationToken))
+        return false;
+    session(id)->send({ { u"type"_s, u"play"_s }, { u"game"_s, game } });
     return true;
 }
 
@@ -724,6 +741,8 @@ bool ProductHost::start(const ProductRecord &record, const QString &file, const 
             emit connected(id);
             emit productsChanged();
         });
+        connect(session, &HostSession::reported, this,
+                [this, id](const QJsonObject &report) { emit reported(id, report.toVariantMap()); });
         // Without its channel a product has nothing to do: it quits by itself
         // once welcomed, and is ended if it does not.
         connect(session, &HostSession::ended, process, [process] { endLater(process); });

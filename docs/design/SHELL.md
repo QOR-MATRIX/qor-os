@@ -172,6 +172,39 @@ the strip with it. Windows of Spaces out of view are not drawn.
   Click empty space to exit. Drag a window onto a Space chip to move it
   there.
 
+### Home and the Library (`Home.qml`, `HomeShelf.qml`, `HomeCard.qml`, `library.h`)
+
+Guide, or Beam's **Home** and **Library**. Where a controller lands, over the
+desktop's frosted glass.
+
+- **Home** has three rows: **Continue** (what was played or opened last, a
+  film or song with how far it got), **Games**, and the newest **Media**.
+- **The Library** shows everything, chosen by **Everything**, **Games**,
+  **ARQADE**, **Made by you** or **Media**.
+- Every card's art is drawn from its hue (Kit's `Artwork`) until it has its
+  own, with its glyph.
+- **Moving:** the d-pad or the arrow keys go from card to card, along a row or
+  through the grid, and on Home Up and Down go a row at a time. Up from the
+  top reaches the tabs, then Left and Right on them change the page. LB and RB
+  go between Home and the Library.
+- **Choosing:** South, Return or Space plays a game in the QQ Player or in
+  ARQADE, or opens a file in QOR Media, where it stopped. East or Esc closes.
+- **Hints** show those buttons with the controller's own glyphs.
+
+The Library (`qor::Library`) finds what it shows until the QOR core's index
+(Phase 2):
+
+- **QOR OS's QQ games:** folders that have scenes in `QOR_GAMES`, else in
+  `share/qor-os/games` beside Prism and in the data folder.
+- **The person's own:** such folders in Documents, two deep.
+- **ARQADE's six games**, while ARQADE can start.
+- **Video, music and pictures** in the person's folders, three deep.
+
+It reads them on a worker thread when the shell starts and when Home opens,
+at most every ten seconds. It keeps what was played and where QOR Media last
+stopped (its `position` reports) in `library-history.json`, in the shell's
+data folder.
+
 ### Themes and widgets
 
 Themes and widgets come from the Store ([STORE.md](../STORE.md)).

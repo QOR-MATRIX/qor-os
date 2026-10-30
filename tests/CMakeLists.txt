@@ -36,6 +36,8 @@ set_target_properties(tst_producthost_product PROPERTIES WIN32_EXECUTABLE OFF)
 qor_add_test(tst_producthost SOURCES prism/tst_producthost.cpp LIBRARIES qor_shell Qt6::Network)
 target_compile_definitions(tst_producthost PRIVATE QOR_TEST_PRODUCT="$<TARGET_FILE:tst_producthost_product>")
 add_dependencies(tst_producthost tst_producthost_product)
+# The Library (prism/shell/library.h): the games and media it finds, and what was played.
+qor_add_test(tst_library SOURCES prism/tst_library.cpp LIBRARIES qor_shell)
 # The QOR core through its C bridge, built from demiurge-chain at the pinned commit (core/, QOR-0003).
 if(TARGET qor::core)
     qor_add_test(tst_qorcore SOURCES core/tst_qorcore.cpp LIBRARIES qor::core)

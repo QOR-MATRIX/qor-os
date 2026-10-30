@@ -26,7 +26,7 @@ FocusScope {
 
     // ── Session state ───────────────────────────────────────────────────────
     property bool locked: true
-    property string surface: ""        // "", "beam", "control-center", "overview", "media"
+    property string surface: ""        // "", "home", "beam", "control-center", "overview", "media"
     property int currentSpace: 0
     readonly property int spaceCount: 3
     readonly property bool overview: surface === "overview"
@@ -122,11 +122,12 @@ FocusScope {
             if (locked)
                 unlock();
             else
-                setSurface("");
+                toggleSurface("home");
             break;
         case "back": setSurface(""); break;
-        case "previousSpace": switchSpace(currentSpace - 1); break;
-        case "nextSpace": switchSpace(currentSpace + 1); break;
+        // On Home, the shoulders go between Home and the Library.
+        case "previousSpace": surface === "home" ? home.showPage("home") : switchSpace(currentSpace - 1); break;
+        case "nextSpace": surface === "home" ? home.showPage("library") : switchSpace(currentSpace + 1); break;
         case "volumeDown": changeVolume(-1); break;
         case "volumeUp": changeVolume(1); break;
         case "keyboard": controllerKeyboard.open = !controllerKeyboard.open; break;
@@ -143,6 +144,11 @@ FocusScope {
                     { button: Gamepads.East, label: qsTr("Close") }];
         if (locked)
             return [{ button: Gamepads.South, label: qsTr("Unlock") }];
+        if (surface === "home")
+            return [{ button: Gamepads.DPadUp, text: qsTr("D-pad"), label: qsTr("Choose") },
+                    { button: Gamepads.South, label: qsTr("Play") },
+                    { button: Gamepads.RightShoulder, label: home.page === "home" ? qsTr("Library") : qsTr("Home") },
+                    { button: Gamepads.East, label: qsTr("Close") }];
         if (surface === "beam")
             return [{ button: Gamepads.DPadUp, text: qsTr("D-pad"), label: qsTr("Choose") },
                     { button: Gamepads.South, label: qsTr("Open") },
@@ -293,6 +299,8 @@ FocusScope {
     // Shows a product, starting it if need be: `file` ({ path, kind }) is
     // what it opens: QOR Media a file, the QQ Player a game's scene. False if
     // it cannot be shown here.
+    // `file` may name what to show: { path, kind } a file to open, with
+    // `position` where it resumes; { game } one of ARQADE's games to play.
     function showProduct(id: string, file: var): bool {
         const product = ProductHost.product(id);
         if (product.id === undefined)
@@ -314,8 +322,10 @@ FocusScope {
         const ratio = Screen.devicePixelRatio > 0 ? Screen.devicePixelRatio : 1;
         const content = Qt.rect(Math.round(frame.x * ratio), Math.round((frame.y + 40) * ratio),
                                 Math.round(frame.width * ratio), Math.round((frame.height - 40) * ratio));
-        const shown = file ? ProductHost.open(id, file.path, file.kind, content, activationToken())
-                           : ProductHost.place(id, content, activationToken());
+        const shown = !file ? ProductHost.place(id, content, activationToken())
+                    : file.game ? ProductHost.play(id, file.game, content, activationToken())
+                                : ProductHost.open(id, file.path, file.kind, content, activationToken(),
+                                                   file.position ?? -1);
         if (!shown)
             toast.show(product.glyph, qsTr("%1 cannot be opened here").arg(product.name));
         return shown;
@@ -337,8 +347,56 @@ FocusScope {
         return showProduct("qq-player", { path: scene });
     }
 
+    // Plays one of ARQADE's games, by its kind ("orbital").
+    function playInArqade(game: string): bool {
+        if (locked)
+            return false;
+        surface = "";
+        return showProduct("arqade", { game: game });
+    }
+
+    // ── Home and the Library ────────────────────────────────────────────────
+    // Opens Home at a page: "home" or "library".
+    function openHome(page: string) {
+        if (locked)
+            return;
+        home.page = page;
+        setSurface("home");
+    }
+
+    // Plays a game or opens a file of the Library's (library.h), by its item,
+    // a film or a song where it stopped; and remembers it was.
+    function playItem(item: var): bool {
+        if (!item || !item.id || locked)
+            return false;
+        let shown = false;
+        if (item.source === "arqade") {
+            shown = playInArqade(item.game);
+        } else if (item.kind === "game") {
+            shown = playQQGame(item.path);
+        } else {
+            surface = "";
+            shown = showProduct("qor-media", { path: item.path, kind: item.mediaKind,
+                                                position: item.position > 0 ? item.position : -1 });
+        }
+        if (shown)
+            Library.used(item.id);
+        return shown;
+    }
+
+    Binding {
+        target: Library
+        property: "arqade"
+        value: ProductHost.products.some(product => product.id === "arqade" && product.available)
+    }
+
     Connections {
         target: ProductHost
+        // Where a film or a song stopped, and how long it is: the Library's.
+        function onReported(id: string, report: var) {
+            if (id === "qor-media")
+                Library.reported(report);
+        }
         function onExited(id: string, failed: bool) {
             const product = ProductHost.product(id);
             if (failed)
@@ -576,6 +634,9 @@ FocusScope {
         case "app.open": launch(args.id, args); break;
         case "widgets.edit": editWidgets(true); break;
         case "store.open": launch("store", args); break;
+        case "home.open": openHome("home"); break;
+        case "library.open": openHome("library"); break;
+        case "library.play": playItem(Library.item(args.id)); break;
         case "theme.apply": Themes.apply(args.id ?? ""); break;
         default: console.warn("Unknown shell action", id);
         }
@@ -611,6 +672,7 @@ FocusScope {
     }
 
     Component.onCompleted: {
+        Library.refresh();
         Materials.desktop = wallpaperBackdrop;
         Materials.scene = sceneBackdrop;
         Gamepads.setLightColor(controllerLight);
@@ -635,7 +697,10 @@ FocusScope {
         id: surfaceTimer
         interval: 900
         onTriggered: {
-            desktop.setSurface(desktop.options.surface);
+            if (desktop.options.surface === "home" || desktop.options.surface === "library")
+                desktop.openHome(desktop.options.surface);
+            else
+                desktop.setSurface(desktop.options.surface);
             if (desktop.options.surface === "beam" && desktop.options.query)
                 beam.query = desktop.options.query;
         }
@@ -837,6 +902,17 @@ FocusScope {
             backdrop: sceneBackdrop
             onDismissed: desktop.setSurface("")
             onActionRequested: (id, args) => desktop.runAction(id, args)
+        }
+
+        Home {
+            id: home
+            objectName: "home"
+            anchors.fill: parent
+            topMargin: desktop.railHeight
+            open: desktop.surface === "home"
+            backdrop: sceneBackdrop
+            onDismissed: desktop.setSurface("")
+            onChosen: item => desktop.playItem(item)
         }
 
         Beam {
