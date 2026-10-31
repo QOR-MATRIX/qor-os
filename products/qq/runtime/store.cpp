@@ -114,8 +114,9 @@ bool toJson(const QJSValue &value, QJsonValue *out, int depth, QString *why)
         return true;
     }
     // A plain object, and nothing that only looks like one: a vector, a colour, a date or a pattern is a value of its
-    // own, and would come back as something else.
-    if (value.isObject() && value.toVariant().metaType() == QMetaType::fromType<QVariantMap>()) {
+    // own, and would come back as something else. Retained, so that asking does not itself walk an object nested too deep
+    // to walk: that is what the depth above is there to refuse.
+    if (value.isObject() && value.toVariant(QJSValue::RetainJSObjects).metaType() == QMetaType::fromType<QJSValue>()) {
         QJsonObject object;
         QJSValueIterator it(value);
         while (it.hasNext()) {

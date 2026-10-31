@@ -34,6 +34,11 @@ concurrency:
 
 env:
   QOR_QT_VERSION: '6.12.0'
+  # Both jobs run on one laptop, which someone also uses, with 20 threads and 16 GB. Left to itself each build starts 22
+  # compilers at once, and two full ones were running when it crashed on 31 October (docs/CI.md). The Linux job also waits
+  # for the Windows one, below.
+  CMAKE_BUILD_PARALLEL_LEVEL: '8'
+  CARGO_BUILD_JOBS: '8'
 
 jobs:
   preflight:
@@ -191,9 +196,10 @@ jobs:
 
   linux:
     name: Linux · GCC
-    needs: preflight
+    # After the Windows job, whatever became of it: one machine, one job at a time (docs/CI.md).
+    needs: [preflight, windows]
     # A dependency update waits for a person: Dependabot's pull requests never run on the workstation (docs/CI.md).
-    if: needs.preflight.outputs.linux == 'true' && github.event.pull_request.user.login != 'dependabot[bot]'
+    if: ${{ !cancelled() && needs.preflight.outputs.linux == 'true' && github.event.pull_request.user.login != 'dependabot[bot]' }}
     runs-on: ${{ fromJSON(vars.QOR_LINUX_RUNNER || '"ubuntu-24.04"') }}
     timeout-minutes: 90
     steps:

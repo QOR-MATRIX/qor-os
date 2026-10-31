@@ -10,9 +10,16 @@
 #include <QtCore/QCoreApplication>
 #include <QtCore/QDir>
 #include <QtCore/QFileInfo>
+#include <QtCore/QScopeGuard>
 #include <QtCore/QSet>
 #include <QtTest/QSignalSpy>
 #include <QtTest/QTest>
+
+#if defined(Q_OS_WIN)
+#include <qt_windows.h>
+
+#include <aclapi.h>
+#endif
 
 using namespace Qt::StringLiterals;
 
@@ -50,9 +57,42 @@ private Q_SLOTS:
         const auto others = QFile::ReadGroup | QFile::WriteGroup | QFile::ExeGroup | QFile::ReadOther
                             | QFile::WriteOther | QFile::ExeOther;
         QVERIFY2(!(folder.permissions() & others), qPrintable(folder.filePath()));
-        QVERIFY(QFileInfo(m_url.path()).exists());
+        const QFileInfo socket(m_url.path());
+        QVERIFY(socket.exists());
+        QVERIFY2(!(socket.permissions() & others), qPrintable(socket.filePath()));
+#elif defined(Q_OS_WIN)
+        // Left alone, Windows lets everyone on the machine read a new pipe. Here the only allowance is this user's.
+        const QString pipe = u"\\\\.\\pipe\\"_s + m_url.path();
+        const HANDLE handle =
+            CreateFileW(reinterpret_cast<LPCWSTR>(pipe.utf16()), READ_CONTROL, 0, nullptr, OPEN_EXISTING, 0, nullptr);
+        QVERIFY(handle != INVALID_HANDLE_VALUE);
+        PACL allowances = nullptr;
+        PSECURITY_DESCRIPTOR descriptor = nullptr;
+        const DWORD read = GetSecurityInfo(handle, SE_KERNEL_OBJECT, DACL_SECURITY_INFORMATION, nullptr, nullptr,
+                                           &allowances, nullptr, &descriptor);
+        CloseHandle(handle);
+        QCOMPARE(read, DWORD(ERROR_SUCCESS));
+        const auto freed = qScopeGuard([descriptor] { LocalFree(descriptor); });
+        QVERIFY(allowances);
+
+        HANDLE token = nullptr;
+        QVERIFY(OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &token));
+        const auto closed = qScopeGuard([token] { CloseHandle(token); });
+        DWORD size = 0;
+        GetTokenInformation(token, TokenUser, nullptr, 0, &size);
+        QByteArray user(qsizetype(size), Qt::Uninitialized);
+        QVERIFY(GetTokenInformation(token, TokenUser, user.data(), size, &size));
+        const PSID me = reinterpret_cast<PTOKEN_USER>(user.data())->User.Sid;
+
+        QVERIFY(allowances->AceCount > 0);
+        for (DWORD i = 0; i < allowances->AceCount; ++i) {
+            ACCESS_ALLOWED_ACE *allowance = nullptr;
+            QVERIFY(GetAce(allowances, i, reinterpret_cast<LPVOID *>(&allowance)));
+            QCOMPARE(allowance->Header.AceType, BYTE(ACCESS_ALLOWED_ACE_TYPE));
+            QVERIFY(EqualSid(reinterpret_cast<PSID>(&allowance->SidStart), me));
+        }
 #else
-        QSKIP("A named pipe here; Windows is a development host, not the device.");
+        QSKIP("No bus here.");
 #endif
     }
 

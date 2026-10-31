@@ -3,6 +3,8 @@
 // in), an outline, and, when asked, the standard security handler's lock (revision 2, 40-bit RC4), the oldest every
 // reader opens. And what a saved PDF holds, read back through QOR Media's own PDFium, under its lock, since a reader
 // may be drawing with it. Shared by QOR Media's suites (tst_reader, tst_pdfpages, tst_pdfmarks).
+//
+// Changed for QOR OS: no compiler warnings (what a test leaves out of a page or a field is empty, by a default).
 
 #pragma once
 
@@ -33,9 +35,9 @@ namespace testpdf {
 // A page of a PDF: lines of text in Helvetica, and links to another page (by its index) or to a URI.
 struct Link
 {
-    QRectF rect;  // in points, from the page's bottom left, as a PDF writes it
+    QRectF rect {};  // in points, from the page's bottom left, as a PDF writes it
     int page = -1;
-    QByteArray uri;
+    QByteArray uri {};
 };
 // A form's field: its widget on the page, with an appearance of its own as a filled form's fields have (a check box's or
 // a radio button's on state a black square, its off state nothing), or with none, as some forms leave to the reader.
@@ -43,11 +45,11 @@ struct Field
 {
     enum Kind { Text, Check, Radio, Combo, List, Button, Signature };
     Kind kind = Text;
-    QByteArray name;
-    QRectF rect;                // in points, from the page's bottom left; a radio group's first button
-    QByteArray value;           // a text's words, a choice's option; a check box's or radio group's state, or "Off"
-    QList<QByteArray> options;  // a choice's; a radio group's states, one for each button; a check box's on state
-    QList<QRectF> buttons;      // a radio group's other buttons, after the first
+    QByteArray name {};
+    QRectF rect {};                // in points, from the page's bottom left; a radio group's first button
+    QByteArray value {};           // a text's words, a choice's option; a check box's or radio group's state, or "Off"
+    QList<QByteArray> options {};  // a choice's; a radio group's states, one for each button; a check box's on state
+    QList<QRectF> buttons {};      // a radio group's other buttons, after the first
     int flags = 0;              // /Ff, beside what the kind itself sets
     int maxLength = 0;
     bool drawn = true;
@@ -56,14 +58,14 @@ struct Field
 
 struct Page
 {
-    QList<QByteArray> lines;
-    QList<Link> links;
+    QList<QByteArray> lines {};
+    QList<Link> links {};
     // Red squares, in points from the page's bottom left: annotations each with its own appearance, as most marks are.
-    QList<QRectF> boxes;
+    QList<QRectF> boxes {};
     // Notes, each with its text and the pop-up that shows it, as Acrobat writes them, with no appearance of their own.
-    QList<QPair<QRectF, QByteArray>> notes;
+    QList<QPair<QRectF, QByteArray>> notes {};
     // A form's fields, each annotation after the page's notes.
-    QList<Field> fields;
+    QList<Field> fields {};
 };
 struct Entry
 {
@@ -125,12 +127,16 @@ inline QByteArray writePdf(const QList<Page> &pages, const QList<Entry> &outline
             linkObj[i] << next++;
     QList<QList<int>> boxObj(count);  // each box: its annotation, then its appearance
     for (int i = 0; i < count; ++i)
-        for (qsizetype b = 0; b < pages[i].boxes.size(); ++b)
-            boxObj[i] << next++ << next++;
+        for (qsizetype b = 0; b < pages[i].boxes.size(); ++b) {
+            boxObj[i] << next++;
+            boxObj[i] << next++;
+        }
     QList<QList<int>> noteObj(count);  // each note: its annotation, then its pop-up
     for (int i = 0; i < count; ++i)
-        for (qsizetype n = 0; n < pages[i].notes.size(); ++n)
-            noteObj[i] << next++ << next++;
+        for (qsizetype n = 0; n < pages[i].notes.size(); ++n) {
+            noteObj[i] << next++;
+            noteObj[i] << next++;
+        }
     // Each field: a radio group's own, then each of its widgets with their appearances (a text's or a choice's one, a
     // check box's or radio button's on and off, none for a signature or a field not drawn). Any other field is its widget.
     struct Placed

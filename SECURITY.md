@@ -101,6 +101,24 @@ Say so if you find a way past one; these are the walls we know are low.
   through `QOR_STORE_URL` until there is a server (Store stage 2).
 - **A same-user process can rewrite a widget** after it is checked and before Qt
   reads it, in a small window. A read-only image closes that (Phase 3).
+- **A process running as the person can drive QQ Studio.** Its tools' pipe admits
+  only that person, and has no token of its own, so any of their processes can use
+  an open Studio's tools. `QQ_ANTHROPIC_URL` and `QQ_KEYCHAIN_TARGET`, which the
+  checks use, are honoured too, so whoever starts Studio can send its agent's key to
+  another https server, or have it use another credential.
+- **Letting the agent play its logic is one switch for the session.** Off by
+  default, and it says logic runs with everything the person can reach. Once on, it
+  covers all the logic the agent writes in that session, unread.
+- **A process running as the person can spoil a product's start** by connecting
+  first to its channel: the connection is refused as not the product Prism started,
+  and the channel closes, so the product does not open. It cannot pose as the product.
+- **In the simulator, a music file is decoded inside Prism**, by Qt Multimedia, so
+  a hostile file reaches the compositor's process. No device build has the simulator.
+- **A Store package's archive can claim less than it holds.** Qt's reader grows its
+  buffer until the data fits, up to about a thousand times the download, before the
+  manifest's signature is checked. The download must first match the digest in the
+  catalogue, so only a catalogue that lists such a package reaches this, and what it
+  costs is memory.
 
 Before anything holds value, the QOR core and the vault service get an
 external security review, and the key Demiurge's records list as exposed on

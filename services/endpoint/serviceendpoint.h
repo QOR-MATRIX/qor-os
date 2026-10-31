@@ -8,7 +8,8 @@
 // crash the process hosting it. On Linux the socket is therefore a file in the
 // person's runtime folder, which only they can enter. An abstract socket, which
 // it was until QOR-0018, takes no permissions at all: any user on the machine,
-// and any app sharing its network namespace, could connect.
+// and any app sharing its network namespace, could connect. On Windows it is a
+// named pipe, which SimServices opens to this user alone.
 #pragma once
 
 #include <QtCore/QStandardPaths>

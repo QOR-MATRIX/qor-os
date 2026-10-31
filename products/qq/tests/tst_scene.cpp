@@ -939,6 +939,7 @@ private slots:
             {QStringLiteral("inList"), QStringLiteral("[1, () => 2]")},
             {QStringLiteral("inObject"), QStringLiteral("({ at: Qt.vector3d(0, 1, 0) })")},
             {QStringLiteral("deep"), QStringLiteral("(() => { let v = 1; for (let i = 0; i < 40; ++i) v = [v]; return v })()")},
+            {QStringLiteral("deepest"), QStringLiteral("(() => { let v = {}; for (let i = 0; i < 300000; ++i) v = { v }; return v })()")},
             {QStringLiteral("huge"), QStringLiteral("'x'.repeat(70000)")},
         };
         for (const auto &[key, text] : refused) {
@@ -1158,7 +1159,7 @@ private slots:
             u16(8);
             b.append("data");
             u32(bytes);
-            b.append(QByteArray(qsizetype(bytes), char(0x80)));
+            b.append(QByteArray(qsizetype(bytes), '\x80'));
             return b;
         };
         QTemporaryDir dir;

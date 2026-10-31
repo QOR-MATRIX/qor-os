@@ -310,13 +310,6 @@ struct Headless {
     }
 };
 
-QVariantMap outcomeOf(QObject *scene)
-{
-    QVariant text;
-    QMetaObject::invokeMethod(scene, "outcomeText", Q_RETURN_ARG(QVariant, text));
-    return QJsonDocument::fromJson(text.toString().toUtf8()).object().toVariantMap();
-}
-
 QString sceneText(const QString &entities, const QString &settings = {})
 {
     return QStringLiteral("import QQ\nScene {\n    name: \"play\"\n%1    Sun {}\n    Ground { extent: 30 }\n%2}\n")

@@ -165,7 +165,9 @@ Button { onClicked: Intents.openApp("settings", { page: "display" }) }
 On Linux it is a socket in a folder only the person can enter, never an abstract
 socket, which takes no permissions: Qt Remote Objects has no authentication, and
 its decoder trusts what it is sent, so whoever reaches the socket can do what the
-shell can, and crash whatever hosts it. Nothing sandboxed is ever given it.
+shell can, and crash whatever hosts it. Nothing sandboxed is ever given it. The
+socket, and the named pipe that stands for it on Windows, admit only the person's
+own account (`QLocalServer::UserAccessOption`).
 
 The embedded host (`qor-shell`) and `qor-simd` fall back to
 `…-<pid>` if the default is taken. Override with `--services-url` /

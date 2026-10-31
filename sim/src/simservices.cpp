@@ -7,6 +7,7 @@
 #include <QtCore/QFile>
 #include <QtCore/QJsonDocument>
 #include <QtCore/QLoggingCategory>
+#include <QtNetwork/QLocalServer>
 #include <QtNetwork/QLocalSocket>
 
 using namespace Qt::StringLiterals;
@@ -109,6 +110,9 @@ bool SimServices::start(const SimOptions &options)
     m_control->setScenario(scenarioName());
 
     const QUrl requested = options.url.isEmpty() ? services::defaultEndpoint() : options.url;
+    // This person's alone: a new pipe on Windows otherwise lets everyone on the machine read it, and on Linux this
+    // stands behind the runtime folder's own permissions.
+    QRemoteObjectHost::setLocalServerOptions(QLocalServer::UserAccessOption);
     m_host = std::make_unique<QRemoteObjectHost>();
     m_url = requested;
     if (endpointInUse(m_url) || !m_host->setHostUrl(m_url)) {

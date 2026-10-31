@@ -255,6 +255,16 @@ WSL keeps the distribution running while the runner's `wsl.exe` process is
 alive, so start the runner from Windows (`tools/ci/runners.ps1 -StartOnly`, or
 the Startup entry above).
 
+**One machine, one job at a time.** Both runners are this laptop: 20 threads, 16 GB, and someone using it. So the Linux job
+waits for the Windows one, each build runs at most 8 compilers (`CMAKE_BUILD_PARALLEL_LEVEL`) and Cargo 8 jobs. Left to
+itself each build starts 22. On 31 October 2026, 15 minutes into two full rebuilds at once (the exploit mitigations had
+changed every object), with the laptop in Modern Standby, it reset itself: Kernel-Power 41, with no bugcheck, dump or
+press of the power button (`ConnectedStandbyInProgress` true). Nothing it logged says why, so the load is the part that
+could be changed, and was. The Windows suites also have the machine to themselves now, which their timing wants.
+
+A build that **stops partway with no failure in its log**, both jobs ending together, means the machine stopped. Look at
+the System log first: on 30 October a Build "failed" that way at Windows' critical-battery shutdown (Kernel-Power 524).
+
 **WSL's clock drifts.** After the laptop sleeps, WSL's clock can be hours away
 from Windows'. It was 6 h 25 min ahead on 26 October 2026. The runner's session
 is a signed token with a time window, so GitHub refuses it, and the runner logs
