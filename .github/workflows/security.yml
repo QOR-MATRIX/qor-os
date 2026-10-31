@@ -30,7 +30,8 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      # --redact: a finding names its file, commit and rule, never the value.
+      # A finding says its rule, file, line and commit. Never the value (--redact), and never who committed it, whose
+      # email address a log should not hold, which gitleaks' own verbose report would print.
       - name: gitleaks
         env:
           GITLEAKS_VERSION: 8.30.1
@@ -41,7 +42,13 @@ jobs:
             "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/$archive"
           echo "$GITLEAKS_SHA256  $RUNNER_TEMP/$archive" | sha256sum --check --strict
           tar -xzf "$RUNNER_TEMP/$archive" -C "$RUNNER_TEMP" gitleaks
-          "$RUNNER_TEMP/gitleaks" git . --redact --no-banner --log-level warn --exit-code 1 --config tools/ci/gitleaks.toml
+          status=0
+          "$RUNNER_TEMP/gitleaks" git . --redact --no-banner --log-level warn --exit-code 1 --config tools/ci/gitleaks.toml \
+            --report-format json --report-path "$RUNNER_TEMP/found.json" || status=$?
+          if [ -s "$RUNNER_TEMP/found.json" ]; then
+            jq -r '.[] | [.RuleID, .File, (.StartLine | tostring), .Commit[0:10]] | @tsv' "$RUNNER_TEMP/found.json" | sort
+          fi
+          exit "$status"
 
   core-advisories:
     name: The QOR core's dependencies at the pin
