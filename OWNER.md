@@ -26,11 +26,14 @@ Demiurge's QQ engine, ARQADE and QOR Media, on Linux. Code:
 
 ## Checked
 
-Before the rename, CI passed on both systems at `2096075`. After it, both games'
-33 rules tests pass, and their recorded runs replay in Node and in QQ. Hidden on
-Linux, in software rendering, both cards open their games and leave them, the
-d-pad finds them, and the Library lists them. The Windows job this push starts
-runs the rest, and opens game windows on this PC.
+CI passed on both systems at `8d93b19`, with the new names: every suite, and on
+Windows all three products. Both games' 33 rules tests pass, and their recorded
+runs replay in Node and in QQ. **Two things went wrong on the way.** My rename
+broke QQ's build for one run, now fixed. And ARQADE passed only on its automatic
+second attempt in the last two runs: once a test found the game paused mid-fight,
+most likely a click taken by the real mouse, though that is not proven. I cut that
+exposure; it passes hidden on Linux, and is committed here, unpushed, so it opens
+no windows until the next push.
 
 ## Needs you
 
@@ -43,7 +46,8 @@ runs the rest, and opens game windows on this PC.
    prototype. A search is not trademark clearance.
 3. **Play Darkveil and Ever Rift.** Nobody has watched them move or heard them.
 4. **Move the Store's signing keys off this PC.** A CI job here could read them.
-5. **Keep the laptop on AC during CI.** A low battery ended one run too.
+5. **During CI, keep the laptop on AC,** and leave the mouse and keyboard alone
+   while test windows are open: they reach those windows.
 6. **The Linux machine:** an SSD of 500 GB or more for USB-C and a USB stick of
    8 GB or more, then BUILDING.md's steps.
 7. **Legal, still open:** trademark advice, the legal entity, the Qt letter,
