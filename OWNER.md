@@ -32,18 +32,17 @@ Demiurge's QQ engine, ARQADE and QOR Media, on Linux. Code:
 
 ## Checked
 
-CI passed on both systems at `e80537b`, the security work: the Windows product
-suites and the sanitizers (*memory-error detectors*) passed there for the first
-time. Gloamreach: its 19 rules tests pass, seven planted faults are caught, and
-a run QQ recorded replays to the same result in Node. Hidden on Linux, its cases
-in ARQADE's suite pass, in software rendering. Its first run on a real graphics
-card is the Windows job this push starts, which opens game windows on this PC.
+CI passed on both systems at `2096075`, which holds all of this: every suite, the
+sanitizers (*memory-error detectors*) and, on Windows, all three products. There,
+on a real graphics card, a scripted player talks, fights to Gloamreach's first
+beacon and falls, and a run QQ recorded replays to the same result in Node. Its
+19 rules tests pass, and seven faults planted in its rules are caught.
 
 ## Needs you
 
-1. **Play Gloamreach.** It has been seen only through hidden software rendering
-   and screenshots, and heard by nobody. How it feels, and whether it is too
-   easy, wants a person.
+1. **Play Gloamreach**, on ARQADE's sixth card. Tests have played it, and I have
+   seen screenshots, but nobody has watched it move or heard it. How it feels,
+   and whether it is too easy, wants a person.
 2. **Name the games.** "Rift Delve" and "Gloamreach" are working titles; a
    search found no game of either exact name, which is not trademark clearance.
    Their rules go to demiurge-chain only once you approve names.
