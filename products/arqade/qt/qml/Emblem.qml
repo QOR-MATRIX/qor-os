@@ -7,12 +7,12 @@ import ARQADE
 // A game's emblem: a small 3D scene of what the game is about, in the portal's gilt and ember. It turns slowly, faster
 // when its card is hovered, and holds still with reduced motion.
 //
-// Changed for QOR OS: Rift Delve's, a blade pointing down through the three floors, and Gloamreach's, a beacon lit in its
+// Changed for QOR OS: Ever Rift's, a blade pointing down through the three floors, and Darkveil's, a beacon lit in its
 // valley (QOR OS's QOR-0017).
 View3D {
     id: emblem
 
-    // "rift", "void", "synapse", "orbital", "delve", "gloam", "flux" or "reversi".
+    // "rift", "void", "synapse", "orbital", "everrift", "darkveil", "flux" or "reversi".
     required property string kind
     property bool lively: false
     readonly property bool moving: !Theme.reducedMotion && emblem.visible
@@ -59,7 +59,7 @@ View3D {
     }
 
     Loader3D {
-        sourceComponent: ({ "rift": rift, "void": runner, "synapse": synapse, "orbital": orbital, "delve": delve, "gloam": gloam, "flux": flux, "reversi": reversi })[emblem.kind] ?? null
+        sourceComponent: ({ "rift": rift, "void": runner, "synapse": synapse, "orbital": orbital, "everrift": everRift, "darkveil": darkveil, "flux": flux, "reversi": reversi })[emblem.kind] ?? null
     }
 
     component Gilt: PrincipledMaterial {
@@ -123,9 +123,9 @@ View3D {
         }
     }
 
-    // Gloamreach: a beacon on its plinth with a breathing flame, the valley a gilt ring round it, and two more far off.
+    // Darkveil: a beacon on its plinth with a breathing flame, the valley a gilt ring round it, and two more far off.
     Component {
-        id: gloam
+        id: darkveil
         Node {
             eulerRotation: Qt.vector3d(20, emblem.t * 16, 0)
             Model {
@@ -167,9 +167,9 @@ View3D {
         }
     }
 
-    // Rift Delve: three floors, ring under ring, and a gilt blade pointing down through them to the ember below.
+    // Ever Rift: three floors, ring under ring, and a gilt blade pointing down through them to the ember below.
     Component {
-        id: delve
+        id: everRift
         Node {
             eulerRotation: Qt.vector3d(18, emblem.t * 20, 0)
             Repeater3D {

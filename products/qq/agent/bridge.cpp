@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
         studio.connectToServer(pipe);
         return studio.waitForConnected(1500);
     };
-    reach();
+    darkveil();
 
     QObject::connect(&studio, &QLocalSocket::readyRead, &app, [&studio] {
         while (studio.canReadLine()) {
@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 
     // A line from the client: to the Studio, or, with none to reach, an answer that says so.
     auto relay = [&](const QByteArray &line) {
-        if (reach()) {
+        if (darkveil()) {
             studio.write(line + '\n');
             studio.flush();
             return;

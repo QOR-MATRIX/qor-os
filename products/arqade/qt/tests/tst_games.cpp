@@ -7,9 +7,9 @@
 //   Synapse: a press while the signal shows is no answer; three signals repeated, then a node out of turn.
 //   Rift Survivor: moved each way there is; steered clear until the signal evolves and a perk is chosen; then left
 //   standing until its hull breaks.
-//   Gloamreach (QOR OS's own): moved each way there is, the view turned; talked to its people; fought to its first
+//   Darkveil (QOR OS's own): moved each way there is, the view turned; talked to its people; fought to its first
 //   beacon by the shared pilot; then walked among what is left, without a blow, until a third fall ends the run.
-//   Rift Delve (QOR OS's own): moved each way there is; fought through the first floor and down its stairs; then walked
+//   Ever Rift (QOR OS's own): moved each way there is; fought through the first floor and down its stairs; then walked
 //   among the second floor's enemies without a blow until the delver falls.
 //
 // And the two arenas (P7.24), against another person on ARQADE's server, here a stand-in that signs in as the website
@@ -26,8 +26,8 @@
 // motion reaches the game, and Esc and Back return to the home.
 //
 // Changed for QOR OS: the home is chosen from by the d-pad and the arrows, a game played by the pad's A or Return, and
-// put away by the pad's Back, the focus coming back to its card. Rift Delve, QOR OS's own game (its QOR-0017), is
-// played too, by tests/delve-pilot.js.
+// put away by the pad's Back, the focus coming back to its card. Ever Rift, QOR OS's own game (its QOR-0017), is
+// played too, by tests/ever-rift-pilot.js.
 //
 // It opens a real window, so it needs a desktop session. With ARQADE_SHOT set to a folder, it saves what it drew there;
 // with ARQADE_RUN set to a folder, it writes each run it played there, as <game>-run.json (how the fixtures were made).
@@ -73,8 +73,8 @@ const QUrl kOrbital(QStringLiteral("qrc:/games/orbital/scenes/orbital.qml"));
 const QUrl kVoidRunner(QStringLiteral("qrc:/games/void-runner/scenes/void-runner.qml"));
 const QUrl kSynapse(QStringLiteral("qrc:/games/synapse/scenes/synapse.qml"));
 const QUrl kRiftSurvivor(QStringLiteral("qrc:/games/rift-survivor/scenes/rift-survivor.qml"));
-const QUrl kRiftDelve(QStringLiteral("qrc:/games/rift-delve/scenes/rift-delve.qml"));
-const QUrl kGloamreach(QStringLiteral("qrc:/games/gloamreach/scenes/gloamreach.qml"));
+const QUrl kEverRift(QStringLiteral("qrc:/games/ever-rift/scenes/ever-rift.qml"));
+const QUrl kDarkveil(QStringLiteral("qrc:/games/darkveil/scenes/darkveil.qml"));
 const QUrl kFluxFour(QStringLiteral("qrc:/games/arenas/scenes/flux-four.qml"));
 const QUrl kRiftReversi(QStringLiteral("qrc:/games/arenas/scenes/rift-reversi.qml"));
 // Rift Survivor's rules (logic/rules.mjs): a run's length in steps.
@@ -748,21 +748,21 @@ class TestGames : public QObject
         steering = want;
     }
 
-    // Rift Delve: the rules' game as it stands, read field by field (its floor is too big to copy at every look), and
-    // what tests/delve-pilot.js would do next, run in the game's own engine on it.
-    QJSValue delve() const { return logic() ? logic()->property("game").value<QJSValue>() : QJSValue(); }
-    QJSValue delvePilot;
-    QVariantMap delveChoice(bool calm)
+    // Ever Rift: the rules' game as it stands, read field by field (its floor is too big to copy at every look), and
+    // what tests/ever-rift-pilot.js would do next, run in the game's own engine on it.
+    QJSValue everRift() const { return logic() ? logic()->property("game").value<QJSValue>() : QJSValue(); }
+    QJSValue everRiftPilot;
+    QVariantMap everRiftChoice(bool calm)
     {
-        if (delvePilot.isUndefined()) {
-            QFile source(QStringLiteral(ARQADE_PILOTS "/delve-pilot.js"));
+        if (everRiftPilot.isUndefined()) {
+            QFile source(QStringLiteral(ARQADE_PILOTS "/ever-rift-pilot.js"));
             if (!source.open(QIODevice::ReadOnly))
                 return {};
-            delvePilot = qmlEngine(logic())->evaluate(QString::fromUtf8(source.readAll()), source.fileName());
+            everRiftPilot = qmlEngine(logic())->evaluate(QString::fromUtf8(source.readAll()), source.fileName());
         }
-        return delvePilot.call({delve(), QJSValue(calm)}).toVariant().toMap();
+        return everRiftPilot.call({everRift(), QJSValue(calm)}).toVariant().toMap();
     }
-    // Rift Delve: Space held to strike, and let go.
+    // Ever Rift: Space held to strike, and let go.
     bool striking = false;
     void strike(bool on)
     {
@@ -771,9 +771,9 @@ class TestGames : public QObject
         on ? QTest::keyPress(window, Qt::Key_Space) : QTest::keyRelease(window, Qt::Key_Space);
         striking = on;
     }
-    // Rift Delve: the pilot's choice played, the way by W, A, S and D, a strike by Space, a whirl by the pad's X, a
+    // Ever Rift: the pilot's choice played, the way by W, A, S and D, a strike by Space, a whirl by the pad's X, a
     // dash by L, and a potion by the screen's Drink button.
-    void playDelve(const QVariantMap &choice)
+    void playEverRift(const QVariantMap &choice)
     {
         const QVariantList way = choice.value("way").toList();
         steer({way.value(0).toInt(), way.value(1).toInt()});
@@ -794,25 +794,25 @@ class TestGames : public QObject
         return (set > 0 ? set : 300000) - 20000;
     }
 
-    // Gloamreach: the rules' game as it stands, its one hero, and what the shared pilot would do next, run in the game's
+    // Darkveil: the rules' game as it stands, its one hero, and what the shared pilot would do next, run in the game's
     // own engine on it.
-    QJSValue reach() const { return logic() ? logic()->property("game").value<QJSValue>() : QJSValue(); }
-    QJSValue reachHero() const { return reach().property("players").property(0); }
-    QJSValue reachPilot;
-    QVariantMap reachChoice(const QJSValue &calm)
+    QJSValue darkveil() const { return logic() ? logic()->property("game").value<QJSValue>() : QJSValue(); }
+    QJSValue darkveilHero() const { return darkveil().property("players").property(0); }
+    QJSValue darkveilPilot;
+    QVariantMap darkveilChoice(const QJSValue &calm)
     {
-        if (reachPilot.isUndefined()) {
-            QFile source(QStringLiteral(ARQADE_SHARED_PILOTS "/gloamreach-pilot.js"));
+        if (darkveilPilot.isUndefined()) {
+            QFile source(QStringLiteral(ARQADE_SHARED_PILOTS "/darkveil-pilot.js"));
             if (!source.open(QIODevice::ReadOnly))
                 return {};
-            reachPilot = qmlEngine(logic())->evaluate(QString::fromUtf8(source.readAll()), source.fileName());
+            darkveilPilot = qmlEngine(logic())->evaluate(QString::fromUtf8(source.readAll()), source.fileName());
         }
         const QJSValue rules = logic()->property("rules").value<QJSValue>();
-        return reachPilot.call({rules, reach(), calm}).toVariant().toMap();
+        return darkveilPilot.call({rules, darkveil(), calm}).toVariant().toMap();
     }
-    // Gloamreach: the pilot's choice played, the way by W, A, S and D, a strike by Space, a bolt by the pad's X, a nova by
+    // Darkveil: the pilot's choice played, the way by W, A, S and D, a strike by Space, a bolt by the pad's X, a nova by
     // I, a roll by L, a potion by the screen's Drink button, talking by E, and an answer by its number.
-    void playReach(const QVariantMap &choice)
+    void playDarkveil(const QVariantMap &choice)
     {
         const QVariantList way = choice.value("way").toList();
         steer({way.value(0).toInt(), way.value(1).toInt()});
@@ -941,7 +941,7 @@ private slots:
     // The six games and the two arenas all play here.
     void every_card_plays_its_game_here()
     {
-        for (const char *name : {"Orbital", "Void Runner", "Synapse", "Rift Survivor", "Rift Delve", "Gloamreach", "Flux Four",
+        for (const char *name : {"Orbital", "Void Runner", "Synapse", "Rift Survivor", "Ever Rift", "Darkveil", "Flux Four",
                                  "Rift Reversi"})
             QVERIFY2(find(window->contentItem(), [&](QQuickItem *i) {
                          return i->property("name").toString() == QLatin1String(name) && i->property("here").toBool();
@@ -990,7 +990,7 @@ private slots:
         // Down, to the game under it; down again, to an arena under the games, which the page brings into view; and up
         // again, a row at a time.
         pad(QStringLiteral("Down"));
-        QTRY_VERIFY(focusedOn("Gloamreach"));
+        QTRY_VERIFY(focusedOn("Darkveil"));
         pad(QStringLiteral("Down"));
         QTRY_VERIFY(focusedOn("Flux Four") || focusedOn("Rift Reversi"));
         auto *page = window->findChild<QQuickItem *>(QStringLiteral("page"));
@@ -1003,7 +1003,7 @@ private slots:
         QTRY_VERIFY(page->property("contentY").toReal() > 0);
         QTRY_VERIFY(inView());
         pad(QStringLiteral("Up"));
-        QTRY_VERIFY(focusedOn("Rift Delve") || focusedOn("Gloamreach"));
+        QTRY_VERIFY(focusedOn("Ever Rift") || focusedOn("Darkveil"));
         pad(QStringLiteral("Up"));
         QTRY_VERIFY(focusedOn("Void Runner") || focusedOn("Synapse"));
         for (int i = 0; i < 3; ++i)
@@ -1552,23 +1552,23 @@ private slots:
         QVERIFY2(warnings.isEmpty(), qPrintable(warnings.join('\n')));
     }
 
-    void rift_delves_card_opens_it_and_play_starts_the_run()
+    void ever_rifts_card_opens_it_and_play_starts_the_run()
     {
-        behaviour = QStringLiteral("Rift Delve");
-        open(QStringLiteral("Rift Delve"), QStringLiteral("delve"), kRiftDelve, QStringLiteral("RIFT DELVE"));
+        behaviour = QStringLiteral("Ever Rift");
+        open(QStringLiteral("Ever Rift"), QStringLiteral("everrift"), kEverRift, QStringLiteral("EVER RIFT"));
         if (QTest::currentTestFailed())
             return;
         QTest::qWait(400);
-        save(window, "delve-title.png");
+        save(window, "ever-rift-title.png");
         QVERIFY(click(QStringLiteral("Play")));
-        QTRY_COMPARE(delve().property("phase").toString(), QStringLiteral("playing"));
+        QTRY_COMPARE(everRift().property("phase").toString(), QStringLiteral("playing"));
         QTRY_COMPARE(screenText(QStringLiteral("Health words")), QStringLiteral("100 / 100"));
         QCOMPARE(screenText(QStringLiteral("Depth")), QStringLiteral("FLOOR 1 OF 3"));
         // The floor's rock is built as blocks, far fewer than its tiles of rock.
         QTRY_VERIFY(asList(logic()->property("rock")).size() > 10);
         QVERIFY(asList(logic()->property("rock")).size() < 300);
         QTest::qWait(300);
-        save(window, "delve-floor-1.png");
+        save(window, "ever-rift-floor-1.png");
         QVERIFY2(warnings.isEmpty(), qPrintable(warnings.join('\n')));
     }
 
@@ -1591,20 +1591,20 @@ private slots:
              }},
         };
         for (const Way &way : ways) {
-            const double x = delve().property("x").toNumber(), y = delve().property("y").toNumber();
+            const double x = everRift().property("x").toNumber(), y = everRift().property("y").toNumber();
             way.hold(true);
             QTest::qWait(150);
             way.hold(false);
             QTest::qWait(30);
-            const double mx = delve().property("x").toNumber() - x, my = delve().property("y").toNumber() - y;
+            const double mx = everRift().property("x").toNumber() - x, my = everRift().property("y").toNumber() - y;
             QVERIFY2(mx * way.dx > 12 || my * way.dy > 12,
                      qPrintable(QStringLiteral("%1 moved the delver %2, %3").arg(QLatin1String(way.name)).arg(mx).arg(my)));
             QVERIFY2(std::abs(mx * way.dy) + std::abs(my * way.dx) < 1, way.name);
         }
-        QVERIFY(!delve().property("held").property("up").toBool());
+        QVERIFY(!everRift().property("held").property("up").toBool());
     }
 
-    // Played as a person plays it, by the keys, the pad and the screen's buttons (tests/delve-pilot.js): the first
+    // Played as a person plays it, by the keys, the pad and the screen's buttons (tests/ever-rift-pilot.js): the first
     // floor's enemies cut down, a fall heard from where it happened, and the stairs taken to the second floor.
     void a_delver_cuts_through_the_first_floor_and_goes_down()
     {
@@ -1613,24 +1613,24 @@ private slots:
         waited.start();
         int frame = 0;
         bool fallHeard = false;
-        while (delve().property("floor").toInt() == 1 && delve().property("phase").toString() == QLatin1String("playing")) {
+        while (everRift().property("floor").toInt() == 1 && everRift().property("phase").toString() == QLatin1String("playing")) {
             QVERIFY2(waited.elapsed() < 300000, "five minutes passed on the first floor");
-            playDelve(delveChoice(false));
+            playEverRift(everRiftChoice(false));
             fallHeard = fallHeard || !placedVoices(QStringLiteral("kill.wav")).isEmpty();
             if (++frame == 600)
-                save(window, "delve-fighting.png");
+                save(window, "ever-rift-fighting.png");
             QTest::qWait(4);
         }
         steer({0, 0});
         strike(false);
-        QCOMPARE(delve().property("phase").toString(), QStringLiteral("playing"));
-        QCOMPARE(delve().property("floor").toInt(), 2);
-        QVERIFY(delve().property("kills").toInt() >= 5);
-        QVERIFY(delve().property("level").toInt() >= 2);
+        QCOMPARE(everRift().property("phase").toString(), QStringLiteral("playing"));
+        QCOMPARE(everRift().property("floor").toInt(), 2);
+        QVERIFY(everRift().property("kills").toInt() >= 5);
+        QVERIFY(everRift().property("level").toInt() >= 2);
         QVERIFY2(fallHeard, "no fall was heard from a place on the floor");
         QTRY_COMPARE(screenText(QStringLiteral("Depth")), QStringLiteral("FLOOR 2 OF 3"));
         QTest::qWait(400);
-        save(window, "delve-floor-2.png");
+        save(window, "ever-rift-floor-2.png");
     }
 
     // Then walked among the second floor's enemies without a blow, a potion or a skill: they wake, close in and strike
@@ -1641,29 +1641,29 @@ private slots:
         QElapsedTimer waited;
         waited.start();
         bool shot = false;
-        while (delve().property("phase").toString() != QLatin1String("over")) {
+        while (everRift().property("phase").toString() != QLatin1String("over")) {
             QVERIFY2(waited.elapsed() < 240000, "four minutes passed and the delver stood");
-            playDelve(delveChoice(true));
-            if (!shot && delve().property("hurt").toInt() > 0) {
-                save(window, "delve-hurt.png");
+            playEverRift(everRiftChoice(true));
+            if (!shot && everRift().property("hurt").toInt() > 0) {
+                save(window, "ever-rift-hurt.png");
                 shot = true;
             }
             QTest::qWait(4);
         }
         steer({0, 0});
-        QCOMPARE(delve().property("health").toInt(), 0);
+        QCOMPARE(everRift().property("health").toInt(), 0);
         QTRY_COMPARE(screenText(QStringLiteral("Result")), QStringLiteral("FALLEN"));
         QVERIFY(screenText(QStringLiteral("Final")).startsWith(QStringLiteral("SCORE ")));
         QVERIFY(screenText(QStringLiteral("Details")).startsWith(QStringLiteral("Floor 2")));
         QTest::qWait(400);
-        save(window, "delve-over.png");
+        save(window, "ever-rift-over.png");
         QVERIFY2(warnings.isEmpty(), qPrintable(warnings.join('\n')));
     }
 
-    void rift_delves_kept_run_replays_to_its_outcome()
+    void ever_rifts_kept_run_replays_to_its_outcome()
     {
         QVariantMap outcome;
-        keptRunReplays(kRiftDelve, QStringLiteral("rift-delve"), &outcome);
+        keptRunReplays(kEverRift, QStringLiteral("ever-rift"), &outcome);
         if (QTest::currentTestFailed())
             return;
         QCOMPARE(outcome.value("health").toInt(), 0);
@@ -1675,12 +1675,12 @@ private slots:
                  screenText(QStringLiteral("Final")));
     }
 
-    void rift_delves_kept_run_replays_in_qq_as_its_rules_replay_it()
+    void ever_rifts_kept_run_replays_in_qq_as_its_rules_replay_it()
     {
-        fixtureReplays(QStringLiteral("rift-delve"), kRiftDelve);
+        fixtureReplays(QStringLiteral("ever-rift"), kEverRift);
     }
 
-    void esc_leaves_rift_delve_too()
+    void esc_leaves_ever_rift_too()
     {
         QTest::keyClick(window, Qt::Key_Escape);
         QTRY_COMPARE(window->property("playing").toString(), QString());
@@ -1689,21 +1689,21 @@ private slots:
         QVERIFY2(warnings.isEmpty(), qPrintable(warnings.join('\n')));
     }
 
-    void gloamreachs_card_opens_it_and_play_starts_the_run()
+    void darkveils_card_opens_it_and_play_starts_the_run()
     {
-        behaviour = QStringLiteral("Gloamreach");
-        open(QStringLiteral("Gloamreach"), QStringLiteral("gloam"), kGloamreach, QStringLiteral("GLOAMREACH"));
+        behaviour = QStringLiteral("Darkveil");
+        open(QStringLiteral("Darkveil"), QStringLiteral("darkveil"), kDarkveil, QStringLiteral("DARKVEIL"));
         if (QTest::currentTestFailed())
             return;
         QTest::qWait(600);
-        save(window, "gloam-title.png");
+        save(window, "darkveil-title.png");
         QVERIFY(click(QStringLiteral("Play")));
-        QTRY_COMPARE(reach().property("phase").toString(), QStringLiteral("playing"));
+        QTRY_COMPARE(darkveil().property("phase").toString(), QStringLiteral("playing"));
         QTRY_COMPARE(screenText(QStringLiteral("Health words")), QStringLiteral("120 / 120"));
         QCOMPARE(screenText(QStringLiteral("Objective")), QStringLiteral("Speak to Elder Maren, in Hearth"));
         QCOMPARE(screenText(QStringLiteral("Place")), QStringLiteral("HEARTH"));
         QTest::qWait(600);
-        save(window, "gloam-hearth.png");
+        save(window, "darkveil-hearth.png");
         QVERIFY2(warnings.isEmpty(), qPrintable(warnings.join('\n')));
     }
 
@@ -1727,38 +1727,38 @@ private slots:
              }},
         };
         for (const Way &way : ways) {
-            const double x = reachHero().property("x").toNumber(), y = reachHero().property("y").toNumber();
+            const double x = darkveilHero().property("x").toNumber(), y = darkveilHero().property("y").toNumber();
             way.hold(true);
             QTest::qWait(150);
             way.hold(false);
             QTest::qWait(30);
-            const double mx = reachHero().property("x").toNumber() - x, my = reachHero().property("y").toNumber() - y;
+            const double mx = darkveilHero().property("x").toNumber() - x, my = darkveilHero().property("y").toNumber() - y;
             QVERIFY2(mx * way.dx > 10 || my * way.dy > 10,
                      qPrintable(QStringLiteral("%1 moved the hero %2, %3").arg(QLatin1String(way.name)).arg(mx).arg(my)));
             QVERIFY2(std::abs(mx * way.dy) + std::abs(my * way.dx) < 1, way.name);
         }
-        QVERIFY(!reachHero().property("held").property("up").toBool());
+        QVERIFY(!darkveilHero().property("held").property("up").toBool());
 
         QTest::keyClick(window, Qt::Key_C);
-        QTRY_COMPARE(reachHero().property("view").toInt(), 1);
+        QTRY_COMPARE(darkveilHero().property("view").toInt(), 1);
         QTest::keyClick(window, Qt::Key_C);
-        QTRY_COMPARE(reachHero().property("view").toInt(), 2);
-        const double x = reachHero().property("x").toNumber(), y = reachHero().property("y").toNumber();
+        QTRY_COMPARE(darkveilHero().property("view").toInt(), 2);
+        const double x = darkveilHero().property("x").toNumber(), y = darkveilHero().property("y").toNumber();
         QTest::keyPress(window, Qt::Key_W);
         QTest::qWait(150);
         QTest::keyRelease(window, Qt::Key_W);
         QTest::qWait(30);
-        QVERIFY2(reachHero().property("x").toNumber() - x > 10, "ahead, with the view turned east, is east");
-        QVERIFY(std::abs(reachHero().property("y").toNumber() - y) < 1);
+        QVERIFY2(darkveilHero().property("x").toNumber() - x > 10, "ahead, with the view turned east, is east");
+        QVERIFY(std::abs(darkveilHero().property("y").toNumber() - y) < 1);
         pad(QStringLiteral("LB"));
-        QTRY_COMPARE(reachHero().property("view").toInt(), 1);
+        QTRY_COMPARE(darkveilHero().property("view").toInt(), 1);
         QTest::qWait(300);
-        save(window, "gloam-turned.png");
+        save(window, "darkveil-turned.png");
         QTest::keyClick(window, Qt::Key_Z);
-        QTRY_COMPARE(reachHero().property("view").toInt(), 0);
+        QTRY_COMPARE(darkveilHero().property("view").toInt(), 0);
     }
 
-    // Played as a person plays it, by the keys, the pad and the screen's buttons (tests/gloamreach-pilot.js): the Elder's
+    // Played as a person plays it, by the keys, the pad and the screen's buttons (tests/darkveil-pilot.js): the Elder's
     // words and an answer, on the talk screen, with the valley held; then the meadow and the Mirewood fought through, the
     // first warden broken and its beacon lit, its light and the sounds of it coming from where they should.
     void a_hero_talks_fights_and_lights_the_first_beacon()
@@ -1767,27 +1767,27 @@ private slots:
         QElapsedTimer waited;
         waited.start();
         bool talked = false, fallHeard = false, fightShot = false;
-        while (!reach().property("world").property("beacons").property(0).toBool()
-               && reach().property("phase").toString() == QLatin1String("playing")) {
+        while (!darkveil().property("world").property("beacons").property(0).toBool()
+               && darkveil().property("phase").toString() == QLatin1String("playing")) {
             QVERIFY2(waited.elapsed() < playingLimit(), "the time ran out and no beacon was lit");
-            if (!talked && !reachHero().property("talk").isNull()) {
+            if (!talked && !darkveilHero().property("talk").isNull()) {
                 QTRY_VERIFY(screens().contains(QStringLiteral("talk")));
                 QCOMPARE(screenText(QStringLiteral("Who")), QStringLiteral("Elder Maren"));
                 QVERIFY(screens().contains(QStringLiteral("say1")));
                 QVERIFY(screenText(QStringLiteral("Line 0")).startsWith(QStringLiteral("The beacons went dark")));
                 QTest::qWait(200);
-                save(window, "gloam-talking.png");
+                save(window, "darkveil-talking.png");
                 // Its answer by the screen's button, this first time.
                 QVERIFY(click(QStringLiteral("Say 1")));
-                QTRY_COMPARE(reachHero().property("errands").property("king").toInt(), 1);
+                QTRY_COMPARE(darkveilHero().property("errands").property("king").toInt(), 1);
                 QTRY_VERIFY(screenText(QStringLiteral("Line 0")).startsWith(QStringLiteral("Then go")));
                 talked = true;
                 continue;
             }
-            playReach(reachChoice(QJSValue(false)));
+            playDarkveil(darkveilChoice(QJSValue(false)));
             fallHeard = fallHeard || !placedVoices(QStringLiteral("kill.wav")).isEmpty();
-            if (!fightShot && reachHero().property("swing").toInt() > 0) {
-                save(window, "gloam-fighting.png");
+            if (!fightShot && darkveilHero().property("swing").toInt() > 0) {
+                save(window, "darkveil-fighting.png");
                 fightShot = true;
             }
             QTest::qWait(4);
@@ -1795,14 +1795,14 @@ private slots:
         steer({0, 0});
         strike(false);
         QVERIFY(talked);
-        QCOMPARE(reach().property("phase").toString(), QStringLiteral("playing"));
-        QVERIFY(reach().property("world").property("wardens").property(0).toBool());
-        QVERIFY(reachHero().property("kills").toInt() >= 5);
-        QVERIFY(reachHero().property("level").toInt() >= 2);
+        QCOMPARE(darkveil().property("phase").toString(), QStringLiteral("playing"));
+        QVERIFY(darkveil().property("world").property("wardens").property(0).toBool());
+        QVERIFY(darkveilHero().property("kills").toInt() >= 5);
+        QVERIFY(darkveilHero().property("level").toInt() >= 2);
         QVERIFY2(fallHeard, "no fall was heard from a place in the valley");
         QTRY_VERIFY(screenText(QStringLiteral("Objective")).contains(QStringLiteral("Ashen Hold")));
         QTest::qWait(600);
-        save(window, "gloam-beacon.png");
+        save(window, "darkveil-beacon.png");
         QVERIFY2(warnings.isEmpty(), qPrintable(warnings.join('\n')));
     }
 
@@ -1814,29 +1814,29 @@ private slots:
         QElapsedTimer waited;
         waited.start();
         int woke = 0;
-        while (reach().property("phase").toString() != QLatin1String("over")) {
+        while (darkveil().property("phase").toString() != QLatin1String("over")) {
             QVERIFY2(waited.elapsed() < playingLimit(), "the time ran out and the hero stood");
-            playReach(reachChoice(QJSValue(true)));
-            if (woke == 0 && reachHero().property("falls").toInt() == 1) {
+            playDarkveil(darkveilChoice(QJSValue(true)));
+            if (woke == 0 && darkveilHero().property("falls").toInt() == 1) {
                 QTRY_COMPARE(screenText(QStringLiteral("Place")), QStringLiteral("HEARTH"));
                 woke = 1;
             }
             QTest::qWait(4);
         }
         steer({0, 0});
-        QCOMPARE(reachHero().property("falls").toInt(), 3);
-        QTRY_COMPARE(screenText(QStringLiteral("Result")), QStringLiteral("THE GLOAM TOOK YOU"));
+        QCOMPARE(darkveilHero().property("falls").toInt(), 3);
+        QTRY_COMPARE(screenText(QStringLiteral("Result")), QStringLiteral("THE VEIL TOOK YOU"));
         QVERIFY(screenText(QStringLiteral("Final")).startsWith(QStringLiteral("SCORE ")));
         QVERIFY(screenText(QStringLiteral("Details")).startsWith(QStringLiteral("1 of 3 beacons")));
         QTest::qWait(400);
-        save(window, "gloam-over.png");
+        save(window, "darkveil-over.png");
         QVERIFY2(warnings.isEmpty(), qPrintable(warnings.join('\n')));
     }
 
-    void gloamreachs_kept_run_replays_to_its_outcome()
+    void darkveils_kept_run_replays_to_its_outcome()
     {
         QVariantMap outcome;
-        keptRunReplays(kGloamreach, QStringLiteral("gloamreach"), &outcome);
+        keptRunReplays(kDarkveil, QStringLiteral("darkveil"), &outcome);
         if (QTest::currentTestFailed())
             return;
         QCOMPARE(outcome.value("falls").toInt(), 3);
@@ -1848,12 +1848,12 @@ private slots:
                  screenText(QStringLiteral("Final")));
     }
 
-    void gloamreachs_kept_run_replays_in_qq_as_its_rules_replay_it()
+    void darkveils_kept_run_replays_in_qq_as_its_rules_replay_it()
     {
-        fixtureReplays(QStringLiteral("gloamreach"), kGloamreach);
+        fixtureReplays(QStringLiteral("darkveil"), kDarkveil);
     }
 
-    void esc_leaves_gloamreach_too()
+    void esc_leaves_darkveil_too()
     {
         QTest::keyClick(window, Qt::Key_Escape);
         QTRY_COMPARE(window->property("playing").toString(), QString());

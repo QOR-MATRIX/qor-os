@@ -46,11 +46,11 @@ fixtures above (docs/decisions/QOR-0017-arqades-new-games.md). They are
 written here under the Apache License, Version 2.0, and say so in their
 first line:
 
-- products/arqade/games/rift-delve/logic/rules.mjs
-- products/arqade/tests/rift-delve.test.mjs
-- products/arqade/games/gloamreach/logic/rules.mjs
-- products/arqade/tests/gloamreach.test.mjs
-- products/arqade/tests/gloamreach-pilot.js
+- products/arqade/games/ever-rift/logic/rules.mjs
+- products/arqade/tests/ever-rift.test.mjs
+- products/arqade/games/darkveil/logic/rules.mjs
+- products/arqade/tests/darkveil.test.mjs
+- products/arqade/tests/darkveil-pilot.js
 
 Third-party components
 ----------------------

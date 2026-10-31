@@ -16,7 +16,7 @@
 #   pwsh products/arqade/qt/build.ps1            # build and test
 #   pwsh products/arqade/qt/build.ps1 -Deploy    # and make the self-contained copy the launcher opens
 #
-# Changed for QOR OS: src/controllerback, a controller's Back as the way back from a game; Rift Delve's and Gloamreach's
+# Changed for QOR OS: src/controllerback, a controller's Back as the way back from a game; Ever Rift's and Darkveil's
 # packages (QOR OS's QOR-0017); every suite built with QQ's tests/virtualpads.cpp; and QOR OS's exploit mitigations (QOR-0018).
 
 cmake_minimum_required(VERSION 3.22)
@@ -156,93 +156,93 @@ qt_add_resources(arqade_core "rift-survivor"
         ../games/rift-survivor/assets/lost.wav
 )
 # QOR OS's own games (its QOR-0017), rewarded as the four are.
-qt_add_resources(arqade_core "rift-delve"
-    PREFIX /games/rift-delve
-    BASE "${CMAKE_CURRENT_SOURCE_DIR}/../games/rift-delve"
+qt_add_resources(arqade_core "ever-rift"
+    PREFIX /games/ever-rift
+    BASE "${CMAKE_CURRENT_SOURCE_DIR}/../games/ever-rift"
     FILES
-        ../games/rift-delve/scenes/rift-delve.qml
-        ../games/rift-delve/logic/rift-delve.qml
-        ../games/rift-delve/logic/rules.mjs
-        ../games/rift-delve/assets/delve.hdr
-        ../games/rift-delve/assets/flagstones.png
-        ../games/rift-delve/assets/flagstones-relief.png
-        ../games/rift-delve/assets/rock.png
-        ../games/rift-delve/assets/rock-relief.png
-        ../games/rift-delve/assets/delve.wav
-        ../games/rift-delve/assets/swing.wav
-        ../games/rift-delve/assets/hit.wav
-        ../games/rift-delve/assets/crit.wav
-        ../games/rift-delve/assets/kill.wav
-        ../games/rift-delve/assets/hurt.wav
-        ../games/rift-delve/assets/whirl.wav
-        ../games/rift-delve/assets/dash.wav
-        ../games/rift-delve/assets/potion.wav
-        ../games/rift-delve/assets/coin.wav
-        ../games/rift-delve/assets/relic.wav
-        ../games/rift-delve/assets/bolt.wav
-        ../games/rift-delve/assets/rising.wav
-        ../games/rift-delve/assets/slam.wav
-        ../games/rift-delve/assets/warden.wav
-        ../games/rift-delve/assets/level.wav
-        ../games/rift-delve/assets/descend.wav
-        ../games/rift-delve/assets/cleared.wav
-        ../games/rift-delve/assets/fallen.wav
+        ../games/ever-rift/scenes/ever-rift.qml
+        ../games/ever-rift/logic/ever-rift.qml
+        ../games/ever-rift/logic/rules.mjs
+        ../games/ever-rift/assets/ever-rift.hdr
+        ../games/ever-rift/assets/flagstones.png
+        ../games/ever-rift/assets/flagstones-relief.png
+        ../games/ever-rift/assets/rock.png
+        ../games/ever-rift/assets/rock-relief.png
+        ../games/ever-rift/assets/ever-rift.wav
+        ../games/ever-rift/assets/swing.wav
+        ../games/ever-rift/assets/hit.wav
+        ../games/ever-rift/assets/crit.wav
+        ../games/ever-rift/assets/kill.wav
+        ../games/ever-rift/assets/hurt.wav
+        ../games/ever-rift/assets/whirl.wav
+        ../games/ever-rift/assets/dash.wav
+        ../games/ever-rift/assets/potion.wav
+        ../games/ever-rift/assets/coin.wav
+        ../games/ever-rift/assets/relic.wav
+        ../games/ever-rift/assets/bolt.wav
+        ../games/ever-rift/assets/rising.wav
+        ../games/ever-rift/assets/slam.wav
+        ../games/ever-rift/assets/warden.wav
+        ../games/ever-rift/assets/level.wav
+        ../games/ever-rift/assets/descend.wav
+        ../games/ever-rift/assets/cleared.wav
+        ../games/ever-rift/assets/fallen.wav
 )
-qt_add_resources(arqade_core "gloamreach"
-    PREFIX /games/gloamreach
-    BASE "${CMAKE_CURRENT_SOURCE_DIR}/../games/gloamreach"
+qt_add_resources(arqade_core "darkveil"
+    PREFIX /games/darkveil
+    BASE "${CMAKE_CURRENT_SOURCE_DIR}/../games/darkveil"
     FILES
-        ../games/gloamreach/scenes/gloamreach.qml
-        ../games/gloamreach/logic/gloamreach.qml
-        ../games/gloamreach/logic/rules.mjs
-        ../games/gloamreach/logic/land.mjs
-        ../games/gloamreach/assets/beacon.wav
-        ../games/gloamreach/assets/bolt.wav
-        ../games/gloamreach/assets/bonecaster.glb
-        ../games/gloamreach/assets/burst.wav
-        ../games/gloamreach/assets/cast.wav
-        ../games/gloamreach/assets/coin.wav
-        ../games/gloamreach/assets/crit.wav
-        ../games/gloamreach/assets/curse.wav
-        ../games/gloamreach/assets/elder.glb
-        ../games/gloamreach/assets/fallen.wav
-        ../games/gloamreach/assets/gate.wav
-        ../games/gloamreach/assets/gloam.hdr
-        ../games/gloamreach/assets/gloam.wav
-        ../games/gloamreach/assets/healer.glb
-        ../games/gloamreach/assets/herb.wav
-        ../games/gloamreach/assets/hero.glb
-        ../games/gloamreach/assets/hit.wav
-        ../games/gloamreach/assets/hunter.glb
-        ../games/gloamreach/assets/hurt.wav
-        ../games/gloamreach/assets/kill.wav
-        ../games/gloamreach/assets/king.glb
-        ../games/gloamreach/assets/king.wav
-        ../games/gloamreach/assets/land.glb
-        ../games/gloamreach/assets/level.wav
-        ../games/gloamreach/assets/lost.wav
-        ../games/gloamreach/assets/no.wav
-        ../games/gloamreach/assets/potion.wav
-        ../games/gloamreach/assets/revenant.glb
-        ../games/gloamreach/assets/rising.wav
-        ../games/gloamreach/assets/roll.wav
-        ../games/gloamreach/assets/scenery-0.glb
-        ../games/gloamreach/assets/scenery-1.glb
-        ../games/gloamreach/assets/scenery-2.glb
-        ../games/gloamreach/assets/scenery-3.glb
-        ../games/gloamreach/assets/shade.glb
-        ../games/gloamreach/assets/slam.wav
-        ../games/gloamreach/assets/smith.glb
-        ../games/gloamreach/assets/swing.wav
-        ../games/gloamreach/assets/talk.wav
-        ../games/gloamreach/assets/thorn.wav
-        ../games/gloamreach/assets/thornling.glb
-        ../games/gloamreach/assets/wake.wav
-        ../games/gloamreach/assets/warden.glb
-        ../games/gloamreach/assets/warden.wav
-        ../games/gloamreach/assets/wolf.glb
-        ../games/gloamreach/assets/won.wav
-        ../games/gloamreach/assets/yes.wav
+        ../games/darkveil/scenes/darkveil.qml
+        ../games/darkveil/logic/darkveil.qml
+        ../games/darkveil/logic/rules.mjs
+        ../games/darkveil/logic/land.mjs
+        ../games/darkveil/assets/beacon.wav
+        ../games/darkveil/assets/bolt.wav
+        ../games/darkveil/assets/bonecaster.glb
+        ../games/darkveil/assets/burst.wav
+        ../games/darkveil/assets/cast.wav
+        ../games/darkveil/assets/coin.wav
+        ../games/darkveil/assets/crit.wav
+        ../games/darkveil/assets/curse.wav
+        ../games/darkveil/assets/elder.glb
+        ../games/darkveil/assets/fallen.wav
+        ../games/darkveil/assets/gate.wav
+        ../games/darkveil/assets/darkveil.hdr
+        ../games/darkveil/assets/darkveil.wav
+        ../games/darkveil/assets/healer.glb
+        ../games/darkveil/assets/herb.wav
+        ../games/darkveil/assets/hero.glb
+        ../games/darkveil/assets/hit.wav
+        ../games/darkveil/assets/hunter.glb
+        ../games/darkveil/assets/hurt.wav
+        ../games/darkveil/assets/kill.wav
+        ../games/darkveil/assets/king.glb
+        ../games/darkveil/assets/king.wav
+        ../games/darkveil/assets/land.glb
+        ../games/darkveil/assets/level.wav
+        ../games/darkveil/assets/lost.wav
+        ../games/darkveil/assets/no.wav
+        ../games/darkveil/assets/potion.wav
+        ../games/darkveil/assets/revenant.glb
+        ../games/darkveil/assets/rising.wav
+        ../games/darkveil/assets/roll.wav
+        ../games/darkveil/assets/scenery-0.glb
+        ../games/darkveil/assets/scenery-1.glb
+        ../games/darkveil/assets/scenery-2.glb
+        ../games/darkveil/assets/scenery-3.glb
+        ../games/darkveil/assets/shade.glb
+        ../games/darkveil/assets/slam.wav
+        ../games/darkveil/assets/smith.glb
+        ../games/darkveil/assets/swing.wav
+        ../games/darkveil/assets/talk.wav
+        ../games/darkveil/assets/thorn.wav
+        ../games/darkveil/assets/thornling.glb
+        ../games/darkveil/assets/wake.wav
+        ../games/darkveil/assets/warden.glb
+        ../games/darkveil/assets/warden.wav
+        ../games/darkveil/assets/wolf.glb
+        ../games/darkveil/assets/won.wav
+        ../games/darkveil/assets/yes.wav
 )
 # The two arenas (P7.24), one package with a scene for each, played on ARQADE's server, which keeps their rules.
 qt_add_resources(arqade_core "arenas"

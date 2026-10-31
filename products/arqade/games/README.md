@@ -1,6 +1,6 @@
 # ARQADE's games, rebuilt in QQ
 
-Changed for QOR OS: Rift Delve and Gloamreach, the first of QOR OS's own games (its QOR-0017), and the left stick's four
+Changed for QOR OS: Ever Rift and Darkveil, the first of QOR OS's own games (its QOR-0017), and the left stick's four
 ways among the pad's bindings.
 
 ARQADE's four solo games and its two arenas are rebuilt as QQ games (ADR-102 decision 2; DIRECTION P7.20 and P7.24).
@@ -15,8 +15,8 @@ Player as it is (an arena there has nobody to ask, so it stays in its lobby).
 | Synapse | Rebuilt, 24 October 2026: the same |
 | Rift Survivor | Rebuilt, 24 October 2026: the same |
 | Flux Four and Rift Reversi | Rebuilt, 24 October 2026: play in ARQADE against another person, on ARQADE's server; a run replays in QQ and in Node |
-| Rift Delve | QOR OS's own, 30 October 2026 (a working title until the owner names it): plays in ARQADE, its rules replay a run in QQ and in Node |
-| Gloamreach | QOR OS's own, 31 October 2026 (a working title until the owner names it): the same |
+| Ever Rift | QOR OS's own, 30 October 2026: plays in ARQADE, its rules replay a run in QQ and in Node |
+| Darkveil | QOR OS's own, 31 October 2026: the same |
 
 ## A game's package
 
@@ -134,7 +134,7 @@ each warning of the other, so each `make_assets.py` writes the sounds its game p
 to the satellite's white, and Void Runner's red hazards to white and its collapse to yellow. Each glow that carries a
 meaning is kept near or under 1, which keeps its hue. Synapse's lit node is capped at 0.77 for the same reason.
 
-## Rift Delve
+## Ever Rift
 
 QOR OS's own game, the first of the seven its QOR-0017 sets out: a dungeon hack-and-slash, three floors down into the
 rift. Each floor is carved from the run's seed: up to nine rooms that keep apart, each joined to the one before by a
@@ -169,7 +169,7 @@ with Q, H, Y or Drink; P or Start pauses.
 against them each axis on its own, sight along a line looked at every ten units, and the way to the delver found by a
 breadth-first walk over the tiles, all in the arithmetic above. A swing's arc is a dot product held against cos 60°,
 written in as a number. **Rewarded from the start** (QOR-0017): its rules, its Node test and its fixture are shared
-with demiurge-chain under Apache-2.0, once the owner names the game.
+with demiurge-chain under Apache-2.0.
 
 **In 3D.** The floor is a board tilted toward the eye that moves under it, so the delver stays in the middle: worn
 flagstones, and the rock the floor is cut from built as blocks (each row's runs of rock, carried down while the row
@@ -181,13 +181,13 @@ stairs are a teal ring with motes rising from it. Sound comes from where it happ
 fall from the fallen, a bolt from its seer, and the delver's swings, wounds and finds from the delver. With reduced
 motion the eye keeps exactly to the delver, nothing on the floor turns, wisps do not bob, and the words do not swell.
 
-## Gloamreach
+## Darkveil
 
 QOR OS's own game, the second of the seven its QOR-0017 sets out: a 3D action RPG in one hand-laid valley of 64 by 64
 tiles. The three beacons went dark when the Hollow King rose behind his gate, and a warden stands over each. A hero walks
 out of the village of Hearth with a rusted blade, takes errands from the people there, fights through the meadow, the
 Mirewood, the Ashen Hold and the High Pass, breaks the wardens and lights the beacons. With all three burning the gate
-opens. The king ended wins; a third fall ends the run; and the gloam closes over the valley after three quarters of an hour.
+opens. The king ended wins; a third fall ends the run; and the veil closes over the valley after three quarters of an hour.
 
 - **The hero** moves as the view faces, the view turned an eighth at a time, so a run holds no analog input and replays
   exactly. Mud slows them. A **swing** turns toward the nearest enemy awake within 110 units and strikes within 60 degrees
@@ -215,8 +215,8 @@ Q, H or Y; talk with E, Return or LT; P or Start pauses.
 **World and players apart** (QOR-0017 decision 4). `game.world` holds what is out there, `game.players` each player's own,
 and every input names its player, so a server could step one valley for many. QQ plays one, and the Node test steps two: a
 beacon one lights burns for both, an errand stays their own, and the valley holds only while every hero talks. The rules
-are written for replay as Rift Delve's are, and **rewarded from the start**: its rules, its Node test, its pilot and its
-fixture are shared with demiurge-chain under Apache-2.0, once the owner names the game. `make_world.py` lays the valley out
+are written for replay as Ever Rift's are, and **rewarded from the start**: its rules, its Node test, its pilot and its
+fixture are shared with demiurge-chain under Apache-2.0. `make_world.py` lays the valley out
 and writes it between the markers in `logic/rules.mjs`, with how high the land stands in `logic/land.mjs`, which only the
 drawing reads, and it checks that every place can be walked to from Hearth and that the Crown cannot until the gate opens.
 
@@ -285,16 +285,16 @@ asked for is in the server's answer, which the run keeps. An arena's run is not 
   arena's edges, shots, chains and fragments, a still ship breached four times with the hold between, the signal evolving
   and each perk, and a pilot who keeps away lasting far longer than a still one. For each, nothing moves on the title or
   while paused, and the rules' source uses no sine, cosine, power or logarithm.
-- `../tests/gloamreach.test.mjs` (Node, in QOR OS's lint workflow), 19 tests, with `../tests/gloamreach-pilot.js`, a pilot
+- `../tests/darkveil.test.mjs` (Node, in QOR OS's lint workflow), 19 tests, with `../tests/darkveil-pilot.js`, a pilot
   it shares with `tst_games`: the same run for a seed; the valley whole, every place walked to, and the Crown only through
   the gate; movement as the view faces, mud, a pause, and nothing walking through what stands; a swing's arc, its turn and
   its chain; a roll, a bolt and a nova; potions, the wound's hold and the ward; talking holding the valley, and nothing sold
   for too little; the errands; enemies waking, missing a hero who steps away, going home and shooting; what falls lying
   where it can be reached; beacons, the gate and the king; falls; a pilot who plays it through winning on three seeds where
-  one who goes straight for the wardens falls; a still hero never found, and the gloam closing; two heroes in one valley;
+  one who goes straight for the wardens falls; a still hero never found, and the veil closing; two heroes in one valley;
   and a run replaying to the outcome of the same events live. Its fixture replays, and not altered; its state is pinned;
   and its source uses none of the forbidden functions, nor a clock.
-- `../tests/rift-delve.test.mjs` (Node, in QOR OS's lint workflow), 14 tests: the same floors and run for a seed;
+- `../tests/ever-rift.test.mjs` (Node, in QOR OS's lint workflow), 14 tests: the same floors and run for a seed;
   every floor whole, its stairs in the furthest room and the warden on the last; movement, the corner slip, walls, and
   nothing moving on the title or paused; a swing's arc and reach, fury, and a held swing again; a whirl's three blows
   and a dash's ninety units unwounded; potions; enemies asleep until they see, a blow wound up and missing a delver who
@@ -313,8 +313,8 @@ asked for is in the server's answer, which the run keeps. An arena's run is not 
   node out of turn loses it for 450. Rift Survivor is moved each way there is (D, the left arrow, the d-pad's down and
   the screen's Up button), steered clear by the keys until ten kills evolve the signal, a perk chosen by its button while
   the world holds, then left standing until four breaches end it, a perk chosen by its key each time the signal evolves
-  meanwhile. Rift Delve is moved each way there is (D, the left arrow, the left stick down and the screen's Up
-  button), played through its first floor and down its stairs by `../qt/tests/delve-pilot.js` (the Node test's pilot,
+  meanwhile. Ever Rift is moved each way there is (D, the left arrow, the left stick down and the screen's Up
+  button), played through its first floor and down its stairs by `../qt/tests/ever-rift-pilot.js` (the Node test's pilot,
   run in the game's own engine) by the keys, the pad and the screen's Drink button, then walked among the second
   floor's enemies without a blow until the delver falls. Each game's placed sounds are checked where they happen: a lock within a unit of the satellite, a change
   of lane from a placed voice, each Synapse note at its own node, a kill from a place in the arena. The run ARQADE kept
@@ -329,7 +329,7 @@ asked for is in the server's answer, which the run keeps. An arena's run is not 
   result's words and outcome, and what is told read and never trusted. Both runs kept in `../tests/fixtures/` replay to
   QQ's outcomes, and not without the server's last answer. The whole state at the end of each is pinned, and
   `arena.mjs` uses no clock or chance of its own.
-- `../qt/tests/tst_games.cpp` plays Gloamreach too: moved each way there is and the view turned; the Elder answered by the
+- `../qt/tests/tst_games.cpp` plays Darkveil too: moved each way there is and the view turned; the Elder answered by the
   screen's button; fought to its first beacon by the shared pilot, by the keys, the pad and the screen's buttons; then
   walked among what is left without a blow until a third fall ends the run. Its run replays in QQ to its outcome, and so
   does its fixture.

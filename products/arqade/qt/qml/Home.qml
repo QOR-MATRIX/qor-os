@@ -12,7 +12,7 @@ import ARQADE
 // Changed for QOR OS: a controller's d-pad and the arrow keys take the keyboard's focus to the nearest card, button or
 // tab that way, its ring showing, and the pad's A or Return presses it as it comes up. The page follows the focus, and
 // back from a game the focus is on the card that started it. ARQADE has the controller to itself in Prism (its record
-// takes it), so the home answers it here, through QQ's Input, as the games do. Rift Delve and Gloamreach, QOR OS's own
+// takes it), so the home answers it here, through QQ's Input, as the games do. Ever Rift and Darkveil, QOR OS's own
 // games (its QOR-0017), have the fifth and sixth cards.
 Item {
     id: home
@@ -366,8 +366,8 @@ Item {
                             { kind: "synapse", number: "02", name: "Synapse", tag: qsTr("Memory / pattern"), line: qsTr("Trust the signal. Question your mind."), here: true },
                             { kind: "orbital", number: "03", name: "Orbital", tag: qsTr("Precision / timing"), line: qsTr("Find order in the chaos."), here: true },
                             { kind: "rift", number: "04", name: "Rift Survivor", tag: qsTr("Survival / evolution"), line: qsTr("One signal. Ninety seconds. Evolve."), here: true },
-                            { kind: "delve", number: "05", name: "Rift Delve", tag: qsTr("Dungeon / action RPG"), line: qsTr("Three floors down. Break the warden."), here: true },
-                            { kind: "gloam", number: "06", name: "Gloamreach", tag: qsTr("Open world / action RPG"), line: qsTr("Light the beacons. End the Hollow King."), here: true },
+                            { kind: "everrift", number: "05", name: "Ever Rift", tag: qsTr("Dungeon / action RPG"), line: qsTr("Three floors down. Break the warden."), here: true },
+                            { kind: "darkveil", number: "06", name: "Darkveil", tag: qsTr("Open world / action RPG"), line: qsTr("Light the beacons. End the Hollow King."), here: true },
                         ]
                         GameCard {
                             id: solo

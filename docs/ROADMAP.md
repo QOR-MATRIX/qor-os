@@ -111,7 +111,7 @@ QQ's, ARQADE's and QOR Media's suites.
   - **The Library** (`library.h`) finds, until the core's index (Phase 2):
     - the QQ games QOR OS carries (`QOR_GAMES`, else `share/qor-os/games`);
     - the person's own QQ projects in Documents;
-    - ARQADE's games (eight since Gloamreach);
+    - ARQADE's games (eight since Darkveil);
     - video, music and pictures.
   - It remembers what was played, and where QOR Media last stopped, which Prism now takes from QOR Media's reports.
     A game plays in the QQ Player or in ARQADE (`play`), and a film resumes there.
@@ -126,28 +126,30 @@ QQ's, ARQADE's and QOR Media's suites.
 Seven original games built with QQ, each rewarded from the start: its rules in one module that ARQADE's server
 replays, shared with demiurge-chain ([QOR-0017](decisions/QOR-0017-arqades-new-games.md)). Each lands whole (its
 package, ARQADE's card, the Library, `tst_games`, a fixture and a Node test) before the next begins. Working titles
-until the owner names them; none is published before.
+until the owner names them, as [QOR-0019](decisions/QOR-0019-ever-rift-and-darkveil.md) did the first two; none is
+published before.
 
-- [x] Rift Delve, the dungeon hack-and-slash
+- [x] Ever Rift, the dungeon hack-and-slash
 
-  **30 October** ([games/README.md](../products/arqade/games/README.md#rift-delve)): three floors carved from the
+  **30 October** ([games/README.md](../products/arqade/games/README.md#ever-rift)): three floors carved from the
   seed, a sword, whirl, dash and potions, five kinds of enemy and the warden, gold, relics and levels; its rules in
   ARQADE's replay-safe arithmetic. ARQADE's fifth card and Prism's Library carry it. Its Node test (14 tests) runs in
   the lint workflow; `tst_games` plays it through its first floor and to a fall on the second, by the keys, the pad and
-  the screen's buttons, and its recorded run replays to the same outcome in QQ and in Node. **Left:** its name, then
-  its rules upstream (the last item here).
-- [x] Gloamreach, the 3D action RPG, single-player, its rules built so a server can run them for many players
+  the screen's buttons, and its recorded run replays to the same outcome in QQ and in Node.
+- [x] Darkveil, the 3D action RPG, single-player, its rules built so a server can run them for many players
 
-  **31 October** ([games/README.md](../products/arqade/games/README.md#gloamreach)): one hand-laid valley, a village
+  **31 October** ([games/README.md](../products/arqade/games/README.md#darkveil)): one hand-laid valley, a village
   with four people and their errands, three wardens over three beacons, a gate and the Hollow King behind it; a blade in
   a chain of three, a roll, a bolt, a nova and potions; camps of five kinds of enemy, levels, gold and what it buys; rigged
   models with clips, in QQ's props. ARQADE's sixth card and Prism's Library carry it. Its Node test (19 tests) runs in the
   lint workflow, and steps two players in one valley; `tst_games` plays it to its first beacon and to a third fall, and its
-  recorded run replays to the same outcome in QQ and in Node. **Left:** its name, then its rules upstream (the last item
-  here).
+  recorded run replays to the same outcome in QQ and in Node.
 - [ ] A platformer, a racer, a pixel-art game and an arcade game
 - [ ] The online world grown from the RPG, its server in demiurge-chain, after Phase 2's sign-in (its own record)
 - [ ] Each named game's rules, Node test and fixture in demiurge-chain, by a pull request there
+
+  Ever Rift's and Darkveil's, with its ADR-129: committed on `session/ever-rift-and-darkveil` in the upstream clone, not
+  pushed. Pushing it publishes them, and waits for the owner's word.
 
 ## Phase 2 · Identity and keys
 

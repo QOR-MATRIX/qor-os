@@ -150,8 +150,9 @@ private slots:
         library.setArqade(true);
         QCOMPARE(changed.size(), 1);
         const QStringList arqade = idsOf(library.games()).filter(u"arqade:"_s);
-        QCOMPARE(arqade, (QStringList { u"arqade:void"_s, u"arqade:synapse"_s, u"arqade:orbital"_s, u"arqade:rift"_s,
-                                        u"arqade:delve"_s, u"arqade:gloam"_s, u"arqade:flux"_s, u"arqade:reversi"_s }));
+        QCOMPARE(arqade,
+                 (QStringList { u"arqade:void"_s, u"arqade:synapse"_s, u"arqade:orbital"_s, u"arqade:rift"_s,
+                                u"arqade:everrift"_s, u"arqade:darkveil"_s, u"arqade:flux"_s, u"arqade:reversi"_s }));
         QCOMPARE(library.item(u"arqade:orbital"_s).value(u"game"_s).toString(), u"orbital"_s);
         library.setArqade(false);
         QVERIFY(library.item(u"arqade:orbital"_s).isEmpty());

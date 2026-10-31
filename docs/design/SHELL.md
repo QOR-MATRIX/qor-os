@@ -203,7 +203,7 @@ The Library (`qor::Library`) finds what it shows until the QOR core's index
 - **The person's own:** such folders in Documents, two deep, that QQ Studio made or
   they trusted (`qor-os/own-projects.json` in their data folder). A folder that is
   merely there, a download unpacked, is not listed as theirs.
-- **ARQADE's eight games**, Rift Delve and Gloamreach among them, while ARQADE can start.
+- **ARQADE's eight games**, Ever Rift and Darkveil among them, while ARQADE can start.
 - **Video, music and pictures** in the person's folders, three deep.
 
 It reads them on a worker thread when the shell starts and when Home opens,
