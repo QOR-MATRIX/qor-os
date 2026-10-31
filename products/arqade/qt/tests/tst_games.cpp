@@ -7,6 +7,8 @@
 //   Synapse: a press while the signal shows is no answer; three signals repeated, then a node out of turn.
 //   Rift Survivor: moved each way there is; steered clear until the signal evolves and a perk is chosen; then left
 //   standing until its hull breaks.
+//   Gloamreach (QOR OS's own): moved each way there is, the view turned; talked to its people; fought to its first
+//   beacon by the shared pilot; then walked among what is left, without a blow, until a third fall ends the run.
 //   Rift Delve (QOR OS's own): moved each way there is; fought through the first floor and down its stairs; then walked
 //   among the second floor's enemies without a blow until the delver falls.
 //
@@ -72,6 +74,7 @@ const QUrl kVoidRunner(QStringLiteral("qrc:/games/void-runner/scenes/void-runner
 const QUrl kSynapse(QStringLiteral("qrc:/games/synapse/scenes/synapse.qml"));
 const QUrl kRiftSurvivor(QStringLiteral("qrc:/games/rift-survivor/scenes/rift-survivor.qml"));
 const QUrl kRiftDelve(QStringLiteral("qrc:/games/rift-delve/scenes/rift-delve.qml"));
+const QUrl kGloamreach(QStringLiteral("qrc:/games/gloamreach/scenes/gloamreach.qml"));
 const QUrl kFluxFour(QStringLiteral("qrc:/games/arenas/scenes/flux-four.qml"));
 const QUrl kRiftReversi(QStringLiteral("qrc:/games/arenas/scenes/rift-reversi.qml"));
 // Rift Survivor's rules (logic/rules.mjs): a run's length in steps.
@@ -783,6 +786,51 @@ class TestGames : public QObject
             click(QStringLiteral("Drink"));
     }
 
+    // How long a case may play, by the wall clock: what the watchdog lets it, less a margin, so a slow renderer's run says
+    // why it stopped. Qt's own limit is five minutes unless QTEST_FUNCTION_TIMEOUT says otherwise.
+    static qint64 playingLimit()
+    {
+        const int set = qEnvironmentVariableIntValue("QTEST_FUNCTION_TIMEOUT");
+        return (set > 0 ? set : 300000) - 20000;
+    }
+
+    // Gloamreach: the rules' game as it stands, its one hero, and what the shared pilot would do next, run in the game's
+    // own engine on it.
+    QJSValue reach() const { return logic() ? logic()->property("game").value<QJSValue>() : QJSValue(); }
+    QJSValue reachHero() const { return reach().property("players").property(0); }
+    QJSValue reachPilot;
+    QVariantMap reachChoice(const QJSValue &calm)
+    {
+        if (reachPilot.isUndefined()) {
+            QFile source(QStringLiteral(ARQADE_SHARED_PILOTS "/gloamreach-pilot.js"));
+            if (!source.open(QIODevice::ReadOnly))
+                return {};
+            reachPilot = qmlEngine(logic())->evaluate(QString::fromUtf8(source.readAll()), source.fileName());
+        }
+        const QJSValue rules = logic()->property("rules").value<QJSValue>();
+        return reachPilot.call({rules, reach(), calm}).toVariant().toMap();
+    }
+    // Gloamreach: the pilot's choice played, the way by W, A, S and D, a strike by Space, a bolt by the pad's X, a nova by
+    // I, a roll by L, a potion by the screen's Drink button, talking by E, and an answer by its number.
+    void playReach(const QVariantMap &choice)
+    {
+        const QVariantList way = choice.value("way").toList();
+        steer({way.value(0).toInt(), way.value(1).toInt()});
+        strike(choice.value("attack").toBool());
+        if (choice.value("bolt").toBool())
+            pad(QStringLiteral("X"));
+        if (choice.value("nova").toBool())
+            QTest::keyClick(window, Qt::Key_I);
+        if (choice.value("roll").toBool())
+            QTest::keyClick(window, Qt::Key_L);
+        if (choice.value("potion").toBool())
+            click(QStringLiteral("Drink"));
+        if (choice.value("talk").toBool())
+            QTest::keyClick(window, Qt::Key_E);
+        if (const int say = choice.value("say").toInt(); say > 0)
+            QTest::keyClick(window, Qt::Key(Qt::Key_0 + say));
+    }
+
     // Synapse: node `n` (0 to 3) pressed by the keys 1 to 4 (way 0), the pad's X, Y, B and A (1), or its button (2).
     void node(int n, int way)
     {
@@ -890,10 +938,10 @@ private slots:
         input->setReadsHardware(false);
     }
 
-    // The five games and the two arenas all play here.
+    // The six games and the two arenas all play here.
     void every_card_plays_its_game_here()
     {
-        for (const char *name : {"Orbital", "Void Runner", "Synapse", "Rift Survivor", "Rift Delve", "Flux Four",
+        for (const char *name : {"Orbital", "Void Runner", "Synapse", "Rift Survivor", "Rift Delve", "Gloamreach", "Flux Four",
                                  "Rift Reversi"})
             QVERIFY2(find(window->contentItem(), [&](QQuickItem *i) {
                          return i->property("name").toString() == QLatin1String(name) && i->property("here").toBool();
@@ -939,7 +987,10 @@ private slots:
         QTest::keyClick(window, Qt::Key_Left);
         QTRY_VERIFY(focusedOn("Synapse"));
 
-        // Down, to an arena under the games, which the page brings into view; and up again, to a game.
+        // Down, to the game under it; down again, to an arena under the games, which the page brings into view; and up
+        // again, a row at a time.
+        pad(QStringLiteral("Down"));
+        QTRY_VERIFY(focusedOn("Gloamreach"));
         pad(QStringLiteral("Down"));
         QTRY_VERIFY(focusedOn("Flux Four") || focusedOn("Rift Reversi"));
         auto *page = window->findChild<QQuickItem *>(QStringLiteral("page"));
@@ -952,7 +1003,9 @@ private slots:
         QTRY_VERIFY(page->property("contentY").toReal() > 0);
         QTRY_VERIFY(inView());
         pad(QStringLiteral("Up"));
-        QTRY_VERIFY(focusedOn("Void Runner") || focusedOn("Synapse") || focusedOn("Orbital") || focusedOn("Rift Survivor"));
+        QTRY_VERIFY(focusedOn("Rift Delve") || focusedOn("Gloamreach"));
+        pad(QStringLiteral("Up"));
+        QTRY_VERIFY(focusedOn("Void Runner") || focusedOn("Synapse"));
         for (int i = 0; i < 3; ++i)
             pad(QStringLiteral("Left"));
         QTRY_VERIFY(focusedOn("Void Runner"));
@@ -1628,6 +1681,179 @@ private slots:
     }
 
     void esc_leaves_rift_delve_too()
+    {
+        QTest::keyClick(window, Qt::Key_Escape);
+        QTRY_COMPARE(window->property("playing").toString(), QString());
+        QTRY_VERIFY(!game());
+        QVERIFY(home()->isVisible());
+        QVERIFY2(warnings.isEmpty(), qPrintable(warnings.join('\n')));
+    }
+
+    void gloamreachs_card_opens_it_and_play_starts_the_run()
+    {
+        behaviour = QStringLiteral("Gloamreach");
+        open(QStringLiteral("Gloamreach"), QStringLiteral("gloam"), kGloamreach, QStringLiteral("GLOAMREACH"));
+        if (QTest::currentTestFailed())
+            return;
+        QTest::qWait(600);
+        save(window, "gloam-title.png");
+        QVERIFY(click(QStringLiteral("Play")));
+        QTRY_COMPARE(reach().property("phase").toString(), QStringLiteral("playing"));
+        QTRY_COMPARE(screenText(QStringLiteral("Health words")), QStringLiteral("120 / 120"));
+        QCOMPARE(screenText(QStringLiteral("Objective")), QStringLiteral("Speak to Elder Maren, in Hearth"));
+        QCOMPARE(screenText(QStringLiteral("Place")), QStringLiteral("HEARTH"));
+        QTest::qWait(600);
+        save(window, "gloam-hearth.png");
+        QVERIFY2(warnings.isEmpty(), qPrintable(warnings.join('\n')));
+    }
+
+    // Held for a moment each way there is, the hero moves that way: D on the keys, the left arrow, the pad's left stick
+    // down, and the screen's Up button under the pointer. Then C and the pad's left shoulder turn the view, and ahead
+    // is ahead of the view.
+    void the_hero_moves_by_keys_the_stick_and_the_screens_buttons_and_the_view_turns()
+    {
+        struct Way { const char *name; double dx, dy; std::function<void(bool)> hold; };
+        const QList<Way> ways = {
+            {"D", 1, 0, [this](bool down) { down ? QTest::keyPress(window, Qt::Key_D) : QTest::keyRelease(window, Qt::Key_D); }},
+            {"the left arrow", -1, 0,
+             [this](bool down) { down ? QTest::keyPress(window, Qt::Key_Left) : QTest::keyRelease(window, Qt::Key_Left); }},
+            {"the left stick down", 0, 1,
+             [this](bool down) { input->gamepadState(QVector2D(0, down ? -1.0f : 0.0f), {}, false, false); }},
+            {"the Up button", 0, -1, [this](bool down) {
+                 QQuickItem *drawn = find(game(), [](QQuickItem *i) { return i->objectName() == QLatin1String("Up"); });
+                 const QPoint at = drawn->mapToScene(QPointF(drawn->width() / 2, drawn->height() / 2)).toPoint();
+                 down ? QTest::mousePress(window, Qt::LeftButton, Qt::NoModifier, at)
+                      : QTest::mouseRelease(window, Qt::LeftButton, Qt::NoModifier, at);
+             }},
+        };
+        for (const Way &way : ways) {
+            const double x = reachHero().property("x").toNumber(), y = reachHero().property("y").toNumber();
+            way.hold(true);
+            QTest::qWait(150);
+            way.hold(false);
+            QTest::qWait(30);
+            const double mx = reachHero().property("x").toNumber() - x, my = reachHero().property("y").toNumber() - y;
+            QVERIFY2(mx * way.dx > 10 || my * way.dy > 10,
+                     qPrintable(QStringLiteral("%1 moved the hero %2, %3").arg(QLatin1String(way.name)).arg(mx).arg(my)));
+            QVERIFY2(std::abs(mx * way.dy) + std::abs(my * way.dx) < 1, way.name);
+        }
+        QVERIFY(!reachHero().property("held").property("up").toBool());
+
+        QTest::keyClick(window, Qt::Key_C);
+        QTRY_COMPARE(reachHero().property("view").toInt(), 1);
+        QTest::keyClick(window, Qt::Key_C);
+        QTRY_COMPARE(reachHero().property("view").toInt(), 2);
+        const double x = reachHero().property("x").toNumber(), y = reachHero().property("y").toNumber();
+        QTest::keyPress(window, Qt::Key_W);
+        QTest::qWait(150);
+        QTest::keyRelease(window, Qt::Key_W);
+        QTest::qWait(30);
+        QVERIFY2(reachHero().property("x").toNumber() - x > 10, "ahead, with the view turned east, is east");
+        QVERIFY(std::abs(reachHero().property("y").toNumber() - y) < 1);
+        pad(QStringLiteral("LB"));
+        QTRY_COMPARE(reachHero().property("view").toInt(), 1);
+        QTest::qWait(300);
+        save(window, "gloam-turned.png");
+        QTest::keyClick(window, Qt::Key_Z);
+        QTRY_COMPARE(reachHero().property("view").toInt(), 0);
+    }
+
+    // Played as a person plays it, by the keys, the pad and the screen's buttons (tests/gloamreach-pilot.js): the Elder's
+    // words and an answer, on the talk screen, with the valley held; then the meadow and the Mirewood fought through, the
+    // first warden broken and its beacon lit, its light and the sounds of it coming from where they should.
+    void a_hero_talks_fights_and_lights_the_first_beacon()
+    {
+        QVERIFY(logic());
+        QElapsedTimer waited;
+        waited.start();
+        bool talked = false, fallHeard = false, fightShot = false;
+        while (!reach().property("world").property("beacons").property(0).toBool()
+               && reach().property("phase").toString() == QLatin1String("playing")) {
+            QVERIFY2(waited.elapsed() < playingLimit(), "the time ran out and no beacon was lit");
+            if (!talked && !reachHero().property("talk").isNull()) {
+                QTRY_VERIFY(screens().contains(QStringLiteral("talk")));
+                QCOMPARE(screenText(QStringLiteral("Who")), QStringLiteral("Elder Maren"));
+                QVERIFY(screens().contains(QStringLiteral("say1")));
+                QVERIFY(screenText(QStringLiteral("Line 0")).startsWith(QStringLiteral("The beacons went dark")));
+                QTest::qWait(200);
+                save(window, "gloam-talking.png");
+                // Its answer by the screen's button, this first time.
+                QVERIFY(click(QStringLiteral("Say 1")));
+                QTRY_COMPARE(reachHero().property("errands").property("king").toInt(), 1);
+                QTRY_VERIFY(screenText(QStringLiteral("Line 0")).startsWith(QStringLiteral("Then go")));
+                talked = true;
+                continue;
+            }
+            playReach(reachChoice(QJSValue(false)));
+            fallHeard = fallHeard || !placedVoices(QStringLiteral("kill.wav")).isEmpty();
+            if (!fightShot && reachHero().property("swing").toInt() > 0) {
+                save(window, "gloam-fighting.png");
+                fightShot = true;
+            }
+            QTest::qWait(4);
+        }
+        steer({0, 0});
+        strike(false);
+        QVERIFY(talked);
+        QCOMPARE(reach().property("phase").toString(), QStringLiteral("playing"));
+        QVERIFY(reach().property("world").property("wardens").property(0).toBool());
+        QVERIFY(reachHero().property("kills").toInt() >= 5);
+        QVERIFY(reachHero().property("level").toInt() >= 2);
+        QVERIFY2(fallHeard, "no fall was heard from a place in the valley");
+        QTRY_VERIFY(screenText(QStringLiteral("Objective")).contains(QStringLiteral("Ashen Hold")));
+        QTest::qWait(600);
+        save(window, "gloam-beacon.png");
+        QVERIFY2(warnings.isEmpty(), qPrintable(warnings.join('\n')));
+    }
+
+    // Then walked among what is left without a blow, a potion or a skill: it wakes in Hearth lighter of gold, twice, and a
+    // third fall ends the run.
+    void left_among_them_the_hero_falls_three_times()
+    {
+        QVERIFY(logic());
+        QElapsedTimer waited;
+        waited.start();
+        int woke = 0;
+        while (reach().property("phase").toString() != QLatin1String("over")) {
+            QVERIFY2(waited.elapsed() < playingLimit(), "the time ran out and the hero stood");
+            playReach(reachChoice(QJSValue(true)));
+            if (woke == 0 && reachHero().property("falls").toInt() == 1) {
+                QTRY_COMPARE(screenText(QStringLiteral("Place")), QStringLiteral("HEARTH"));
+                woke = 1;
+            }
+            QTest::qWait(4);
+        }
+        steer({0, 0});
+        QCOMPARE(reachHero().property("falls").toInt(), 3);
+        QTRY_COMPARE(screenText(QStringLiteral("Result")), QStringLiteral("THE GLOAM TOOK YOU"));
+        QVERIFY(screenText(QStringLiteral("Final")).startsWith(QStringLiteral("SCORE ")));
+        QVERIFY(screenText(QStringLiteral("Details")).startsWith(QStringLiteral("1 of 3 beacons")));
+        QTest::qWait(400);
+        save(window, "gloam-over.png");
+        QVERIFY2(warnings.isEmpty(), qPrintable(warnings.join('\n')));
+    }
+
+    void gloamreachs_kept_run_replays_to_its_outcome()
+    {
+        QVariantMap outcome;
+        keptRunReplays(kGloamreach, QStringLiteral("gloamreach"), &outcome);
+        if (QTest::currentTestFailed())
+            return;
+        QCOMPARE(outcome.value("falls").toInt(), 3);
+        QCOMPARE(outcome.value("beacons").toInt(), 1);
+        QCOMPARE(outcome.value("won").toBool(), false);
+        QCOMPARE(outcome.value("over").toBool(), true);
+        QVERIFY(outcome.value("kills").toInt() >= 5);
+        QCOMPARE(QStringLiteral("SCORE ") + QLocale(QLocale::English, QLocale::UnitedKingdom).toString(outcome.value("score").toInt()),
+                 screenText(QStringLiteral("Final")));
+    }
+
+    void gloamreachs_kept_run_replays_in_qq_as_its_rules_replay_it()
+    {
+        fixtureReplays(QStringLiteral("gloamreach"), kGloamreach);
+    }
+
+    void esc_leaves_gloamreach_too()
     {
         QTest::keyClick(window, Qt::Key_Escape);
         QTRY_COMPARE(window->property("playing").toString(), QString());

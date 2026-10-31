@@ -111,7 +111,7 @@ QQ's, ARQADE's and QOR Media's suites.
   - **The Library** (`library.h`) finds, until the core's index (Phase 2):
     - the QQ games QOR OS carries (`QOR_GAMES`, else `share/qor-os/games`);
     - the person's own QQ projects in Documents;
-    - ARQADE's games (seven since Rift Delve);
+    - ARQADE's games (eight since Gloamreach);
     - video, music and pictures.
   - It remembers what was played, and where QOR Media last stopped, which Prism now takes from QOR Media's reports.
     A game plays in the QQ Player or in ARQADE (`play`), and a film resumes there.
@@ -136,7 +136,15 @@ until the owner names them; none is published before.
   the lint workflow; `tst_games` plays it through its first floor and to a fall on the second, by the keys, the pad and
   the screen's buttons, and its recorded run replays to the same outcome in QQ and in Node. **Left:** its name, then
   its rules upstream (the last item here).
-- [ ] A 3D action RPG, single-player, its rules built so a server can run them for many players
+- [x] Gloamreach, the 3D action RPG, single-player, its rules built so a server can run them for many players
+
+  **31 October** ([games/README.md](../products/arqade/games/README.md#gloamreach)): one hand-laid valley, a village
+  with four people and their errands, three wardens over three beacons, a gate and the Hollow King behind it; a blade in
+  a chain of three, a roll, a bolt, a nova and potions; camps of five kinds of enemy, levels, gold and what it buys; rigged
+  models with clips, in QQ's props. ARQADE's sixth card and Prism's Library carry it. Its Node test (19 tests) runs in the
+  lint workflow, and steps two players in one valley; `tst_games` plays it to its first beacon and to a third fall, and its
+  recorded run replays to the same outcome in QQ and in Node. **Left:** its name, then its rules upstream (the last item
+  here).
 - [ ] A platformer, a racer, a pixel-art game and an arcade game
 - [ ] The online world grown from the RPG, its server in demiurge-chain, after Phase 2's sign-in (its own record)
 - [ ] Each named game's rules, Node test and fixture in demiurge-chain, by a pull request there

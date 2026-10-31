@@ -7,11 +7,12 @@ import ARQADE
 // A game's emblem: a small 3D scene of what the game is about, in the portal's gilt and ember. It turns slowly, faster
 // when its card is hovered, and holds still with reduced motion.
 //
-// Changed for QOR OS: Rift Delve's, a blade pointing down through the three floors (QOR OS's QOR-0017).
+// Changed for QOR OS: Rift Delve's, a blade pointing down through the three floors, and Gloamreach's, a beacon lit in its
+// valley (QOR OS's QOR-0017).
 View3D {
     id: emblem
 
-    // "rift", "void", "synapse", "orbital", "delve", "flux" or "reversi".
+    // "rift", "void", "synapse", "orbital", "delve", "gloam", "flux" or "reversi".
     required property string kind
     property bool lively: false
     readonly property bool moving: !Theme.reducedMotion && emblem.visible
@@ -58,7 +59,7 @@ View3D {
     }
 
     Loader3D {
-        sourceComponent: ({ "rift": rift, "void": runner, "synapse": synapse, "orbital": orbital, "delve": delve, "flux": flux, "reversi": reversi })[emblem.kind] ?? null
+        sourceComponent: ({ "rift": rift, "void": runner, "synapse": synapse, "orbital": orbital, "delve": delve, "gloam": gloam, "flux": flux, "reversi": reversi })[emblem.kind] ?? null
     }
 
     component Gilt: PrincipledMaterial {
@@ -119,6 +120,50 @@ View3D {
             }
             Gilt { id: gilded }
             Ember { id: embered; strength: 1.2; tint: Theme.accent }
+        }
+    }
+
+    // Gloamreach: a beacon on its plinth with a breathing flame, the valley a gilt ring round it, and two more far off.
+    Component {
+        id: gloam
+        Node {
+            eulerRotation: Qt.vector3d(20, emblem.t * 16, 0)
+            Model {
+                geometry: TorusGeometry { radius: 66; tubeRadius: 2.4; rings: 96; segments: 16 }
+                position.y: -44
+                materials: Gilt { baseColor: Theme.gilt }
+            }
+            Model {
+                source: "#Cylinder"
+                position.y: -24
+                scale: Qt.vector3d(0.26, 0.42, 0.26)
+                materials: Gilt { baseColor: Theme.giltBright; roughness: 0.3 }
+            }
+            Model {
+                source: "#Cone"
+                position.y: -6
+                scale: Qt.vector3d(0.4, 0.14, 0.4)
+                eulerRotation.x: 180
+                materials: Gilt { }
+            }
+            Model {
+                source: "#Sphere"
+                position.y: 24
+                readonly property real beat: 0.3 + 0.03 * Math.sin(emblem.t * 3)
+                scale: Qt.vector3d(beat, beat * 1.45, beat)
+                materials: Ember { strength: 1.8 }
+            }
+            Repeater3D {
+                model: 2
+                Model {
+                    id: farBeacon
+                    required property int index
+                    source: "#Sphere"
+                    position: Qt.vector3d(farBeacon.index === 0 ? -66 : 66, -30, farBeacon.index === 0 ? -14 : 14)
+                    scale: Qt.vector3d(0.08, 0.1, 0.08)
+                    materials: Ember { strength: 1.2 }
+                }
+            }
         }
     }
 

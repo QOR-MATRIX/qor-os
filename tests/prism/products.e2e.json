@@ -138,7 +138,7 @@
     { "expect": { "path": "products.qq-studio.running", "equals": false } },
 
     { "log": "The Library knows the QQ game QOR OS keeps, ARQADE's seven games and the person's one video" },
-    { "expect": { "path": "library.games.length", "equals": 8 } },
+    { "expect": { "path": "library.games.length", "equals": 9 } },
     { "expect": { "path": "library.games.0", "contains": "orb-run.qml" } },
     { "expect": { "path": "library.games.1", "equals": "arqade:void" } },
     { "expect": { "path": "library.media", "equals": 1 } },

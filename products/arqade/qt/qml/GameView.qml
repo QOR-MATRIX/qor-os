@@ -25,7 +25,7 @@ import ARQADE
 //
 // Changed for QOR OS: a controller's Back (View, Share) puts the game away too, since ARQADE has the controller to
 // itself in Prism and no Esc comes from it there. No game binds Back, and the game never hears it (ControllerBack).
-// Rift Delve, QOR OS's own (its QOR-0017), is played here too.
+// Rift Delve and Gloamreach, QOR OS's own (its QOR-0017), are played here too.
 Item {
     id: view
 
@@ -41,6 +41,7 @@ Item {
         synapse: { name: "Synapse", file: "qrc:/games/synapse/scenes/synapse.qml" },
         rift: { name: "Rift Survivor", file: "qrc:/games/rift-survivor/scenes/rift-survivor.qml" },
         delve: { name: "Rift Delve", file: "qrc:/games/rift-delve/scenes/rift-delve.qml" },
+        gloam: { name: "Gloamreach", file: "qrc:/games/gloamreach/scenes/gloamreach.qml" },
         flux: { name: "Flux Four", file: "qrc:/games/arenas/scenes/flux-four.qml", arena: "flux" },
         reversi: { name: "Rift Reversi", file: "qrc:/games/arenas/scenes/rift-reversi.qml", arena: "reversi" },
     })

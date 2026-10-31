@@ -265,6 +265,11 @@ could be changed, and was. The Windows suites also have the machine to themselve
 A build that **stops partway with no failure in its log**, both jobs ending together, means the machine stopped. Look at
 the System log first: on 30 October a Build "failed" that way at Windows' critical-battery shutdown (Kernel-Power 524).
 
+**A stopped machine leaves damage behind.** The next Build on the Linux runner failed to link, with undefined references to
+code that had not changed: five objects written as the machine stopped were empty, dated a minute before it, so Ninja took
+them as built. A Build now deletes empty objects first. Anything stranger in a folder that used to build (a partly written
+file has no such mark) means deleting the runner's `build` folder while it is idle and running the failed job again.
+
 **WSL's clock drifts.** After the laptop sleeps, WSL's clock can be hours away
 from Windows'. It was 6 h 25 min ahead on 26 October 2026. The runner's session
 is a signed token with a time window, so GitHub refuses it, and the runner logs

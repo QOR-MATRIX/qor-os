@@ -16,8 +16,8 @@
 #   pwsh products/arqade/qt/build.ps1            # build and test
 #   pwsh products/arqade/qt/build.ps1 -Deploy    # and make the self-contained copy the launcher opens
 #
-# Changed for QOR OS: src/controllerback, a controller's Back as the way back from a game; Rift Delve's package (QOR OS's
-# QOR-0017); every suite built with QQ's tests/virtualpads.cpp; and QOR OS's exploit mitigations (QOR-0018).
+# Changed for QOR OS: src/controllerback, a controller's Back as the way back from a game; Rift Delve's and Gloamreach's
+# packages (QOR OS's QOR-0017); every suite built with QQ's tests/virtualpads.cpp; and QOR OS's exploit mitigations (QOR-0018).
 
 cmake_minimum_required(VERSION 3.22)
 
@@ -188,6 +188,62 @@ qt_add_resources(arqade_core "rift-delve"
         ../games/rift-delve/assets/cleared.wav
         ../games/rift-delve/assets/fallen.wav
 )
+qt_add_resources(arqade_core "gloamreach"
+    PREFIX /games/gloamreach
+    BASE "${CMAKE_CURRENT_SOURCE_DIR}/../games/gloamreach"
+    FILES
+        ../games/gloamreach/scenes/gloamreach.qml
+        ../games/gloamreach/logic/gloamreach.qml
+        ../games/gloamreach/logic/rules.mjs
+        ../games/gloamreach/logic/land.mjs
+        ../games/gloamreach/assets/beacon.wav
+        ../games/gloamreach/assets/bolt.wav
+        ../games/gloamreach/assets/bonecaster.glb
+        ../games/gloamreach/assets/burst.wav
+        ../games/gloamreach/assets/cast.wav
+        ../games/gloamreach/assets/coin.wav
+        ../games/gloamreach/assets/crit.wav
+        ../games/gloamreach/assets/curse.wav
+        ../games/gloamreach/assets/elder.glb
+        ../games/gloamreach/assets/fallen.wav
+        ../games/gloamreach/assets/gate.wav
+        ../games/gloamreach/assets/gloam.hdr
+        ../games/gloamreach/assets/gloam.wav
+        ../games/gloamreach/assets/healer.glb
+        ../games/gloamreach/assets/herb.wav
+        ../games/gloamreach/assets/hero.glb
+        ../games/gloamreach/assets/hit.wav
+        ../games/gloamreach/assets/hunter.glb
+        ../games/gloamreach/assets/hurt.wav
+        ../games/gloamreach/assets/kill.wav
+        ../games/gloamreach/assets/king.glb
+        ../games/gloamreach/assets/king.wav
+        ../games/gloamreach/assets/land.glb
+        ../games/gloamreach/assets/level.wav
+        ../games/gloamreach/assets/lost.wav
+        ../games/gloamreach/assets/no.wav
+        ../games/gloamreach/assets/potion.wav
+        ../games/gloamreach/assets/revenant.glb
+        ../games/gloamreach/assets/rising.wav
+        ../games/gloamreach/assets/roll.wav
+        ../games/gloamreach/assets/scenery-0.glb
+        ../games/gloamreach/assets/scenery-1.glb
+        ../games/gloamreach/assets/scenery-2.glb
+        ../games/gloamreach/assets/scenery-3.glb
+        ../games/gloamreach/assets/shade.glb
+        ../games/gloamreach/assets/slam.wav
+        ../games/gloamreach/assets/smith.glb
+        ../games/gloamreach/assets/swing.wav
+        ../games/gloamreach/assets/talk.wav
+        ../games/gloamreach/assets/thorn.wav
+        ../games/gloamreach/assets/thornling.glb
+        ../games/gloamreach/assets/wake.wav
+        ../games/gloamreach/assets/warden.glb
+        ../games/gloamreach/assets/warden.wav
+        ../games/gloamreach/assets/wolf.glb
+        ../games/gloamreach/assets/won.wav
+        ../games/gloamreach/assets/yes.wav
+)
 # The two arenas (P7.24), one package with a scene for each, played on ARQADE's server, which keeps their rules.
 qt_add_resources(arqade_core "arenas"
     PREFIX /games/arenas
@@ -231,4 +287,5 @@ target_compile_definitions(tst_interface PRIVATE
 # The runs QQ kept that ARQADE's rules replay in Node (products/arqade/tests/fixtures/), which QQ's replay must agree with.
 target_compile_definitions(tst_games PRIVATE
     ARQADE_RUNS="${CMAKE_CURRENT_SOURCE_DIR}/../tests/fixtures"
-    ARQADE_PILOTS="${CMAKE_CURRENT_SOURCE_DIR}/tests")
+    ARQADE_PILOTS="${CMAKE_CURRENT_SOURCE_DIR}/tests"
+    ARQADE_SHARED_PILOTS="${CMAKE_CURRENT_SOURCE_DIR}/../tests")

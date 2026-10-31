@@ -1,6 +1,6 @@
 # Where QOR OS stands
 
-For Andrew, 30 October 2026. One page, rewritten every session (`AGENTS.md` §2).
+For Andrew, 31 October 2026. One page, rewritten every session (`AGENTS.md` §2).
 
 ## What QOR OS is
 
@@ -11,39 +11,51 @@ Demiurge's QQ engine, ARQADE and QOR Media, on Linux. Code:
 
 ## This session
 
-1. **qorsync.dev is live**, redone, with QOR Mobile 0.1.0 (*the Android app*).
-   ARQADE and QOR Media answer the controller, the products wear Lumen, and
-   Guide opens **Home and the Library**.
-2. **ARQADE's new games** (decision record QOR-0017): seven original games by
-   genre, the big ones first, each *rewarded* (*ARQADE's server can replay a
-   run to confirm it*) from the start. The online world waits for Phase 2's
-   sign-in.
-3. **Rift Delve**, the first: a dungeon hack-and-slash, three floors down to
-   break the warden. A sword, a whirl, a dash and potions; five kinds of
-   enemy; gold, relics and levels; every floor carved fresh from the run's
-   seed. It is ARQADE's fifth card and in Prism's Library. QQ games can now
-   move with the controller's left stick too.
-4. **A Linux machine:** BUILDING.md's "Linux on a machine of its own" and
-   `tools/dev/setup-fedora.sh` set up Fedora on an external SSD, NVIDIA's
-   driver included, and start Prism with the products.
-5. **Checked:** Rift Delve's rules pass their 14 tests. Played hidden on
-   Linux, a scripted player fought through floor 1 and fell on floor 2, and
-   that recorded run replays to the same result in QQ and in Node. QOR OS
-   builds without warnings on Windows and Linux. The full games suite runs on
-   Windows CI when this is pushed, which opens game windows on this PC.
+1. **The security bar** (decision record QOR-0018). Machines now check exploit
+   mitigations (*defences compiled into every program*) and what CI (*the
+   automatic build and test run*) trusts, and look for secrets. Two independent
+   reviews found serious holes, now fixed: any local user could reach the
+   service bus (*how apps talk to system services*), a game package could run
+   native code, and a project from elsewhere ran in QQ Studio unasked. What is
+   left is listed in `SECURITY.md` under Known limits.
+2. **CI runs safely on this laptop**, one job at a time and held to 8 compilers.
+   It reset itself during two full builds at once (Kernel-Power 41, no dump).
+   The load is my doing and is fixed; **the true cause is not proven.** The
+   crash left empty build files behind, so CI now clears those first.
+3. **Gloamreach** (a working title), ARQADE's new 3D action RPG: a valley, the
+   village of Hearth with four people and their errands, three wardens over
+   three beacons, and the Hollow King behind a gate. A chain of sword swings, a
+   roll, spells, levels, gold and a smith. A scripted player wins it in about
+   8 minutes; a person will take far longer. It is rewarded (*ARQADE's server
+   can replay a run to confirm it*), and its rules keep the world apart from
+   each player, ready for the online world later.
+
+## Checked
+
+CI passed on both systems at `e80537b`, the security work: the Windows product
+suites and the sanitizers (*memory-error detectors*) passed there for the first
+time. Gloamreach: its 19 rules tests pass, seven planted faults are caught, and
+a run QQ recorded replays to the same result in Node. Hidden on Linux, its cases
+in ARQADE's suite pass, in software rendering. Its first run on a real graphics
+card is the Windows job this push starts, which opens game windows on this PC.
 
 ## Needs you
 
-1. **Name the game.** "Rift Delve" is a working title: a search found no game
-   of that name, which is not trademark clearance. Its rules go to
-   demiurge-chain only once you approve a name.
-2. **The Linux machine:** an SSD of 500 GB or more for USB-C (10 Gbit/s or
-   faster) and a USB stick of 8 GB or more, then BUILDING.md's steps.
-3. **Merge demiurge-chain #116**: the homepage's QOR OS facts.
-4. **Legal, still open:** trademark advice, the legal entity, the Qt letter,
-   replacing the 5 October key, the Store keys' backup off this PC.
+1. **Play Gloamreach.** It has been seen only through hidden software rendering
+   and screenshots, and heard by nobody. How it feels, and whether it is too
+   easy, wants a person.
+2. **Name the games.** "Rift Delve" and "Gloamreach" are working titles; a
+   search found no game of either exact name, which is not trademark clearance.
+   Their rules go to demiurge-chain only once you approve names.
+3. **Move the Store's signing keys off this PC.** A CI job here could read them.
+4. **Keep the laptop on AC during CI.** A low battery ended one run too.
+5. **The Linux machine:** an SSD of 500 GB or more for USB-C and a USB stick of
+   8 GB or more, then BUILDING.md's steps.
+6. **Merge demiurge-chain #116**: the homepage's QOR OS facts.
+7. **Legal, still open:** trademark advice, the legal entity, the Qt letter,
+   replacing the 5 October key.
 
 ## Next
 
-The 3D RPG, then the platformer, racer, pixel-art and arcade games; and
-Phase 1's goal on the Linux machine: Orb Run in Prism with a DualSense.
+The platformer, then the racer, pixel-art and arcade games; and Phase 1's goal
+on the Linux machine: Orb Run in Prism with a DualSense.

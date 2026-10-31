@@ -1,7 +1,7 @@
 # ARQADE's games, rebuilt in QQ
 
-Changed for QOR OS: Rift Delve, the first of QOR OS's own games (its QOR-0017), and the left stick's four ways among
-the pad's bindings.
+Changed for QOR OS: Rift Delve and Gloamreach, the first of QOR OS's own games (its QOR-0017), and the left stick's four
+ways among the pad's bindings.
 
 ARQADE's four solo games and its two arenas are rebuilt as QQ games (ADR-102 decision 2; DIRECTION P7.20 and P7.24).
 They are played in ARQADE's Qt app ([`../qt/`](../qt/README.md)) by QQ's runtime ([`products/qq/`](../../qq/README.md)).
@@ -16,6 +16,7 @@ Player as it is (an arena there has nobody to ask, so it stays in its lobby).
 | Rift Survivor | Rebuilt, 24 October 2026: the same |
 | Flux Four and Rift Reversi | Rebuilt, 24 October 2026: play in ARQADE against another person, on ARQADE's server; a run replays in QQ and in Node |
 | Rift Delve | QOR OS's own, 30 October 2026 (a working title until the owner names it): plays in ARQADE, its rules replay a run in QQ and in Node |
+| Gloamreach | QOR OS's own, 31 October 2026 (a working title until the owner names it): the same |
 
 ## A game's package
 
@@ -180,6 +181,54 @@ stairs are a teal ring with motes rising from it. Sound comes from where it happ
 fall from the fallen, a bolt from its seer, and the delver's swings, wounds and finds from the delver. With reduced
 motion the eye keeps exactly to the delver, nothing on the floor turns, wisps do not bob, and the words do not swell.
 
+## Gloamreach
+
+QOR OS's own game, the second of the seven its QOR-0017 sets out: a 3D action RPG in one hand-laid valley of 64 by 64
+tiles. The three beacons went dark when the Hollow King rose behind his gate, and a warden stands over each. A hero walks
+out of the village of Hearth with a rusted blade, takes errands from the people there, fights through the meadow, the
+Mirewood, the Ashen Hold and the High Pass, breaks the wardens and lights the beacons. With all three burning the gate
+opens. The king ended wins; a third fall ends the run; and the gloam closes over the valley after three quarters of an hour.
+
+- **The hero** moves as the view faces, the view turned an eighth at a time, so a run holds no analog input and replays
+  exactly. Mud slows them. A **swing** turns toward the nearest enemy awake within 110 units and strikes within 60 degrees
+  of where they face; held, or pressed in time, swings run in a chain of three, the third slow, wide and heavy. A **roll**
+  crosses ground unwounded every 55 steps. A **bolt** costs mana and flies at what it can see; a **nova**, from level 3,
+  strikes all round. Potions heal half their most health, and a wound holds off the next for half a second. The ward takes
+  its part off every wound.
+- **The enemies** wait in camps, placed from the seed: wolves, weaving shades, thornlings and bonecasters that shoot from
+  afar, revenants, and a region's share more health and wound the further from Hearth. They sleep until a hero comes within
+  230 units in their sight, wake their pack, come straight while they see the hero and otherwise by the valley's ways, wind
+  up a blow that lands only on a hero still in reach, and go home whole when led too far. Three **wardens** slam all round
+  them and call their own every ten seconds. The **great wolf** dens in the west. The **Hollow King**, hurt past half, comes
+  on faster, looses a ring of eight shots with each slam, and calls revenants.
+- **The people of Hearth.** Talking holds the valley. Elder Maren sets the beacons' errand. Ise rests a hero for nothing,
+  sells potions, and wants five moonherbs from the Mirewood. Tolv sells blades and wards, and wants four lumps of ironroot
+  from the Hold. Brann wants the great wolf dead. Answer with the keys 1 to 6, by the screen's buttons, or with up, down and
+  the strike button on a pad; each errand pays in gold, score and something more.
+- **A fall** wakes the hero in Hearth lighter of a quarter of their gold, with what chased them gone home.
+- **The score** counts gold, falls of the enemy, each beacon (800), each errand (400), and a bonus for the time left.
+
+Move with W, A, S and D, the arrows, the pad's left stick or d-pad, or the screen's buttons; turn the view with Z and C or
+the shoulders; strike with Space, J or the pad's A; roll with L, Shift or B; bolt with K or X; nova with I or RT; drink with
+Q, H or Y; talk with E, Return or LT; P or Start pauses.
+
+**World and players apart** (QOR-0017 decision 4). `game.world` holds what is out there, `game.players` each player's own,
+and every input names its player, so a server could step one valley for many. QQ plays one, and the Node test steps two: a
+beacon one lights burns for both, an errand stays their own, and the valley holds only while every hero talks. The rules
+are written for replay as Rift Delve's are, and **rewarded from the start**: its rules, its Node test, its pilot and its
+fixture are shared with demiurge-chain under Apache-2.0, once the owner names the game. `make_world.py` lays the valley out
+and writes it between the markers in `logic/rules.mjs`, with how high the land stands in `logic/land.mjs`, which only the
+drawing reads, and it checks that every place can be walked to from Hearth and that the Crown cannot until the gate opens.
+
+**In 3D.** `make_assets.py` writes everything with the standard library, the same bytes each time. The land is one mesh under
+one painted picture, its rim rising into mountains so its edge is never seen. What stands on it is four flat-shaded quarters
+from one small palette: each region's trees, boulders, the Hold's broken walls, Hearth's houses, bridges, the plinths and
+the king's dais. People and enemies are rigged models of boxes and tapers with their own clips, played on the game's clock
+by QQ's props and sped to last as long as the rules' count of what they show. Everything the rules hold is drawn from pools
+made as play starts, only what is near is drawn, and an idle piece is hidden and plays no clip. The valley moves under the
+eye and turns with the view, and a tall column of light stands over what to do next. Sound comes from where it happens.
+With reduced motion the eye keeps exactly to the hero, the view turns at once, and nothing on the ground spins.
+
 ## The arenas: Flux Four and Rift Reversi
 
 Two people play one board on ARQADE's server, which keeps every match and decides every move, as it does for the
@@ -236,6 +285,15 @@ asked for is in the server's answer, which the run keeps. An arena's run is not 
   arena's edges, shots, chains and fragments, a still ship breached four times with the hold between, the signal evolving
   and each perk, and a pilot who keeps away lasting far longer than a still one. For each, nothing moves on the title or
   while paused, and the rules' source uses no sine, cosine, power or logarithm.
+- `../tests/gloamreach.test.mjs` (Node, in QOR OS's lint workflow), 19 tests, with `../tests/gloamreach-pilot.js`, a pilot
+  it shares with `tst_games`: the same run for a seed; the valley whole, every place walked to, and the Crown only through
+  the gate; movement as the view faces, mud, a pause, and nothing walking through what stands; a swing's arc, its turn and
+  its chain; a roll, a bolt and a nova; potions, the wound's hold and the ward; talking holding the valley, and nothing sold
+  for too little; the errands; enemies waking, missing a hero who steps away, going home and shooting; what falls lying
+  where it can be reached; beacons, the gate and the king; falls; a pilot who plays it through winning on three seeds where
+  one who goes straight for the wardens falls; a still hero never found, and the gloam closing; two heroes in one valley;
+  and a run replaying to the outcome of the same events live. Its fixture replays, and not altered; its state is pinned;
+  and its source uses none of the forbidden functions, nor a clock.
 - `../tests/rift-delve.test.mjs` (Node, in QOR OS's lint workflow), 14 tests: the same floors and run for a seed;
   every floor whole, its stairs in the furthest room and the warden on the last; movement, the corner slip, walls, and
   nothing moving on the title or paused; a swing's arc and reach, fury, and a held swing again; a whirl's three blows
@@ -271,6 +329,10 @@ asked for is in the server's answer, which the run keeps. An arena's run is not 
   result's words and outcome, and what is told read and never trusted. Both runs kept in `../tests/fixtures/` replay to
   QQ's outcomes, and not without the server's last answer. The whole state at the end of each is pinned, and
   `arena.mjs` uses no clock or chance of its own.
+- `../qt/tests/tst_games.cpp` plays Gloamreach too: moved each way there is and the view turned; the Elder answered by the
+  screen's button; fought to its first beacon by the shared pilot, by the keys, the pad and the screen's buttons; then
+  walked among what is left without a blow until a third fall ends the run. Its run replays in QQ to its outcome, and so
+  does its fixture.
 - `../qt/tests/tst_games.cpp` plays both arenas against a stand-in ARQADE that signs in as the website does, keeps
   matches as `arena-store.ts` keeps them and moves for the opponent. Signed out, an arena says why and offers nothing.
   Flux Four opens a match, a challenger joins, and four pulses go down one column by Space, the key 5, the pad's A and

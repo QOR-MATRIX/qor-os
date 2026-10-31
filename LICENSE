@@ -48,6 +48,9 @@ first line:
 
 - products/arqade/games/rift-delve/logic/rules.mjs
 - products/arqade/tests/rift-delve.test.mjs
+- products/arqade/games/gloamreach/logic/rules.mjs
+- products/arqade/tests/gloamreach.test.mjs
+- products/arqade/tests/gloamreach-pilot.js
 
 Third-party components
 ----------------------

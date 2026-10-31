@@ -123,6 +123,12 @@ jobs:
             if (Test-Path $dir) { (Resolve-Path $dir).Path >> $env:GITHUB_PATH }
           }
 
+      # A machine that stops in the middle of a build can leave an object empty, with a new date, which Ninja takes as built
+      # (docs/CI.md). Such an object is built again.
+      - name: What a stopped machine left
+        shell: pwsh
+        run: if (Test-Path build) { Get-ChildItem build -Recurse -File -Filter *.obj | Where-Object Length -eq 0 | ForEach-Object { $_.FullName; Remove-Item $_.FullName } }
+
       - name: Configure
         run: cmake --preset ci-windows
 
@@ -248,6 +254,11 @@ jobs:
             [ -d "$kit/../../$tool" ] && realpath "$kit/../../$tool" >> "$GITHUB_PATH"
           done
           true
+
+      # A machine that stops in the middle of a build can leave an object empty, with a new date, which Ninja takes as built
+      # (docs/CI.md). Such an object is built again.
+      - name: What a stopped machine left
+        run: if [ -d build ]; then find build -name '*.o' -size 0 -print -delete; fi
 
       - name: Configure
         run: cmake --preset ci-linux

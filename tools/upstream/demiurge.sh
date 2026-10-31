@@ -37,11 +37,14 @@ rules=(
     products/arqade/games/rift-survivor/logic/rules.mjs
     products/arqade/games/arenas/logic/arena.mjs
     products/arqade/games/rift-delve/logic/rules.mjs
+    products/arqade/games/gloamreach/logic/rules.mjs
 )
 # The Node tests of QOR OS's own games, written here and shared with their
 # rules (QOR-0017). The four games' tests live upstream only.
 tests=(
     products/arqade/tests/rift-delve.test.mjs
+    products/arqade/tests/gloamreach.test.mjs
+    products/arqade/tests/gloamreach-pilot.js
 )
 # Developed here since QOR-0015; status says where each left upstream.
 developed=(
