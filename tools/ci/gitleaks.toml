@@ -1,11 +1,25 @@
-# gitleaks' own rules, with what is made up on purpose set aside: the same files tools/ci/secrets-allowed.txt names, and
-# nothing else. A real secret is removed and replaced, never listed here (AGENTS.md section 6).
+# gitleaks' own rules, with what is not a secret set aside as narrowly as can be said. A real secret is removed and
+# replaced, never listed here (AGENTS.md section 6).
 
 [extend]
 useDefault = true
 
-[allowlist]
-description = "Made-up values in tests"
+[[allowlists]]
+description = "Made-up values in tests, the same file tools/ci/secrets-allowed.txt names"
 paths = [
     '''products/qq/tests/tst_agent\.cpp''',
+]
+
+# A catalogue's "key" is a developer's public key, there so anyone can check a signature: 65 bytes, a point on P-256 (checked
+# 31 October 2026). Only that exact line in a catalogue: anything else in the same file is still looked at.
+[[allowlists]]
+description = "A developer's public key in the Store's catalogues"
+targetRules = ["generic-api-key"]
+condition = "AND"
+paths = [
+    '''(^|/)catalog\.json$''',
+]
+regexTarget = "line"
+regexes = [
+    '''^\s*"key":\s*"[A-Za-z0-9+/]{87}=",?\s*$''',
 ]
