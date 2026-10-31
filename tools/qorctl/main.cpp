@@ -22,6 +22,7 @@
 #include "rep_power_replica.h"
 #include "rep_settings_replica.h"
 #include "rep_simcontrol_replica.h"
+#include "serviceendpoint.h"
 
 #include <QtCore/QCommandLineParser>
 #include <QtCore/QCoreApplication>
@@ -47,15 +48,6 @@ QTextStream &err()
 {
     static QTextStream stream(stderr);
     return stream;
-}
-
-QUrl defaultUrl()
-{
-#if defined(Q_OS_LINUX)
-    return QUrl(u"localabstract:qor-services"_s);
-#else
-    return QUrl(u"local:qor-services"_s);
-#endif
 }
 
 template<typename Replica>
@@ -162,7 +154,7 @@ Commands:
     const QString arg1 = args.value(1);
 
     QRemoteObjectNode node;
-    const QUrl url = parser.isSet(urlOption) ? QUrl(parser.value(urlOption)) : defaultUrl();
+    const QUrl url = parser.isSet(urlOption) ? QUrl(parser.value(urlOption)) : qor::services::defaultEndpoint();
     if (!node.connectToNode(url)) {
         err() << "qorctl: cannot connect to " << url.toString() << '\n';
         return 1;

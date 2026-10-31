@@ -115,6 +115,7 @@ Item {
                 anchors.bottom: parent.bottom
                 width: parent.width
                 text: card.modelData.name
+                textFormat: Text.PlainText
                 color: Theme.textSecondary
                 font: Theme.footnote
                 elide: Text.ElideRight

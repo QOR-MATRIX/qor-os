@@ -1,4 +1,7 @@
+// Changed for QOR OS: confined, logic is run only from the game's own package (QOR-0018).
 #include "logicfile.h"
+
+#include "sceneio.h"
 
 #include <QDir>
 #include <QFile>
@@ -83,6 +86,14 @@ void LogicFile::restart()
     setError(QString());
     if (!m_active || m_source.isEmpty())
         return;
+    // A confined game runs logic only from its own package, and watches no other folder.
+    if (QQmlEngine *engine = qmlEngine(this)) {
+        auto *io = engine->singletonInstance<SceneIO *>("QQ", "SceneIO");
+        if (io && io->outside(m_source)) {
+            setError(QStringLiteral("A game runs only its own logic."));
+            return;
+        }
+    }
     watch();
     reload();
 }

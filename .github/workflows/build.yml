@@ -67,31 +67,32 @@ jobs:
   windows:
     name: Windows · MSVC 2022
     needs: preflight
-    if: needs.preflight.outputs.windows == 'true'
+    # A dependency update waits for a person: Dependabot's pull requests never run on the workstation (docs/CI.md).
+    if: needs.preflight.outputs.windows == 'true' && github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ${{ fromJSON(vars.QOR_WINDOWS_RUNNER || '"windows-2025"') }}
     timeout-minutes: 90
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           # Self-hosted runners keep the build tree for incremental builds.
           clean: ${{ vars.QOR_WINDOWS_QT_DIR == '' }}
 
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         if: vars.QOR_WINDOWS_QT_DIR == ''
         with:
           python-version: '3.12'
 
-      - uses: seanmiddleditch/gha-setup-ninja@v6
+      - uses: seanmiddleditch/gha-setup-ninja@3b1f8f94a2f8254bd26914c4ab9474d4f0015f67 # v6
         if: vars.QOR_WINDOWS_QT_DIR == ''
 
-      - uses: ilammy/msvc-dev-cmd@v1
+      - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1
         with:
           arch: x64
 
       - name: Restore Qt
         id: qt-cache
         if: vars.QOR_WINDOWS_QT_DIR == ''
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: ${{ runner.temp }}/Qt
           key: qt-${{ runner.os }}-${{ env.QOR_QT_VERSION }}-${{ hashFiles('.github/qt-packages.json') }}
@@ -123,6 +124,10 @@ jobs:
       - name: Build
         run: cmake --build --preset ci-windows
 
+      # What came out has the mitigations cmake/QorHardening.cmake asks for (QOR-0018).
+      - name: Exploit mitigations
+        run: python tools/ci/check_hardening.py build/ci-windows
+
       - name: qmllint
         run: cmake --build --preset ci-windows --target all_qmllint
 
@@ -136,7 +141,7 @@ jobs:
 
       - name: Upload golden-image differences
         if: failure() && steps.gpu-tests.outcome == 'failure'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: golden-diff-windows
           path: build/ci-windows/tests/golden-out
@@ -169,11 +174,15 @@ jobs:
         shell: pwsh
         run: .\tools\dev\products.ps1 -Qt $env:QOR_QT_DIR -BuildRoot build\ci-products
 
+      - name: Exploit mitigations (the products)
+        if: steps.products.outputs.run == 'true'
+        run: python tools/ci/check_hardening.py build/ci-products
+
       - name: Package
         if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')
         run: cmake --install build/ci-windows --prefix dist/qor-os
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')
         with:
           name: qor-os-windows-x64
@@ -183,15 +192,16 @@ jobs:
   linux:
     name: Linux · GCC
     needs: preflight
-    if: needs.preflight.outputs.linux == 'true'
+    # A dependency update waits for a person: Dependabot's pull requests never run on the workstation (docs/CI.md).
+    if: needs.preflight.outputs.linux == 'true' && github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ${{ fromJSON(vars.QOR_LINUX_RUNNER || '"ubuntu-24.04"') }}
     timeout-minutes: 90
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           clean: ${{ vars.QOR_LINUX_QT_DIR == '' }}
 
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
         if: vars.QOR_LINUX_QT_DIR == ''
         with:
           python-version: '3.12'
@@ -209,7 +219,7 @@ jobs:
       - name: Restore Qt
         id: qt-cache
         if: vars.QOR_LINUX_QT_DIR == ''
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: ${{ runner.temp }}/Qt
           key: qt-${{ runner.os }}-${{ env.QOR_QT_VERSION }}-${{ hashFiles('.github/qt-packages.json') }}
@@ -239,11 +249,22 @@ jobs:
       - name: Build
         run: cmake --build --preset ci-linux
 
+      # What came out has the mitigations cmake/QorHardening.cmake asks for (QOR-0018).
+      - name: Exploit mitigations
+        run: python3 tools/ci/check_hardening.py build/ci-linux
+
       - name: qmllint
         run: cmake --build --preset ci-linux --target all_qmllint
 
       - name: Test
         run: ctest --preset ci-linux -LE gpu
+
+      # The same suites under AddressSanitizer and UBSan, in a build folder of their own (QOR-0018).
+      - name: Sanitizers
+        run: |
+          cmake --preset linux-asan
+          cmake --build --preset linux-asan
+          ctest --preset linux-asan -LE gpu --timeout 300
 
       - name: Test (GPU)
         id: gpu-tests
@@ -261,7 +282,7 @@ jobs:
 
       - name: Upload golden-image differences
         if: failure() && steps.gpu-tests.outcome == 'failure'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: golden-diff-linux
           path: build/ci-linux/tests/golden-out

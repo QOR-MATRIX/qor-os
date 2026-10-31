@@ -1,3 +1,5 @@
+// Changed for QOR OS: logic the agent wrote plays only once the creator allows it, nothing of a project not yet trusted
+// is built, and its file fields stay in the project (QOR-0018).
 #include "studiotools.h"
 
 #include <QBuffer>
@@ -19,6 +21,7 @@
 
 #include <cmath>
 
+#include "confinement.h"
 #include "input.h"
 #include "sceneio.h"
 
@@ -556,15 +559,20 @@ QString StudioTools::setField(QObject *e, const QString &field, const QJsonValue
         const QString path = value.toString();
         if (path.isEmpty()) {
             v = QUrl();
-        } else if (path.startsWith(QStringLiteral("file:")) || path.startsWith(QStringLiteral("qrc:"))) {
+        } else if (path.startsWith(QStringLiteral("qrc:"))) {
             v = QUrl(path);
         } else {
-            QString local = path;
-            if (QDir::isRelativePath(path)) {
+            // In the project, and nowhere else: a picture from anywhere on this computer, with a frame captured of it,
+            // would be a way to read it.
+            QString local = path.startsWith(QStringLiteral("file:")) ? QUrl(path).toLocalFile() : path;
+            if (QDir::isRelativePath(local)) {
                 if (!project().isLocalFile())
                     return tr("A path in the project needs a project: the creator has not chosen one.");
-                local = QDir(project().toLocalFile()).filePath(path);
+                local = QDir(project().toLocalFile()).filePath(local);
             }
+            if (!project().isLocalFile()
+                || !Confinement::within(Confinement::realPath(local), Confinement::realPath(project().toLocalFile())))
+                return tr("%1 is outside the project: an agent works with the project's own files.").arg(field);
             if (!QFileInfo(local).isFile())
                 return tr("There is no file %1.").arg(QDir::toNativeSeparators(local));
             v = QUrl::fromLocalFile(QDir::cleanPath(local));
@@ -728,6 +736,8 @@ McpServer::Result StudioTools::behaviourWrite(const QJsonObject &args)
 {
     if (!project().isLocalFile())
         return problem(tr("Logic lives in the project, and the creator has not chosen one."));
+    if (!m_studio->property("projectTrusted").toBool())
+        return problem(tr("The creator has not said they trust this project, so nothing of it is built."));
     const QString file = args.value(QStringLiteral("file")).toString();
     const QString code = args.value(QStringLiteral("code")).toString();
     if (file.trimmed().isEmpty() || code.trimmed().isEmpty())
@@ -735,6 +745,7 @@ McpServer::Result StudioTools::behaviourWrite(const QJsonObject &args)
     const QUrl url = m_io->writeLogic(project(), file, code);
     if (url.isEmpty())
         return problem(m_io->lastError());
+    m_wroteLogic = true;
     const QString relative = QDir(project().toLocalFile()).relativeFilePath(url.toLocalFile());
 
     // Does it build? Checked here, from the text, so the agent hears now rather than at play.
@@ -791,6 +802,13 @@ McpServer::Result StudioTools::play()
 {
     if (playing())
         return McpServer::Result::text(status());
+    // Logic runs with the creator's own reach, and a model's answer can be led by what it reads: what the agent wrote
+    // runs once the creator has said it may.
+    if (m_wroteLogic && !m_studio->property("agentMayRun").toBool()) {
+        say(tr("The agent asks to play logic it wrote. Allow it in the Agent panel."), true);
+        return problem(tr("The creator has not allowed logic the agent wrote to run. Ask them to allow it in the Agent "
+                          "panel, then play again."));
+    }
     QVariant started;
     QMetaObject::invokeMethod(m_studio, "play", Q_RETURN_ARG(QVariant, started));
     if (!started.toBool())

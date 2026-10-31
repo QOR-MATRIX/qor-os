@@ -82,6 +82,15 @@ p95 8.46 ms, p99 8.97 ms, no frame missed, input to swap 7.80 / 10.21 ms,
 against the ten runs at `7f7f544` above (7.36 and 7.37 ms). The same within
 noise: the tour opens neither.
 
+Re-measured on 2026-10-31 for the exploit mitigations and the security batch
+([QOR-0018](decisions/QOR-0018-the-security-and-quality-bar.md)), the same way:
+three alternating runs of the same code built with and without
+`QOR_HARDENING`. Without: median 8.15 ms average (8.05, 8.15, 8.23). With:
+8.16 ms (8.16, 8.15, 8.22). The same within noise. Both are higher than the
+runs above because the batch's other changes are in both, and the machine was
+busier. Ubuntu's compiler adds some of these flags even with `QOR_HARDENING`
+off, so this shows the added cost on that compiler, not the whole of it.
+
 ### Input-to-swap latency (2026-10-24)
 
 `inputToSwap` times a pointer move over the Shelf. The clock starts when the

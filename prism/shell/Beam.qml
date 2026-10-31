@@ -334,6 +334,7 @@ Item {
                     Text {
                         width: parent.width
                         text: row.title
+                        textFormat: Text.PlainText
                         font: row.kind === "calc" ? Theme.title3 : Theme.bodyStrong
                         color: Theme.textPrimary
                         elide: Text.ElideRight
@@ -389,6 +390,7 @@ Item {
                     width: parent.width
                     horizontalAlignment: Text.AlignHCenter
                     text: preview.current ? preview.current.title : ""
+                    textFormat: Text.PlainText
                     font: Theme.title3
                     color: Theme.textPrimary
                     wrapMode: Text.Wrap

@@ -1,5 +1,10 @@
+// Changed for QOR OS: a confined game learns the length only of its own sounds, and a chunk's size cannot turn the walk
+// through a wave file back on itself (QOR-0018).
 #include "mixer.h"
 
+#include "sceneio.h"
+
+#include <QQmlEngine>
 #include <QFile>
 #include <QFileInfo>
 #include <QtEndian>
@@ -51,6 +56,11 @@ double Mixer::lengthOf(const QUrl &sound)
                                                                   : QString();
     if (path.isEmpty())
         return 0;
+    if (QQmlEngine *engine = qmlEngine(this)) {
+        auto *io = engine->singletonInstance<SceneIO *>("QQ", "SceneIO");
+        if (io && io->outside(sound))
+            return 0;
+    }
     const QFileInfo info(path);
     if (const auto it = m_lengths.constFind(sound);
         it != m_lengths.cend() && it->size == info.size() && it->modified == info.lastModified())
@@ -77,7 +87,9 @@ double wavLength(const QByteArray &header)
             bytesPerSecond = qFromLittleEndian<quint32>(header.constData() + at + 8 + 8);
         if (id == "data")
             return bytesPerSecond > 0 ? double(size) / bytesPerSecond : 0;
-        at += 8 + size + (size & 1);  // chunks are padded to an even size
+        at += qsizetype(8) + qsizetype(size) + (size & 1);  // chunks are padded to an even size
+        if (at <= 0)
+            return 0;  // too large to be read here, on a 32-bit build
     }
     return 0;
 }

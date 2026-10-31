@@ -184,10 +184,13 @@ qor-gamepads --rumble         # a short vibration on each
 qor-gamepads --light ff6b00   # light bar colour (PlayStation)
 ```
 
-`QOR_GAMEPADS=virtual` keeps only virtual controllers (every test sets it,
-and `--screenshot`, `--benchmark` and `--script` runs do too), and
-`QOR_GAMEPADS=off` none. `QT_LOGGING_RULES="qor.input.*=true"` logs what
-the backends find.
+`QOR_GAMEPADS=virtual` keeps only virtual controllers, and `QOR_GAMEPADS=off`
+none. Every suite runs with virtual ones, so a controller on the machine never
+joins in: QOR OS's own through `tests/CMakeLists.txt`, QQ's and ARQADE's built
+with `products/qq/tests/virtualpads.cpp`. `--screenshot`, `--benchmark` and
+`--script` runs set it too. `QT_LOGGING_RULES="qor.input.*=true"` logs what the
+backends find; a scan's list of every HID device is off unless that asks for
+it.
 
 Shell scripts drive a virtual controller:
 

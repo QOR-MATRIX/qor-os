@@ -8,7 +8,9 @@ Player (prism-test-arqade, prism-test-media, prism-test-qq-studio and
 prism-test-qq-player) where QOR_ARQADE, QOR_MEDIA, QOR_QQ_STUDIO and
 QOR_QQ_PLAYER point. A JSON UI script (`prism --script`) opens them as a person
 would and checks that Prism starts them, lays out their windows and names them
-from its own records. ctest runs it as prism_products.
+from its own records. ctest runs it as prism_products. With --client, it also
+starts a Wayland client of Prism's of its own, not one Prism knows, as
+prism_untrusted does.
 
     tools/dev/prism-products.py --prism <prism> --arqade <exe> --media <exe> \\
         --qq-studio <exe> --qq-player <exe> --script tests/prism/products.e2e.json
@@ -21,9 +23,11 @@ from __future__ import annotations
 
 import argparse
 import os
+import shlex
 import subprocess
 import sys
 import tempfile
+import time
 
 
 def main() -> int:
@@ -35,6 +39,7 @@ def main() -> int:
     parser.add_argument("--qq-player", required=True)
     parser.add_argument("--script", required=True)
     parser.add_argument("--timeout", type=int, default=100)
+    parser.add_argument("--client", action="append", default=[], help="A command line for a client that connects by itself")
     args = parser.parse_args()
 
     for program in (args.prism, args.arqade, args.media, args.qq_studio, args.qq_player):
@@ -86,11 +91,25 @@ def main() -> int:
         })
         command = [args.prism, "--unlocked", "--size", "1920x1200", "--socket", "wayland-products",
                    "--script", os.path.abspath(args.script)]
+        prism = subprocess.Popen(command, env=env)
+        clients = []
         try:
-            return subprocess.run(command, env=env, timeout=args.timeout, check=False).returncode
+            if args.client:
+                socket = os.path.join(runtime, "wayland-products")
+                deadline = time.monotonic() + 30
+                while not os.path.exists(socket) and time.monotonic() < deadline and prism.poll() is None:
+                    time.sleep(0.05)
+                client_env = dict(env, WAYLAND_DISPLAY="wayland-products", QT_QPA_PLATFORM="wayland")
+                clients = [subprocess.Popen(shlex.split(line), env=client_env) for line in args.client]
+            return prism.wait(timeout=args.timeout)
         except subprocess.TimeoutExpired:
             print(f"Prism did not finish the script in {args.timeout} s", file=sys.stderr)
             return 101
+        finally:
+            for process in [prism, *clients]:
+                if process.poll() is None:
+                    process.kill()
+                process.wait()
 
 
 if __name__ == "__main__":

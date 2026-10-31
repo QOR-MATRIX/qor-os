@@ -10,6 +10,7 @@
 #include <QtCore/QFileInfo>
 #include <QtCore/QJsonDocument>
 #include <QtCore/QJsonObject>
+#include <QtCore/QLoggingCategory>
 #include <QtCore/QStandardPaths>
 #include <QtCore/QUrl>
 
@@ -17,9 +18,13 @@
 
 using namespace Qt::StringLiterals;
 
+Q_LOGGING_CATEGORY(lcStoreShell, "qor.store.shell")
+
 namespace qor::store {
 
 namespace {
+
+const auto kFirstParty = QStringLiteral("dev.qorsync");
 
 QJsonObject readJson(const QString &path)
 {
@@ -43,7 +48,12 @@ Store::Store(QObject *parent) : QObject(parent)
         invalidate();
         Q_EMIT stateChanged();
     });
-    connect(store, &StoreEngine::catalogChanged, this, &Store::invalidate);
+    // Whether what is installed is intact is asked of the developers' keys the catalogue holds.
+    connect(store, &StoreEngine::catalogChanged, this, [this] {
+        m_contentValid = false;
+        invalidate();
+        Q_EMIT installedChanged();
+    });
     connect(store, &StoreEngine::progressChanged, this, &Store::invalidate);
     connect(store, &StoreEngine::installedChanged, this, [this] {
         m_contentValid = false;
@@ -183,6 +193,12 @@ void Store::loadInstalledContent() const
     for (const StoreEngine::Installed &installed : store->installed()) {
         const QString dir = store->installDirectory(installed.id);
         const QString developer = describe(installed.id).value(u"developerName"_s).toString();
+        // Verified as it is loaded, not only as it was installed: anything running as this user can write there, and a
+        // widget's QML runs inside the shell.
+        if (!store->isIntact(installed.id)) {
+            qCWarning(lcStoreShell, "%s is not what its developer signed, and is not loaded", qPrintable(installed.id));
+            continue;
+        }
         if (installed.kind == u"theme"_s) {
             const QJsonObject theme = readJson(dir + u"/theme.json"_s);
             if (theme.isEmpty())
@@ -202,6 +218,9 @@ void Store::loadInstalledContent() const
                 { u"wallpaperIntensity"_s, clamped(wallpaper.value(u"intensity"_s), 1, 0.3, 1.6) },
             });
         } else if (installed.kind == u"widget"_s) {
+            // A widget runs inside Prism, with all the shell can do: only QOR OS's own (docs/STORE.md).
+            if (installed.developer != kFirstParty)
+                continue;
             const QJsonObject widget = readJson(dir + u"/widget.json"_s);
             const QString entry = widget.value(u"entry"_s).toString();
             const QString size = widget.value(u"size"_s).toString();
@@ -249,6 +268,9 @@ QVariantMap Store::theme(const QString &id) const
 
 QVariantMap Store::widget(const QString &id) const
 {
+    // Checked again as it is asked for: the list above may be as old as this session.
+    if (!engine()->isIntact(id))
+        return {};
     for (const QVariant &widget : widgets())
         if (widget.toMap().value(u"id"_s).toString() == id)
             return widget.toMap();

@@ -1,4 +1,8 @@
+// Changed for QOR OS: natively, a voice's source goes through the engine's interceptor (QOR-0018).
 #include "webvoice.h"
+
+#include <QQmlContext>
+#include <QQmlEngine>
 
 #include <algorithm>
 
@@ -183,7 +187,10 @@ void WebVoice::setSource(const QUrl &source)
         }
     }
 #else
-    m_effect->setSource(source);
+    // Through the engine, so a confined game's voice is held to its package as everything else is: Qt's sound effects
+    // would otherwise fetch any URL with a network of their own.
+    const QQmlContext *context = qmlContext(this);
+    m_effect->setSource(context ? context->resolvedUrl(source) : source);
 #endif
     emit sourceChanged();
 }

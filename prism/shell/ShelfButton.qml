@@ -126,6 +126,7 @@ Item {
             id: tipText
             anchors.centerIn: parent
             text: button.label
+            textFormat: Text.PlainText
             font: Theme.footnote
             color: Theme.textPrimary
         }

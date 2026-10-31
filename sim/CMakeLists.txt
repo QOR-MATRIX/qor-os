@@ -30,6 +30,7 @@ target_link_libraries(qor_sim
         Qt6::RemoteObjects
         qor_audio
     PRIVATE
+        qor_service_endpoint
         Qt6::Concurrent
         qor::compiler_settings
 )

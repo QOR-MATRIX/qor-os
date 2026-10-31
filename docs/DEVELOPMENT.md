@@ -282,6 +282,25 @@ Two suites use the runner (label `gpu`), and a third needs no display:
   - that the QQ Player plays one game at a time;
   - that closing a window ends its product.
 
+### Check what crosses a trust boundary
+
+[QOR-0018](decisions/QOR-0018-the-security-and-quality-bar.md). Code that reads what something else hands it (a file, a
+socket, a game, a Wayland client, a device) has a test from the hostile side, and runs under the sanitizers:
+
+```bash
+cmake --preset linux-asan && cmake --build --preset linux-asan
+ctest --preset linux-asan -LE gpu
+QOR_SANITIZE=address,undefined tools/dev/products.sh --product qq --tests tst_lockdown --build-root ~/qor-build/products-asan
+```
+
+- `tools/ci/check_hardening.py <build folder>` reads back each program's mitigations.
+- `tools/ci/check_secrets.py [--staged]` looks for a secret's shape, and says where, never what. A made-up value in a test
+  goes in `tools/ci/secrets-allowed.txt` with its reason.
+- `prism_untrusted` (`tests/prism/untrusted.e2e.json`) runs Prism with clients that lie about themselves.
+- `tst_lockdown` plays games that try to get out, and `tst_player` shows the kernel's wall holding them.
+- **To add a CI action or a download**, pin it by commit or SHA-256. Anything that downloads a tool to run it goes in the
+  Security workflow, on a hosted runner, never on the workstation.
+
 ### Run a product inside Prism
 
 Prism starts the products itself and lays out their windows

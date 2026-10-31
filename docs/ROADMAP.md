@@ -194,6 +194,23 @@ SDK.
 - [ ] Paid items, only once [QOR-0006](decisions/QOR-0006-qor-os-1-0-moves-no-money.md)'s conditions are met and a record chooses the model; QQ's side of Demiurge's P3.6 (collectibles and in-game purchases) with them
 - [ ] Later than 1.0 ([QOR-0007](decisions/QOR-0007-what-1-0-ships.md)): GNOSIS, Stream, Spatial mode (Qt Quick 3D Xr), on-device intelligence, Continuity
 
+## Alongside the phases · The security bar
+
+[QOR-0018](decisions/QOR-0018-the-security-and-quality-bar.md), from two independent reviews of the trust boundaries on
+30 October 2026. What is left of them, with the known limits in [SECURITY.md](../SECURITY.md#known-limits):
+
+- [x] Exploit mitigations on every program, read back in CI; the suites under sanitizers; CI pinned by content; secrets
+  and advisories looked for
+- [x] Prism: the bus, the keyboard, the lock screen, what a client's name and title can do, the Store's widgets
+- [x] QQ and QOR Media: what a package can reach, the Studio's trust in a project, the agent's logic; the QQ Player
+  walled in by the kernel on Linux
+- [ ] The Store's catalogue carries a sequence and an expiry, so an old one cannot be replayed (needs signing, with Store
+  stage 2)
+- [ ] The Player's wall on the owner's Linux machine with a real graphics card: tested so far in software only
+- [ ] Prism's clipboard: a client sets the selection only when it has the keyboard (needs Prism's own data device, or a
+  patch to Qt)
+- [ ] Report Qt Remote Objects' decoder (it trusts packet contents) to The Qt Company, under the owner's licence
+
 ## Release gates
 
 Nothing is published until all of these hold

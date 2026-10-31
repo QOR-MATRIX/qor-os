@@ -51,6 +51,9 @@ FocusScope {
             spaceOffset: display.primary.spaceOffset
             overview: display.primary.overview
             surfaceDelegate: display.primary.windowLayer.surfaceDelegate
+            enabled: !display.primary.locked
+            locked: display.primary.locked
+            surfaceOpen: display.primary.surface !== ""
             opacity: 1 - display.primary.lockProgress
             scale: 1 - 0.035 * display.primary.lockProgress
             visible: opacity > 0.002

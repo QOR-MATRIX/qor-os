@@ -108,10 +108,14 @@ FocusScope {
         } else if (controllerForGame) {
             // Picked up to play: the game has it, and the question waits.
             toast.show("gamepad-2", qsTr("%1 connected").arg(gamepad.name));
+        } else if (locked) {
+            // Nothing a device says appears over the lock screen: asked once it is open.
+            controllerAwaiting = gamepad;
         } else {
             controllerPrompt.ask(gamepad);
         }
     }
+    property var controllerAwaiting: null
 
     function controllerAction(name: string) {
         switch (name) {
@@ -119,9 +123,7 @@ FocusScope {
         case "controlCenter": toggleSurface("control-center"); break;
         case "overview": toggleSurface("overview"); break;
         case "home":
-            if (locked)
-                unlock();
-            else
+            if (!locked)
                 toggleSurface("home");
             break;
         case "back": setSurface(""); break;
@@ -143,7 +145,7 @@ FocusScope {
                     { button: Gamepads.North, label: qsTr("Space") }, { button: Gamepads.Start, label: qsTr("Enter") },
                     { button: Gamepads.East, label: qsTr("Close") }];
         if (locked)
-            return [{ button: Gamepads.South, label: qsTr("Unlock") }];
+            return [{ button: Gamepads.South, label: qsTr("Type the password") }];
         if (surface === "home")
             return [{ button: Gamepads.DPadUp, text: qsTr("D-pad"), label: qsTr("Choose") },
                     { button: Gamepads.South, label: qsTr("Play") },
@@ -208,8 +210,10 @@ FocusScope {
             // The prompt answers to the controller before the interface is on.
             if (controllerPrompt.open && !desktop.controllerActive)
                 controllerPrompt.controllerButton(button);
+            // On the lock screen a controller types the password like anyone
+            // else; it never unlocks by itself.
             else if (desktop.controllerActive && desktop.locked && button === Gamepads.South)
-                desktop.unlock();
+                controllerKeyboard.open = true;
             // Over a game, Guide brings the shell back: Overview, to pick
             // another window or return to the game.
             else if (desktop.controllerActive && desktop.controllerForGame && button === Gamepads.Guide)
@@ -258,11 +262,29 @@ FocusScope {
         locked = true;
     }
 
+    // Every way off the lock screen comes through here. A simulated session has
+    // nothing to check a password against, so any unlocks it, and the screen says
+    // so. Any other stays locked until there is something to check it with
+    // (QOR ID's sign-in, Phase 2).
+    function tryUnlock(secret: string): bool {
+        if (options.simulated !== true)
+            return false;
+        unlock();
+        return true;
+    }
+
     function unlock() {
         if (locked)
             Sounds.play("unlock");
         locked = false;
         desktop.forceActiveFocus();
+        focusedLayer.focusActive();
+        if (controllerAwaiting !== null) {
+            const waiting = controllerAwaiting;
+            controllerAwaiting = null;
+            if (Gamepads.count > 0)
+                controllerConnected(waiting);
+        }
         if (!startupAppsOpened) {
             startupAppsOpened = true;
             // "settings/sound" opens an app at a page, "settings/sound/reactive"
@@ -786,7 +808,9 @@ FocusScope {
             opacity: (1 - lockDepth.value) * (1 - editDepth.value)
             scale: 1 - 0.035 * lockDepth.value
             visible: opacity > 0.002
-            enabled: !desktop.editingWidgets
+            enabled: !desktop.editingWidgets && !desktop.locked
+            locked: desktop.locked
+            surfaceOpen: desktop.surface !== ""
             onOverviewPicked: desktop.setSurface("")
             originProvider: appId => shelf.originFor(appId)
             spaceAt: scenePoint => spaceSwitcher.indexAt(scenePoint)
@@ -934,7 +958,8 @@ FocusScope {
         locked: desktop.locked
         backdrop: sceneBackdrop
         history: notifications.history
-        onUnlockRequested: desktop.unlock()
+        simulated: desktop.options.simulated === true
+        unlockedBy: secret => desktop.tryUnlock(secret)
     }
 
     // ── Controller interface surfaces (above the lock screen too) ──────────

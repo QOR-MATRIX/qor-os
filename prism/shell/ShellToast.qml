@@ -38,6 +38,6 @@ Item {
         anchors.centerIn: parent
         spacing: 10
         Icon { anchors.verticalCenter: parent.verticalCenter; name: toast.icon; size: 17; color: Theme.accentText }
-        Text { anchors.verticalCenter: parent.verticalCenter; text: toast.text; font: Theme.callout; color: Theme.textPrimary }
+        Text { anchors.verticalCenter: parent.verticalCenter; text: toast.text; textFormat: Text.PlainText; font: Theme.callout; color: Theme.textPrimary }
     }
 }

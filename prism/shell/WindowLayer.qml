@@ -13,6 +13,10 @@ Item {
     id: layer
 
     property rect workArea
+    // Whether the screen is locked, and whether a shell surface (Beam, Home, Overview) has the keyboard: what a client's
+    // new window may not take it from.
+    property bool locked: false
+    property bool surfaceOpen: false
     property int currentSpace: 0
     property real spaceOffset: 0
     property bool overview: false
@@ -250,6 +254,34 @@ Item {
         return window;
     }
 
+    // What a client calls itself is only a claim. Prism's own apps and the
+    // products it hosts are known by their ids, so a client claiming one is kept
+    // apart under another: it takes no icon or place on the Shelf, it does not
+    // stand in for the real one when that is asked for, and it gets nothing the
+    // id allows a product (the controller, say).
+    function clientAppId(claimed: string): string {
+        const taken = AppRegistry.app(claimed) !== null && AppRegistry.app(claimed) !== undefined
+                      || ProductHost.product(claimed).id !== undefined;
+        return taken ? "client:" + claimed : claimed;
+    }
+
+    // A client's window has become something a person can see. It takes the
+    // keyboard only if that cannot be a theft: never while the screen is locked,
+    // and never from a shell surface or another client's window, unless Prism
+    // itself started it. One that may not asks for attention instead. Until it
+    // can be seen it takes nothing: a client that creates a toplevel and never
+    // draws would otherwise hold every key, unseen.
+    function arrived(window: AppWindow) {
+        const clientOf = w => w && w.shellSurface ? w.shellSurface.surface.client : null;
+        const free = active === null || active.minimized || active.closing
+                     || (clientOf(active) !== null && clientOf(active) === clientOf(window));
+        if (!locked && (window.startedByPrism || (!surfaceOpen && free)))
+            activate(window);
+        else
+            window.demandsAttention = true;
+        relayout();
+    }
+
     // Manages a window for a Wayland xdg-toplevel (Prism compositor only).
     // `product` is { id, frame } for a product Prism hosts: its window is
     // known by the product's id, whatever the client calls itself. With a
@@ -261,7 +293,8 @@ Item {
         const frame = planned ? product.frame : planFrame(960, 640, null);
         const window = windowFactory.createObject(strip, {
             manager: layer,
-            appId: product ? product.id : toplevel.appId,
+            appId: product ? product.id : clientAppId(toplevel.appId),
+            startedByPrism: product !== null,
             title: toplevel.title,
             space: currentSpace,
             normalX: frame.x,
@@ -278,12 +311,14 @@ Item {
         // toplevel, so both are followed rather than read once.
         toplevel.titleChanged.connect(() => window.title = toplevel.title);
         if (!product)
-            toplevel.appIdChanged.connect(() => window.appId = toplevel.appId);
+            toplevel.appIdChanged.connect(() => window.appId = clientAppId(toplevel.appId));
         // Its manager at the time: the window may have moved to another display.
         window.closed.connect(() => window.manager.remove(window));
         windows = windows.concat([window]);
-        activate(window);
-        relayout();
+        if (planned)
+            arrived(window);
+        else
+            relayout();
         return window;
     }
 

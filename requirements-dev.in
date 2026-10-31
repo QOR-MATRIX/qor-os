@@ -1,0 +1,6 @@
+# Developer tooling, the versions chosen by hand. requirements-dev.txt is generated from this with every dependency's
+# hash, so an install takes exactly these files (QOR-0018). To change a version, edit here, then:
+#   pip-compile --generate-hashes --strip-extras --output-file requirements-dev.txt requirements-dev.in
+clang-format==20.1.8
+pre-commit==4.7.0
+cryptography==50.0.2

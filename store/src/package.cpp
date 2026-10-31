@@ -6,6 +6,9 @@
 
 #include <QtCore/QBuffer>
 #include <QtCore/QCryptographicHash>
+#include <QtCore/QDir>
+#include <QtCore/QDirIterator>
+#include <QtCore/QFile>
 #include <QtCore/QJsonDocument>
 #include <QtCore/QJsonObject>
 #include <QtCore/QRegularExpression>
@@ -96,8 +99,40 @@ PackageResult openPackage(const QByteArray &archive, const QByteArray &developer
             return failure(u"%1 does not match the package manifest."_s.arg(it.key()));
         result.contents.insert(it.key(), data);
     }
+    result.manifestBytes = manifestBytes;
+    result.signature = signature;
     result.ok = true;
     return result;
+}
+
+bool verifyInstalled(const QString &folder, const QByteArray &developerKey)
+{
+    const auto read = [&folder](const QString &name) {
+        QFile file(folder + u'/' + name);
+        return file.open(QIODevice::ReadOnly) ? file.readAll() : QByteArray();
+    };
+    const QByteArray manifestBytes = read(kManifest);
+    const QByteArray signature = read(kSignature);
+    if (manifestBytes.isEmpty() || signature.isEmpty() || !verifySignature(developerKey, manifestBytes, signature))
+        return false;
+    const QJsonObject files = QJsonDocument::fromJson(manifestBytes).object().value(u"files"_s).toObject();
+    QSet<QString> expected { kManifest, kSignature };
+    for (auto it = files.begin(); it != files.end(); ++it) {
+        if (!isSafePackagePath(it.key()))
+            return false;
+        const QByteArray digest = QByteArray::fromHex(it.value().toString().toLatin1());
+        if (digest.size() != 32 || QCryptographicHash::hash(read(it.key()), QCryptographicHash::Sha256) != digest)
+            return false;
+        expected.insert(it.key());
+    }
+    // Nothing added: not a qmldir, nor a plugin for one to name.
+    QSet<QString> found;
+    const QDir root(folder);
+    QDirIterator walk(folder, QDir::Files | QDir::Hidden | QDir::System | QDir::NoDotAndDotDot,
+                      QDirIterator::Subdirectories);
+    while (walk.hasNext())
+        found.insert(root.relativeFilePath(walk.next()));
+    return found == expected;
 }
 
 } // namespace qor::store

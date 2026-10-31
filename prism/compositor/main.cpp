@@ -17,10 +17,14 @@
 #include "backend.h"
 #include "kit.h"
 #include "producthost.h"
+#include "refusednetwork.h"
+#include "serviceendpoint.h"
 #include "services.h"
 #include "shellbenchmark.h"
 #include "shellscript.h"
+#ifdef QOR_HAS_SIMULATOR
 #include "simservices.h"
+#endif
 
 #include <QtCore/QCommandLineParser>
 #include <QtCore/QTemporaryDir>
@@ -61,8 +65,14 @@ int main(int argc, char *argv[])
     parser.setApplicationDescription(u"Prism, the QOR OS Wayland compositor."_s);
     parser.addHelpOption();
     parser.addVersionOption();
+#ifdef QOR_HAS_SIMULATOR
     const QCommandLineOption services(u"services"_s, u"embedded (simulated, default) or external."_s, u"mode"_s,
                                       u"embedded"_s);
+#else
+    // A device: the system's own daemons, and no simulator built in to choose (SECURITY.md).
+    const QCommandLineOption services(u"services"_s, u"external: the only choice in this build."_s, u"mode"_s,
+                                      u"external"_s);
+#endif
     const QCommandLineOption unlocked(u"unlocked"_s, u"Start on the desktop instead of the lock screen."_s);
     const QCommandLineOption socket(u"socket"_s, u"Wayland socket name for clients (default: first free wayland-N)."_s,
                                     u"name"_s);
@@ -98,8 +108,9 @@ int main(int argc, char *argv[])
         qputenv("QOR_STORE_DIR", automationStore->path().toUtf8());
     }
 
+    QUrl servicesUrl = qor::services::defaultEndpoint();
+#ifdef QOR_HAS_SIMULATOR
     std::unique_ptr<qor::sim::SimServices> simulator;
-    QUrl servicesUrl = qor::Services::defaultUrl();
     if (parser.value(services) != u"external"_s) {
         simulator = std::make_unique<qor::sim::SimServices>();
         qor::sim::SimOptions simOptions;
@@ -113,17 +124,30 @@ int main(int argc, char *argv[])
             qputenv("QOR_TOUCHPAD", "off");
         if (automated) {
             simOptions.persistent = false;
-            simOptions.url = QUrl(qor::Services::defaultUrl().scheme() + u":qor-services-"_s
-                                  + QString::number(QCoreApplication::applicationPid()));
+            simOptions.url =
+                qor::services::endpoint(u"qor-services-"_s + QString::number(QCoreApplication::applicationPid()));
         }
         if (!simulator->start(simOptions))
             return 1;
         servicesUrl = simulator->url();
     }
+    const bool simulated = simulator != nullptr;
+#else
+    if (parser.value(services) != u"external"_s) {
+        qCritical("This build of Prism has no simulator: the services are the system's (--services external).");
+        return 1;
+    }
+    const bool simulated = false;
+#endif
     qor::Services::instance()->connectTo(servicesUrl);
 
     QQmlApplicationEngine engine;
+    // Nothing in the shell is fetched from the network, whatever a window's title or a notification says.
+    qor::RefusedNetworkFactory refusedNetwork;
+    engine.setNetworkAccessManagerFactory(&refusedNetwork);
     QVariantMap options;
+    // Only a simulated session has an unlock with nothing behind it (Desktop.tryUnlock).
+    options.insert(u"simulated"_s, simulated);
     const int benchmarkSeconds = parser.value(benchmark).toInt();
     options.insert(u"unlocked"_s, parser.isSet(unlocked) || benchmarkSeconds > 0);
     options.insert(u"surface"_s, parser.value(surface));

@@ -38,7 +38,8 @@
 
 using namespace Qt::StringLiterals;
 
-Q_LOGGING_CATEGORY(lcHid, "qor.input.hid")
+// Quiet unless asked for: a scan names every HID device on the machine, every few seconds.
+Q_LOGGING_CATEGORY(lcHid, "qor.input.hid", QtInfoMsg)
 
 namespace qor::input {
 
@@ -99,8 +100,9 @@ QList<HidDevice> enumerateHid()
             device.vendor = attributes.VendorID;
             device.product = attributes.ProductID;
         }
+        // One character less than it has room for: a name that fills it would otherwise have no end.
         wchar_t name[128] {};
-        if (HidD_GetProductString(handle, name, sizeof(name)))
+        if (HidD_GetProductString(handle, name, sizeof(name) - sizeof(wchar_t)))
             device.productName = QString::fromWCharArray(name).trimmed();
         PHIDP_PREPARSED_DATA preparsed = nullptr;
         if (HidD_GetPreparsedData(handle, &preparsed)) {
@@ -587,6 +589,9 @@ private:
                 value = long(raw) - (1l << cap.BitSize); // sign-extend
             if (maximum <= minimum)
                 maximum = (1l << std::min<int>(cap.BitSize, 30)) - 1;
+            // A descriptor with no range at all says nothing; dividing by it would put NaN in the axes for good.
+            if (maximum <= minimum)
+                continue;
             const float t = float(value - minimum) / float(maximum - minimum);
             const float centred = std::clamp(t * 2.0f - 1.0f, -1.0f, 1.0f);
             if (cap.UsagePage == 0x01) {

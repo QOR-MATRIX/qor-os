@@ -66,7 +66,8 @@ void FileSource::readBuffer()
         const QAudioFormat format = buffer.format();
         const int channels = format.channelCount();
         const qsizetype frames = buffer.frameCount();
-        if (channels <= 0 || frames <= 0)
+        // A decoder can report a rate of nothing for a hostile file, and the resampler below would then never finish.
+        if (channels <= 0 || frames <= 0 || format.sampleRate() <= 0)
             continue;
 
         // Fast path: the decoder honoured the requested format.

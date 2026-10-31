@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #pragma once
 
+#include <QtCore/QElapsedTimer>
 #include <QtCore/QHash>
 #include <QtCore/QObject>
+#include <QtCore/QStringList>
 #include <QtCore/QVariantMap>
 #include <QtQml/qqmlregistration.h>
 
@@ -29,8 +31,12 @@ public:
 
 private:
     QVariantMap resolve(const QString &appId) const;
+    QStringList entriesFor(const QString &wmClass) const;
 
     QHash<QString, QVariantMap> m_cache;
+    // Which desktop files name which StartupWMClass, read at most once a minute.
+    mutable QHash<QString, QStringList> m_byWmClass;
+    mutable QElapsedTimer m_scanned;
 };
 
 } // namespace qor

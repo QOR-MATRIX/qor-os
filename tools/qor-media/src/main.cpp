@@ -6,6 +6,7 @@
 // window and opens what the launcher asks (medialink.h), and exits when the launcher closes the channel. Started by
 // hand with a file, it opens that file in a window of its own.
 
+// Changed for QOR OS: nothing shown comes from the network or another computer (QOR-0018).
 #include <QCommandLineParser>
 #include <QDir>
 #include <QFont>
@@ -15,6 +16,7 @@
 #include <QQuickStyle>
 #include <QtQml/qqmlextensionplugin.h>
 
+#include "localonly.h"
 #include "look.h"
 #include "medialink.h"
 #include "tokens.h"
@@ -51,6 +53,12 @@ int main(int argc, char *argv[])
     const bool launched = parser.isSet(channel);
 
     QQmlApplicationEngine engine;
+    // Nothing QOR Media shows comes from the network or another computer: not a picture a Markdown file names, nor one in
+    // a track's title, which would say to whoever sent it when, and from where, the file was opened.
+    static qormedia::LocalOnlyNetworkFactory localOnly;
+    engine.setNetworkAccessManagerFactory(&localOnly);
+    static qormedia::NoOtherComputers noOtherComputers;
+    engine.addUrlInterceptor(&noOtherComputers);
     const QStringList files = parser.positionalArguments();
     engine.setInitialProperties({
         {QStringLiteral("link"), QVariant::fromValue(link)},

@@ -11,7 +11,9 @@
 //
 // Changed for QOR OS: the bar is reached by Return and gone along by the arrows, as a controller does them under Prism,
 // and Esc comes back from it.
+// Changed for QOR OS: copies being saved wait in the person's own cache (QOR-0018).
 
+#include <QStandardPaths>
 #include <QClipboard>
 #include <QDir>
 #include <QFile>
@@ -149,7 +151,7 @@ class TestReader : public QObject
     // The copies a save shows while it writes, which it deletes once done.
     static QStringList copiesLeft()
     {
-        return QDir(QDir::temp().filePath("qor-media")).entryList({"saving-*"}, QDir::Files);
+        return QDir(QDir(QStandardPaths::writableLocation(QStandardPaths::CacheLocation)).filePath("saving")).entryList({"saving-*"}, QDir::Files);
     }
     // Type `text` into whatever has the keyboard. QTest types whole strings only into widgets.
     void type(const QString &text)

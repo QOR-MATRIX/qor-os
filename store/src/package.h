@@ -27,6 +27,8 @@ struct PackageResult
     QString error;
     PackageManifest manifest;
     QMap<QString, QByteArray> contents; // path → bytes, all verified
+    QByteArray manifestBytes;           // the manifest and its signature, kept with what is installed
+    QByteArray signature;
 };
 
 // Opens a package and verifies it completely: the developer's signature over
@@ -35,6 +37,11 @@ struct PackageResult
 // `maximumSize` bytes of content are refused.
 PackageResult openPackage(const QByteArray &archive, const QByteArray &developerKey,
                           qint64 maximumSize = 32 * 1024 * 1024);
+
+// Whether a package's files, installed in `folder`, are still exactly what its developer signed: the signature kept
+// beside them over the manifest, every listed file against it, and no other file. An install is verified once; what
+// runs is verified each time it is loaded, since anything running as this user can write there.
+bool verifyInstalled(const QString &folder, const QByteArray &developerKey);
 
 bool isSafePackagePath(const QString &path);
 

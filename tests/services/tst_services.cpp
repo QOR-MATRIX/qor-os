@@ -3,10 +3,13 @@
 // End-to-end Qt Remote Objects round trips between the simulated sources
 // (qor-sim) and the replicas the shell consumes (QOR.Services).
 
+#include "serviceendpoint.h"
 #include "services.h"
 #include "simservices.h"
 
 #include <QtCore/QCoreApplication>
+#include <QtCore/QDir>
+#include <QtCore/QFileInfo>
 #include <QtCore/QSet>
 #include <QtTest/QSignalSpy>
 #include <QtTest/QTest>
@@ -25,12 +28,32 @@ private Q_SLOTS:
     void initTestCase()
     {
         qor::sim::SimOptions options;
-        options.url = QUrl(u"local:qor-test-"_s + QString::number(QCoreApplication::applicationPid()));
+        options.url = qor::services::endpoint(u"qor-test-"_s + QString::number(QCoreApplication::applicationPid()));
         options.persistent = false;
         QVERIFY(m_sim.start(options));
         m_url = m_sim.url();
         QVERIFY(qor::Services::instance()->connectTo(m_url, 5000));
         QVERIFY(qor::Services::instance()->isConnected());
+    }
+
+    // The bus has no authentication of its own, and takes what it is sent on trust: nobody else may reach it. On Linux
+    // it is a socket in a folder only this user can enter, never an abstract socket, which takes no permissions at all.
+    void theBusIsThisPersonsAlone()
+    {
+#if defined(Q_OS_LINUX)
+        const QUrl url = qor::Services::defaultUrl();
+        QCOMPARE(url.scheme(), u"local"_s);
+        QVERIFY(QDir::isAbsolutePath(url.path()));
+        const QFileInfo folder(QFileInfo(url.path()).path());
+        QVERIFY(folder.isDir());
+        QCOMPARE(folder.ownerId(), QFileInfo(QDir::homePath()).ownerId());
+        const auto others = QFile::ReadGroup | QFile::WriteGroup | QFile::ExeGroup | QFile::ReadOther
+                            | QFile::WriteOther | QFile::ExeOther;
+        QVERIFY2(!(folder.permissions() & others), qPrintable(folder.filePath()));
+        QVERIFY(QFileInfo(m_url.path()).exists());
+#else
+        QSKIP("A named pipe here; Windows is a development host, not the device.");
+#endif
     }
 
     void initialStateReplicates()

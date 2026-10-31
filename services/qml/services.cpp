@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "services.h"
 
+#include "serviceendpoint.h"
+
 #include <QtCore/QCoreApplication>
 #include <QtCore/QDeadlineTimer>
 #include <QtCore/QLoggingCategory>
@@ -27,15 +29,7 @@ Services *Services::create(QQmlEngine *, QJSEngine *)
     return services;
 }
 
-QUrl Services::defaultUrl()
-{
-#if defined(Q_OS_LINUX)
-    // Abstract sockets never leave stale files behind after a crash.
-    return QUrl(u"localabstract:qor-services"_s);
-#else
-    return QUrl(u"local:qor-services"_s);
-#endif
-}
+QUrl Services::defaultUrl() { return services::defaultEndpoint(); }
 
 bool Services::connectTo(const QUrl &url, int timeoutMs)
 {

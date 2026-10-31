@@ -8,6 +8,7 @@ target_include_directories(qorctl PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 target_link_libraries(qorctl PRIVATE
     Qt6::Core
     Qt6::RemoteObjects
+    qor_service_endpoint
     qor::compiler_settings
 )
 

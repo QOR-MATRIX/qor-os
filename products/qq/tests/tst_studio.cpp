@@ -5,7 +5,8 @@
 // the disk.
 //
 // Changed for QOR OS: a warning from QQ's own QML (an undefined name, a failed binding) fails the case it happens in;
-// and a Studio is open once its window has the keyboard too, so that a shortcut is not pressed before it can answer.
+// a Studio is open once its window has the keyboard too, so that a shortcut is not pressed before it can answer; and no
+// controller on the machine joins in (virtualpads.cpp).
 
 #include <QDir>
 #include <QElapsedTimer>
@@ -29,6 +30,7 @@
 #include <cmath>
 #include <QtQml/qqmlextensionplugin.h>
 
+#include "gamepadmanager.h"
 #include "gpu.h"
 #include "mixer.h"
 
@@ -194,6 +196,92 @@ private slots:
 
     // QQ's own QML says nothing is wrong with it.
     void init() { QTest::failOnWarning(QRegularExpression(QStringLiteral("^qrc:/qt/qml/QQ/"))); }
+
+    // A project made elsewhere runs nothing until a person says they trust it: a scene is QML, and opening it runs it. And
+    // nothing beside the scene stands in for what the Studio itself writes.
+    void aProjectFromElsewhereRunsNothingUntilTrusted()
+    {
+        Studio s;
+        const QDir root(s.project.path());
+        root.mkpath(QStringLiteral("scenes"));
+        // Its code leaves a mark where the test can see it, as code that ran for any other reason would not.
+        QCoreApplication::setOrganizationDomain({});
+        const QByteArray ran("import QtQml\nimport QQ\nScene {\n    name: \"old\"\n    Component.onCompleted: Qt.application.domain = \"the-scene-ran\"\n}\n");
+        QFile scene(root.filePath(QStringLiteral("scenes/old.qml")));
+        QVERIFY(scene.open(QIODevice::WriteOnly));
+        scene.write(ran);
+        scene.close();
+        // QML takes a file beside a scene as a type of that name: this would be the new scene's Sun.
+        QFile sun(root.filePath(QStringLiteral("scenes/Sun.qml")));
+        QVERIFY(sun.open(QIODevice::WriteOnly));
+        sun.write("import QQ\nShape { name: \"not the sun\" }\n");
+        sun.close();
+        QVERIFY(s.open());
+        QVERIFY(!s.window->property("projectTrusted").toBool());
+
+        // The new scene is the Studio's own, with the real Sun.
+        QVERIFY(!s.entity(QStringLiteral("not the sun")));
+        QVERIFY(!s.window->property("sceneFile").toUrl().isLocalFile());
+
+        // Asked, and nothing runs: not by Play, nor by opening a scene, which is what a yes will do.
+        QVERIFY(!s.call("play").toBool());
+        QVERIFY(!s.window->property("playing").toBool());
+        QVERIFY(!s.call("openScene", QStringLiteral("old")).toBool());
+        QCOMPARE(s.scene()->property("name").toString(), QStringLiteral("untitled"));
+        auto *dialog = s.window->findChild<QObject *>(QStringLiteral("trustDialog"));
+        QVERIFY(dialog);
+        QTRY_VERIFY(dialog->property("opened").toBool());
+        QCOMPARE(QCoreApplication::organizationDomain(), QString());
+
+        // A person says so: it opens, and is remembered.
+        QVERIFY(QMetaObject::invokeMethod(s.window, "trustProject_"));
+        QTRY_VERIFY2(s.scene()->property("name").toString() == QStringLiteral("old"),
+                     qPrintable(s.window->property("notice").toString()));
+        QCOMPARE(QCoreApplication::organizationDomain(), QStringLiteral("the-scene-ran"));
+        QCoreApplication::setOrganizationDomain({});
+        QVERIFY(s.window->property("projectTrusted").toBool());
+        qq::SceneIO *io = s.engine.singletonInstance<qq::SceneIO *>("QQ", "SceneIO");
+        QVERIFY(io->projectTrusted(QUrl::fromLocalFile(s.project.path())));
+    }
+
+    // Even in a trusted project a qmldir brings in no native code, and the Studio's logic reads only the project, reaches
+    // no network and opens nothing outside.
+    void whatRunsInTheStudioStaysInTheProject()
+    {
+        Studio s;
+        const QDir root(s.project.path());
+        root.mkpath(QStringLiteral("scenes"));
+        QFile names(root.filePath(QStringLiteral("scenes/qmldir")));
+        QVERIFY(names.open(QIODevice::WriteOnly));
+        names.write("module Evil\nplugin evil\n");
+        names.close();
+        QVERIFY(s.open());
+        qq::SceneIO *io = s.engine.singletonInstance<qq::SceneIO *>("QQ", "SceneIO");
+        io->trustProject(QUrl::fromLocalFile(s.project.path()));
+        s.window->setProperty("projectTrusted", true);
+        QVERIFY(s.scene());
+
+        QFile mine(root.filePath(QStringLiteral("mine.txt")));
+        QVERIFY(mine.open(QIODevice::WriteOnly));
+        mine.write("the project's");
+        mine.close();
+        QTemporaryDir elsewhere;
+        QFile other(QDir(elsewhere.path()).filePath(QStringLiteral("secret.txt")));
+        QVERIFY(other.open(QIODevice::WriteOnly));
+        other.write("a person's");
+        other.close();
+        QCOMPARE(io->readText(QUrl::fromLocalFile(root.filePath(QStringLiteral("mine.txt")))).toString(), QStringLiteral("the project's"));
+        QVERIFY(!io->readText(QUrl::fromLocalFile(other.fileName())).isValid());
+
+        QVERIFY(!io->openInOwnEditor(QUrl::fromLocalFile(other.fileName())));
+        QVERIFY(!io->openInOwnEditor(QUrl::fromLocalFile(root.filePath(QStringLiteral("mine.txt")))));
+    }
+
+    // A controller on the machine this runs on never moves the player in a case below.
+    void noControllerOnTheMachineJoinsIn()
+    {
+        QCOMPARE(qor::input::GamepadManager::instance()->backendNames(), QStringList{QStringLiteral("virtual")});
+    }
 
     void aNewStudioOpensALitSceneInItsProject()
     {

@@ -35,6 +35,8 @@ T.ItemDelegate {
             Text {
                 anchors.verticalCenter: parent.verticalCenter
                 text: control.text
+                // What a list shows often comes from outside: a network's name, a file's. Text, never markup.
+                textFormat: Text.PlainText
                 font: control.font
                 color: control.enabled ? Theme.textPrimary : Theme.textDisabled
                 elide: Text.ElideRight

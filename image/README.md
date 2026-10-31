@@ -57,3 +57,8 @@ Environment=QT_QPA_PLATFORMTHEME=qor
 Environment=XDG_SESSION_TYPE=wayland
 ExecStart=/usr/bin/prism
 ```
+
+**The image is built with `-DQOR_BUILD_SIMULATOR=OFF`**, so Prism has no simulated
+services to fall back on, no `qor-shell`, and no unlock that accepts any password:
+it runs on the real daemons (Phase 3) and stays locked until there is a sign-in to
+check against ([QOR-0018](../docs/decisions/QOR-0018-the-security-and-quality-bar.md)).

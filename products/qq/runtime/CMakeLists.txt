@@ -4,6 +4,7 @@
 #
 # Changed for QOR OS: controllers come from QOR OS's controller service, QOR.Input's backends (input/gamepads), in
 # place of XInput.
+# Changed for QOR OS: the watchdog, and Qt's private QML API for refusing what opens outside (QOR-0018).
 
 qt_add_library(qqruntime STATIC)
 
@@ -51,6 +52,7 @@ qt_add_qml_module(qqruntime
         softdot.h softdot.cpp
         gpu.h gpu.cpp
         confinement.h confinement.cpp
+        watchdog.h watchdog.cpp
         webvoice.h webvoice.cpp
         look.h look.cpp
         tilemap.h tilemap.cpp
@@ -78,7 +80,11 @@ target_include_directories(qqruntime PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 if(NOT MSVC)
     target_compile_options(qqruntime PRIVATE -ffp-contract=off)
 endif()
-target_link_libraries(qqruntime PUBLIC Qt6::Qml Qt6::Quick Qt6::Quick3D PRIVATE Qt6::Network Qt6::Multimedia)
+# QmlPrivate: Qt's one way to refuse Qt.openUrlExternally from a module or a worker (confinement.cpp), used knowingly and
+# pinned to the Qt version the project requires.
+set(QT_NO_PRIVATE_MODULE_WARNING ON)
+find_package(Qt6 6.12 REQUIRED COMPONENTS QmlPrivate)
+target_link_libraries(qqruntime PUBLIC Qt6::Qml Qt6::Quick Qt6::Quick3D PRIVATE Qt6::Network Qt6::Multimedia Qt6::QmlPrivate)
 # Controllers, from QOR.Input's backends: XInput and raw HID (DualShock 4, DualSense) on Windows, evdev on Linux. Added
 # here when QQ is built on its own, as it is.
 if(NOT TARGET qor_gamepads)

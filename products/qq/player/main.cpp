@@ -20,7 +20,13 @@
 // network request, writes no file and opens nothing outside. A stranger's game plays only in the browser. A run is
 // written by the Player itself, never by the game.
 //
-// Changed for QOR OS: on Linux the process's creation is read from /proc, so the start is measured there too.
+// On Linux the Player also walls itself in with the kernel before anything else runs (sandbox.h): the game reads what is
+// its own and the system's, writes its store, makes no network socket and starts no program, whatever gets past QQ's own
+// checks. A scene with no folder of its own, saved straight in a person's home or Downloads, is not played: its package
+// would be all of it.
+//
+// Changed for QOR OS: on Linux the process's creation is read from /proc, so the start is measured there too; the wall
+// (sandbox.h), the refusal of too wide a package, and the watchdog for logic that never returns (QOR-0018).
 
 #include <QCommandLineParser>
 #include <QDateTime>
@@ -40,6 +46,8 @@
 #include "confinement.h"
 #include "gpu.h"
 #include "run.h"
+#include "sandbox.h"
+#include "watchdog.h"
 
 #ifdef Q_OS_WIN
 #define NOMINMAX
@@ -112,12 +120,6 @@ int main(int argc, char *argv[])
     Measure measure;
     measure.mainMs = sinceStart();
 
-    // Before the application exists: the GPU is chosen when the first window is shown.
-    const QString gpu = qq::preferHighPerformanceGpu();
-    QGuiApplication app(argc, argv);
-    QGuiApplication::setApplicationName(QStringLiteral("QQ Player"));
-    QGuiApplication::setOrganizationName(QStringLiteral("Demiurge"));
-
     QCommandLineParser parser;
     parser.setApplicationDescription(QStringLiteral("QQ Player: plays a QQ scene as a game"));
     parser.addHelpOption();
@@ -144,7 +146,41 @@ int main(int argc, char *argv[])
     parser.addOption(recordTo);
     parser.addOption(ticksOption);
     parser.addOption(replayFrom);
+
+    // The wall goes up before the application makes a thread, and needs what the command line says. Read again below,
+    // with the application, for its own options and any mistake.
+    QStringList commandLine;
+    for (int i = 0; i < argc; ++i)
+        commandLine << QString::fromLocal8Bit(argv[i]);
+    parser.parse(commandLine);
+    const QStringList named = parser.positionalArguments();
+    if (!named.isEmpty()) {
+        const QUrl package = qq::Confinement::packageOf(QUrl::fromLocalFile(QDir().absoluteFilePath(named.first())));
+        if (qq::Confinement::tooWide(package)) {
+            qWarning("%s is too wide to be a game's package: a game is played from a folder of its own.",
+                     qPrintable(package.toLocalFile()));
+            return 3;
+        }
+    }
+    qq::PlayerWall wall;
+    if (!named.isEmpty())
+        wall.package = qq::Confinement::packageOf(QUrl::fromLocalFile(QDir().absoluteFilePath(named.first()))).toLocalFile();
+    for (const QCommandLineOption &written : {capture, measureTo, recordTo}) {
+        if (parser.isSet(written))
+            wall.writes << QDir().absoluteFilePath(parser.value(written));
+    }
+    if (parser.isSet(replayFrom))
+        wall.reads << QDir().absoluteFilePath(parser.value(replayFrom));
+    const QString walled = qq::raisePlayerWall(wall);
+
+    // Before the application exists: the GPU is chosen when the first window is shown.
+    const QString gpu = qq::preferHighPerformanceGpu();
+    QGuiApplication app(argc, argv);
+    QGuiApplication::setApplicationName(QStringLiteral("QQ Player"));
+    QGuiApplication::setOrganizationName(QStringLiteral("Demiurge"));
     parser.process(app);
+    if (!walled.isEmpty())
+        qInfo("QQ Player walled in: %s", qPrintable(walled));
 
     const QStringList positional = parser.positionalArguments();
     const QUrl scene = positional.isEmpty() ? QUrl(QStringLiteral("qrc:/playground/scenes/playground.qml"))
@@ -172,6 +208,14 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
     // Whatever the game, its logic reaches only its own package (ADR-087 decision 2): before anything is loaded.
     qq::Confinement::apply(&engine, qq::Confinement::packageOf(scene));
+#ifndef Q_OS_WASM
+    // Logic that never returns would stop the window for good. (A browser watches its own pages.)
+    qq::LogicWatchdog watchdog(&engine);
+    QObject::connect(&watchdog, &qq::LogicWatchdog::gaveUp, &app, [] {
+        qWarning("This game's logic keeps stopping the window: it has been closed.");
+        QCoreApplication::exit(5);
+    });
+#endif
     qq::RunRecord *record = parser.isSet(recordTo) ? new qq::RunRecord(&app) : nullptr;
     engine.setInitialProperties({{QStringLiteral("scene"), scene},
                                  {QStringLiteral("seed"), parser.value(seedOption).toInt()},

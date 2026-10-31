@@ -63,8 +63,12 @@ target_link_libraries(prism PRIVATE
     qor_storeplugin
     qor_shell
     qor_shellplugin
-    qor_sim
+    qor_audio
     qor::compiler_settings
 )
+if(QOR_BUILD_SIMULATOR)
+    target_link_libraries(prism PRIVATE qor_sim)
+    target_compile_definitions(prism PRIVATE QOR_HAS_SIMULATOR)
+endif()
 
 install(TARGETS prism RUNTIME DESTINATION bin)

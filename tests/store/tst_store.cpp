@@ -245,6 +245,68 @@ private Q_SLOTS:
         QVERIFY(store.error().contains(u"signature"_s));
     }
 
+    // Anything running as this user can write where the Store installs, and a widget's QML runs inside the shell: what
+    // is installed is checked each time it is loaded, against what its developer signed. An old catalogue cannot put
+    // back an older version.
+    void whatIsInstalledStaysWhatItsDeveloperSigned()
+    {
+        QTemporaryDir data;
+        const QByteArray key = publicKey(kFixtures + u"/store.pub"_s);
+        const QString widget = u"org.example.widget.test"_s;
+        StoreEngine store(data.path(), key);
+        store.setCatalogUrl(QUrl::fromLocalFile(kFixtures + u"/v2/catalog.json"_s));
+        store.refresh();
+        QTRY_COMPARE(store.state(), StoreEngine::State::Ready);
+        QSignalSpy finished(&store, &StoreEngine::finished);
+        QVERIFY(store.install(widget));
+        QTRY_COMPARE(finished.count(), 1);
+        QVERIFY2(finished.at(0).at(1).toBool(), qPrintable(finished.at(0).at(2).toString()));
+        QVERIFY(store.isIntact(widget));
+
+        const QString installed = store.installDirectory(widget);
+        const QString qml = installed + u"/Test.qml"_s;
+        const QByteArray original = readFile(qml);
+        {
+            QFile changed(qml);
+            QVERIFY(changed.open(QIODevice::Append));
+            changed.write("// changed\n");
+        }
+        QVERIFY(!store.isIntact(widget));
+        {
+            QFile back(qml);
+            QVERIFY(back.open(QIODevice::WriteOnly));
+            back.write(original);
+        }
+        QVERIFY(store.isIntact(widget));
+        // Nothing added: a qmldir would bring in a plugin.
+        {
+            QFile added(installed + u"/qmldir"_s);
+            QVERIFY(added.open(QIODevice::WriteOnly));
+            added.write("plugin evil\n");
+        }
+        QVERIFY(!store.isIntact(widget));
+        QVERIFY(QFile::remove(installed + u"/qmldir"_s));
+        QVERIFY(QFile::remove(installed + u"/manifest.sig"_s));
+        QVERIFY(!store.isIntact(widget));
+
+        // Installed afresh, an older catalogue offers what it has and is refused.
+        const QString theme = u"org.example.theme.test"_s;
+        finished.clear();
+        QVERIFY(store.install(theme));
+        QTRY_COMPARE(finished.count(), 1);
+        QVERIFY(finished.at(0).at(1).toBool());
+        QCOMPARE(store.installed().value(theme).version, u"1.1.0"_s);
+        store.setCatalogUrl(QUrl::fromLocalFile(kFixtures + u"/v1/catalog.json"_s));
+        store.refresh();
+        QTRY_COMPARE(store.catalog().item(theme)->version, u"1.0.0"_s);
+        finished.clear();
+        QVERIFY(store.install(theme));
+        QTRY_COMPARE(finished.count(), 1);
+        QVERIFY(!finished.at(0).at(1).toBool());
+        QVERIFY(finished.at(0).at(2).toString().contains(u"newer"_s));
+        QCOMPARE(store.installed().value(theme).version, u"1.1.0"_s);
+    }
+
     void describesTheBuiltInStore()
     {
         // The shell's view: the signed catalogue built into QOR OS (qrc).
@@ -270,7 +332,24 @@ private Q_SLOTS:
         QCOMPARE(theme.value(u"appearance"_s).toString(), u"dark"_s);
         const QVariantMap clock = store.widget(u"dev.qorsync.widget.clock"_s);
         QCOMPARE(clock.value(u"size"_s).toString(), u"medium"_s);
-        QVERIFY(QFile::exists(clock.value(u"source"_s).toUrl().toLocalFile()));
+        const QString clockQml = clock.value(u"source"_s).toUrl().toLocalFile();
+        QVERIFY(QFile::exists(clockQml));
+        // Changed on disk, it is no longer loaded, and the shell never sees it.
+        const QByteArray clockOriginal = readFile(clockQml);
+        {
+            QFile changed(clockQml);
+            QVERIFY(changed.open(QIODevice::Append));
+            changed.write("// changed\n");
+        }
+        store.refresh();
+        QTRY_VERIFY(store.widget(u"dev.qorsync.widget.clock"_s).isEmpty());
+        {
+            QFile back(clockQml);
+            QVERIFY(back.open(QIODevice::WriteOnly));
+            back.write(clockOriginal);
+        }
+        store.refresh();
+        QTRY_VERIFY(!store.widget(u"dev.qorsync.widget.clock"_s).isEmpty());
         QCOMPARE(store.library().size(), 2);
         QCOMPARE(store.updateCount(), 0);
 

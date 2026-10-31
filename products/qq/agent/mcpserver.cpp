@@ -1,9 +1,11 @@
+// Changed for QOR OS: the pipe is in the person's runtime folder on Linux, and a line has an end (QOR-0018).
 #include "mcpserver.h"
 
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QLocalServer>
 #include <QLocalSocket>
+#include <QStandardPaths>
 #include <QPointer>
 #include <QRegularExpression>
 
@@ -168,6 +170,13 @@ QString McpServer::defaultPipeName()
     const QString set = qEnvironmentVariable("QQ_MCP_PIPE");
     if (!set.isEmpty())
         return set;
+#if defined(Q_OS_LINUX)
+    // In the person's runtime folder, which only they can enter: a plain name would be a socket in /tmp, which another
+    // user could take first, and qq-mcp would speak to them.
+    const QString folder = QStandardPaths::writableLocation(QStandardPaths::RuntimeLocation);
+    if (!folder.isEmpty())
+        return folder + QStringLiteral("/qq-studio-mcp");
+#endif
     QString user = qEnvironmentVariable("USERNAME", qEnvironmentVariable("USER", QStringLiteral("user")));
     user.replace(QRegularExpression(QStringLiteral("[^A-Za-z0-9_-]")), QStringLiteral("_"));
     return QStringLiteral("qq-studio-mcp-") + user;
@@ -195,6 +204,11 @@ bool McpServer::listen(const QString &name)
         while (QLocalSocket *socket = m_local->nextPendingConnection()) {
             connect(socket, &QLocalSocket::disconnected, socket, &QObject::deleteLater);
             connect(socket, &QLocalSocket::readyRead, this, [this, socket] {
+                // A client that never ends its line does not fill this Studio's memory.
+                if (!socket->canReadLine() && socket->bytesAvailable() > 64 * 1024 * 1024) {
+                    socket->abort();
+                    return;
+                }
                 while (socket->canReadLine()) {
                     const QByteArray text = socket->readLine().trimmed();
                     if (text.isEmpty())

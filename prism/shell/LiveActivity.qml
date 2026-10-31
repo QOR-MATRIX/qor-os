@@ -64,6 +64,7 @@ Item {
             Text {
                 anchors.verticalCenter: parent.verticalCenter
                 text: Services.media.title
+                textFormat: Text.PlainText
                 font: Theme.footnote
                 color: Theme.textPrimary
             }

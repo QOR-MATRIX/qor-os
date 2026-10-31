@@ -163,11 +163,19 @@ void StoreEngine::complete(const QString &id, const QByteArray &data)
     if (manifest.id != item->id || manifest.version != item->version || manifest.kind != item->kind
         || manifest.developer != item->developer)
         return fail(id, u"The package is not the one the catalogue lists."_s);
+    // An old catalogue, replayed, could otherwise put back a version with a known fault.
+    if (const auto installed = m_installed.constFind(id);
+        installed != m_installed.cend() && compareVersions(item->version, installed->version) < 0)
+        return fail(id, u"A newer version of this is already installed."_s);
 
     // Write everything beside the old version, then swap.
     const QString target = installDirectory(id);
     const QString staging = m_dataDir + u"/items/.staging-"_s + QUuid::createUuid().toString(QUuid::Id128);
-    for (auto it = package.contents.cbegin(); it != package.contents.cend(); ++it) {
+    QMap<QString, QByteArray> files = package.contents;
+    // Kept beside them, so what runs can be checked each time it is loaded.
+    files.insert(u"manifest.json"_s, package.manifestBytes);
+    files.insert(u"manifest.sig"_s, package.signature);
+    for (auto it = files.cbegin(); it != files.cend(); ++it) {
         const QString path = staging + u'/' + it.key();
         QDir().mkpath(QFileInfo(path).absolutePath());
         QSaveFile file(path);
@@ -197,6 +205,15 @@ void StoreEngine::complete(const QString &id, const QByteArray &data)
     Q_EMIT installedChanged();
     Q_EMIT progressChanged(id);
     Q_EMIT finished(id, true, {});
+}
+
+bool StoreEngine::isIntact(const QString &id) const
+{
+    const auto installed = m_installed.constFind(id);
+    if (installed == m_installed.cend())
+        return false;
+    const auto developer = m_catalog.developers.constFind(installed->developer);
+    return developer != m_catalog.developers.cend() && verifyInstalled(installDirectory(id), developer->key);
 }
 
 void StoreEngine::fail(const QString &id, const QString &error)

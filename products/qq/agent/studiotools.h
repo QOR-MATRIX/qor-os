@@ -117,6 +117,8 @@ private:
     McpServer *m_server;
     QJsonObject m_kinds;
     bool m_drivingInput = false;
+    /// Logic the agent has written since this Studio opened, which runs only once the creator allows it.
+    bool m_wroteLogic = false;
 };
 
 }  // namespace qq

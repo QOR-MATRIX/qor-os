@@ -38,6 +38,8 @@ target_compile_definitions(tst_producthost PRIVATE QOR_TEST_PRODUCT="$<TARGET_FI
 add_dependencies(tst_producthost tst_producthost_product)
 # The Library (prism/shell/library.h): the games and media it finds, and what was played.
 qor_add_test(tst_library SOURCES prism/tst_library.cpp LIBRARIES qor_shell)
+# What a Wayland client's app id can make the shell read.
+qor_add_test(tst_desktopentries SOURCES prism/tst_desktopentries.cpp LIBRARIES qor_shell)
 # The QOR core through its C bridge, built from demiurge-chain at the pinned commit (core/, QOR-0003).
 if(TARGET qor::core)
     qor_add_test(tst_qorcore SOURCES core/tst_qorcore.cpp LIBRARIES qor::core)
@@ -132,6 +134,22 @@ if(TARGET prism)
                 --qq-player $<TARGET_FILE:prism-test-qq-player>
                 --script "${CMAKE_CURRENT_SOURCE_DIR}/prism/products.e2e.json")
         set_tests_properties(prism_products PROPERTIES TIMEOUT 120)
+
+        # What a client says about itself is only a claim: one calling itself
+        # Settings, and one that opens a window it never draws, hoping for the
+        # keyboard. No display and no graphics card, as above.
+        add_test(NAME prism_untrusted
+            COMMAND Python3::Interpreter "${CMAKE_SOURCE_DIR}/tools/dev/prism-products.py"
+                --prism $<TARGET_FILE:prism>
+                --arqade $<TARGET_FILE:prism-test-arqade>
+                --media $<TARGET_FILE:prism-test-media>
+                --qq-studio $<TARGET_FILE:prism-test-qq-studio>
+                --qq-player $<TARGET_FILE:prism-test-qq-player>
+                --script "${CMAKE_CURRENT_SOURCE_DIR}/prism/untrusted.e2e.json"
+                "--client=$<TARGET_FILE:prism-test-client> --app-id settings --title Impostor"
+                "--client=$<TARGET_FILE:prism-test-client> --app-id arqade --title Pretender"
+                "--client=$<TARGET_FILE:prism-test-client> --unseen --after 9000 --title Unseen")
+        set_tests_properties(prism_untrusted PROPERTIES TIMEOUT 120)
     endif()
 endif()
 

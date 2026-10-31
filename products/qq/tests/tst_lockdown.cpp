@@ -5,6 +5,10 @@
 // beyond the package. What the logic got back is read from its own properties, what reached the disk or the network
 // is checked from outside, and every refusal must be on Confinement's record. The first case is the other side: a game
 // that keeps to its own files plays, and nothing of it is refused.
+//
+// Changed for QOR OS: the holes a review found on 30 October 2026 (QOR-0018), each tried from the game's side: a qmldir
+// naming a native plugin, a symbolic link out of the package, a voice's URL, logic and a sound from elsewhere, a request
+// to open something from a module and a worker, and logic that never returns.
 
 #include <QDir>
 #include <QDirIterator>
@@ -23,10 +27,16 @@
 
 #include <memory>
 
+#include <QDesktopServices>
+#include <QSignalSpy>
+
 #include "confinement.h"
 #include "gpu.h"
+#include "mixer.h"
+#include "run.h"
 #include "sceneio.h"
 #include "store.h"
+#include "watchdog.h"
 
 static const QString chosenGpu = qq::preferHighPerformanceGpu();
 
@@ -135,6 +145,158 @@ private slots:
     {
         // Games' stores (P3.16) go to the test's own folders, never a person's.
         QStandardPaths::setTestModeEnabled(true);
+    }
+
+    // A qmldir in a package can name a native plugin, which Qt loads as this program: looked for beside every QML file,
+    // with no import asking. So nothing in a package is a module, and the plugin it names is never tried.
+    void aPackagesQmldirIsNoModuleAndItsPluginIsNeverLoaded()
+    {
+        Game g;
+        const QByteArray names("module Evil\nplugin evil\n");
+        write(g.in(QStringLiteral("scenes/qmldir")), names);
+        write(g.in(QStringLiteral("logic/qmldir")), names);
+        QVERIFY(g.play(QByteArrayLiteral("import QQ\nLogic {\n    property bool ran: false\n    onFrame: (dt) => ran = true\n}\n")));
+        QObject *logic = g.logic();
+        QVERIFY2(logic, qPrintable(g.behaviour()->property("error").toString()));
+        QTRY_VERIFY(logic->property("ran").toBool());
+        QVERIFY2(g.newRefusals().join(QLatin1Char('\n')).contains(QStringLiteral("import: ")), qPrintable(g.newRefusals().join(QLatin1Char('\n'))));
+    }
+
+#ifdef Q_OS_UNIX
+    // A symbolic link in a package to a file elsewhere is elsewhere: a package can come as a tar or from git, with links.
+    void aSymbolicLinkOutOfThePackageIsOutside()
+    {
+        Game g;
+        write(g.out(QStringLiteral("secret.txt")), QByteArrayLiteral("a person's secret"));
+        write(g.in(QStringLiteral("assets/mine.txt")), QByteArrayLiteral("the game's own"));
+        QVERIFY(QFile::link(g.out(QStringLiteral("secret.txt")), g.in(QStringLiteral("assets/link.txt"))));
+        QVERIFY(QFile::link(g.outside.path(), g.in(QStringLiteral("assets/folder"))));
+        QVERIFY(g.play(QStringLiteral(
+            "import QQ\nLogic {\n"
+            "    property string mine: SceneIO.readText(\"%1\") ?? \"absent\"\n"
+            "    property string linked: SceneIO.readText(\"%2\") ?? \"absent\"\n"
+            "    property string through: SceneIO.readText(\"%3\") ?? \"absent\"\n"
+            "}\n").arg(QUrl::fromLocalFile(g.in(QStringLiteral("assets/mine.txt"))).toString(),
+                       QUrl::fromLocalFile(g.in(QStringLiteral("assets/link.txt"))).toString(),
+                       QUrl::fromLocalFile(g.in(QStringLiteral("assets/folder/secret.txt"))).toString()).toUtf8()));
+        QObject *logic = g.logic();
+        QVERIFY2(logic, qPrintable(g.behaviour()->property("error").toString()));
+        QCOMPARE(logic->property("mine").toString(), QStringLiteral("the game's own"));
+        QCOMPARE(logic->property("linked").toString(), QStringLiteral("absent"));
+        QCOMPARE(logic->property("through").toString(), QStringLiteral("absent"));
+    }
+#endif
+
+    // Qt's sound effects fetch a URL with a network manager of their own, past the engine's.
+    void aVoiceReachesNoNetwork()
+    {
+        QTcpServer listener;
+        QVERIFY(listener.listen(QHostAddress::LocalHost));
+        Game g;
+        QVERIFY(g.play(QStringLiteral(
+            "import QQ\nLogic {\n    WebVoice { source: \"http://127.0.0.1:%1/x.wav\" }\n}\n").arg(listener.serverPort()).toUtf8()));
+        QVERIFY2(g.logic(), qPrintable(g.behaviour()->property("error").toString()));
+        QTest::qWait(600);
+        QVERIFY(!listener.hasPendingConnections());
+        // Refused before it got that far: where the sound effect's own network may not connect at all, as with no sound
+        // device, the listener alone would say nothing.
+        const QString refused = g.newRefusals().join(QLatin1Char('\n'));
+        QVERIFY2(refused.contains(QStringLiteral("127.0.0.1")), qPrintable(refused));
+    }
+
+    // Logic from elsewhere is not built, nor its folder watched; a sound from elsewhere tells nothing about itself.
+    void logicAndSoundsFromElsewhereAreNothing()
+    {
+        Game g;
+        write(g.out(QStringLiteral("other.qml")), QByteArrayLiteral("import QQ\nLogic { Component.onCompleted: Qt.exit(9) }\n"));
+        QVERIFY(QFile::copy(fixture(QStringLiteral("chime.wav")), g.out(QStringLiteral("far.wav"))));
+        QVERIFY(QFile::copy(fixture(QStringLiteral("chime.wav")), g.in(QStringLiteral("near.wav"))));
+        QVERIFY(g.play(QStringLiteral(
+            "import QQ\nLogic {\n"
+            "    LogicFile { id: other; active: true; source: \"%1\" }\n"
+            "    property string otherError: other.error\n"
+            "    property bool otherBuilt: other.object !== null\n"
+            "    property real far: Mixer.lengthOf(\"%2\")\n"
+            "    property real near: Mixer.lengthOf(\"%3\")\n"
+            "}\n").arg(g.outUrl(QStringLiteral("other.qml")), g.outUrl(QStringLiteral("far.wav")),
+                       QUrl::fromLocalFile(g.in(QStringLiteral("near.wav"))).toString()).toUtf8()));
+        QObject *logic = g.logic();
+        QVERIFY2(logic, qPrintable(g.behaviour()->property("error").toString()));
+        QVERIFY(!logic->property("otherBuilt").toBool());
+        QVERIFY2(logic->property("otherError").toString().contains(QStringLiteral("own logic")), qPrintable(logic->property("otherError").toString()));
+        QCOMPARE(logic->property("far").toDouble(), 0.0);
+        QVERIFY(logic->property("near").toDouble() > 0);
+    }
+
+    // From a JavaScript module or a worker there is no QML context, and Qt hands the URL over with no interceptor.
+    void nothingOpensOutsideFromAModuleOrAWorker()
+    {
+        struct Handler : QObject {
+            int hits = 0;
+            Q_INVOKABLE void hit(const QUrl &) { ++hits; }
+        } handler;
+        QDesktopServices::setUrlHandler(QStringLiteral("qqtest"), &handler, "hit");
+        Game g;
+        write(g.in(QStringLiteral("logic/out.mjs")),
+              QByteArrayLiteral("export function open() { return Qt.openUrlExternally(\"qqtest:from-a-module\") }\n"));
+        write(g.in(QStringLiteral("logic/worker.mjs")),
+              QByteArrayLiteral("WorkerScript.onMessage = () => { WorkerScript.sendMessage({ opened: Qt.openUrlExternally(\"qqtest:from-a-worker\") }) }\n"));
+        QVERIFY(g.play(QByteArrayLiteral(
+            "import QtQml\nimport QtQml.WorkerScript\nimport QQ\nimport \"out.mjs\" as Out\nLogic {\n"
+            "    property bool fromModule: true\n    property var fromWorker: undefined\n"
+            "    WorkerScript { id: worker; source: \"worker.mjs\"; onMessage: (m) => fromWorker = m.opened }\n"
+            "    Component.onCompleted: { fromModule = Out.open(); worker.sendMessage({}) }\n}\n")));
+        QObject *logic = g.logic();
+        QVERIFY2(logic, qPrintable(g.behaviour()->property("error").toString()));
+        QVERIFY(!logic->property("fromModule").toBool());
+        QTRY_VERIFY_WITH_TIMEOUT(logic->property("fromWorker").isValid(), 5000);
+        QVERIFY(!logic->property("fromWorker").toBool());
+        QDesktopServices::unsetUrlHandler(QStringLiteral("qqtest"));
+        QCOMPARE(handler.hits, 0);
+        QVERIFY(g.newRefusals().join(QLatin1Char('\n')).contains(QStringLiteral("request to open")));
+    }
+
+    // Logic that never returns would stop the window for good.
+    void logicThatNeverReturnsIsInterrupted()
+    {
+        Game g;
+        qq::LogicWatchdog watchdog(&g.engine, 400);
+        QSignalSpy gaveUp(&watchdog, &qq::LogicWatchdog::gaveUp);
+        QVERIFY(g.play(QByteArrayLiteral(
+            "import QQ\nLogic {\n    property int tries: 0\n    onFrame: (dt) => { tries += 1; while (true) {} }\n}\n")));
+        QTRY_VERIFY_WITH_TIMEOUT(watchdog.interruptions() >= 3, 20000);
+        QCOMPARE(gaveUp.count(), 1);
+    }
+
+    void aPackageIsAFolderOfItsOwn()
+    {
+        QVERIFY(qq::Confinement::tooWide(QUrl::fromLocalFile(QDir::homePath())));
+        QVERIFY(qq::Confinement::tooWide(QUrl::fromLocalFile(QDir::rootPath())));
+        QVERIFY(qq::Confinement::tooWide(QUrl::fromLocalFile(QStandardPaths::writableLocation(QStandardPaths::DownloadLocation))));
+        QVERIFY(qq::Confinement::tooWide(QUrl::fromLocalFile(QDir::tempPath())));
+        QTemporaryDir own;
+        QVERIFY(!qq::Confinement::tooWide(QUrl::fromLocalFile(own.path())));
+        QVERIFY(!qq::Confinement::tooWide(QUrl(QStringLiteral("qrc:/games/orbital"))));
+#ifdef Q_OS_LINUX
+        // By the file system's own rule of case: on Linux another folder.
+        QVERIFY(!qq::Confinement::within(QStringLiteral("/home/A/x"), QStringLiteral("/home/a")));
+#endif
+        QVERIFY(qq::Confinement::within(QStringLiteral("/home/a/x"), QStringLiteral("/home/a")));
+        QVERIFY(!qq::Confinement::within(QStringLiteral("/home/ab"), QStringLiteral("/home/a")));
+    }
+
+    // What a file says of itself ends: a chunk's size cannot turn the walk back, nor a run's length go on for ever.
+    void hostileFilesEnd()
+    {
+        QByteArray wave("RIFF\0\0\0\0WAVEjunk", 16);
+        wave.append("\xF8\xFF\xFF\xFF", 4);
+        wave.append(QByteArray(64, '\0'));
+        QCOMPARE(qq::wavLength(wave), 0.0);
+
+        qq::RunRecord run;
+        QString why;
+        QVERIFY(!run.fromJson(QByteArrayLiteral("{\"qqRun\":1,\"ticks\":2147483647}"), &why));
+        QVERIFY(why.contains(QStringLiteral("longer")));
     }
 
     void aGameThatKeepsToItsOwnFilesPlaysAndNothingIsRefused()

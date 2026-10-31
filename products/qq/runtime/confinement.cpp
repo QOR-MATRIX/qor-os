@@ -1,3 +1,7 @@
+// Changed for QOR OS: a qmldir in a package is refused, since it can name a native plugin; places are compared where they
+// really are, through symbolic links, and by the file system's own rule of case; Qt.openUrlExternally is refused however
+// it is reached; and the Studio has a guard of its own (QOR-0018).
+
 #include "confinement.h"
 
 #include <QDesktopServices>
@@ -13,6 +17,8 @@
 #include <QQmlAbstractUrlInterceptor>
 #include <QQmlEngine>
 #include <QQmlNetworkAccessManagerFactory>
+#include <QStandardPaths>
+#include <private/qqmlglobal_p.h>
 
 #include "sceneio.h"
 
@@ -32,13 +38,13 @@ void record(const QString &kind, const QString &what)
     qWarning("QQ refused a game's %s: %s", qPrintable(kind), qPrintable(what));
 }
 
-/// A location to compare: "qrc:/path" for the executable's resources, a clean local path for files, "" otherwise.
+/// A location to compare: "qrc:/path" for the executable's resources, a file's real place for files, "" otherwise.
 QString location(const QUrl &url)
 {
     if (url.scheme() == QStringLiteral("qrc"))
         return QStringLiteral("qrc:") + QDir::cleanPath(url.path());
     if (url.isLocalFile())
-        return QDir::cleanPath(url.toLocalFile());
+        return Confinement::realPath(url.toLocalFile());
     return {};
 }
 
@@ -48,14 +54,12 @@ QString rootOf(const QString &importPath)
         return QStringLiteral("qrc:") + QDir::cleanPath(importPath.mid(4));
     if (importPath.startsWith(QStringLiteral(":/")))
         return QStringLiteral("qrc:") + QDir::cleanPath(importPath.mid(1));
-    return QDir::cleanPath(QDir::fromNativeSeparators(importPath));
+    return Confinement::realPath(QDir::fromNativeSeparators(importPath));
 }
 
 bool inside(const QString &where, const QString &root)
 {
-    return !root.isEmpty()
-           && (where.compare(root, Qt::CaseInsensitive) == 0
-               || where.startsWith(root + QLatin1Char('/'), Qt::CaseInsensitive));
+    return Confinement::within(where, root);
 }
 
 /// A URL that names nothing: what a refused load is pointed at, so it fails as a missing file does.
@@ -99,8 +103,16 @@ public:
             record(QStringLiteral("load"), url.toString());
             return nowhere("load");
         }
-        if (inside(where, m_package))
+        if (inside(where, m_package)) {
+            // A package holds no modules: a qmldir can name a native plugin, which Qt would load as this program, and
+            // Qt looks for one beside every QML file without any import asking.
+            if (type == QmldirFile) {
+                if (exists(where))
+                    record(QStringLiteral("import"), url.toString());
+                return nowhere("import");
+            }
             return url;
+        }
         // The innermost import folder holding it: an application's folder can hold its own qml/ folder of modules.
         for (const QString &root : m_roots) {
             if (!inside(where, root))
@@ -161,6 +173,61 @@ public:
     QNetworkAccessManager *create(QObject *parent) override { return new RefusingAccess(parent); }
 };
 
+/// The Studio runs a project's own code, so it keeps what is on a qmldir out: only modules from the import folders and
+/// the executable can bring native code. Everything else loads as it would.
+class ModulesOnlyFromImportFolders : public QQmlAbstractUrlInterceptor
+{
+public:
+    explicit ModulesOnlyFromImportFolders(QStringList roots) : m_roots(std::move(roots)) {}
+
+    QUrl intercept(const QUrl &url, DataType type) override
+    {
+        if (type != QmldirFile || url.isEmpty() || url.isRelative() || url.scheme() == QStringLiteral("qrc"))
+            return url;
+        const QString where = location(url);
+        for (const QString &root : m_roots) {
+            if (inside(where, root))
+                return url;
+        }
+        if (QFile::exists(where))
+            record(QStringLiteral("import"), url.toString());
+        return nowhere("import");
+    }
+
+private:
+    QStringList m_roots;
+};
+
+/// Qt.openUrlExternally reaches the operating system past the engine's interceptor when it is called from a JavaScript
+/// module or a worker, which have no QML context. This stands in for Qt Quick's provider, whose other answers it passes
+/// on: nothing a game or a project's logic runs opens anything outside. It is the process's, once.
+class NothingOpensOutside : public QQmlGuiProvider
+{
+public:
+    QQmlApplication *application(QObject *parent) override { return m_theirs->application(parent); }
+    QObject *inputMethod() override { return m_theirs->inputMethod(); }
+    QObject *styleHints() override { return m_theirs->styleHints(); }
+    QStringList fontFamilies() override { return m_theirs->fontFamilies(); }
+    QString pluginName() const override { return m_theirs->pluginName(); }
+    bool openUrlExternally(const QUrl &url) override
+    {
+        record(QStringLiteral("request to open"), url.toString());
+        return false;
+    }
+
+    static void install()
+    {
+        static NothingOpensOutside *ours = nullptr;
+        if (ours)
+            return;
+        ours = new NothingOpensOutside;
+        ours->m_theirs = QQml_setGuiProvider(ours);
+    }
+
+private:
+    QQmlGuiProvider *m_theirs = nullptr;
+};
+
 /// Qt.openUrlExternally lands here for every refused scheme.
 class UrlRefuser : public QObject
 {
@@ -217,6 +284,71 @@ const QStringList &Confinement::refusedSchemes()
     return schemes;
 }
 
+QString Confinement::realPath(const QString &path)
+{
+    const QString clean = QDir::cleanPath(path);
+    const QFileInfo info(clean);
+    const QString real = info.canonicalFilePath();
+    if (!real.isEmpty())
+        return real;
+    // Not there (yet): the real place of the nearest folder that is, with the rest of its name as written.
+    QString rest = info.fileName();
+    for (QFileInfo folder(info.path());; folder = QFileInfo(folder.path())) {
+        const QString found = folder.canonicalFilePath();
+        if (!found.isEmpty())
+            return QDir::cleanPath(found + QLatin1Char('/') + rest);
+        if (folder.isRoot() || folder.path() == folder.filePath())
+            return clean;
+        rest = folder.fileName() + QLatin1Char('/') + rest;
+    }
+}
+
+bool Confinement::within(const QString &where, const QString &root)
+{
+#ifdef Q_OS_WIN
+    constexpr Qt::CaseSensitivity sense = Qt::CaseInsensitive;
+#else
+    constexpr Qt::CaseSensitivity sense = Qt::CaseSensitive;
+#endif
+    return !root.isEmpty()
+           && (where.compare(root, sense) == 0
+               || where.startsWith(root.endsWith(QLatin1Char('/')) ? root : root + QLatin1Char('/'), sense));
+}
+
+bool Confinement::tooWide(const QUrl &package)
+{
+    if (!package.isLocalFile())
+        return false;
+    const QString folder = realPath(package.toLocalFile());
+    const QStandardPaths::StandardLocation personal[] = {
+        QStandardPaths::HomeLocation,      QStandardPaths::DesktopLocation, QStandardPaths::DocumentsLocation,
+        QStandardPaths::DownloadLocation,  QStandardPaths::MusicLocation,   QStandardPaths::MoviesLocation,
+        QStandardPaths::PicturesLocation,  QStandardPaths::TempLocation,
+    };
+    if (QFileInfo(folder).isRoot())
+        return true;
+    for (const QStandardPaths::StandardLocation where : personal) {
+        const QString place = realPath(QStandardPaths::writableLocation(where));
+        // That folder itself, or one it lies inside: home, say, for ~/Downloads.
+        if (within(place, folder))
+            return true;
+    }
+    return false;
+}
+
+void Confinement::guardStudio(QQmlEngine *engine)
+{
+    QStringList roots;
+    for (const QString &path : engine->importPathList())
+        roots << rootOf(path);
+    auto *interceptor = new ModulesOnlyFromImportFolders(roots);
+    engine->addUrlInterceptor(interceptor);
+    QObject::connect(engine, &QObject::destroyed, [interceptor] { delete interceptor; });
+    static RefusingAccessFactory access;
+    engine->setNetworkAccessManagerFactory(&access);
+    NothingOpensOutside::install();
+}
+
 QUrl Confinement::packageOf(const QUrl &scene)
 {
     const QString path = scene.scheme() == QStringLiteral("qrc") ? scene.path() : scene.toLocalFile();
@@ -255,6 +387,7 @@ void Confinement::apply(QQmlEngine *engine, const QUrl &package)
     static UrlRefuser *refuser = new UrlRefuser;
     for (const QString &scheme : refusedSchemes())
         QDesktopServices::setUrlHandler(scheme, refuser, "refuse");
+    NothingOpensOutside::install();
 }
 
 QStringList Confinement::refusals()

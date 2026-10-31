@@ -13,6 +13,7 @@ import QOR.Media
 // Changed for QOR OS: Return takes the keyboard to the controls, at Play; there the arrows go from control to control
 // (the volume's own Left and Right excepted), and Esc comes back. Under Prism, a controller's d-pad is the arrows, its A
 // Return and its East Esc.
+// Changed for QOR OS: a track's title and artist are text, never markup (QOR-0018).
 FocusScope {
     id: player
     objectName: "player"
@@ -170,6 +171,7 @@ FocusScope {
             Text {
                 Layout.alignment: Qt.AlignHCenter
                 text: media.metaData.stringValue(MediaMetaData.Title) || Files.nameOf(player.path)
+                textFormat: Text.PlainText
                 color: Theme.ink
                 font.family: Theme.ui
                 font.pixelSize: Theme.sizeFigure
@@ -178,6 +180,7 @@ FocusScope {
             Text {
                 Layout.alignment: Qt.AlignHCenter
                 text: [media.metaData.stringValue(MediaMetaData.ContributingArtist), media.metaData.stringValue(MediaMetaData.AlbumTitle)].filter(Boolean).join(" · ")
+                textFormat: Text.PlainText
                 color: Theme.inkMuted
                 font.family: Theme.text
                 font.pixelSize: Theme.sizeTitle

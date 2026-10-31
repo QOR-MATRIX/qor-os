@@ -7,6 +7,7 @@
 // it sends, what it runs, what it leaves for the creator, and how it meets a busy provider, a refused key and a refusal.
 //
 // Changed for QOR OS: a warning from QQ's own QML (an undefined name, a failed binding) fails the case it happens in.
+// Changed for QOR OS: what an agent writes runs only when allowed (QOR-0018).
 
 #include <QColor>
 #include <QDir>
@@ -528,6 +529,36 @@ private slots:
         QVERIFY(QFile::exists(QDir(s.project.path()).filePath(QStringLiteral("logic/broken.qml"))));
     }
 
+    // A model's answer is not the creator's. Logic the agent wrote runs once the creator allows it; its files stay in the
+    // project: a picture from anywhere, with a frame captured of it, would be a way to read it.
+    void whatTheAgentWritesRunsOnlyWhenAllowed()
+    {
+        Studio s;
+        QVERIFY(s.open());
+        QVERIFY(!s.client.tool(QStringLiteral("behaviour_write"),
+                               {{QStringLiteral("file"), QStringLiteral("mine")},
+                                {QStringLiteral("code"), QStringLiteral("import QQ\nLogic {}\n")}})
+                     .value(QStringLiteral("isError")).toBool());
+        QJsonObject r = s.client.tool(QStringLiteral("play"));
+        QVERIFY(r.value(QStringLiteral("isError")).toBool());
+        QVERIFY2(r.value(QStringLiteral("text")).toString().contains(QStringLiteral("allow")), qPrintable(r.value(QStringLiteral("text")).toString()));
+        QVERIFY(!s.window->property("playing").toBool());
+
+        s.window->setProperty("agentMayRun", true);
+        r = s.client.tool(QStringLiteral("play"));
+        QVERIFY2(!r.value(QStringLiteral("isError")).toBool(), qPrintable(r.value(QStringLiteral("text")).toString()));
+        s.client.tool(QStringLiteral("stop"));
+
+        // A file outside the project is no field's value.
+        s.client.tool(QStringLiteral("entity_add"),
+                      {{QStringLiteral("kind"), QStringLiteral("Shape")}, {QStringLiteral("name"), QStringLiteral("Wall")}});
+        r = s.client.tool(QStringLiteral("entity_set"),
+                          {{QStringLiteral("name"), QStringLiteral("Wall")},
+                           {QStringLiteral("fields"), QJsonObject{{QStringLiteral("image"), QUrl::fromLocalFile(fixture(QStringLiteral("tiles.png"))).toString()}}}});
+        QVERIFY(r.value(QStringLiteral("isError")).toBool());
+        QVERIFY2(r.value(QStringLiteral("text")).toString().contains(QStringLiteral("outside the project")), qPrintable(r.value(QStringLiteral("text")).toString()));
+    }
+
     void anAgentPlaysLooksAndStopsAndTheSceneComesBack()
     {
         Studio s;
@@ -591,6 +622,7 @@ private slots:
     {
         Studio s;
         QVERIFY(s.open());
+        s.window->setProperty("agentMayRun", true);
         const qint64 start = s.client.tool(QStringLiteral("log_read"), {{QStringLiteral("since"), 0}})
                                  .value(QStringLiteral("json")).toObject().value(QStringLiteral("next")).toInteger();
         s.client.tool(QStringLiteral("behaviour_write"),

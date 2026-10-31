@@ -14,7 +14,8 @@
 #
 # products/qq/README.md has the whole procedure. Build outside the repository's drive if it is short of space.
 #
-# Changed for QOR OS: Qt D-Bus on Linux, for the Studio's key in the Secret Service (QOR OS's QOR-0011).
+# Changed for QOR OS: Qt D-Bus on Linux, for the Studio's key in the Secret Service (QOR OS's QOR-0011); QOR OS's exploit
+# mitigations (QOR-0018).
 
 cmake_minimum_required(VERSION 3.22)
 
@@ -51,6 +52,8 @@ if(MSVC)
 else()
     add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
+
+include(../../cmake/QorHardening.cmake)
 
 add_subdirectory(runtime)
 add_subdirectory(player)

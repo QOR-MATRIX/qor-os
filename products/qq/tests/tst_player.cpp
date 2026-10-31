@@ -6,6 +6,7 @@
 // file from disk, report its first frame and frame rate, and show a frame that is the game (sky, ground, lit shapes and
 // the player), not an empty window.
 
+// Changed for QOR OS: the kernel's wall around a game (QOR-0018).
 #include <QDir>
 #include <QFile>
 #include <QImage>
@@ -105,6 +106,63 @@ private slots:
         QVERIFY2(first > m.value(QStringLiteral("mainMs")).toDouble() && first < 10000, qPrintable(QString::number(first)));
         QVERIFY2(m.value(QStringLiteral("fps")).toDouble() >= 20, qPrintable(QString::number(m.value(QStringLiteral("fps")).toDouble())));
     }
+
+#ifdef Q_OS_LINUX
+    // What gets past QQ's own checks meets the kernel (player/sandbox.h): Qt Quick's grabToImage saves over any picture a
+    // person can write, and no interceptor sees it. Without the wall it does, which is how this knows the wall is what
+    // stopped it.
+    void theKernelHoldsAGameInWhereQQsOwnChecksCannot()
+    {
+        QTemporaryDir game;
+        QTemporaryDir outside;
+        const QDir root(game.path());
+        root.mkpath(QStringLiteral("scenes"));
+        root.mkpath(QStringLiteral("logic"));
+        const QString target = QDir(outside.path()).filePath(QStringLiteral("grabbed.png"));
+        const auto write = [&root](const QString &name, const QString &text) {
+            QFile f(root.filePath(name));
+            QVERIFY(f.open(QIODevice::WriteOnly));
+            f.write(text.toUtf8());
+        };
+        write(QStringLiteral("scenes/wall.qml"),
+              QStringLiteral("import QQ\nScene {\n    name: \"wall\"\n    Sun {}\n    Ground {}\n"
+                             "    Behaviour { name: \"Reach\"; source: \"../logic/reach.qml\"; target: \"\" }\n}\n"));
+        write(QStringLiteral("logic/reach.qml"),
+              QStringLiteral("import QtQuick\nimport QQ\nLogic {\n    property bool tried: false\n"
+                             "    onFrame: (dt) => {\n        if (tried)\n            return\n        tried = true\n"
+                             "        SceneIO.viewOf(scene).grabToImage((r) => r.saveToFile(\"%1\"))\n    }\n}\n")
+                  .arg(QUrl::fromLocalFile(target).toString()));
+
+        const auto play = [&](bool walled) {
+            QProcess player;
+            player.setProgram(QStringLiteral(QQ_PLAYER));
+            player.setArguments({root.filePath(QStringLiteral("scenes/wall.qml")), QStringLiteral("--measure"),
+                                 QDir(outside.path()).filePath(QStringLiteral("measure.json"))});
+            QProcessEnvironment environment = QProcessEnvironment::systemEnvironment();
+            if (!walled)
+                environment.insert(QStringLiteral("QQ_PLAYER_SANDBOX"), QStringLiteral("off"));
+            player.setProcessEnvironment(environment);
+            player.setProcessChannelMode(QProcess::MergedChannels);
+            player.start();
+            const bool finished = player.waitForFinished(60000);
+            const QByteArray said = player.readAll();
+            if (!finished)
+                player.kill();
+            return said;
+        };
+
+        QFile::remove(target);
+        const QByteArray open = play(false);
+        if (!QFile::exists(target))
+            QSKIP("This display gives grabToImage nothing to save, so what the wall stops cannot be shown here.");
+        QFile::remove(target);
+        const QByteArray walled = play(true);
+        if (walled.contains("no Landlock"))
+            QSKIP("This kernel has no Landlock.");
+        QVERIFY2(walled.contains("walled in"), walled.constData());
+        QVERIFY2(!QFile::exists(target), "the game wrote outside its package");
+    }
+#endif
 
     void itsFirstFrameIsTheGame()
     {

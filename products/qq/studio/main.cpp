@@ -14,6 +14,8 @@
 //
 // It offers its tools to language models (DIRECTION P3.3) on a local pipe only this user can open: an MCP client starts
 // qq-mcp, which relays to it (agent/). One Studio at a time serves the pipe; QQ_MCP_PIPE names another.
+//
+// Changed for QOR OS: the watchdog for logic that never returns (QOR-0018).
 
 #include <QCommandLineParser>
 #include <QDir>
@@ -34,6 +36,7 @@
 #include "designloop.h"
 #include "sceneio.h"
 #include "studiotools.h"
+#include "watchdog.h"
 
 Q_IMPORT_QML_PLUGIN(QQPlugin)
 Q_IMPORT_QML_PLUGIN(QQ_StudioPlugin)
@@ -112,6 +115,13 @@ int main(int argc, char *argv[])
         for (QObject *root : engine.rootObjects())
             QMetaObject::invokeMethod(root, "release");
         QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
+    });
+
+    // Logic in play that never returns would take the Studio, and what is unsaved in it, with it.
+    qq::LogicWatchdog watchdog(&engine);
+    QObject::connect(&watchdog, &qq::LogicWatchdog::gaveUp, &app, [&engine] {
+        for (QObject *root : engine.rootObjects())
+            QMetaObject::invokeMethod(root, "stop");
     });
 
     // The agent's tools, on the Studio's window.

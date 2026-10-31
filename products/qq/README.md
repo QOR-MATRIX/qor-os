@@ -485,6 +485,14 @@ the web has no audio, so in a browser sound is QQ's own, on the page's Web Audio
 
 ## Known limits
 
+- **A project made elsewhere (QOR OS's QOR-0018).** Opening a scene or a logic file runs it, with the person's own reach,
+  so the Studio asks once before it does and remembers (`qor-os/own-projects.json` in the data folder). The Studio's logic
+  reads only the project, reaches no network, and opens nothing outside; a `qmldir` in a project brings in nothing. What it
+  can still do, once trusted, is what a person's own code can do.
+- **What an agent writes** runs only once the creator allows it in the Agent panel.
+- **The Player's walls (QOR-0018).** QQ's own checks (`runtime/confinement.h`) everywhere, and on Linux the kernel's
+  (`player/sandbox.h`): Landlock for files and programs, seccomp for the network. Natively on Windows, Qt Quick's `Canvas`
+  and `grabToImage` and Qt Multimedia's types get past the first, which is why a stranger's game plays only in a browser.
 - **2D, as built in P3.10:** a Tiled map is read one tile layer per TileMap, from its first tileset, which must be one
   image (a collection of images is refused, with the reason); object layers, tile animations, one-way platforms and
   slopes are not read yet. A Player2D is stopped by solid tile maps, static and kinematic shapes and sprites, and the

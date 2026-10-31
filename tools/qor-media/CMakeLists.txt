@@ -12,6 +12,8 @@
 #
 #   pwsh tools/qor-media/build.ps1            # build and test
 #   pwsh tools/qor-media/build.ps1 -Deploy    # and make the self-contained copy the launcher opens
+#
+# Changed for QOR OS: QOR OS's exploit mitigations (QOR-0018).
 
 cmake_minimum_required(VERSION 3.22)
 
@@ -35,6 +37,8 @@ if(MSVC)
 else()
     add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
+
+include(../../cmake/QorHardening.cmake)
 
 # Everything but main(), so the tests use exactly what the application does.
 qt_add_library(qormedia_core STATIC

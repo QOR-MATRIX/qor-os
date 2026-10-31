@@ -25,6 +25,10 @@ option(QOR_BUILD_TESTS "Build unit and QML tests" ON)
 option(QOR_BUILD_TOOLS "Build developer tools (qorctl, qor-simd)" ON)
 option(QOR_BUILD_PLATFORM "Build the QPA platform theme and Lumen QStyle plugins" ON)
 option(QOR_WARNINGS_AS_ERRORS "Treat compiler warnings as errors" OFF)
+# The simulator is a development tool with no authentication and no real unlock
+# (SECURITY.md). A device's image is built without it, and without qor-shell and
+# the tests, which need it: Prism then has the system's own services or none.
+option(QOR_BUILD_SIMULATOR "Build the simulated services (never in anything installed on a device)" ON)
 # The QOR core is Rust, built by cargo (core/CMakeLists.txt, QOR-0003): on by
 # default wherever cargo is installed.
 find_program(QOR_CARGO cargo HINTS "$ENV{CARGO_HOME}/bin" "$ENV{HOME}/.cargo/bin" "$ENV{USERPROFILE}/.cargo/bin")
@@ -83,13 +87,16 @@ set(QT_QML_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/qml")
 set(QT_QML_GENERATE_QMLLS_INI ON CACHE BOOL "Write .qmlls.ini files for qmlls into the source tree")
 
 include(QorCompilerSettings)
+include(QorHardening)
 
 add_subdirectory(kit)
 add_subdirectory(audio)
 add_subdirectory(input)
 add_subdirectory(services)
 add_subdirectory(store)
-add_subdirectory(sim)
+if(QOR_BUILD_SIMULATOR)
+    add_subdirectory(sim)
+endif()
 add_subdirectory(apps)
 add_subdirectory(prism)
 
@@ -106,7 +113,7 @@ if(QOR_BUILD_PLATFORM)
     add_subdirectory(platform)
 endif()
 
-if(QOR_BUILD_TESTS)
+if(QOR_BUILD_TESTS AND QOR_BUILD_SIMULATOR)
     enable_testing()
     add_subdirectory(tests)
 endif()

@@ -1,7 +1,8 @@
 # The QQ Player (DIRECTION P3.2): plays one QQ scene as a game, natively and, built with Qt for WebAssembly, in a
 # browser. Its window is the QML module "QQ.Player"; the playground it plays by default is bundled inside it.
-
-qt_add_executable(qq-player WIN32 main.cpp)
+#
+# Changed for QOR OS: on Linux the Player walls itself in with the kernel (sandbox.h, QOR-0018).
+qt_add_executable(qq-player WIN32 main.cpp sandbox.h sandbox.cpp)
 
 qt_add_qml_module(qq-player
     URI QQ.Player

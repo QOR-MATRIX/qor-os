@@ -118,6 +118,10 @@ Makers are paid when their work is used, licensed or remixed.
   commit. That covers tokens, keys, passwords, recovery phrases, backup
   codes, sign-in links and email addresses. A new flow that handles one of
   them is checked for this in the same change, whatever the value is called.
+- **Whatever comes from outside is text.** A window's title, a file's name or tags, a
+  device's name, a notification, another player's alias or a model's answer shown by a
+  Qt `Text` sets `textFormat: Text.PlainText`: Qt otherwise guesses rich text, which
+  can paint any picture at any size and fetch it.
 - **Secrets stay out of the repository:**
   - The Store's signing keys live on the owner's machine, in
     `~/.qor-os/store-signing/` (moved from QTOS's `~/.qtos/store-signing/` on
@@ -143,10 +147,20 @@ QTOS's practice, which QOR OS keeps:
 - **Before calling work done:**
   - `cmake --build --preset <preset>` builds without warnings, and
     `ctest --preset <preset>` passes;
+  - `tools/ci/check_hardening.py <build folder>` passes;
   - `all_qmllint` reports zero warnings;
   - `pre-commit run --all-files` is clean (clang-format 20.1.8, generated
-    tokens, SPDX headers);
-  - for the products, `tools/dev/products.ps1` passes.
+    tokens, SPDX headers, no secrets);
+  - for the products, `tools/dev/products.ps1` passes;
+  - a change to code that reads what something else hands it (a file, a socket,
+    a game, a Wayland client, a device) is run under the `linux-asan` preset, and
+    its hostile input has a test.
+- **The security bar is checked by machines**
+  ([QOR-0018](docs/decisions/QOR-0018-the-security-and-quality-bar.md)): exploit
+  mitigations on every program, what CI runs pinned by content, secrets looked
+  for at the door and in the history. Never add a target, an action or a download
+  outside it. A suite hears nothing of the machine it runs on: no real controller,
+  sound device or keyring.
 - **Every source file carries `SPDX-License-Identifier`**, except the files
   from demiurge-chain, which keep their own notices.
 - **New behaviour has tests**: Qt Test for C++, Qt Quick Test for QML logic,

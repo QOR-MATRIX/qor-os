@@ -34,6 +34,8 @@ Item {
     // decorations): Prism then draws no title bar of its own.
     property bool decorated: true
     readonly property bool hasTitleBar: !isClient || decorated
+    // A product Prism started, not a client that opened a window of its own.
+    property bool startedByPrism: false
     // A client's window opening at the size the client asks for: unseen, at
     // a provisional frame, until the client's first commit says what that
     // size is (adoptContentSize).
@@ -85,12 +87,16 @@ Item {
             normalH = frame.height;
             arrive();
             awaitingSize = false;
+            manager.arrived(win);
             return;
         }
         if (maximized || inOverview)
             return;
-        normalW = contentWidth;
-        normalH = contentHeight + chrome;
+        // Never larger than the work area: the frame, and the texture its
+        // shadow is drawn from, are what a client's size decides.
+        const area = manager.workArea;
+        normalW = area.width > 0 ? Math.min(contentWidth, area.width) : contentWidth;
+        normalH = area.height > 0 ? Math.min(contentHeight + chrome, area.height) : contentHeight + chrome;
     }
 
     function focusContent() {
@@ -117,7 +123,10 @@ Item {
             restoreRect = Qt.rect(normalX, normalY, normalW, normalH);
         maximized = !maximized;
         // A client that opens maximised has the work area for its size.
-        awaitingSize = false;
+        if (awaitingSize) {
+            awaitingSize = false;
+            manager.arrived(win);
+        }
     }
 
     // ── Geometry springs ────────────────────────────────────────────────────
@@ -466,6 +475,7 @@ Item {
                 anchors.centerIn: parent
                 width: Math.min(implicitWidth, parent.width - 220)
                 text: win.title
+                textFormat: Text.PlainText
                 font: Theme.bodyStrong
                 color: win.focused ? Theme.textPrimary : Theme.textTertiary
                 elide: Text.ElideRight

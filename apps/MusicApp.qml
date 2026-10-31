@@ -181,6 +181,7 @@ Item {
                 width: parent.width
                 horizontalAlignment: Text.AlignHCenter
                 text: app.media.title
+                textFormat: Text.PlainText
                 font: Theme.title2
                 color: Theme.textPrimary
                 elide: Text.ElideRight
@@ -374,6 +375,7 @@ Item {
                     Text {
                         width: parent.width
                         text: entry.modelData.title
+                        textFormat: Text.PlainText
                         font: entry.current ? Theme.bodyStrong : Theme.body
                         color: entry.current ? Theme.accentText : Theme.textPrimary
                         elide: Text.ElideRight
@@ -556,6 +558,7 @@ Item {
                         width: headings.artistX - x - 12
                         anchors.verticalCenter: parent.verticalCenter
                         text: song.modelData.title
+                        textFormat: Text.PlainText
                         font: song.current ? Theme.bodyStrong : Theme.body
                         color: song.current ? Theme.accentText : Theme.textPrimary
                         elide: Text.ElideRight
@@ -659,7 +662,7 @@ Item {
                         anchors.topMargin: 8
                         x: 12
                         width: parent.width - 24
-                        Text { width: parent.width; text: album.modelData.name; font: Theme.bodyStrong; color: Theme.textPrimary; elide: Text.ElideRight }
+                        Text { width: parent.width; text: album.modelData.name; textFormat: Text.PlainText; font: Theme.bodyStrong; color: Theme.textPrimary; elide: Text.ElideRight }
                         Text {
                             width: parent.width
                             text: album.modelData.detail + " · " + qsTr("%n song(s)", "", album.modelData.count)
@@ -726,6 +729,7 @@ Item {
                             width: parent.width
                             horizontalAlignment: Text.AlignHCenter
                             text: artist.modelData.name
+                            textFormat: Text.PlainText
                             font: Theme.bodyStrong
                             color: Theme.textPrimary
                             elide: Text.ElideRight

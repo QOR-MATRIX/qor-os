@@ -24,6 +24,8 @@
 //
 // Changed for QOR OS: on Linux, Qt's keys for Delete include Ctrl+D (Duplicate's) and its keys for Redo leave out
 // Ctrl+Y, so there Delete is the Delete key alone and Redo adds Ctrl+Y, the keys this window promises on every system.
+// Changed for QOR OS: a project from elsewhere runs nothing until it is trusted, the Studio's guard, and whether the
+// agent's logic may run (QOR-0018).
 
 import QtQuick
 // Before the Material style: Qt Quick 3D has a type called Material too, and the import that comes later wins.
@@ -219,27 +221,63 @@ ApplicationWindow {
         return true
     }
 
+    /// Whether what this project holds may run here. Opening a scene or a logic file runs it with the person's own reach,
+    /// so one made elsewhere waits until they say they trust it.
+    property bool projectTrusted: true
+    /// Whether logic the agent wrote may run. A model's answer is not the creator's, and can be led by what it reads.
+    property bool agentMayRun: false
+    property var whenTrusted: null
+
+    /// What the dialog's Trust and open does.
+    function trustProject_() {
+        SceneIO.trustProject(project)
+        projectTrusted = true
+        trustDialog.close()
+        const then = whenTrusted
+        whenTrusted = null
+        if (then)
+            then()
+    }
+
+    /// Do `then` if the project is trusted, or once the person says it is. True if it ran.
+    function trusting(then) {
+        if (projectTrusted) {
+            then()
+            return true
+        }
+        whenTrusted = then
+        trustDialog.open()
+        return false
+    }
+
     function newScene() {
         const text = 'import QQ\nScene {\n    name: "untitled"\n    Sun { elevation: 38 }\n    Ground {}\n'
                    + '    Shape { name: "Plinth"; position: Qt.vector3d(0, 0.25, 0); scale: Qt.vector3d(2, 0.5, 2); '
                    + 'colour: "#2b3140"; roughness: 0.6 }\n'
                    + '    Prop { name: "Orb"; position: Qt.vector3d(0, 1.75, 0); source: ' + JSON.stringify(String(model))
                    + ' }\n}\n'
-        if (show(SceneIO.loadText(text, fileFor("untitled"), stage), fileFor("untitled"), "untitled", false)) {
+        // QML takes every file beside a scene as a type of the same name, so an untrusted project's scenes/ folder could
+        // stand in for Sun or Ground: a new scene has no place in it until it is trusted.
+        const place = projectTrusted ? fileFor("untitled") : "qrc:/qq-untrusted/untitled.qml"
+        if (show(SceneIO.loadText(text, place, stage), place, "untitled", false)) {
             history.reset(SceneIO.write(scene, sceneFile))
             say(qsTr("A new scene. Save it to keep it in the project."))
         }
     }
 
     function openScene(name) {
-        if (show(SceneIO.load(fileFor(name), stage), fileFor(name), name, true)) {
-            history.reset(SceneIO.write(scene, sceneFile))
-            say(qsTr("Opened scenes/%1.qml").arg(name))
-        }
+        return trusting(() => {
+            if (show(SceneIO.load(fileFor(name), stage), fileFor(name), name, true)) {
+                history.reset(SceneIO.write(scene, sceneFile))
+                say(qsTr("Opened scenes/%1.qml").arg(name))
+            }
+        })
     }
 
     function chooseProject(folder) {
         project = folder
+        SceneIO.setProject(folder)
+        projectTrusted = SceneIO.projectTrusted(folder)
         projectInfo = SceneIO.project(folder)
         if (scene && String(sceneFile) === "")
             sceneFile = fileFor(sceneName)
@@ -379,7 +417,9 @@ ApplicationWindow {
     function openLogic(name) {
         if (String(project) === "")
             return false
-        return logicEditor.open(name)
+        let opened = false
+        trusting(() => opened = logicEditor.open(name))
+        return opened
     }
 
     /// The logic file a Behaviour runs, by name, if it is in the project's logic/; or "".
@@ -536,6 +576,10 @@ ApplicationWindow {
     function play() {
         if (!scene || playing)
             return false
+        if (!projectTrusted) {
+            trusting(() => play())
+            return false
+        }
         world.hearing = true  // before any sound is made, so the engine is in metres from the first
         const copy = SceneIO.play(scene, sceneFile, playStage)
         if (!copy) {
@@ -664,9 +708,42 @@ ApplicationWindow {
     }
 
     Component.onCompleted: {
+        // Before anything of a project is looked at.
+        SceneIO.guardStudio()
         if (String(project) !== "")
             chooseProject(project)
         newScene()
+    }
+
+    Dialog {
+        id: trustDialog
+        objectName: "trustDialog"
+        anchors.centerIn: parent
+        modal: true
+        title: qsTr("Trust this project?")
+        standardButtons: Dialog.NoButton
+        width: 460
+        contentItem: Label {
+            wrapMode: Text.Wrap
+            textFormat: Text.PlainText
+            text: qsTr("This project was not made on this computer. Opening its scenes and logic runs them with everything you can reach: your files, your accounts, this Studio's agent. Trust it only if you trust whoever made it.")
+        }
+        footer: DialogButtonBox {
+            Button {
+                objectName: "trustProject"
+                text: qsTr("Trust and open")
+                DialogButtonBox.buttonRole: DialogButtonBox.AcceptRole
+                onClicked: window.trustProject_()
+            }
+            Button {
+                text: qsTr("Keep it closed")
+                DialogButtonBox.buttonRole: DialogButtonBox.RejectRole
+                onClicked: {
+                    window.whenTrusted = null
+                    trustDialog.close()
+                }
+            }
+        }
     }
 
     // Ctrl+S saves what has the keys: the logic open in the editor, or the scene.
@@ -1459,7 +1536,11 @@ ApplicationWindow {
             Loader {
                 anchors.fill: parent
                 active: window.designer !== null
-                sourceComponent: AgentPanel { designer: window.designer }
+                sourceComponent: AgentPanel {
+                    designer: window.designer
+                    mayRun: window.agentMayRun
+                    onMayRunAsked: (allowed) => window.agentMayRun = allowed
+                }
             }
         }
     }

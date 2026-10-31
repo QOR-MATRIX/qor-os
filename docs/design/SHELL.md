@@ -116,6 +116,10 @@ top-right on `snappy`.
 - **Maximise**: double-click the title or press the button. Animates to the
   work area and back.
 - **Focus**: any press activates the window (z-order raise, focus to content).
+  A client's new window takes the keyboard only once it has drawn, and only if that
+  is a theft from nobody: on an empty desktop, from the same client, or if Prism
+  started it. Otherwise it asks for attention. It never does on the lock screen or
+  over a shell surface ([QOR-0018](../decisions/QOR-0018-the-security-and-quality-bar.md)).
 - **Window menu**: right-click the title bar for Minimize, Maximize or
   Restore, Move to Space 1–3, and Close.
 - **Wayland clients** (under `prism`): the same frame. Content is a
@@ -196,7 +200,9 @@ The Library (`qor::Library`) finds what it shows until the QOR core's index
 
 - **QOR OS's QQ games:** folders that have scenes in `QOR_GAMES`, else in
   `share/qor-os/games` beside Prism and in the data folder.
-- **The person's own:** such folders in Documents, two deep.
+- **The person's own:** such folders in Documents, two deep, that QQ Studio made or
+  they trusted (`qor-os/own-projects.json` in their data folder). A folder that is
+  merely there, a download unpacked, is not listed as theirs.
 - **ARQADE's seven games**, Rift Delve among them, while ARQADE can start.
 - **Video, music and pictures** in the person's folders, three deep.
 

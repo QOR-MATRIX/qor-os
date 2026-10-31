@@ -37,6 +37,7 @@ import QOR.Media
 // Changed for QOR OS: Qt's keys for Redo on Linux leave out Ctrl+Y, so there it is named as well. And Return takes the
 // keyboard from the pages to the bar's actions, where the arrows go from one to the next and Esc comes back: under
 // Prism, a controller's d-pad is the arrows, its A Return and its East Esc.
+// Changed for QOR OS: a bookmark's title is text, never markup (QOR-0018).
 FocusScope {
     id: reader
     objectName: "reader"
@@ -1249,6 +1250,7 @@ FocusScope {
                 Text {
                     anchors { left: arrow.right; leftMargin: 6; right: parent.right; rightMargin: 8; verticalCenter: parent.verticalCenter }
                     text: entry.title
+                    textFormat: Text.PlainText
                     elide: Text.ElideRight
                     color: entry.page === reader.currentSource ? Theme.ink : Theme.inkBody
                     font.family: Theme.text

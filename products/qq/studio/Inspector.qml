@@ -2,6 +2,7 @@
 // declares `fields`, and optionally `ranges` (sliders) and `choices` (a list to pick from); SceneIO.fieldType says what
 // each field holds. A change is written to the entity at once, and `edited` tells the Studio the scene changed.
 
+// Changed for QOR OS: Open outside opens only the project's own QML (QOR-0018).
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Controls.Material
@@ -254,7 +255,7 @@ ColumnLayout {
                     flat: true
                     ToolTip.visible: hovered
                     ToolTip.text: qsTr("In your own editor")
-                    onClicked: Qt.openUrlExternally(SceneIO.resolvedUrl(inspector.target, inspector.target[urlRow.field]))
+                    onClicked: SceneIO.openInOwnEditor(SceneIO.resolvedUrl(inspector.target, inspector.target[urlRow.field]))
                 }
             }
             FileDialog {

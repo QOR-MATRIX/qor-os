@@ -51,6 +51,7 @@ Item {
             Text {
                 width: parent.width
                 text: Services.media.title
+                textFormat: Text.PlainText
                 font: Theme.headline
                 color: Theme.textPrimary
                 elide: Text.ElideRight

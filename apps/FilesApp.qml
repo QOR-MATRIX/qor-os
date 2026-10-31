@@ -169,6 +169,7 @@ Item {
                     y: 76
                     horizontalAlignment: Text.AlignHCenter
                     text: cell.modelData.name
+                    textFormat: Text.PlainText
                     font: Theme.footnote
                     color: Theme.textPrimary
                     elide: Text.ElideMiddle
@@ -230,6 +231,7 @@ Item {
                     Text {
                         width: listView.width * 0.5
                         text: rowItem.modelData.name
+                        textFormat: Text.PlainText
                         font: Theme.body
                         color: Theme.textPrimary
                         elide: Text.ElideRight
@@ -297,6 +299,7 @@ Item {
             Text {
                 width: parent.width
                 text: app.selected ? app.selected.name : ""
+                textFormat: Text.PlainText
                 font: Theme.headline
                 color: Theme.textPrimary
                 wrapMode: Text.Wrap

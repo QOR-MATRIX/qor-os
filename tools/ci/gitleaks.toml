@@ -1,0 +1,11 @@
+# gitleaks' own rules, with what is made up on purpose set aside: the same files tools/ci/secrets-allowed.txt names, and
+# nothing else. A real secret is removed and replaced, never listed here (AGENTS.md section 6).
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Made-up values in tests"
+paths = [
+    '''products/qq/tests/tst_agent\.cpp''',
+]

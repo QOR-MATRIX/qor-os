@@ -7,6 +7,7 @@
 #include <QtCore/QDirIterator>
 #include <QtCore/QFile>
 #include <QtCore/QFileInfo>
+#include <QtCore/QJsonArray>
 #include <QtCore/QJsonDocument>
 #include <QtCore/QJsonObject>
 #include <QtCore/QSaveFile>
@@ -77,7 +78,22 @@ QVariantMap gameItem(const QDir &folder, const QString &scene, bool mine)
              { u"modified"_s, QFileInfo(scene).lastModified().toMSecsSinceEpoch() } };
 }
 
-void findGames(const QString &root, int depth, bool mine, QVariantList &into, QSet<QString> &seen)
+// The projects QQ Studio made here, or a person said they trust (QQ's SceneIO keeps the list). A folder in Documents is
+// no one's own game just for being there: a download unpacked there would otherwise be listed as "Made by you", one
+// press from playing.
+QSet<QString> ownProjects()
+{
+    QFile file(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + u"/qor-os/own-projects.json"_s);
+    QSet<QString> own;
+    if (!file.open(QIODevice::ReadOnly))
+        return own;
+    for (const QJsonValue &value : QJsonDocument::fromJson(file.readAll()).array())
+        own.insert(value.toString());
+    return own;
+}
+
+void findGames(const QString &root, int depth, bool mine, const QSet<QString> &own, QVariantList &into,
+               QSet<QString> &seen)
 {
     const QDir dir(root);
     if (!dir.exists() || depth <= 0)
@@ -87,12 +103,14 @@ void findGames(const QString &root, int depth, bool mine, QVariantList &into, QS
         const QString scene = sceneOf(folder);
         if (!scene.isEmpty()) {
             const QString canonical = QFileInfo(scene).canonicalFilePath();
+            if (mine && !own.contains(QFileInfo(folder.path()).canonicalFilePath()))
+                continue;
             if (!seen.contains(canonical)) {
                 seen.insert(canonical);
                 into.append(gameItem(folder, scene, mine));
             }
         } else {
-            findGames(folder.path(), depth - 1, mine, into, seen);
+            findGames(folder.path(), depth - 1, mine, own, into, seen);
         }
     }
 }
@@ -183,9 +201,9 @@ Library::Found Library::scan(const QStringList &gameFolders, const QStringList &
     Found found;
     QSet<QString> seen;
     for (const QString &folder : gameFolders)
-        findGames(folder, 1, false, found.games, seen);
+        findGames(folder, 1, false, {}, found.games, seen);
     for (const QString &folder : mineFolders)
-        findGames(folder, 2, true, found.games, seen);
+        findGames(folder, 2, true, ownProjects(), found.games, seen);
     QSet<QString> files;
     for (const QString &folder : mediaFolders)
         findMedia(folder, found.media, files);

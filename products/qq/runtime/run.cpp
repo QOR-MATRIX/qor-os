@@ -1,3 +1,4 @@
+// Changed for QOR OS: a run's length has a limit (QOR-0018).
 #include "run.h"
 
 #include <QCoreApplication>
@@ -240,6 +241,11 @@ bool RunRecord::fromJson(const QByteArray &json, QString *why)
     m_scene = run.value(QStringLiteral("scene")).toString();
     m_seed = run.value(QStringLiteral("seed")).toInt();
     m_ticks = run.value(QStringLiteral("ticks")).toInt();
+    // A day of play is more than any run: a file cannot ask a replay to go on for ever.
+    if (m_ticks < 0 || m_ticks > 60 * 60 * 60 * 24) {
+        clear();
+        return fail(QStringLiteral("The run is longer than any game."));
+    }
     m_outcome = run.value(QStringLiteral("outcome")).toObject().toVariantMap();
     // A run kept before P3.16 has none: its game started with nothing kept, as far as a replay knows.
     m_store = run.value(QStringLiteral("store")).toObject().toVariantMap();

@@ -1,4 +1,6 @@
 # QQ's tests: Qt Test, rendering for real on the machine's GPU and judging what was drawn by its pixels.
+#
+# Changed for QOR OS: every suite is built with virtualpads.cpp, so no controller on the machine joins in.
 
 qt_add_executable(tst_world tst_world.cpp)
 
@@ -102,3 +104,11 @@ target_link_libraries(tst_publish PRIVATE
 )
 
 add_test(NAME tst_publish COMMAND tst_publish)
+
+# Every suite in this folder, so a new one cannot forget.
+get_directory_property(qq_suites BUILDSYSTEM_TARGETS)
+foreach(suite IN LISTS qq_suites)
+    if(suite MATCHES "^tst_[a-z0-9_]+$")
+        target_sources(${suite} PRIVATE virtualpads.cpp)
+    endif()
+endforeach()

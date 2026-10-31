@@ -344,8 +344,6 @@ private slots:
     {
         // Games' stores (P3.16) go to the test's own folders, never a person's.
         QStandardPaths::setTestModeEnabled(true);
-        // The controllers are the cases' own, never one in a person's hands.
-        qputenv("QOR_GAMEPADS", "virtual");
     }
 
     // ── physics ──
@@ -2077,7 +2075,7 @@ private slots:
             QVERIFY(QFile::copy(fixture(QStringLiteral("chime.wav")), root.filePath(QLatin1String(name))));
         Stage s;
         QVERIFY(s.open(sceneText(QStringLiteral(
-                           "    Music { name: \"Music\"; source: \"../assets/first.wav\"; volume: 0.8; fade: 0.6 }\n")),
+                           "    Music { name: \"Music\"; source: \"../assets/first.wav\"; volume: 0.8; fade: 10 }\n")),
                        true, QUrl::fromLocalFile(root.filePath(QStringLiteral("scenes/play.qml")))));
         QObject *music = s.entity(QStringLiteral("Music"));
         auto voice = [music](int index) {
@@ -2099,12 +2097,16 @@ private slots:
         QVERIFY(qAbs(level(0) - 0.4) < 1e-6);
         mixer->setLevel(QStringLiteral("music"), 1);
 
-        // The next track: the first fades out as the second fades in, and is let go when it has.
+        // The next track: the first fades out as the second fades in, and is let go when it has. A slow fade, looked at by
+        // how far it has come, so a frame that takes long on a busy machine cannot carry it past the middle unseen.
         music->setProperty("source", QStringLiteral("../assets/second.wav"));
         QCOMPARE(track(1), QStringLiteral("second.wav"));
-        s.run(250);
-        QVERIFY2(level(0) > 0.05 && level(0) < 0.75, qPrintable(QString::number(level(0))));
-        QVERIFY2(level(1) > 0.05 && level(1) < 0.75, qPrintable(QString::number(level(1))));
+        auto faded = [&] { return music->property("mix").toDouble(); };
+        QVERIFY(s.runUntil([&] { return faded() > 0.05; }, 3000));
+        QVERIFY2(faded() < 1 && voice(0), qPrintable(QString::number(faded())));
+        QVERIFY2(qAbs(level(0) - 0.8 * (1 - faded())) < 1e-6, qPrintable(QString::number(level(0))));
+        QVERIFY2(qAbs(level(1) - 0.8 * faded()) < 1e-6, qPrintable(QString::number(level(1))));
+        music->setProperty("fade", 0.2);
         QVERIFY(s.runUntil([&] { return qAbs(level(1) - 0.8) < 1e-6 && !voice(0); }, 2000));
         // Stopped, it lets its voices go.
         s.scene->setProperty("playing", false);

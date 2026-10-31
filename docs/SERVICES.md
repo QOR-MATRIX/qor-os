@@ -160,7 +160,12 @@ Button { onClicked: Intents.openApp("settings", { page: "display" }) }
 | Platform | Default URL |
 |----------|-------------|
 | Windows, macOS | `local:qor-services` |
-| Linux | `localabstract:qor-services` |
+| Linux | `local:$XDG_RUNTIME_DIR/qor-services` |
+
+On Linux it is a socket in a folder only the person can enter, never an abstract
+socket, which takes no permissions: Qt Remote Objects has no authentication, and
+its decoder trusts what it is sent, so whoever reaches the socket can do what the
+shell can, and crash whatever hosts it. Nothing sandboxed is ever given it.
 
 The embedded host (`qor-shell`) and `qor-simd` fall back to
 `…-<pid>` if the default is taken. Override with `--services-url` /

@@ -1,5 +1,6 @@
 // Changed for QOR OS: siblings are put in the order people read numbers in the C locale too, which Linux often runs in
 // (WSL, containers, a system before its language is chosen).
+// Changed for QOR OS: nothing that is a program is opened elsewhere (QOR-0018).
 
 #include "files.h"
 
@@ -124,6 +125,17 @@ QString Files::nameOf(const QString &path)
 
 bool Files::openElsewhere(const QString &path)
 {
+    // A document in the program a person chose for it. Never a program, or what starts one.
+    static const QStringList programs{QStringLiteral("exe"),  QStringLiteral("bat"),  QStringLiteral("cmd"),
+                                      QStringLiteral("com"),  QStringLiteral("scr"),  QStringLiteral("lnk"),
+                                      QStringLiteral("msi"),  QStringLiteral("ps1"),  QStringLiteral("vbs"),
+                                      QStringLiteral("js"),   QStringLiteral("jse"),  QStringLiteral("wsf"),
+                                      QStringLiteral("hta"),  QStringLiteral("cpl"),  QStringLiteral("pif"),
+                                      QStringLiteral("reg"),  QStringLiteral("url"),  QStringLiteral("desktop"),
+                                      QStringLiteral("sh"),   QStringLiteral("appimage")};
+    const QFileInfo info(path);
+    if (programs.contains(info.suffix().toLower()) || info.isExecutable())
+        return false;
     return QDesktopServices::openUrl(QUrl::fromLocalFile(path));
 }
 

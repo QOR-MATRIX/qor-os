@@ -27,6 +27,7 @@ record supersedes it, and both say so.
 | [QOR-0015](QOR-0015-the-products-are-developed-here.md) | QQ, ARQADE's app and games, and QOR Media are developed here, no longer pulled; demiurge-chain's copies frozen (its ADR-126), which the Windows launcher ships; ARQADE's fixtures, the one look and the core still come from upstream; new work is proprietary until the SDK's record | Accepted 2026-10-29; its point on `tokens.json` amended by QOR-0016, its shared rule modules by QOR-0017 |
 | [QOR-0016](QOR-0016-the-products-wear-lumen.md) | The products wear Lumen: Demiurge's one look mapped onto Lumen's roles in `lumen.tokens.json`, resolved dark with the person's accent, tint and contrast; Prism gives them to every product (`theme`, `QOR_THEME_COLORS`) | Accepted 2026-10-30 |
 | [QOR-0017](QOR-0017-arqades-new-games.md) | ARQADE's new games: seven original games by genre, the dungeon hack-and-slash and the 3D RPG first; rewarded from the start, their rules, Node tests and fixtures shared with demiurge-chain under Apache-2.0; the online world after Phase 2; names wait for the owner | Accepted 2026-10-30 |
+| [QOR-0018](QOR-0018-the-security-and-quality-bar.md) | The security and quality bar, checked by machines: exploit mitigations on every program and read back in CI, the suites under sanitizers, what CI runs pinned by content, Dependabot's pull requests off the workstation, secrets looked for at the door and in the history, the core's dependencies audited weekly, and suites deaf to the machine they run on | Accepted 2026-10-30 |
 
 ## QTOS (inherited)
 

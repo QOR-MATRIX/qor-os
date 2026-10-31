@@ -264,6 +264,7 @@ Item {
                     Text {
                         width: parent.width
                         text: app.featuredTheme ? app.featuredTheme.name : ""
+                        textFormat: Text.PlainText
                         color: Theme.textPrimary
                         font: Theme.display
                         elide: Text.ElideRight
@@ -412,6 +413,7 @@ Item {
                             anchors.verticalCenter: parent.verticalCenter
                             Text {
                                 text: row.modelData.name
+                                textFormat: Text.PlainText
                                 color: Theme.textPrimary
                                 font: Theme.bodyStrong
                             }
@@ -550,6 +552,7 @@ Item {
                             Text {
                                 width: parent.width
                                 text: entry.modelData.name
+                                textFormat: Text.PlainText
                                 color: Theme.textPrimary
                                 font: Theme.bodyStrong
                                 elide: Text.ElideRight
@@ -663,6 +666,7 @@ Item {
                         objectName: "storeItemName"
                         width: parent.width
                         text: app.selected.name
+                        textFormat: Text.PlainText
                         color: Theme.textPrimary
                         font: Theme.title1
                         wrapMode: Text.Wrap
@@ -671,6 +675,7 @@ Item {
                         spacing: 6
                         Text {
                             text: app.selected.developerName
+                            textFormat: Text.PlainText
                             color: Theme.accentText
                             font: Theme.body
                         }
@@ -752,6 +757,7 @@ Item {
                         required property var modelData
                         required property int index
                         text: modelData ?? ""
+                        textFormat: Text.PlainText
                         color: index % 2 === 0 ? Theme.textTertiary : Theme.textPrimary
                         font: Theme.body
                     }
@@ -889,6 +895,7 @@ Item {
             Text {
                 width: parent.width
                 text: card.item.name ?? ""
+                textFormat: Text.PlainText
                 color: Theme.textPrimary
                 font: Theme.bodyStrong
                 elide: Text.ElideRight
@@ -902,6 +909,7 @@ Item {
             }
             Text {
                 text: card.item.developerName ?? ""
+                textFormat: Text.PlainText
                 color: Theme.textTertiary
                 font: Theme.caption
             }

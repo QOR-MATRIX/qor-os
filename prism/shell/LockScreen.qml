@@ -17,7 +17,16 @@ Item {
     property Backdrop backdrop
     property ListModel history
 
-    signal unlockRequested()
+    // Whether this session is simulated, so any password unlocks it, and whom to
+    // ask: a function of the password, true if it unlocked.
+    property bool simulated: false
+    property var unlockedBy: secret => false
+
+    function submit() {
+        refused = !unlockedBy(password.text);
+        password.text = "";
+    }
+    property bool refused: false
 
     visible: progress > 0.002
     opacity: progress
@@ -34,6 +43,7 @@ Item {
     onLockedChanged: {
         if (locked) {
             password.text = "";
+            refused = false;
             password.forceActiveFocus();
         }
     }
@@ -111,6 +121,7 @@ Item {
                     Text {
                         width: parent.width
                         text: note.title
+                        textFormat: Text.PlainText
                         font: Theme.bodyStrong
                         color: Theme.textPrimary
                         elide: Text.ElideRight
@@ -118,6 +129,7 @@ Item {
                     Text {
                         width: parent.width
                         text: note.body
+                        textFormat: Text.PlainText
                         font: Theme.footnote
                         color: Theme.textSecondary
                         elide: Text.ElideRight
@@ -157,6 +169,7 @@ Item {
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
             text: lock.userName
+            textFormat: Text.PlainText
             font: Theme.headline
             color: Theme.textPrimary
         }
@@ -184,8 +197,8 @@ Item {
                 color: Theme.textPrimary
                 clip: true
                 focus: true
-                Keys.onReturnPressed: lock.unlockRequested()
-                Keys.onEnterPressed: lock.unlockRequested()
+                Keys.onReturnPressed: lock.submit()
+                Keys.onEnterPressed: lock.submit()
                 Text {
                     anchors.verticalCenter: parent.verticalCenter
                     visible: password.text.length === 0
@@ -210,13 +223,14 @@ Item {
                     size: 16
                     color: Theme.onAccent
                 }
-                TapHandler { onTapped: lock.unlockRequested() }
+                TapHandler { onTapped: lock.submit() }
             }
         }
 
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
-            text: qsTr("Simulation: any password unlocks")
+            text: lock.refused ? qsTr("That did not unlock this session")
+                               : lock.simulated ? qsTr("Simulation: any password unlocks") : ""
             font: Theme.caption
             color: Theme.textTertiary
         }

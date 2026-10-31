@@ -4,11 +4,26 @@ Workflows live in [`.github/workflows/`](../.github/workflows/).
 
 | Workflow | Runs on | Needs Qt | Checks |
 |----------|---------|----------|--------|
-| **Lint** (`lint.yml`) | `ubuntu-24.04` | No | Generated tokens are current, token generator tests, the Store's signed catalogue, SPDX headers, the rules of QOR OS's own ARQADE games in Node (`products/arqade/tests/*.test.mjs`, [QOR-0017](decisions/QOR-0017-arqades-new-games.md)), clang-format 20.1.8, JSON validity. The products keep their own form, so the format checks skip them; the header check skips only their files from demiurge-chain (`LICENSES/from-demiurge-chain.txt`, [UPSTREAM.md](UPSTREAM.md)) |
-| **Build** (`build.yml`) | Windows and Linux, self-hosted (or hosted with the online installer) | Yes (commercial) | Configure (`ci-windows`/`ci-linux`, warnings as errors, the QOR core required), build, `all_qmllint`, `ctest -LE gpu` (plus `-L gpu` when enabled). On both, the carried products (QQ, ARQADE, QOR Media) when they changed. Tags and manual runs also upload an installable Windows artifact (kept 7 days) |
+| **Lint** (`lint.yml`) | `ubuntu-24.04` | No | Generated tokens are current, token generator tests, the Store's signed catalogue, SPDX headers, no secret in the tracked files, the rules of QOR OS's own ARQADE games in Node (`products/arqade/tests/*.test.mjs`, [QOR-0017](decisions/QOR-0017-arqades-new-games.md)), clang-format 20.1.8, JSON validity. The products keep their own form, so the format checks skip them; the header check skips only their files from demiurge-chain (`LICENSES/from-demiurge-chain.txt`, [UPSTREAM.md](UPSTREAM.md)) |
+| **Build** (`build.yml`) | Windows and Linux, self-hosted (or hosted with the online installer) | Yes (commercial) | Configure (`ci-windows`/`ci-linux`, warnings as errors, the QOR core required), build, every program's exploit mitigations read back (`tools/ci/check_hardening.py`), `all_qmllint`, `ctest -LE gpu` (plus `-L gpu` when enabled), and on Linux the same suites again under AddressSanitizer and UBSan (the `linux-asan` preset). On both, the carried products (QQ, ARQADE, QOR Media) when they changed. Tags and manual runs also upload an installable Windows artifact (kept 7 days) |
+| **Security** (`security.yml`) | `ubuntu-24.04`, never the workstation | No | `gitleaks` over the whole history, redacted, its download checked by SHA-256. Weekly and on demand, `cargo audit` of the QOR core's lock file at the pin ([QOR-0018](decisions/QOR-0018-the-security-and-quality-bar.md)) |
 
-Both run on pushes to `main`, on pull requests and on demand; Build also runs on `v*` tags.
-Pull-request runs cancel superseded runs. Each OS job runs only when that OS has a Qt source.
+All three run on pushes to `main`, on pull requests and on demand; Build also runs on `v*` tags and Security every
+Monday. Pull-request runs cancel superseded runs. Each OS job runs only when that OS has a Qt source.
+
+## What CI trusts
+
+The workstation's runners run as its user, on the machine that holds the Store's signing keys and the Qt account, so a
+job there can read them. So ([QOR-0018](decisions/QOR-0018-the-security-and-quality-bar.md)):
+
+- **Every action is pinned by its commit**, with its version in a comment for Dependabot, which proposes the moves. A
+  tag can be moved by whoever owns it; a commit cannot. Downloads are checked by SHA-256, and Python's tooling is
+  installed by hash from `requirements-dev.txt`, generated from `requirements-dev.in`.
+- **Dependabot's pull requests do not run on the workstation.** Build's Windows and Linux jobs skip them, so a person
+  reads the update before its code runs there; a merge runs them as any push does. Lint and Security run on hosted
+  runners, which hold nothing.
+- **Anything that downloads a tool to run it goes in Security**, on a hosted runner.
+- **Left to the owner:** the Store's keys off this machine (`OWNER.md`). Until then, a compromised job here can read them.
 
 ## What the Build job needs on a runner
 

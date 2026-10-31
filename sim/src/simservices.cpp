@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: LicenseRef-QOR-OS-Proprietary
 #include "simservices.h"
 
+#include "serviceendpoint.h"
+
 #include <QtCore/QCoreApplication>
 #include <QtCore/QFile>
 #include <QtCore/QJsonDocument>
@@ -15,22 +17,14 @@ namespace qor::sim {
 
 namespace {
 
-QUrl platformDefaultUrl()
-{
-#if defined(Q_OS_LINUX)
-    return QUrl(u"localabstract:qor-services"_s);
-#else
-    return QUrl(u"local:qor-services"_s);
-#endif
-}
-
 // True when a server already listens on `url`. A Windows named pipe can have
-// any number of servers, so hosting a busy endpoint there does not fail: a
-// second QOR OS would silently share it and clients could reach either one.
+// any number of servers, and on Linux Qt takes over a socket file it finds, so
+// hosting a busy endpoint does not fail: a second QOR OS would silently share
+// it, or cut off the first.
 bool endpointInUse(const QUrl &url)
 {
     if (url.scheme() != u"local"_s)
-        return false; // Linux abstract sockets refuse a second bind by themselves
+        return false;
     QLocalSocket probe;
     probe.connectToServer(url.path());
     return probe.waitForConnected(150);
@@ -114,12 +108,12 @@ bool SimServices::start(const SimOptions &options)
     applyRange();
     m_control->setScenario(scenarioName());
 
-    const QUrl requested = options.url.isEmpty() ? platformDefaultUrl() : options.url;
+    const QUrl requested = options.url.isEmpty() ? services::defaultEndpoint() : options.url;
     m_host = std::make_unique<QRemoteObjectHost>();
     m_url = requested;
     if (endpointInUse(m_url) || !m_host->setHostUrl(m_url)) {
         // Another QOR OS instance owns the default endpoint: fall back to a private one.
-        m_url = QUrl(requested.scheme() + u":qor-services-"_s + QString::number(QCoreApplication::applicationPid()));
+        m_url = services::endpoint(u"qor-services-"_s + QString::number(QCoreApplication::applicationPid()));
         qCWarning(lcSim) << requested << "is in use; hosting services at" << m_url;
         if (!m_host->setHostUrl(m_url)) {
             qCCritical(lcSim) << "Cannot host services:" << m_host->lastError();

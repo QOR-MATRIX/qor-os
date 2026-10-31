@@ -250,6 +250,7 @@ Item {
                 Text {
                     width: parent.width
                     text: Services.media.title
+                    textFormat: Text.PlainText
                     font: Theme.bodyStrong
                     color: Theme.textPrimary
                     elide: Text.ElideRight

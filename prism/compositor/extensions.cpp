@@ -380,6 +380,12 @@ void WindowManagement::takeOver(QQuickItem *shellSurfaceItem)
     }
 }
 
+void WindowManagement::releaseKeyboard(QWaylandCompositor *compositor)
+{
+    if (compositor && compositor->defaultSeat())
+        compositor->defaultSeat()->setKeyboardFocus(nullptr);
+}
+
 bool WindowManagement::configureAcked(QWaylandXdgToplevel *toplevel) const
 {
     return toplevel && QWaylandXdgToplevelPrivate::get(toplevel)->m_pendingConfigures.isEmpty();

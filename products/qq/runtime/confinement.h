@@ -14,14 +14,16 @@
 //   refuses to hand URLs to the operating system (Qt.openUrlExternally) for every scheme in refusedSchemes().
 //
 // It is a second wall, not the boundary: a stranger's game plays only in the browser, whose sandbox is the boundary
-// (ADR-087 decision 1). Two limits are known, and the checks (tst_lockdown) show both:
+// (ADR-087 decision 1), and on Linux the QQ Player also walls itself in with the kernel (player/sandbox.h). This wall has
+// limits that only those can close, and QOR OS's QOR-0018 keeps the list:
 //
-//   Qt lets an application refuse URLs only scheme by scheme, so a scheme not in refusedSchemes() still reaches the
-//     operating system. The list covers the common ones.
-//   Qt Multimedia (its camera and microphone types among them) cannot be refused natively: Qt's spatial audio library
-//     links Qt Multimedia's QML library, which registers its types when it loads, and a module whose types are
-//     registered is imported without its qmldir, which is all an interceptor sees. Natively only a person's own games
-//     play (ADR-087 decision 3); in a browser, the browser asks the player before any camera or microphone is used.
+//   Qt Multimedia (its camera, microphone, screen capture and media recorder types among them) cannot be refused
+//     natively: Qt's spatial audio library links Qt Multimedia's QML library, which registers its types when it loads,
+//     and a module whose types are registered is imported without its qmldir, which is all an interceptor sees.
+//   Qt Quick reads and writes some files past every interceptor: a Canvas's drawImage reads any picture, and an item's
+//     grabToImage saves over any picture a person can write.
+//
+// Changed for QOR OS: see confinement.cpp.
 
 #pragma once
 
@@ -46,6 +48,18 @@ public:
     static const QStringList &allowedModules();
     /// The URL schemes refused to Qt.openUrlExternally.
     static const QStringList &refusedSchemes();
+
+    /// Where a file really is, through any symbolic link: a link in a package to a file elsewhere is elsewhere. What is
+    /// not there yet is taken from the real place of the nearest folder that is.
+    static QString realPath(const QString &path);
+    /// Whether real path `where` is `root` or lies inside it, by the file system's own rule of case.
+    static bool within(const QString &where, const QString &root);
+    /// Whether a folder is too wide to be a game's package: a person's home, Downloads, Documents and the like, or one
+    /// that holds them. A scene saved straight there would otherwise reach all of it.
+    static bool tooWide(const QUrl &package);
+    /// What the Studio asks, for its engine, since it runs a project's own code: no module but from the import folders,
+    /// no network, and nothing opened outside.
+    static void guardStudio(QQmlEngine *engine);
 
     /// What has been refused so far, oldest first (each "kind: what"): for the log and the checks.
     static QStringList refusals();

@@ -171,9 +171,12 @@ Widgets `QStyle` and the QPA platform theme, and into `docs/design/tokens.md`.
    (qor-shell embedded, or qor-simd)          (Services singleton, qorctl, tests)
 ```
 
-- Endpoint: `local:qor-services` (Windows and macOS named pipe or socket),
-  `localabstract:qor-services` (Linux abstract socket). If the default is
-  taken, the host falls back to `…-<pid>`.
+- Endpoint: on Linux a socket in the person's runtime folder,
+  `$XDG_RUNTIME_DIR/qor-services`, which only they can enter
+  (`services/endpoint/serviceendpoint.h`); `local:qor-services` (named pipe or
+  socket) on Windows and macOS. If the default is taken, the host falls back to
+  `…-<pid>`. It takes no authentication and trusts what it is sent, so nothing
+  sandboxed is ever given it ([QOR-0018](decisions/QOR-0018-the-security-and-quality-bar.md)).
 - `Services::connectTo()` acquires all replicas and waits until each has its
   initial state before QML loads, so the UI never flashes default values.
 - Replicas are registered for QML with `QML_FOREIGN` (`NetworkService`,

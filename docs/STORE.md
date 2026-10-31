@@ -162,6 +162,14 @@ forgery and unsigned catalogues, install, update and remove), a qmllint pass
 over every widget (`store_widgets_qmllint`) and the Store section of
 `shell_e2e`.
 
+## What runs, and when it is checked
+
+A package is verified as it is installed (the catalogue's digest, the developer's signature, every file). Its manifest
+and signature are kept beside its files, and `Store` verifies them again each time it loads what is installed: every
+listed file against the manifest and nothing added, since anything running as the person can write there. What fails is
+not loaded. A widget's QML runs inside the shell with all it can do, so only QOR OS's own (`dev.qorsync`) are loaded,
+whoever a catalogue lists. A version older than the one installed is refused ([QOR-0018](decisions/QOR-0018-the-security-and-quality-bar.md)).
+
 ## Roadmap
 
 **QOR OS 1.0 moves no money**

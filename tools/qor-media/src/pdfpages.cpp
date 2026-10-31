@@ -1,5 +1,7 @@
+// Changed for QOR OS: copies being saved wait in this person's own cache (QOR-0018).
 #include "pdfpages.h"
 
+#include <QStandardPaths>
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
@@ -20,6 +22,13 @@ namespace qormedia {
 namespace {
 
 const QString kCopyPrefix = QStringLiteral("saving-");
+
+/// Where copies of a PDF being saved wait: in this person's own cache. A fixed folder in the shared temporary one could be
+/// made first by another user of the machine, who could then read and swap what is saved.
+QString copiesFolder()
+{
+    return QDir(QStandardPaths::writableLocation(QStandardPaths::CacheLocation)).filePath(QStringLiteral("saving"));
+}
 
 }  // namespace
 
@@ -136,7 +145,7 @@ bool PdfPages::save(const QString &path, const QVariantList &layout, const QVari
 
 QUrl PdfPages::copyForSaving(const QString &path)
 {
-    QDir dir(QDir::temp().filePath(QStringLiteral("qor-media")));
+    QDir dir(copiesFolder());
     if (!dir.mkpath(QStringLiteral(".")))
         return {};
     // A copy an earlier save left behind, which nothing shows any more, goes now; one still shown stays.
@@ -153,7 +162,7 @@ bool PdfPages::discard(const QUrl &copy)
     // Only a copy this made: one of its names, in its folder.
     const QFileInfo info(copy.toLocalFile());
     if (!copy.isLocalFile() || !info.fileName().startsWith(kCopyPrefix)
-        || info.absolutePath() != QFileInfo(QDir::temp().filePath(QStringLiteral("qor-media"))).absoluteFilePath())
+        || info.absolutePath() != QFileInfo(copiesFolder()).absoluteFilePath())
         return false;
     // A copy takes its file's attributes, and Windows will not delete a read-only file.
     QFile::setPermissions(info.absoluteFilePath(), QFile::ReadOwner | QFile::WriteOwner | QFile::ReadUser | QFile::WriteUser);

@@ -9,6 +9,7 @@ import QOR.Media
 // changes it asks before it goes back to the Library or opens something else.
 //
 // Changed for QOR OS: on the bar's actions, where the arrows go from one to the next, Esc comes back to the words first.
+// Changed for QOR OS: a Markdown link goes only to the web or mail (QOR-0018).
 FocusScope {
     id: editor
     required property string path
@@ -208,7 +209,12 @@ FocusScope {
                 rightPadding: 28
                 topPadding: 18
                 bottomPadding: 60
-                onLinkActivated: (link) => Qt.openUrlExternally(link)
+                // Where a link may take the person, as in the Reader: the web, or mail. Never a file or a program.
+                onLinkActivated: (link) => {
+                    const s = String(link).toLowerCase()
+                    if (s.startsWith("https://") || s.startsWith("http://") || s.startsWith("mailto:"))
+                        Qt.openUrlExternally(link)
+                }
             }
         }
     }

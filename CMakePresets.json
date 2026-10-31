@@ -114,6 +114,18 @@
         "QOR_BUILD_CORE": "ON"
       },
       "description": "Warnings are errors and the QOR core is required, as on Windows."
+    },
+    {
+      "name": "linux-asan",
+      "displayName": "Linux · AddressSanitizer and UBSan",
+      "inherits": "linux-base",
+      "description": "The suites under sanitizers, to find memory and undefined-behaviour bugs. Never installed.",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "QOR_SANITIZE": "address,undefined",
+        "QOR_BUILD_CORE": "OFF",
+        "QOR_BUILD_PLATFORM": "OFF"
+      }
     }
   ],
   "buildPresets": [
@@ -145,6 +157,10 @@
     {
       "name": "ci-linux",
       "configurePreset": "ci-linux"
+    },
+    {
+      "name": "linux-asan",
+      "configurePreset": "linux-asan"
     },
     {
       "name": "qmllint-windows",
@@ -202,6 +218,15 @@
       "name": "ci-linux",
       "inherits": "test-base",
       "configurePreset": "ci-linux"
+    },
+    {
+      "name": "linux-asan",
+      "inherits": "test-base",
+      "configurePreset": "linux-asan",
+      "environment": {
+        "ASAN_OPTIONS": "detect_leaks=0:detect_stack_use_after_return=1:strict_string_checks=1:halt_on_error=1",
+        "UBSAN_OPTIONS": "print_stacktrace=1:halt_on_error=1"
+      }
     }
   ]
 }

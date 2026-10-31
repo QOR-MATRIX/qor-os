@@ -180,6 +180,22 @@ public:
     /// folder, on this computer or bundled in qrc:), and writes and copies nothing at all. Called by the QQ Player before
     /// a game loads, from C++ only, so a game cannot lift it; there is no way back.
     void confineTo(const QUrl &package);
+
+    /// Whether a URL is outside what this engine may read: a confined game's package. For what reads files by itself.
+    bool outside(const QUrl &url) const;
+
+    /// The Studio's guard (Confinement::guardStudio), from then on: and its reads, of logic and the like, stay in
+    /// the project told by `project`.
+    Q_INVOKABLE void guardStudio();
+    /// Whether a project was made on this computer, or trusted here, so what it holds may run in the Studio. Opening a
+    /// scene or a logic file runs it, with the person's own reach. An empty folder is new, and is taken as made here.
+    Q_INVOKABLE bool projectTrusted(const QUrl &folder);
+    /// A person has said so.
+    Q_INVOKABLE void trustProject(const QUrl &folder);
+    /// The project the Studio is in, whose files it may read.
+    Q_INVOKABLE void setProject(const QUrl &folder);
+    /// A QML file of the project, in the person's own editor. Only that: never a program or anything outside it.
+    Q_INVOKABLE bool openInOwnEditor(const QUrl &file);
     bool confined() const { return m_confined; }
 
 signals:
@@ -189,13 +205,14 @@ private:
     void fail(const QString &why);
     /// Whether `url` is out of bounds for a confined SceneIO: anything not under the package, other than the
     /// executable's own resources. Always false when not confined.
-    bool outside(const QUrl &url) const;
     QQmlEngine *engine() const;
 
     QQmlEngine *m_engine = nullptr;
     QString m_lastError;
     bool m_confined = false;
     QString m_package;
+    bool m_guarded = false;
+    QString m_project;
     QUrl m_packageUrl;
 };
 

@@ -1,0 +1,80 @@
+name: Security
+
+# What a build does not catch (QOR-0018): a secret anywhere in the history, and an advisory published since the QOR core's
+# pin moved. On GitHub's hosted runners, never the self-hosted ones: this downloads tools, and the workstation holds the
+# Store's signing keys. Each download is checked against its SHA-256, or built from a pinned version.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '17 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  history:
+    name: No secret in the history
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      # --redact: a finding names its file, commit and rule, never the value.
+      - name: gitleaks
+        env:
+          GITLEAKS_VERSION: 8.30.1
+          GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+        run: |
+          archive="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          curl --proto '=https' --tlsv1.2 -sSfL -o "$RUNNER_TEMP/$archive" \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/$archive"
+          echo "$GITLEAKS_SHA256  $RUNNER_TEMP/$archive" | sha256sum --check --strict
+          tar -xzf "$RUNNER_TEMP/$archive" -C "$RUNNER_TEMP" gitleaks
+          "$RUNNER_TEMP/gitleaks" git . --redact --no-banner --log-level warn --exit-code 1 --config tools/ci/gitleaks.toml
+
+  core-advisories:
+    name: The QOR core's dependencies at the pin
+    # Weekly and on demand, since an advisory comes whether or not this repository changed.
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: The pin
+        run: |
+          pin=$(sed -n 's/^set(QOR_CORE_COMMIT "\([0-9a-f]\{40\}\)".*/\1/p' core/CMakeLists.txt)
+          [ -n "$pin" ] || { echo "::error::No pin found in core/CMakeLists.txt"; exit 1; }
+          echo "QOR_CORE_PIN=$pin" >> "$GITHUB_ENV"
+          echo "QOR core at $pin" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: demiurge-chain's lock file at the pin
+        run: |
+          git init --quiet "$RUNNER_TEMP/core"
+          cd "$RUNNER_TEMP/core"
+          git remote add origin https://github.com/QOR-MATRIX/demiurge-chain.git
+          git config core.sparseCheckout true
+          printf '%s\n' 'tools/qor-launcher/core/Cargo.lock' 'tools/qor-launcher/core/.cargo/' > .git/info/sparse-checkout
+          git fetch --quiet --depth=1 --filter=blob:none origin "$QOR_CORE_PIN"
+          git checkout --quiet FETCH_HEAD
+
+      - name: cargo audit
+        env:
+          CARGO_AUDIT_VERSION: 0.22.2
+        run: |
+          cargo install cargo-audit --locked --version "$CARGO_AUDIT_VERSION"
+          cd "$RUNNER_TEMP/core/tools/qor-launcher/core"
+          cargo audit --file Cargo.lock

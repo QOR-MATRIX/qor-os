@@ -6,6 +6,7 @@ import QtQuick.Layouts
 //
 // Changed for QOR OS: enter() gives it the keyboard, on its way back, ring showing: what is open does on Return, so a
 // controller's A (Return, under Prism) reaches the actions, and its d-pad goes along them.
+// Changed for QOR OS: a file's name and title are text, never markup (QOR-0018).
 Rectangle {
     id: bar
     property string title
@@ -38,6 +39,7 @@ Rectangle {
             Text {
                 Layout.fillWidth: true
                 text: bar.title
+                textFormat: Text.PlainText
                 color: Theme.ink
                 font.family: Theme.ui
                 font.pixelSize: Theme.sizeHeading
@@ -48,6 +50,7 @@ Rectangle {
                 Layout.fillWidth: true
                 visible: text.length > 0
                 text: bar.subtitle
+                textFormat: Text.PlainText
                 color: Theme.inkMuted
                 font.family: Theme.text
                 font.pixelSize: Theme.sizeUi

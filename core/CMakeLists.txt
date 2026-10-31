@@ -47,10 +47,11 @@ if(NOT EXISTS "${qor_core_crate}/Cargo.toml")
     message(FATAL_ERROR "No QOR core at ${qor_core_crate}. Check the pin (QOR_CORE_COMMIT) or QOR_CORE_SOURCE_DIR.")
 endif()
 
-# The Corrosion release the upstream shell uses (tools/qor-launcher/shell/CMakeLists.txt).
+# The Corrosion release the upstream shell uses (tools/qor-launcher/shell/CMakeLists.txt): v0.6.1, by its commit, so a
+# moved tag cannot change what runs in this build.
 FetchContent_Declare(Corrosion
     GIT_REPOSITORY https://github.com/corrosion-rs/corrosion.git
-    GIT_TAG v0.6.1
+    GIT_TAG 1499b14e4906a2890f5cee1547c8848db261753d
 )
 FetchContent_MakeAvailable(Corrosion)
 

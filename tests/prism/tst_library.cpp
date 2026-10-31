@@ -9,6 +9,7 @@
 
 #include <QtCore/QDir>
 #include <QtCore/QFile>
+#include <QtCore/QJsonArray>
 #include <QtCore/QJsonDocument>
 #include <QtCore/QJsonObject>
 #include <QtCore/QStandardPaths>
@@ -85,6 +86,17 @@ private slots:
         touch(games.filePath(u"notes/readme.txt"_s));
         touch(documents.filePath(u"Projects/my_first_game/scenes/main.qml"_s));
         touch(documents.filePath(u"Deep/a/b/scenes/far.qml"_s));
+        // A download unpacked in Documents is nobody's own game: only what QQ Studio made or a person trusted is.
+        touch(documents.filePath(u"Downloaded/strangers_game/scenes/main.qml"_s));
+        const QString ownList =
+            QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + u"/qor-os/own-projects.json"_s;
+        QDir().mkpath(QFileInfo(ownList).absolutePath());
+        QFile own(ownList);
+        QVERIFY(own.open(QIODevice::WriteOnly));
+        own.write(
+            QJsonDocument(QJsonArray { QFileInfo(documents.filePath(u"Projects/my_first_game"_s)).canonicalFilePath() })
+                .toJson());
+        own.close();
 
         const Library::Found found = Library::scan({ games.path() }, { documents.path() }, {});
         const QStringList ids = idsOf(found.games);
@@ -98,6 +110,9 @@ private slots:
             byId(found.games, u"qq:"_s + documents.filePath(u"Projects/my_first_game/scenes/main.qml"_s));
         QCOMPARE(mine.value(u"title"_s).toString(), u"My First Game"_s);
         QCOMPARE(mine.value(u"source"_s).toString(), u"mine"_s);
+        QVERIFY(
+            byId(found.games, u"qq:"_s + documents.filePath(u"Downloaded/strangers_game/scenes/main.qml"_s)).isEmpty());
+        QFile::remove(ownList);
         // The same game twice is one.
         QCOMPARE(Library::scan({ games.path(), games.path() }, {}, {}).games.size(), 2);
     }

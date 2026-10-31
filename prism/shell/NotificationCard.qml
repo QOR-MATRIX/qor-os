@@ -75,6 +75,7 @@ Item {
                 Text {
                     width: parent.width - when.width
                     text: card.identity.name
+                    textFormat: Text.PlainText
                     font: Theme.caption
                     color: Theme.textTertiary
                     elide: Text.ElideRight
@@ -89,6 +90,7 @@ Item {
             Text {
                 width: parent.width
                 text: card.heading
+                textFormat: Text.PlainText
                 font: Theme.bodyStrong
                 color: Theme.textPrimary
                 elide: Text.ElideRight
@@ -96,6 +98,7 @@ Item {
             Text {
                 width: parent.width
                 text: card.message
+                textFormat: Text.PlainText
                 font: Theme.footnote
                 color: Theme.textSecondary
                 elide: Text.ElideRight

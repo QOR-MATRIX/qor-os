@@ -597,7 +597,8 @@ bool ProductHost::place(const QString &id, const QRect &rect, const QString &act
         qCWarning(lcProducts, "%s cannot be shown in an empty rectangle", qPrintable(r->name));
         return false;
     }
-    if (!start(*r, {}, activationToken))
+    // A product that could not be started at all is already gone when this returns.
+    if (!start(*r, {}, activationToken) || !session(id))
         return false;
     session(id)->send({ { u"type"_s, u"place"_s }, { u"rect"_s, rectJson(rect) }, { u"parent"_s, QJsonValue::Null } });
     return true;
@@ -613,7 +614,7 @@ bool ProductHost::open(const QString &id, const QString &path, const QString &ki
         qCWarning(lcProducts, "%s cannot be shown in an empty rectangle", qPrintable(r->name));
         return false;
     }
-    if (!start(*r, {}, activationToken))
+    if (!start(*r, {}, activationToken) || !session(id))
         return false;
     session(id)->send({ { u"type"_s, u"open"_s },
                         { u"path"_s, path },
@@ -629,7 +630,7 @@ bool ProductHost::play(const QString &id, const QString &game, const QRect &rect
     const ProductRecord *r = record(id);
     if (!r || !r->commands.contains(u"play"_s) || game.isEmpty())
         return false;
-    if (!place(id, rect, activationToken))
+    if (!place(id, rect, activationToken) || !session(id))
         return false;
     session(id)->send({ { u"type"_s, u"play"_s }, { u"game"_s, game } });
     return true;
@@ -756,7 +757,8 @@ bool ProductHost::start(const ProductRecord &record, const QString &file, const 
     qCInfo(lcProducts, "Starting %s", qPrintable(record.name));
     process->start();
     emit productsChanged();
-    return true;
+    // On some failures QProcess reports it from inside start(), and finish() has already let the run go.
+    return m_runs.contains(id);
 }
 
 void ProductHost::finish(const QString &id, bool failed)

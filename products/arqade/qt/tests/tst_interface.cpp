@@ -3,7 +3,8 @@
 // look (ADR-108): its Theme is the source's values, every text is in the look's faces, scale and colours, and its
 // primary reads dark on ember and takes the keyboard's focus ring. It opens a real window, so it needs a desktop session.
 //
-// Changed for QOR OS: every colour a host sends is worn, Lumen's in QOR OS (QOR-0016).
+// Changed for QOR OS: every colour a host sends is worn, Lumen's in QOR OS (QOR-0016); no controller on the machine joins
+// in (QQ's tests/virtualpads.cpp).
 // With ARQADE_SHOT set to a folder, it saves what it drew there, for a person to look at.
 
 #include <QDir>
@@ -28,6 +29,7 @@
 #include "arqadelink.h"
 #include "arqadeserver.h"
 #include "fonts.h"
+#include "gamepadmanager.h"
 
 Q_IMPORT_QML_PLUGIN(ARQADEPlugin)
 Q_IMPORT_QML_PLUGIN(QQPlugin)
@@ -137,6 +139,11 @@ private slots:
     void it_loads_without_a_warning()
     {
         QVERIFY2(warnings.isEmpty(), qPrintable(warnings.join('\n')));
+    }
+
+    void no_controller_on_the_machine_joins_in()
+    {
+        QCOMPARE(qor::input::GamepadManager::instance()->backendNames(), QStringList{QStringLiteral("virtual")});
     }
 
     // Theme is the one look's source, value by value: read from tokens.json, not from the file generated from it.

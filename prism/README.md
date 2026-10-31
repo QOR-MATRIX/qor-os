@@ -55,7 +55,7 @@ behaviours, from decorations to popups and Shelf identity. See
 | `wp_fractional_scale_manager_v1` | Prism (`extensions.cpp`) | Preferred scale = the output window's device pixel ratio |
 | `wp_cursor_shape_manager_v1` (v2) | Prism (`extensions.cpp`) | Named cursors become Qt cursors over the requesting client's surface; tablet tools accepted, not shown yet |
 | `wp_presentation` | Qt (`PresentationTime`), fed by Prism's `PresentationFeedback` | Frames reported at swap time (`CLOCK_MONOTONIC`) |
-| `xdg_activation_v1` | Prism (`extensions.cpp`) | Focus-stealing prevention: tokens issued while the requesting client has keyboard focus (or by Prism for launches) activate; others only mark the window as wanting attention (Shelf hop and accent dot) |
+| `xdg_activation_v1` | Prism (`extensions.cpp`) | Focus-stealing prevention: tokens issued while the requesting client has keyboard focus (or by Prism for launches) activate; others only mark the window as wanting attention (Shelf hop and accent dot). Nothing is raised over the lock screen, and locking takes the keyboard from every client |
 | `zwp_idle_inhibit_manager_v1` | Qt (`IdleInhibitManagerV1`) | Inhibitors are recorded on surfaces, for the Phase 3 idle and lock policy |
 | `zwp_text_input_manager_v2`/`v3`, `qt_text_input_method_manager_v1` | Qt | Input methods |
 

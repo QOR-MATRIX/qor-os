@@ -16,8 +16,8 @@
 #   pwsh products/arqade/qt/build.ps1            # build and test
 #   pwsh products/arqade/qt/build.ps1 -Deploy    # and make the self-contained copy the launcher opens
 #
-# Changed for QOR OS: src/controllerback, a controller's Back as the way back from a game; and Rift Delve's package
-# (QOR OS's QOR-0017).
+# Changed for QOR OS: src/controllerback, a controller's Back as the way back from a game; Rift Delve's package (QOR OS's
+# QOR-0017); every suite built with QQ's tests/virtualpads.cpp; and QOR OS's exploit mitigations (QOR-0018).
 
 cmake_minimum_required(VERSION 3.22)
 
@@ -37,6 +37,8 @@ if(MSVC)
 else()
     add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
+
+include(../../../cmake/QorHardening.cmake)
 
 # QQ's runtime, the QML module "QQ" (ADR-102 decision 2), from its own source: what plays the games.
 add_subdirectory(../../qq/runtime qq-runtime)
@@ -215,7 +217,8 @@ endif()
 
 enable_testing()
 foreach(suite arqadelink arqadeserver interface games)
-    qt_add_executable(tst_${suite} tests/tst_${suite}.cpp tests/fakes.h)
+    # virtualpads.cpp: no controller on the machine joins in.
+    qt_add_executable(tst_${suite} tests/tst_${suite}.cpp tests/fakes.h ../../qq/tests/virtualpads.cpp)
     target_link_libraries(tst_${suite} PRIVATE arqade_core arqade_coreplugin Qt6::QuickControls2 Qt6::Test)
     add_test(NAME ${suite} COMMAND tst_${suite})
 endforeach()

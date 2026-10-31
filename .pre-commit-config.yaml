@@ -44,3 +44,9 @@ repos:
         language: system
         pass_filenames: false
         files: '\.(cpp|h|qml|frag|js)$'
+      - id: no-secrets
+        name: No secret in what is committed
+        entry: python tools/ci/check_secrets.py --staged
+        language: system
+        pass_filenames: false
+        always_run: true

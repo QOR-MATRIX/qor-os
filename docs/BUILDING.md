@@ -216,6 +216,9 @@ Build options (`-D<option>=ON|OFF`):
 | `QOR_WARNINGS_AS_ERRORS` | OFF | `/WX` or `-Werror` |
 | `QOR_QT_PINNED_VERSION` | 6.12.0 | Version used by Qt auto-location |
 | `QOR_BUILD_CORE` | ON where `cargo` is found | The QOR core and `tst_qorcore` ([UPSTREAM.md](UPSTREAM.md)) |
+| `QOR_BUILD_SIMULATOR` | ON | The simulated services, `qor-simd`, `qor-shell` and the tests. **OFF for a device's image**: Prism then has no simulator built in, and no unlock with nothing behind it |
+| `QOR_HARDENING` | ON | Exploit mitigations on every program ([QOR-0018](decisions/QOR-0018-the-security-and-quality-bar.md)). Off only to compare |
+| `QOR_SANITIZE` | empty | Sanitizers for the suites, e.g. `address,undefined` (the `linux-asan` preset). The products take it from the environment |
 | `QOR_CORE_SOURCE_DIR` | empty | A local demiurge-chain checkout to build the core from instead: to change the core and QOR OS together, or to try a commit before the pin moves to it |
 
 The pin (`QOR_CORE_COMMIT`) and the core's Cargo features
@@ -465,7 +468,7 @@ Phase 1.
 | Test output missing in `ctest` | Tests set `QT_FORCE_STDERR_LOGGING=1`; run the binary with `-o -,txt` to see QtTest output directly |
 | Low frame rate on a laptop | Check the log line `GPU: …`. Use `--gpu high-performance`, or force an adapter with `QT_D3D_ADAPTER_INDEX` (`QSG_INFO=1` lists adapters) |
 | Shader or graphics issues | `QSG_INFO=1` prints the RHI backend and adapter; `QSG_RHI_BACKEND=vulkan\|opengl\|d3d12` switches backends |
-| Services did not initialise in time | Another QOR OS instance holds `local:qor-services`. The host falls back to a PID-suffixed endpoint; pass `--services-url` to `qorctl` |
+| Services did not initialise in time | Another QOR OS instance holds the bus's socket (`$XDG_RUNTIME_DIR/qor-services` on Linux, `local:qor-services` elsewhere). The host falls back to a PID-suffixed endpoint; pass `--services-url` to `qorctl` |
 | `QOR core: No QOR core at …` or Corrosion cannot find `cargo` | Install Rust from rustup (1.91+), open a new terminal, and reconfigure; or turn the core off with `-DQOR_BUILD_CORE=OFF` |
 | The core's configure cannot fetch demiurge-chain | It needs network access to GitHub once per build tree; or point `QOR_CORE_SOURCE_DIR` at a local checkout |
 | A product's suite fails on a busy desktop | Leave the desktop alone while the suites run, or run `products.ps1` again; a failure that repeats is real |

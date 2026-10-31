@@ -88,6 +88,7 @@ Item {
                 Text {
                     width: parent.width
                     text: qsTr("%1 connected").arg(prompt.gamepad.name ?? qsTr("Controller"))
+                    textFormat: Text.PlainText
                     font: Theme.headline
                     color: Theme.textPrimary
                     elide: Text.ElideRight

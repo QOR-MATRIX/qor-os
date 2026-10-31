@@ -216,6 +216,11 @@ private:
     {
         const QString title = spec.isObject() ? spec[u"title"_s].toString() : spec.toString();
         const QString appId = spec.isObject() ? spec[u"appId"_s].toString() : spec.toString();
+        // Exactly that app first, so "settings" is not taken for a client's "client:settings".
+        for (QQuickItem *w : windows()) {
+            if (!w->property("closing").toBool() && !appId.isEmpty() && w->property("appId").toString() == appId)
+                return w;
+        }
         for (QQuickItem *w : windows()) {
             if (w->property("closing").toBool())
                 continue;
@@ -978,6 +983,7 @@ private:
             { u"decorated"_s, w->property("decorated").toBool() },
             { u"focused"_s, w->property("focused").toBool() },
             { u"demandsAttention"_s, w->property("demandsAttention").toBool() },
+            { u"awaitingSize"_s, w->property("awaitingSize").toBool() },
             { u"maximized"_s, w->property("maximized").toBool() },
             { u"minimized"_s, w->property("minimized").toBool() },
             { u"closing"_s, w->property("closing").toBool() },
@@ -1092,6 +1098,7 @@ private:
             // The desktop's widgets in Settings order: "id@col,row;…".
             { u"desktopWidgets"_s, desktopWidgets() },
             { u"surface"_s, m_desktop->property("surface").toString() },
+            { u"locked"_s, m_desktop->property("locked").toBool() },
             { u"controller"_s, QJsonValue::fromVariant(plain(m_desktop->property("controllerState"))) },
             // Frames the shell has drawn: a client inside Prism gets frame
             // callbacks only when Prism draws, which a host compositor (WSLg)

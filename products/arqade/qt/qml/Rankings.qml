@@ -1,3 +1,4 @@
+// Changed for QOR OS: another player's alias is text, never markup (QOR-0018).
 pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls.Basic
@@ -234,6 +235,7 @@ Glass {
             }
             Text {
                 text: ranked.row.alias ?? ""
+                textFormat: Text.PlainText
                 font.family: Theme.ui
                 font.pixelSize: Theme.sizeTitle
                 font.weight: Font.Medium

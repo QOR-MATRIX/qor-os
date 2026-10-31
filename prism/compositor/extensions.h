@@ -8,6 +8,7 @@
 #include <QtQml/qqmlregistration.h>
 #include <QtQuick/QQuickItem>
 #include <QtQuick/QQuickWindow>
+#include <QtWaylandCompositor/QWaylandCompositor>
 #include <QtWaylandCompositor/QWaylandCompositorExtensionTemplate>
 #include <QtWaylandCompositor/QWaylandXdgShell>
 
@@ -164,11 +165,18 @@ class WindowManagement : public QObject
     Q_OBJECT
     QML_ELEMENT
     QML_SINGLETON
+    // How many windows one client may keep open.
+    Q_PROPERTY(int mostWindowsPerClient READ mostWindowsPerClient CONSTANT)
 
 public:
     explicit WindowManagement(QObject *parent = nullptr);
 
+    int mostWindowsPerClient() const { return 32; }
+
     Q_INVOKABLE void takeOver(QQuickItem *shellSurfaceItem);
+    // No client holds the keyboard: it is sent wl_keyboard.leave, and can mint no
+    // activation tokens on the strength of having had it.
+    Q_INVOKABLE void releaseKeyboard(QWaylandCompositor *compositor);
     // Whether the client has acknowledged every configure sent to it, so
     // that what it commits answers the latest one. During a resize a client
     // still draws at sizes configured earlier.

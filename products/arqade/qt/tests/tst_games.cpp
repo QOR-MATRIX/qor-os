@@ -861,8 +861,6 @@ class TestGames : public QObject
 private slots:
     void initTestCase()
     {
-        // Only virtual controllers in QOR OS's controller service, which the way back from a game reads.
-        qputenv("QOR_GAMEPADS", "virtual");
         arqade::loadFonts();
         link = new ArqadeLink(this);
         // ARQADE's server and the launcher stood in for here: nothing here reaches the network. Until the arenas' tests

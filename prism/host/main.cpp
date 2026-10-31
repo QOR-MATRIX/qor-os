@@ -10,6 +10,8 @@
 #include "carryover.h"
 #include "gpupreference.h"
 #include "kit.h"
+#include "refusednetwork.h"
+#include "serviceendpoint.h"
 #include "services.h"
 #include "shellbenchmark.h"
 #include "shellscript.h"
@@ -153,7 +155,7 @@ int main(int argc, char *argv[])
     QGuiApplication::setApplicationVersion(QStringLiteral(QOR_VERSION_STRING));
     qor::sim::carryOverFrom(u"QTOS Shell"_s);
 
-    const HostOptions options = parseOptions(app);
+    HostOptions options = parseOptions(app);
     // Automated runs use virtual controllers only, so a controller on the
     // desk never prompts in a screenshot or presses buttons in a test, leave
     // the touchpad alone, and install from the Store into a folder of their own.
@@ -183,8 +185,8 @@ int main(int argc, char *argv[])
         // Automated runs get a private endpoint, so they never meet (or are
         // mistaken for) a QOR OS session someone is using.
         if (simOptions.url.isEmpty() && options.ephemeral)
-            simOptions.url = QUrl(qor::Services::defaultUrl().scheme() + u":qor-services-"_s
-                                  + QString::number(QCoreApplication::applicationPid()));
+            simOptions.url =
+                qor::services::endpoint(u"qor-services-"_s + QString::number(QCoreApplication::applicationPid()));
         simOptions.scenarioPath = options.scenario;
         simOptions.persistent = !options.ephemeral;
         // Automated runs never make sound.
@@ -207,6 +209,11 @@ int main(int argc, char *argv[])
 
     // ── Shell ───────────────────────────────────────────────────────────────
     QQmlApplicationEngine engine;
+    // Nothing in the shell is fetched from the network, whatever a window's title or a notification says.
+    qor::RefusedNetworkFactory refusedNetwork;
+    engine.setNetworkAccessManagerFactory(&refusedNetwork);
+    // Only a simulated session has an unlock with nothing behind it (Desktop.tryUnlock).
+    options.qml.insert(u"simulated"_s, simulator != nullptr);
     engine.setInitialProperties({ { u"options"_s, options.qml } });
     QObject::connect(
         &engine, &QQmlApplicationEngine::objectCreationFailed, &app, [] { QCoreApplication::exit(2); },

@@ -59,6 +59,7 @@ Glass {
         Text {
             anchors.verticalCenter: parent.verticalCenter
             text: rail.activeTitle.length > 0 ? rail.activeTitle : qsTr("Desktop")
+            textFormat: Text.PlainText
             font: Theme.bodyStrong
             color: Theme.textPrimary
         }

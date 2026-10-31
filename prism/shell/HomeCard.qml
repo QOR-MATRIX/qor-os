@@ -71,6 +71,7 @@ Item {
         anchors.topMargin: 10
         width: parent.width
         text: card.item.title
+        textFormat: Text.PlainText
         color: Theme.textPrimary
         font: Theme.bodyStrong
         elide: Text.ElideRight
@@ -80,6 +81,7 @@ Item {
         anchors.topMargin: 2
         width: parent.width
         text: card.item.subtitle
+        textFormat: Text.PlainText
         color: Theme.textSecondary
         font: Theme.footnote
         elide: Text.ElideRight

@@ -1,3 +1,7 @@
+// Changed for QOR OS: places are compared where they really are; the Studio's guard, what it reads and whether a project
+// is trusted; a glTF's files are looked at decoded (QOR-0018).
+#include <QDesktopServices>
+#include <QStandardPaths>
 #include "sceneio.h"
 #include "confinement.h"
 #include "kinematics.h"
@@ -213,7 +217,84 @@ void SceneIO::confineTo(const QUrl &package)
     m_confined = true;
     m_packageUrl = package;
     m_package = package.scheme() == QStringLiteral("qrc") ? QStringLiteral("qrc:") + QDir::cleanPath(package.path())
-                                                         : QDir::cleanPath(package.toLocalFile());
+                                                         : Confinement::realPath(package.toLocalFile());
+}
+
+void SceneIO::guardStudio()
+{
+    if (m_guarded)
+        return;
+    m_guarded = true;
+    if (QQmlEngine *qml = engine())
+        Confinement::guardStudio(qml);
+}
+
+void SceneIO::setProject(const QUrl &folder)
+{
+    m_project = folder.isLocalFile() ? Confinement::realPath(folder.toLocalFile()) : QString();
+}
+
+namespace {
+
+/// Where the projects made or trusted on this computer are kept: a list of folders, shared with QOR OS's Library, which
+/// lists only these as a person's own. It is outside every project, since a mark inside one would come with a download.
+QString trustedListFile()
+{
+    return QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + QStringLiteral("/qor-os/own-projects.json");
+}
+
+QStringList trustedList()
+{
+    QFile f(trustedListFile());
+    if (!f.open(QIODevice::ReadOnly))
+        return {};
+    QStringList list;
+    for (const QJsonValue &v : QJsonDocument::fromJson(f.readAll()).array())
+        list << v.toString();
+    return list;
+}
+
+}  // namespace
+
+void SceneIO::trustProject(const QUrl &folder)
+{
+    if (!folder.isLocalFile())
+        return;
+    QStringList list = trustedList();
+    const QString real = Confinement::realPath(folder.toLocalFile());
+    if (list.contains(real))
+        return;
+    list << real;
+    const QString file = trustedListFile();
+    QDir().mkpath(QFileInfo(file).absolutePath());
+    QSaveFile out(file);
+    if (out.open(QIODevice::WriteOnly)) {
+        out.write(QJsonDocument(QJsonArray::fromStringList(list)).toJson());
+        out.commit();
+    }
+}
+
+bool SceneIO::projectTrusted(const QUrl &folder)
+{
+    if (!folder.isLocalFile())
+        return true;  // no project: nothing of anyone else's to run
+    if (trustedList().contains(Confinement::realPath(folder.toLocalFile())))
+        return true;
+    const QDir root(folder.toLocalFile());
+    for (const char *held : {"scenes", "logic"}) {
+        if (!QDir(root.filePath(QLatin1String(held))).isEmpty(QDir::AllEntries | QDir::NoDotAndDotDot))
+            return false;
+    }
+    trustProject(folder);
+    return true;
+}
+
+bool SceneIO::openInOwnEditor(const QUrl &file)
+{
+    if (!file.isLocalFile() || !file.fileName().endsWith(QStringLiteral(".qml"), Qt::CaseInsensitive)
+        || !Confinement::within(Confinement::realPath(file.toLocalFile()), m_project))
+        return false;
+    return QDesktopServices::openUrl(file);
 }
 
 bool SceneIO::outside(const QUrl &url) const
@@ -224,9 +305,7 @@ bool SceneIO::outside(const QUrl &url) const
         return false;  // the executable's own resources: QQ's modules and a bundled game
     if (!url.isLocalFile())
         return true;
-    const QString path = QDir::cleanPath(url.toLocalFile());
-    return !(path.compare(m_package, Qt::CaseInsensitive) == 0
-             || path.startsWith(m_package + QLatin1Char('/'), Qt::CaseInsensitive));
+    return !Confinement::within(Confinement::realPath(url.toLocalFile()), m_package);
 }
 
 QString SceneIO::save(QObject *scene, const QUrl &file) const
@@ -418,10 +497,15 @@ QUrl SceneIO::adopt(const QUrl &model, const QUrl &project)
             for (const char *list : {"buffers", "images"}) {
                 for (const QJsonValue &entry : gltf.value(QLatin1String(list)).toArray()) {
                     const QString uri = entry.toObject().value(QStringLiteral("uri")).toString();
-                    if (uri.isEmpty() || uri.startsWith(QStringLiteral("data:")) || uri.contains(QStringLiteral("..")))
+                    if (uri.isEmpty() || uri.startsWith(QStringLiteral("data:")))
                         continue;
-                    const QString from = source.absoluteDir().filePath(QUrl::fromPercentEncoding(uri.toUtf8()));
-                    if (!copyOnce(from, assets.filePath(QUrl::fromPercentEncoding(uri.toUtf8())))) {
+                    // What it names once decoded: a file beside the model, never one climbing out of the project.
+                    const QString named = QDir::cleanPath(QUrl::fromPercentEncoding(uri.toUtf8()));
+                    if (named == QStringLiteral("..") || named.startsWith(QStringLiteral("../")) || QDir::isAbsolutePath(named)
+                        || named.contains(QLatin1Char(':')) || named.contains(QLatin1Char('\\')))
+                        continue;
+                    const QString from = source.absoluteDir().filePath(named);
+                    if (!copyOnce(from, assets.filePath(named))) {
                         fail(QStringLiteral("%1, which %2 needs, could not be copied.").arg(uri, source.fileName()));
                         return {};
                     }
@@ -1019,6 +1103,12 @@ QVariant SceneIO::readText(const QUrl &file)
 {
     if (outside(file)) {
         fail(QStringLiteral("A game reads only its own files."));
+        return {};
+    }
+    // In the Studio, logic and the agent read only the project: a project's code runs here, and a model's.
+    if (m_guarded && !m_confined
+        && !(file.isLocalFile() && Confinement::within(Confinement::realPath(file.toLocalFile()), m_project))) {
+        fail(QStringLiteral("Only the project's own files are read here."));
         return {};
     }
     QFile f(file.isLocalFile() ? file.toLocalFile() : QString());

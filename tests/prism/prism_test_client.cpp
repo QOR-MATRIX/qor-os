@@ -13,6 +13,8 @@
 // Title, app id and size limits are set from the command line. With
 // --animate a bar slides along continuously for as long as the compositor
 // sends frame callbacks: Prism's tests see it stop when the window is hidden.
+// With --unseen it opens a toplevel and never draws in it, as a client hoping to
+// take the keyboard unseen would, after --after milliseconds.
 
 #include <QtCore/QCommandLineParser>
 #include <QtCore/QTimer>
@@ -119,11 +121,21 @@ int main(int argc, char *argv[])
     const QCommandLineOption minimum(u"min"_s, u"Minimum size."_s, u"WxH"_s);
     const QCommandLineOption maximum(u"max"_s, u"Maximum size."_s, u"WxH"_s);
     const QCommandLineOption animate(u"animate"_s, u"Draw continuously."_s);
-    parser.addOptions({ title, appId, size, minimum, maximum, animate });
+    const QCommandLineOption unseen(u"unseen"_s, u"Open a toplevel and never draw in it."_s);
+    const QCommandLineOption after(u"after"_s, u"Wait this long first."_s, u"ms"_s, u"0"_s);
+    parser.addOptions({ title, appId, size, minimum, maximum, animate, unseen, after });
     parser.process(app);
 
     if (parser.isSet(appId))
         QGuiApplication::setDesktopFileName(parser.value(appId));
+
+    if (parser.isSet(unseen)) {
+        QWindow bare;
+        bare.setTitle(parser.value(title));
+        bare.setSurfaceType(QSurface::RasterSurface);
+        QTimer::singleShot(parser.value(after).toInt(), &bare, [&bare] { bare.show(); });
+        return app.exec();
+    }
 
     Window window(parser.isSet(animate));
     window.setWindowTitle(parser.value(title));

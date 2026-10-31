@@ -118,6 +118,7 @@ Item {
                     Text {
                         width: parent.width
                         text: entry.edited + "  " + entry.body.split("\n")[0]
+                        textFormat: Text.PlainText
                         font: Theme.footnote
                         color: Theme.textTertiary
                         elide: Text.ElideRight

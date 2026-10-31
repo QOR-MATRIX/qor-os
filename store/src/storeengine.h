@@ -59,6 +59,10 @@ public:
     QString dataDir() const { return m_dataDir; }
     QString installDirectory(const QString &id) const;
 
+    // Whether what is installed for `id` is still exactly what its developer signed. False until the catalogue that
+    // names the developer's key is here.
+    bool isIntact(const QString &id) const;
+
     bool isBusy(const QString &id) const { return m_jobs.contains(id); }
     double progress(const QString &id) const { return m_progress.value(id, 0); }
 

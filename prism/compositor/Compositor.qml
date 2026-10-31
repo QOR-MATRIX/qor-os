@@ -158,10 +158,13 @@ WaylandCompositor {
             // commit says what the client chose: it need not have answered
             // the latest configure, which a client that answers only when it
             // redraws, on a frame callback, does not do for an unseen window.
+            // It must have drawn, though: a client can say a size and never show
+            // anything, and a window arriving may take the keyboard.
+            readonly property bool hasDrawn: surfaceItem.surface !== null && surfaceItem.surface.hasContent
             function adoptClientSize() {
                 if (content.window && geometry.width > 0 && geometry.height > 0
                         && (geometry.width !== configuredSize.width || geometry.height !== configuredSize.height)
-                        && (awaitingSize || WindowManagement.configureAcked(toplevel)))
+                        && (awaitingSize ? hasDrawn : WindowManagement.configureAcked(toplevel)))
                     content.window.adoptContentSize(geometry.width, geometry.height);
             }
             onGeometryChanged: adoptClientSize()
@@ -244,6 +247,16 @@ WaylandCompositor {
         }
     }
 
+    // Locked, no client holds the keyboard, or could ask on its strength for
+    // another window to be raised.
+    Connections {
+        target: desktop
+        function onLockedChanged() {
+            if (desktop.locked)
+                WindowManagement.releaseKeyboard(prism);
+        }
+    }
+
     Component.onCompleted: {
         desktop.windowLayer.surfaceDelegate = clientSurface;
         // A window Prism opens (a product it starts) may take focus.
@@ -253,8 +266,17 @@ WaylandCompositor {
     XdgShell {
         // A product Prism started is known by its process, never by what its
         // toplevel says it is.
-        onToplevelCreated: (toplevel, xdgSurface) => desktop.adoptSurface(
-                               xdgSurface, toplevel, ProductHost.productOf(xdgSurface.surface.client.processId))
+        onToplevelCreated: (toplevel, xdgSurface) => {
+            // A client may keep only so many windows: each costs Prism a surface, a
+            // frame and a texture, and a client could otherwise open them without end.
+            const client = xdgSurface.surface.client;
+            if (desktop.allWindows().filter(w => w.shellSurface && w.shellSurface.surface.client === client).length
+                    >= WindowManagement.mostWindowsPerClient) {
+                toplevel.sendClose();
+                return;
+            }
+            desktop.adoptSurface(xdgSurface, toplevel, ProductHost.productOf(client.processId));
+        }
     }
 
     XdgDecorationManagerV1 {
@@ -277,7 +299,7 @@ WaylandCompositor {
             const window = desktop.allWindows().find(w => w.shellSurface && w.shellSurface.surface === surface);
             if (!window)
                 return;
-            if (trusted)
+            if (trusted && !desktop.locked)
                 window.manager.raise(window);
             else if (!window.focused)
                 window.demandsAttention = true;

@@ -21,6 +21,10 @@ set(QOR_SIM_CONTROL_INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/interfaces/simcontrol
 
 include(QorRepc)
 
+# Where the bus listens, shared by its hosts and its clients.
+add_library(qor_service_endpoint INTERFACE)
+target_include_directories(qor_service_endpoint INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/endpoint")
+
 qt_add_library(qor_services STATIC)
 
 qor_add_repc_replicas(qor_services ${QOR_SERVICE_INTERFACES})
@@ -56,6 +60,7 @@ target_link_libraries(qor_services
         Qt6::Qml
         Qt6::Quick
         Qt6::RemoteObjects
+        qor_service_endpoint
     PRIVATE
         qor::compiler_settings
 )

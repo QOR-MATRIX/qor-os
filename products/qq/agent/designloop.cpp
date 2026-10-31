@@ -1,3 +1,4 @@
+// Changed for QOR OS: the key goes to no redirect, and a looping answer stops at the limit on answers (QOR-0018).
 #include "designloop.h"
 
 #include <QHostAddress>
@@ -219,6 +220,8 @@ void DesignLoop::send()
     };
 
     QNetworkRequest request(endpoint());
+    // The key goes only where it was sent: Qt would otherwise carry its header on to a redirect's new server.
+    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::ManualRedirectPolicy);
     request.setHeader(QNetworkRequest::ContentTypeHeader, QStringLiteral("application/json"));
     request.setRawHeader("anthropic-version", "2023-06-01");
     request.setRawHeader("anthropic-beta", "server-side-fallback-2026-07-01");
@@ -316,6 +319,11 @@ void DesignLoop::received(QNetworkReply *reply)
         }
         runTools(uses, 0, {});
     } else if (stop == QStringLiteral("pause_turn")) {
+        // Each is another answer on the creator's key: the same limit as any.
+        if (m_turns >= maxTurns) {
+            finish(tr("Stopped after %1 answers, the most one run may take.").arg(maxTurns), true);
+            return;
+        }
         send();
     } else {
         finish(QStringLiteral("done"), false);

@@ -9,6 +9,7 @@
 //
 // Changed for QOR OS: imports QQ, whose Look the panel's colours and faces come from. Without it, Look was undefined:
 // the key's problem and the steps were not coloured, and the tool steps were not in the mono face.
+// Changed for QOR OS: whether the agent's logic may run, and its answers are text, never markup (QOR-0018).
 
 import QtQuick
 import QtQuick.Controls
@@ -20,6 +21,9 @@ ColumnLayout {
     id: panel
 
     required property QtObject designer
+    /// Whether logic the agent writes may run in play: the creator's say, off until they give it.
+    property bool mayRun: false
+    signal mayRunAsked(bool allowed)
 
     spacing: 12
 
@@ -48,6 +52,18 @@ ColumnLayout {
                                                   + "looks at it and revises. Nothing is saved until you save.")
         opacity: 0.75
         font.pixelSize: 13
+    }
+
+    // Logic runs with the creator's own reach, and a model's answer can be led by what it reads.
+    CheckBox {
+        objectName: "agentMayRun"
+        Layout.fillWidth: true
+        checked: panel.mayRun
+        text: qsTr("Let the agent play the logic it writes")
+        font.pixelSize: 12
+        ToolTip.visible: hovered
+        ToolTip.text: qsTr("Logic runs with everything you can reach. Off, the agent can write it for you to read, but not run it.")
+        onToggled: panel.mayRunAsked(checked)
     }
 
     // The key, once: kept in the keychain, never shown again.
@@ -149,6 +165,7 @@ ColumnLayout {
             Label {
                 Layout.fillWidth: true
                 wrapMode: Text.Wrap
+                textFormat: Text.PlainText
                 text: modelData.text
                 font.pixelSize: modelData.kind === "said" ? 13 : 12
                 font.family: modelData.kind === "tool" || modelData.kind === "frame" ? Look.mono : Qt.application.font.family
