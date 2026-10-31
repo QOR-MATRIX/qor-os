@@ -13,7 +13,9 @@
     const TILE = 40, COLS = 64, ROWS = 64
     const DIRS = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]]
     const apart = (a, b) => Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y))
-    let ways = { key: "", far: null }
+    // How far each tile is, walking, from the goal and from the hero; each worked out again only when its tile changes. The
+    // suite calls this at every look, on the thread that draws the game, so it must cost next to nothing.
+    let ways = { key: "", far: null }, around = { key: "", far: null }
     const memo = { run: -1, shopped: -1 }
 
     function walking(R, g, tc, tr) {
@@ -33,17 +35,20 @@
         return far
     }
 
-    // How many tiles the place (x, y) is from the hero, walking, or -1.
+    // How many tiles the place (x, y) is from the hero, walking, or -1: one walk from the hero answers for every place.
     function tilesTo(R, g, p, x, y) {
-        const tc = Math.floor(x / TILE), tr = Math.floor(y / TILE), key = g.world.gate + ":" + tc + "," + tr
-        if (ways.key !== key)
-            ways = { key: key, far: walking(R, g, tc, tr) }
-        return ways.far[Math.floor(p.y / TILE) * COLS + Math.floor(p.x / TILE)]
+        const c = Math.floor(p.x / TILE), r = Math.floor(p.y / TILE), key = g.world.gate + ":" + c + "," + r
+        if (around.key !== key)
+            around = { key: key, far: walking(R, g, c, r) }
+        return around.far[Math.floor(y / TILE) * COLS + Math.floor(x / TILE)]
     }
 
     // The way to (x, y): toward the middle of the next tile nearer it, or straight there once beside it.
     function wayTo(R, g, p, x, y) {
-        const here = tilesTo(R, g, p, x, y)
+        const goalC = Math.floor(x / TILE), goalR = Math.floor(y / TILE), key = g.world.gate + ":" + goalC + "," + goalR
+        if (ways.key !== key)
+            ways = { key: key, far: walking(R, g, goalC, goalR) }
+        const here = ways.far[Math.floor(p.y / TILE) * COLS + Math.floor(p.x / TILE)]
         let tx = x, ty = y
         if (here > 1) {
             const c = Math.floor(p.x / TILE), r = Math.floor(p.y / TILE)
